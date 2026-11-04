@@ -45,7 +45,6 @@ export function InventoryView() {
   // Modals
   const [recipeModalOpen, setRecipeModalOpen] = useState(false);
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
-  const [transferModalOpen, setTransferModalOpen] = useState(false);
 
   // Quick Adjustment Modal State (Add or Remove stock directly)
   const [adjustModalOpen, setAdjustModalOpen] = useState(false);
@@ -80,11 +79,6 @@ export function InventoryView() {
   const [wasteQuantity, setWasteQuantity] = useState('');
   const [wasteReason, setWasteReason] = useState('Spoilage / Expired');
   const [wasteSuccess, setWasteSuccess] = useState(false);
-
-  // Requisition transfer form state
-  const [transferIngId, setTransferIngId] = useState('');
-  const [transferQty, setTransferQty] = useState('');
-  const [transferNotes, setTransferNotes] = useState('');
 
   const loadData = () => {
     const roleParam = currentUser?.role ? `?role=${currentUser.role}` : '';
@@ -257,32 +251,6 @@ export function InventoryView() {
       alert(`Error updating threshold: ${e.message}`);
     } finally {
       setSavingThresholdId(null);
-    }
-  };
-
-  const handleRequestTransfer = async () => {
-    if (!transferIngId || !transferQty) return;
-    try {
-      await fetchApi('/inventory/transfers/request', {
-        method: 'POST',
-        body: JSON.stringify({
-          requestedById: currentUser.id || 'k01-storekeeper',
-          items: [
-            {
-              ingredientId: transferIngId,
-              requestedQty: parseFloat(transferQty),
-              unitId: 'unit-id',
-            },
-          ],
-          notes: transferNotes,
-        }),
-      });
-      setTransferModalOpen(false);
-      setTransferQty('');
-      setTransferNotes('');
-      loadData();
-    } catch (e: any) {
-      alert(`Error creating transfer: ${e.message}`);
     }
   };
 
@@ -502,21 +470,13 @@ export function InventoryView() {
                         Receive Bulk PO
                       </button>
                     )}
-                    {!isHeadChefOnly ? (
+                    {!isHeadChefOnly && (
                       <button
                         onClick={() => setSendDirectModalOpen(true)}
                         className="px-3.5 py-1.5 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition border border-white/10 cursor-pointer flex items-center gap-1.5"
                       >
                         <Send className="w-3 h-3 text-amber-400" />
                         <span>Deliver to Kitchen</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setTransferModalOpen(true)}
-                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
-                      >
-                        <PlusCircle className="w-3.5 h-3.5" />
-                        <span>Request from Warehouse</span>
                       </button>
                     )}
                   </div>
@@ -723,13 +683,6 @@ export function InventoryView() {
                     </h3>
                     <div className="text-xs text-zinc-400">Head Chef controlled: auto-deducted on food preparation</div>
                   </div>
-                  <button
-                    onClick={() => setTransferModalOpen(true)}
-                    className="text-xs font-bold text-white bg-white/10 hover:bg-white/15 border border-white/10 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <PlusCircle className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Request Transfer</span>
-                  </button>
                 </div>
 
                 {/* Kitchen Store Cards List */}
@@ -818,13 +771,6 @@ export function InventoryView() {
                     <span>Direct Send to Kitchen</span>
                   </button>
                 )}
-                <button
-                  onClick={() => setTransferModalOpen(true)}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white font-bold rounded-2xl text-xs transition border border-white/10 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <PlusCircle className="w-4 h-4 text-amber-400" />
-                  <span>Request Requisition</span>
-                </button>
               </div>
             </div>
 
@@ -1639,84 +1585,6 @@ export function InventoryView() {
         onPurchaseRecorded={loadData}
         currentUserId={currentUser.id}
       />
-
-      {/* Requisition Request Modal */}
-      {transferModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-white space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <h3 className="text-base font-bold text-white font-heading">Request Transfer from Main Store</h3>
-              <button
-                onClick={() => setTransferModalOpen(false)}
-                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-zinc-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-xs text-zinc-400">
-              Requisition sent to Main Storekeeper for dispatch approval.
-            </p>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                Select Ingredient
-              </label>
-              <select
-                value={transferIngId}
-                onChange={(e) => setTransferIngId(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-500"
-              >
-                <option value="" className="bg-[#1C1815] text-zinc-400">Select ingredient...</option>
-                {(kitchenStoreLoc?.balances || mainStoreLoc?.balances || []).map((b: any) => (
-                  <option key={b.ingredient.id} value={b.ingredient.id} className="bg-[#1C1815] text-white">
-                    {b.ingredient.name} {isHeadChefOnly ? `(Kitchen stock: ${b.quantity} ${b.ingredient.baseUnit.symbol})` : `(Main: ${b.quantity} ${b.ingredient.baseUnit.symbol})`}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                Transfer Quantity (Grams / ml / pcs)
-              </label>
-              <input
-                type="number"
-                step="any"
-                placeholder="e.g. 5000"
-                value={transferQty}
-                onChange={(e) => setTransferQty(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Notes</label>
-              <input
-                type="text"
-                placeholder="e.g. Weekend prep stockup"
-                value={transferNotes}
-                onChange={(e) => setTransferNotes(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
-              <button
-                onClick={() => setTransferModalOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRequestTransfer}
-                className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-2xl text-xs shadow-lg shadow-amber-500/20 cursor-pointer"
-              >
-                Submit Requisition
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
