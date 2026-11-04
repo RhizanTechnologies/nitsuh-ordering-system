@@ -55,6 +55,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit(SocketEvents.STOCK_TRANSFER_UPDATED, transfer);
   }
 
+  // Broadcast inventory and ingredient catalog update
+  broadcastInventoryUpdated() {
+    this.server.emit('inventory:updated');
+  }
+
   // Broadcast tables update to POS and Waiter Pads
   broadcastTablesUpdated(tables: any) {
     this.server.emit('tables:updated', tables);

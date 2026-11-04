@@ -972,4 +972,157 @@ export class InventoryService {
       return fullTransfer;
     });
   }
+
+  async getIngredients() {
+    return this.prisma.ingredient.findMany({
+      where: { isActive: true },
+      include: {
+        baseUnit: true,
+        balances: {
+          include: { location: true },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async getUnits() {
+    return this.prisma.unit.findMany({
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async createIngredient(data: {
+    name: string;
+    sku?: string;
+    category?: string;
+    baseUnitId: string;
+    currentCostPerBaseUnit: number;
+    reorderThresholdMain?: number;
+    reorderThresholdKitchen?: number;
+    initialMainStock?: number;
+    initialKitchenStock?: number;
+  }) {
+    let sku = data.sku?.trim();
+    if (!sku) {
+      const sanitized = data.name.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+      sku = `ING-${sanitized}-${Math.floor(100 + Math.random() * 900)}`;
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const mainStore = await tx.inventoryLocation.findUnique({
+        where: { type: LocationType.MAIN_STORE },
+      });
+      const kitchenStore = await tx.inventoryLocation.findUnique({
+        where: { type: LocationType.KITCHEN_STORE },
+      });
+
+      const ingredient = await tx.ingredient.create({
+        data: {
+          name: data.name.trim(),
+          sku,
+          category: data.category?.trim() || 'General',
+          baseUnitId: data.baseUnitId,
+          currentCostPerBaseUnit: new Prisma.Decimal(data.currentCostPerBaseUnit),
+          reorderThresholdMain: new Prisma.Decimal(data.reorderThresholdMain ?? 1000),
+          reorderThresholdKitchen: new Prisma.Decimal(data.reorderThresholdKitchen ?? 200),
+          isActive: true,
+        },
+        include: { baseUnit: true },
+      });
+
+      if (mainStore) {
+        const mainQty = data.initialMainStock && data.initialMainStock > 0 ? Number(data.initialMainStock) : 0;
+        await tx.inventoryBalance.create({
+          data: {
+            locationId: mainStore.id,
+            ingredientId: ingredient.id,
+            quantity: new Prisma.Decimal(mainQty),
+            reservedQuantity: new Prisma.Decimal(0),
+          },
+        });
+      }
+
+      if (kitchenStore) {
+        const kitchenQty = data.initialKitchenStock && data.initialKitchenStock > 0 ? Number(data.initialKitchenStock) : 0;
+        await tx.inventoryBalance.create({
+          data: {
+            locationId: kitchenStore.id,
+            ingredientId: ingredient.id,
+            quantity: new Prisma.Decimal(kitchenQty),
+            reservedQuantity: new Prisma.Decimal(0),
+          },
+        });
+      }
+
+      this.eventsGateway.broadcastInventoryUpdated();
+      return ingredient;
+    });
+  }
+
+  async updateIngredient(
+    id: string,
+    data: {
+      name?: string;
+      sku?: string;
+      category?: string;
+      baseUnitId?: string;
+      currentCostPerBaseUnit?: number;
+      reorderThresholdMain?: number;
+      reorderThresholdKitchen?: number;
+      isActive?: boolean;
+    },
+  ) {
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name.trim();
+    if (data.sku !== undefined) updateData.sku = data.sku.trim();
+    if (data.category !== undefined) updateData.category = data.category.trim();
+    if (data.baseUnitId !== undefined) updateData.baseUnitId = data.baseUnitId;
+    if (data.currentCostPerBaseUnit !== undefined) {
+      updateData.currentCostPerBaseUnit = new Prisma.Decimal(data.currentCostPerBaseUnit);
+    }
+    if (data.reorderThresholdMain !== undefined) {
+      updateData.reorderThresholdMain = new Prisma.Decimal(data.reorderThresholdMain);
+    }
+    if (data.reorderThresholdKitchen !== undefined) {
+      updateData.reorderThresholdKitchen = new Prisma.Decimal(data.reorderThresholdKitchen);
+    }
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
+
+    const updated = await this.prisma.ingredient.update({
+      where: { id },
+      data: updateData,
+      include: {
+        baseUnit: true,
+        balances: { include: { location: true } },
+      },
+    });
+
+    this.eventsGateway.broadcastInventoryUpdated();
+    return updated;
+  }
+
+  async deleteIngredient(id: string) {
+    const recipesCount = await this.prisma.recipeIngredient.count({ where: { ingredientId: id } });
+    const directMenuItemsCount = await this.prisma.menuItem.count({ where: { directIngredientId: id } });
+
+    if (recipesCount > 0 || directMenuItemsCount > 0) {
+      const softDeleted = await this.prisma.ingredient.update({
+        where: { id },
+        data: { isActive: false },
+      });
+      this.eventsGateway.broadcastInventoryUpdated();
+      return { success: true, message: 'Stock item archived (linked to recipes)', item: softDeleted };
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.inventoryTransaction.deleteMany({ where: { ingredientId: id } });
+      await tx.inventoryBalance.deleteMany({ where: { ingredientId: id } });
+      await tx.stockTransferItem.deleteMany({ where: { ingredientId: id } });
+      await tx.purchaseOrderItem.deleteMany({ where: { ingredientId: id } });
+      const deleted = await tx.ingredient.delete({ where: { id } });
+      this.eventsGateway.broadcastInventoryUpdated();
+      return { success: true, message: 'Stock item deleted permanently', item: deleted };
+    });
+  }
 }

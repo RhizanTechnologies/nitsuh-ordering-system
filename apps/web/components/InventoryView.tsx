@@ -5,6 +5,7 @@ import { useAppStore } from '@/lib/store';
 import { fetchApi } from '@/lib/api';
 import { RecipeEditorModal } from '@/components/RecipeEditorModal';
 import { PurchaseOrderModal } from '@/components/PurchaseOrderModal';
+import { StockItemModal } from '@/components/StockItemModal';
 import {
   Boxes,
   ArrowRightLeft,
@@ -28,12 +29,15 @@ import {
   TrendingUp,
   TrendingDown,
   Sliders,
-  Search
+  Search,
+  Filter,
+  Layers,
+  Scale
 } from 'lucide-react';
 
 export function InventoryView() {
   const { currentUser } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'balances' | 'transfers' | 'recipes' | 'purchases' | 'wastage' | 'ledger'>('balances');
+  const [activeTab, setActiveTab] = useState<'balances' | 'catalog' | 'transfers' | 'recipes' | 'purchases' | 'wastage' | 'ledger'>('balances');
   const [locations, setLocations] = useState<any[]>([]);
   const [transfers, setTransfers] = useState<any[]>([]);
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -43,6 +47,16 @@ export function InventoryView() {
   const [ledgerSearch, setLedgerSearch] = useState('');
   const [alerts, setAlerts] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
+
+  // Raw Stock Items Catalog (CRUD) State
+  const [rawIngredients, setRawIngredients] = useState<any[]>([]);
+  const [units, setUnits] = useState<any[]>([]);
+  const [stockItemModalOpen, setStockItemModalOpen] = useState(false);
+  const [editingStockItem, setEditingStockItem] = useState<any | null>(null);
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState<any | null>(null);
+  const [deletingItem, setDeletingItem] = useState(false);
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [catalogCategory, setCatalogCategory] = useState('ALL');
 
   // Modals
   const [recipeModalOpen, setRecipeModalOpen] = useState(false);
@@ -91,6 +105,8 @@ export function InventoryView() {
     fetchApi(`/inventory/alerts${roleParam}`).then(setAlerts);
     fetchApi('/inventory/ledger').then(setLedger);
     fetchApi('/inventory/suppliers').then(setSuppliers);
+    fetchApi('/inventory/ingredients').then((ings) => setRawIngredients(ings || []));
+    fetchApi('/inventory/units').then((u) => setUnits(u || []));
     fetchApi('/menu/items').then((items) => {
       setMenuItems(items);
       if (items.length > 0) {
@@ -295,6 +311,38 @@ export function InventoryView() {
     }
   };
 
+  // Stock Item CRUD Handlers
+  const handleOpenCreateStockItem = () => {
+    setEditingStockItem(null);
+    setStockItemModalOpen(true);
+  };
+
+  const handleOpenEditStockItem = (item: any) => {
+    setEditingStockItem(item);
+    setStockItemModalOpen(true);
+  };
+
+  const handleConfirmDeleteStockItem = (item: any) => {
+    setDeleteConfirmItem(item);
+  };
+
+  const executeDeleteStockItem = async () => {
+    if (!deleteConfirmItem) return;
+    setDeletingItem(true);
+    try {
+      const res = await fetchApi(`/inventory/ingredients/${deleteConfirmItem.id}`, {
+        method: 'DELETE',
+      });
+      alert(res?.message || 'Stock item deleted successfully');
+      setDeleteConfirmItem(null);
+      loadData();
+    } catch (err: any) {
+      alert(`Error deleting stock item: ${err.message}`);
+    } finally {
+      setDeletingItem(false);
+    }
+  };
+
   const mainStoreLoc = locations.find((l) => l.type === 'MAIN_STORE');
   const kitchenStoreLoc = locations.find((l) => l.type === 'KITCHEN_STORE');
 
@@ -342,6 +390,21 @@ export function InventoryView() {
             }`}
           >
             Store Balances
+          </button>
+
+          <button
+            onClick={() => setActiveTab('catalog')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+              activeTab === 'catalog'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
+                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Boxes className="w-3.5 h-3.5" />
+            <span>Stock Catalog (CRUD)</span>
+            <span className="bg-white/10 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+              {rawIngredients.length}
+            </span>
           </button>
 
           <button
@@ -457,6 +520,15 @@ export function InventoryView() {
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap">
+                    {isOwnerOrManager && (
+                      <button
+                        onClick={handleOpenCreateStockItem}
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>New Stock Item</span>
+                      </button>
+                    )}
                     {isOwnerOrManager && (
                       <button
                         onClick={handleOpenThresholdModal}
@@ -644,6 +716,15 @@ export function InventoryView() {
                           {/* Storekeeper Controls: Add Stock, Remove Stock, Send to Kitchen */}
                           {isMainStorekeeper && (
                             <div className="flex items-center gap-1">
+                              {isOwnerOrManager && (
+                                <button
+                                  onClick={() => handleOpenEditStockItem(b.ingredient)}
+                                  className="p-1.5 bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white rounded-xl transition cursor-pointer"
+                                  title="Edit stock item configuration"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleOpenAdjust(b.ingredient, 'MAIN_STORE', 'ADD')}
                                 className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer"
@@ -729,6 +810,15 @@ export function InventoryView() {
                           {/* Cook Head Chef Controls: Add Stock, Deduct Stock directly in Kitchen */}
                           {isKitchenChef && (
                             <div className="flex items-center gap-1">
+                              {isOwnerOrManager && (
+                                <button
+                                  onClick={() => handleOpenEditStockItem(b.ingredient)}
+                                  className="p-1.5 bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white rounded-xl transition cursor-pointer"
+                                  title="Edit stock item configuration"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleOpenAdjust(b.ingredient, 'KITCHEN_STORE', 'ADD')}
                                 className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer"
@@ -755,7 +845,261 @@ export function InventoryView() {
           </div>
         )}
 
-        {/* TAB 2: STOCK TRANSFERS */}
+        {/* TAB 2: STOCK ITEMS CATALOG (CRUD) */}
+        {activeTab === 'catalog' && (() => {
+          const categories = ['ALL', ...Array.from(new Set(rawIngredients.map((i) => i.category || 'General')))];
+          const filtered = rawIngredients.filter((item) => {
+            const matchesSearch =
+              !catalogSearch ||
+              item.name.toLowerCase().includes(catalogSearch.toLowerCase()) ||
+              item.sku?.toLowerCase().includes(catalogSearch.toLowerCase()) ||
+              item.category?.toLowerCase().includes(catalogSearch.toLowerCase());
+            const matchesCategory = catalogCategory === 'ALL' || item.category === catalogCategory;
+            return matchesSearch && matchesCategory;
+          });
+
+          // Compute KPI totals
+          const totalValuation = rawIngredients.reduce((sum, item) => {
+            const cost = Number(item.currentCostPerBaseUnit || 0);
+            const qty = (item.balances || []).reduce((qSum: number, b: any) => qSum + Number(b.quantity || 0), 0);
+            return sum + (cost * qty);
+          }, 0);
+
+          const lowStockCount = rawIngredients.filter((item) => {
+            const mainBal = item.balances?.find((b: any) => b.location?.type === 'MAIN_STORE')?.quantity || 0;
+            const kitBal = item.balances?.find((b: any) => b.location?.type === 'KITCHEN_STORE')?.quantity || 0;
+            return Number(mainBal) <= Number(item.reorderThresholdMain) || Number(kitBal) <= Number(item.reorderThresholdKitchen);
+          }).length;
+
+          return (
+            <div className="space-y-6">
+              {/* Header & Controls */}
+              <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+                  <div>
+                    <h3 className="text-sm font-black text-white flex items-center gap-2 font-heading">
+                      <Boxes className="w-4 h-4 text-amber-400" />
+                      <span>Stock Items Catalog (Raw Materials & Supplies)</span>
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      Create, view, update unit costs and remove inventory stock items across Main Warehouse and Kitchen
+                    </p>
+                  </div>
+                  {isOwnerOrManager && (
+                    <button
+                      onClick={handleOpenCreateStockItem}
+                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                    >
+                      <Plus className="w-4 h-4 stroke-[3]" />
+                      <span>New Stock Item</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* KPI Overview Strip */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3.5 bg-white/[0.02] border border-white/5 rounded-2xl">
+                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Stock Items</div>
+                    <div className="text-xl font-black text-white mt-1">{rawIngredients.length}</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">Active ingredients</div>
+                  </div>
+                  <div className="p-3.5 bg-white/[0.02] border border-white/5 rounded-2xl">
+                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Catalog Categories</div>
+                    <div className="text-xl font-black text-amber-400 mt-1">{categories.length - 1}</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">Product classifications</div>
+                  </div>
+                  <div className="p-3.5 bg-white/[0.02] border border-white/5 rounded-2xl">
+                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Asset Worth</div>
+                    <div className="text-xl font-black text-emerald-400 mt-1">{totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs">ETB</span></div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">Dual store valuation</div>
+                  </div>
+                  <div className="p-3.5 bg-white/[0.02] border border-white/5 rounded-2xl">
+                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Low-Stock Warnings</div>
+                    <div className={`text-xl font-black mt-1 ${lowStockCount > 0 ? 'text-rose-400' : 'text-zinc-400'}`}>
+                      {lowStockCount}
+                    </div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">Below alert cutoffs</div>
+                  </div>
+                </div>
+
+                {/* Search & Category Filter Toolbar */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                    <input
+                      type="text"
+                      placeholder="Search stock items by name, SKU, or category..."
+                      value={catalogSearch}
+                      onChange={(e) => setCatalogSearch(e.target.value)}
+                      className="w-full bg-white/[0.05] border border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+                    <Filter className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
+                    {categories.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setCatalogCategory(cat)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                          catalogCategory === cat
+                            ? 'bg-amber-500 text-zinc-950 font-black shadow-sm'
+                            : 'bg-white/[0.05] text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-white/5'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Stock Items Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {filtered.length === 0 ? (
+                  <div className="col-span-full py-12 px-6 text-center bg-white/[0.02] border border-white/10 rounded-3xl">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center mb-3">
+                      <Boxes className="w-6 h-6" />
+                    </div>
+                    <h4 className="text-sm font-bold text-white mb-1">No stock items match your criteria</h4>
+                    <p className="text-xs text-zinc-400 max-w-sm mx-auto mb-4">
+                      Try adjusting your search terms or create a new stock item.
+                    </p>
+                    {isOwnerOrManager && (
+                      <button
+                        onClick={handleOpenCreateStockItem}
+                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-bold rounded-xl text-xs transition"
+                      >
+                        + Create Stock Item
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  filtered.map((item) => {
+                    const unitSym = item.baseUnit?.symbol || 'units';
+                    const unitCost = Number(item.currentCostPerBaseUnit || 0);
+
+                    // Find balances from item.balances or locations
+                    const mainBalance = item.balances?.find((b: any) => b.location?.type === 'MAIN_STORE')?.quantity ?? 0;
+                    const kitchenBalance = item.balances?.find((b: any) => b.location?.type === 'KITCHEN_STORE')?.quantity ?? 0;
+                    const totalQty = Number(mainBalance) + Number(kitchenBalance);
+                    const totalWorth = totalQty * unitCost;
+
+                    const isMainLow = Number(mainBalance) <= Number(item.reorderThresholdMain);
+                    const isKitchenLow = Number(kitchenBalance) <= Number(item.reorderThresholdKitchen);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-amber-500/30 rounded-3xl p-5 shadow-xl flex flex-col justify-between gap-4 transition"
+                      >
+                        <div>
+                          {/* Card Top: Title, SKU, Category Badge */}
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-black text-white truncate" title={item.name}>
+                                {item.name}
+                              </h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/[0.06] text-zinc-400 font-mono">
+                                  {item.sku || 'NO-SKU'}
+                                </span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                  {item.category || 'General'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Actions Menu */}
+                            {isOwnerOrManager && (
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <button
+                                  onClick={() => handleOpenEditStockItem(item)}
+                                  className="p-1.5 bg-white/[0.08] hover:bg-white/[0.15] text-zinc-300 hover:text-white rounded-xl transition cursor-pointer"
+                                  title="Edit stock item"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleConfirmDeleteStockItem(item)}
+                                  className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer"
+                                  title="Delete or archive stock item"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Unit Cost Valuation Badge */}
+                          <div className="flex items-center justify-between p-2.5 bg-black/30 rounded-2xl border border-white/5 my-3">
+                            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+                              <Scale className="w-3.5 h-3.5 text-amber-400" />
+                              <span>Base Unit: <strong className="text-white">{item.baseUnit?.name || unitSym} ({unitSym})</strong></span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xs font-black text-amber-400">
+                                {unitCost.toFixed(4)} ETB
+                              </div>
+                              <div className="text-[9px] text-zinc-500">per {unitSym}</div>
+                            </div>
+                          </div>
+
+                          {/* Dual Store Balance Split */}
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className={`p-2.5 rounded-2xl border ${isMainLow ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/[0.02] border-white/5'}`}>
+                              <div className="text-[10px] text-zinc-400 uppercase font-bold flex items-center justify-between">
+                                <span>Main Store</span>
+                                {isMainLow && <span className="text-amber-400 font-black">Low</span>}
+                              </div>
+                              <div className="text-sm font-black text-white mt-0.5">
+                                {Number(mainBalance).toLocaleString()} <span className="text-[10px] text-zinc-400">{unitSym}</span>
+                              </div>
+                              <div className="text-[9px] text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdMain}</div>
+                            </div>
+
+                            <div className={`p-2.5 rounded-2xl border ${isKitchenLow ? 'bg-rose-500/10 border-rose-500/30' : 'bg-white/[0.02] border-white/5'}`}>
+                              <div className="text-[10px] text-zinc-400 uppercase font-bold flex items-center justify-between">
+                                <span>Kitchen Store</span>
+                                {isKitchenLow && <span className="text-rose-400 font-black">Low</span>}
+                              </div>
+                              <div className="text-sm font-black text-white mt-0.5">
+                                {Number(kitchenBalance).toLocaleString()} <span className="text-[10px] text-zinc-400">{unitSym}</span>
+                              </div>
+                              <div className="text-[9px] text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdKitchen}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card Bottom: Total Assets & Quick Adjust */}
+                        <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                          <div>
+                            <div className="text-[10px] text-zinc-400 uppercase font-bold">Total Valued Assets</div>
+                            <div className="text-xs font-black text-emerald-400">
+                              {totalWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB
+                            </div>
+                          </div>
+
+                          {/* Quick Adjust Button */}
+                          {isMainStorekeeper && (
+                            <button
+                              onClick={() => handleOpenAdjust(item, 'MAIN_STORE', 'ADD')}
+                              className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5"
+                            >
+                              <Plus className="w-3.5 h-3.5 text-amber-400" />
+                              <span>Adjust Stock</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* TAB 3: STOCK TRANSFERS */}
         {activeTab === 'transfers' && (
           <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 gap-3">
@@ -1663,6 +2007,57 @@ export function InventoryView() {
         onPurchaseRecorded={loadData}
         currentUserId={currentUser.id}
       />
+
+      {/* STOCK ITEM CREATE & EDIT MODAL */}
+      <StockItemModal
+        isOpen={stockItemModalOpen}
+        onClose={() => setStockItemModalOpen(false)}
+        item={editingStockItem}
+        units={units}
+        onSaved={loadData}
+      />
+
+      {/* DELETE / ARCHIVE STOCK ITEM CONFIRMATION DIALOG */}
+      {deleteConfirmItem && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-white space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-white">Delete Stock Item?</h3>
+                <div className="text-xs text-zinc-400">{deleteConfirmItem.name}</div>
+              </div>
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              Are you sure you want to remove <strong className="text-white">{deleteConfirmItem.name}</strong> ({deleteConfirmItem.sku || 'No SKU'})?
+              If this stock item is linked to existing dishes or recipes, it will be safely <strong className="text-amber-400">archived</strong> to preserve your cost histories and order records.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmItem(null)}
+                disabled={deletingItem}
+                className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDeleteStockItem}
+                disabled={deletingItem}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-950/40 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{deletingItem ? 'Deleting...' : 'Confirm Delete'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

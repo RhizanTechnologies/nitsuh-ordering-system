@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { LocationType } from '@cafe/shared-types';
 
@@ -196,5 +196,56 @@ export class InventoryController {
     const senderId = body.sentById || body.userId || '';
     const items = body.items || (body.ingredientId && body.quantity ? [{ ingredientId: body.ingredientId, quantity: Number(body.quantity) }] : []);
     return this.inventoryService.directDispatchTransfer(senderId, items, body.notes);
+  }
+
+  @Get('ingredients')
+  async getIngredients() {
+    return this.inventoryService.getIngredients();
+  }
+
+  @Get('units')
+  async getUnits() {
+    return this.inventoryService.getUnits();
+  }
+
+  @Post('ingredients')
+  async createIngredient(
+    @Body()
+    body: {
+      name: string;
+      sku?: string;
+      category?: string;
+      baseUnitId: string;
+      currentCostPerBaseUnit: number;
+      reorderThresholdMain?: number;
+      reorderThresholdKitchen?: number;
+      initialMainStock?: number;
+      initialKitchenStock?: number;
+    },
+  ) {
+    return this.inventoryService.createIngredient(body);
+  }
+
+  @Patch('ingredients/:id')
+  async updateIngredient(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      name?: string;
+      sku?: string;
+      category?: string;
+      baseUnitId?: string;
+      currentCostPerBaseUnit?: number;
+      reorderThresholdMain?: number;
+      reorderThresholdKitchen?: number;
+      isActive?: boolean;
+    },
+  ) {
+    return this.inventoryService.updateIngredient(id, body);
+  }
+
+  @Delete('ingredients/:id')
+  async deleteIngredient(@Param('id') id: string) {
+    return this.inventoryService.deleteIngredient(id);
   }
 }
