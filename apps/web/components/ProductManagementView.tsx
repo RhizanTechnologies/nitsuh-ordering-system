@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { fetchApi } from '@/lib/api';
 import { RecipeEditorModal } from '@/components/RecipeEditorModal';
 import { MenuImage } from '@/components/MenuImage';
@@ -18,7 +18,10 @@ import {
   Utensils,
   RefreshCw,
   Sparkles,
-  Layers
+  Layers,
+  UploadCloud,
+  Image as ImageIcon,
+  FileImage,
 } from 'lucide-react';
 
 export function ProductManagementView() {
@@ -43,8 +46,74 @@ export function ProductManagementView() {
   const [formPrepSection, setFormPrepSection] = useState('HOT_KITCHEN');
   const [formIsDirect, setFormIsDirect] = useState(false);
   const [formImageUrl, setFormImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageSizeInfo, setImageSizeInfo] = useState<string | null>(null);
+  const [showUrlFallback, setShowUrlFallback] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [savingProduct, setSavingProduct] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  const processAndSetImage = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload a valid image file (PNG, JPG, WebP).');
+      return;
+    }
+
+    setUploadingImage(true);
+    const originalSizeKb = Math.round(file.size / 1024);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.createElement('img');
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          const optimizedSizeKb = Math.round((dataUrl.length * 3) / 4 / 1024);
+          setFormImageUrl(dataUrl);
+          setImageSizeInfo(`Optimized: ${optimizedSizeKb} KB (from ${originalSizeKb} KB)`);
+        }
+        setUploadingImage(false);
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processAndSetImage(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processAndSetImage(file);
+    }
+  };
 
   const loadData = () => {
     setLoading(true);
@@ -85,6 +154,8 @@ export function ProductManagementView() {
     setFormPrepSection('HOT_KITCHEN');
     setFormIsDirect(false);
     setFormImageUrl('');
+    setImageSizeInfo(null);
+    setShowUrlFallback(false);
     setProductModalOpen(true);
   };
 
@@ -98,6 +169,8 @@ export function ProductManagementView() {
     setFormPrepSection(item.prepSection || 'HOT_KITCHEN');
     setFormIsDirect(Boolean(item.isDirectSale));
     setFormImageUrl(item.imageUrl || '');
+    setImageSizeInfo(null);
+    setShowUrlFallback(false);
     setProductModalOpen(true);
   };
 
@@ -483,14 +556,112 @@ export function ProductManagementView() {
                 />
               </div>
 
-              <div>
-                <label className="block font-bold text-zinc-300 mb-1">Product Photo URL (Unsplash or Image Link)</label>
+              {/* Product Photo Upload Section */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block font-bold text-zinc-300 text-xs uppercase tracking-wider">
+                    Product Photo (Upload File)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlFallback(!showUrlFallback)}
+                    className="text-[10px] font-semibold text-zinc-500 hover:text-amber-400 transition"
+                  >
+                    {showUrlFallback ? 'Hide URL link' : 'Or paste web link'}
+                  </button>
+                </div>
+
+                {formImageUrl ? (
+                  /* Image Preview Card */
+                  <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-black/40 p-3 flex items-center gap-4 group">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-black/60 border border-white/10 flex-shrink-0 relative">
+                      <img
+                        src={formImageUrl}
+                        alt="Product Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Check className="w-4 h-4 text-emerald-400" />
+                        <span>Photo Uploaded & Ready</span>
+                      </div>
+                      {imageSizeInfo && (
+                        <div className="text-[10px] text-zinc-400 mt-0.5 font-mono">{imageSizeInfo}</div>
+                      )}
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <UploadCloud className="w-3.5 h-3.5 text-amber-400" />
+                          Change Photo
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormImageUrl('');
+                            setImageSizeInfo(null);
+                          }}
+                          className="px-3 py-1 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Drag & Drop Upload Zone */
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-white/20 hover:border-amber-500/50 bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center gap-2 group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+                      {uploadingImage ? (
+                        <RefreshCw className="w-6 h-6 animate-spin text-amber-400" />
+                      ) : (
+                        <UploadCloud className="w-6 h-6" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-white">
+                        {uploadingImage ? 'Optimizing & Processing Photo...' : 'Click to Upload Product Photo'}
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                        Choose photo file from your device (PNG, JPG, WebP) or drag here
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Optional Web URL Link Fallback (collapsed by default) */}
+                {showUrlFallback && (
+                  <div className="pt-2 animate-in fade-in duration-150">
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">
+                      Web Image URL (Optional Fallback)
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/..."
+                      value={formImageUrl}
+                      onChange={(e) => setFormImageUrl(e.target.value)}
+                      className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-zinc-500 focus:outline-none"
+                    />
+                  </div>
+                )}
+
+                {/* Hidden File Input */}
                 <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
-                  value={formImageUrl}
-                  onChange={(e) => setFormImageUrl(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-medium text-white placeholder-zinc-500 focus:outline-none"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/jpg"
+                  onChange={handleFileChange}
+                  className="hidden"
                 />
               </div>
 
