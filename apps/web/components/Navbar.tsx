@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAppStore, KNOWN_STAFF } from '@/lib/store';
+import { useAppStore } from '@/lib/store';
 import { getDefaultRouteForRole, isRouteAllowed } from '@/lib/route-guard';
 import {
   Coffee,
@@ -40,7 +40,7 @@ export function Navbar() {
 
   const [unreadAlerts, setUnreadAlerts] = useState(0);
   const [tables, setTables] = useState<any[]>([]);
-  const [staffMenuOpen, setStaffMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const loadTables = () => {
     fetchApi('/menu/tables')
@@ -83,20 +83,6 @@ export function Navbar() {
     router.push('/login');
   };
 
-  const handleSwitchStaff = async (staff: any) => {
-    setStaffMenuOpen(false);
-    try {
-      const res = await fetchApi('/auth/login-pin', {
-        method: 'POST',
-        body: JSON.stringify({ pin: staff.pin }),
-      });
-      login(res.accessToken, res.user);
-      const targetRoute = getDefaultRouteForRole(res.user.role);
-      router.push(targetRoute);
-    } catch (e) {
-      console.error('Failed to switch staff', e);
-    }
-  };
 
   return (
     <>
@@ -296,10 +282,12 @@ export function Navbar() {
             </button>
 
             {/* User Profile Pill / Quick Switcher */}
+            {/* Authenticated Staff User Pill */}
             <div className="relative">
               <button
-                onClick={() => setStaffMenuOpen(!staffMenuOpen)}
-                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 rounded-xl sm:rounded-2xl shadow-xs transition"
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 rounded-xl sm:rounded-2xl shadow-xs transition cursor-pointer"
+                title="View active session"
               >
                 {currentUser.avatarUrl ? (
                   <img
@@ -307,7 +295,11 @@ export function Navbar() {
                     alt={currentUser.name}
                     className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover ring-1 ring-amber-400/50 flex-shrink-0"
                   />
-                ) : null}
+                ) : (
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-[10px] ring-1 ring-amber-400/50 flex-shrink-0">
+                    {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
+                  </div>
+                )}
                 <div className="text-left max-w-[65px] sm:max-w-[120px] truncate">
                   <div className="text-[11px] sm:text-xs font-bold text-white truncate leading-tight">
                     {currentUser.name}
@@ -316,34 +308,40 @@ export function Navbar() {
                     {currentUser.role.replace('_', ' ')}
                   </div>
                 </div>
-                <ChevronDown className="w-3 h-3 text-zinc-400 ml-0.5" />
+                <ChevronDown className={`w-3 h-3 text-zinc-400 ml-0.5 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {staffMenuOpen && (
-                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-[288px] sm:w-72 bg-[#1A1614] rounded-2xl shadow-2xl border border-white/15 p-2 z-50 text-white">
-                  <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-3 py-1.5">
-                    Terminal Quick Staff Switcher
+              {profileOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-[#1A1614] rounded-2xl shadow-2xl border border-white/15 p-3.5 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                    {currentUser.avatarUrl ? (
+                      <img
+                        src={currentUser.avatarUrl}
+                        alt={currentUser.name}
+                        className="w-10 h-10 rounded-full object-cover ring-2 ring-amber-400/40"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-sm ring-2 ring-amber-400/40">
+                        {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
+                      </div>
+                    )}
+                    <div className="truncate">
+                      <div className="text-sm font-bold text-white truncate">{currentUser.name}</div>
+                      <div className="text-[11px] text-zinc-400 truncate">{currentUser.email || 'Terminal User'}</div>
+                      <span className="inline-block mt-0.5 text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        {currentUser.role.replace('_', ' ')}
+                      </span>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {KNOWN_STAFF.map((staff) => (
-                      <button
-                        key={staff.pin}
-                        onClick={() => handleSwitchStaff(staff)}
-                        className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition ${
-                          currentUser.role === staff.role && currentUser.name.includes(staff.name.split(' ')[0])
-                            ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40'
-                            : 'hover:bg-white/[0.06] text-zinc-300'
-                        }`}
-                      >
-                        <div>
-                          <div className="font-semibold text-white">{staff.name}</div>
-                          <div className="text-[10px] text-zinc-400">{staff.role.replace('_', ' ')}</div>
-                        </div>
-                        <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded text-zinc-300">
-                          PIN {staff.pin}
-                        </span>
-                      </button>
-                    ))}
+
+                  <div className="pt-3">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 font-bold text-xs transition cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4 text-red-400" />
+                      Sign Out & Lock Terminal
+                    </button>
                   </div>
                 </div>
               )}
