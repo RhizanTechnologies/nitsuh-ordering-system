@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppStore, KNOWN_STAFF } from '@/lib/store';
+import { useAppStore } from '@/lib/store';
 import { getDefaultRouteForRole } from '@/lib/route-guard';
 import { fetchApi } from '@/lib/api';
 import { Lock, KeyRound, ArrowRight } from 'lucide-react';
@@ -16,8 +16,8 @@ export function LoginScreen() {
   const [activeTab, setActiveTab] = useState<'pin' | 'password'>('pin');
 
   // Email login state
-  const [email, setEmail] = useState('adam@nitsuh.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleNumberClick = (digit: string) => {
     if (pin.length < 6) {
@@ -202,33 +202,6 @@ export function LoginScreen() {
                 {loading ? '...' : <ArrowRight className="w-6 h-6 stroke-[3]" />}
               </button>
             </div>
-
-            {/* Quick Demo PIN Helpers */}
-            <div className="w-full pt-4 border-t border-white/10 space-y-1.5">
-              <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider text-center mb-1">
-                Role-Based Employee Test PINs:
-              </div>
-              <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                {KNOWN_STAFF.map((s) => (
-                  <button
-                    key={s.pin}
-                    onClick={() => {
-                      setPin(s.pin);
-                      handlePinSubmit(s.pin);
-                    }}
-                    className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-left flex items-center justify-between transition cursor-pointer"
-                  >
-                    <div>
-                      <div className="font-bold text-white text-xs">{s.name}</div>
-                      <div className="text-[10px] text-amber-400 font-semibold">{s.role}</div>
-                    </div>
-                    <span className="font-mono text-xs font-black text-zinc-400 bg-white/10 px-1.5 py-0.5 rounded">
-                      {s.pin}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         ) : (
           /* EMAIL LOGIN TAB */
@@ -239,10 +212,11 @@ export function LoginScreen() {
               </label>
               <input
                 type="email"
+                placeholder="staff@nitsuh.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500/50"
+                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500/50 placeholder-zinc-600"
               />
             </div>
 
@@ -252,10 +226,11 @@ export function LoginScreen() {
               </label>
               <input
                 type="password"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500/50"
+                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500/50 placeholder-zinc-600"
               />
             </div>
 
@@ -270,7 +245,7 @@ export function LoginScreen() {
               disabled={loading}
               className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-xl shadow-amber-500/25 transition cursor-pointer active:scale-98"
             >
-              {loading ? 'Verifying...' : 'Sign In as Manager'}
+              {loading ? 'Verifying...' : 'Sign In'}
             </button>
           </form>
         )}
