@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  cafe-postgres:
+    image: postgres:16-alpine
+    container_name: nitsuh-cafe-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cafe_admin
+      POSTGRES_PASSWORD: cafe_secure_password_2026
+      POSTGRES_DB: nitsuh_cafe_db
+    ports:
+      - '5435:5432'
+    volumes:
+      - cafe_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cafe_admin -d nitsuh_cafe_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  cafe_pgdata:

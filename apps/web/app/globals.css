@@ -1,0 +1,267 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="dark"],
+.theme-dark {
+  --bg-canvas: #0D0B0A;
+  --bg-canvas-subtle: #12100E;
+  --bg-surface: #161311;
+  --bg-surface-elevated: #1F1B18;
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --bg-card-hover: rgba(255, 255, 255, 0.08);
+  --bg-input: rgba(255, 255, 255, 0.05);
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --text-primary: #FFFFFF;
+  --text-secondary: #D4D4D8;
+  --text-muted: #8F8B88;
+  --brand-crimson: #C11221;
+  --brand-crimson-hover: #D92534;
+  --brand-amber: #F59E0B;
+  --brand-amber-hover: #FBBF24;
+  --brand-amber-glow: rgba(245, 158, 11, 0.15);
+  --brand-crimson-glow: rgba(193, 18, 33, 0.15);
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --shadow-elevated: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+  --glass-header: rgba(18, 16, 14, 0.95);
+  --glass-drawer: rgba(18, 16, 14, 0.98);
+}
+
+[data-theme="light"],
+.theme-light {
+  /* Warm Alabaster Bistro - Educated Organic Culinary Canvas */
+  --bg-canvas: #F8F5EE;
+  --bg-canvas-subtle: #F2ECE2;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FBF9F4;
+  --bg-input: #FFFFFF;
+  --border-subtle: #E8E2D7;
+  --border-strong: #D6CCC0;
+  --text-primary: #1C1512;        /* Rich Roast Espresso */
+  --text-secondary: #524741;      /* Warm Roasted Mocha */
+  --text-muted: #8C7F78;          /* Muted Truffle */
+  --brand-crimson: #B91C1C;       /* Saturated Tuscan Culinary Crimson */
+  --brand-crimson-hover: #991B1B;
+  --brand-amber: #B45309;         /* Saffron Honey / Roasted Amber (High-Contrast AAA) */
+  --brand-amber-hover: #92400E;
+  --brand-amber-glow: rgba(217, 119, 6, 0.08);
+  --brand-crimson-glow: rgba(185, 28, 28, 0.08);
+  --shadow-card: 0 4px 20px -2px rgba(60, 42, 28, 0.06), 0 1px 3px 0 rgba(60, 42, 28, 0.04);
+  --shadow-elevated: 0 12px 35px -5px rgba(60, 42, 28, 0.10), 0 2px 6px -1px rgba(60, 42, 28, 0.05);
+  --glass-header: rgba(255, 255, 255, 0.95);
+  --glass-drawer: rgba(255, 255, 255, 0.98);
+}
+
+@layer base {
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', Outfit, system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb,
+.theme-light ::-webkit-scrollbar-thumb {
+  background: #D8D0C5;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-amber);
+}
+
+/* Educated Light Theme Visual Transformation Rules */
+[data-theme="light"] body,
+.theme-light body {
+  background-color: #F8F5EE !important;
+  color: #1C1512 !important;
+}
+
+[data-theme="light"] .bg-\[\#0D0B0A\],
+.theme-light .bg-\[\#0D0B0A\] {
+  background-color: #F8F5EE !important;
+}
+
+[data-theme="light"] .bg-\[\#12100E\],
+.theme-light .bg-\[\#12100E\] {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] .bg-\[\#12100E\]\/95,
+.theme-light .bg-\[\#12100E\]\/95 {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+}
+
+[data-theme="light"] .bg-\[\#161311\],
+.theme-light .bg-\[\#161311\] {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] .bg-\[\#161311\]\/95,
+.theme-light .bg-\[\#161311\]\/95 {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+}
+
+[data-theme="light"] .bg-\[\#1A1614\],
+.theme-light .bg-\[\#1A1614\] {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] .bg-\[\#1C1815\],
+.theme-light .bg-\[\#1C1815\] {
+  background-color: #FFFFFF !important;
+}
+
+/* Card surfaces in Light Mode: Crisp ceramic white with soft ambient shadow */
+[data-theme="light"] .bg-white\/\[0\.02\],
+[data-theme="light"] .bg-white\/\[0\.03\],
+[data-theme="light"] .bg-white\/\[0\.04\],
+[data-theme="light"] .bg-white\/\[0\.05\],
+.theme-light .bg-white\/\[0\.02\],
+.theme-light .bg-white\/\[0\.03\],
+.theme-light .bg-white\/\[0\.04\],
+.theme-light .bg-white\/\[0\.05\] {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 4px 18px -2px rgba(60, 42, 28, 0.05), 0 1px 3px 0 rgba(60, 42, 28, 0.03) !important;
+}
+
+[data-theme="light"] .bg-white\/\[0\.06\],
+[data-theme="light"] .bg-white\/\[0\.07\],
+[data-theme="light"] .bg-white\/\[0\.08\],
+[data-theme="light"] .bg-white\/\[0\.1\],
+.theme-light .bg-white\/\[0\.06\],
+.theme-light .bg-white\/\[0\.07\],
+.theme-light .bg-white\/\[0\.08\],
+.theme-light .bg-white\/\[0\.1\] {
+  background-color: #F2ECE2 !important;
+}
+
+/* Borders in Light Mode */
+[data-theme="light"] .border-white\/5,
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/15,
+.theme-light .border-white\/5,
+.theme-light .border-white\/10,
+.theme-light .border-white\/15 {
+  border-color: #E8E2D7 !important;
+}
+
+[data-theme="light"] .border-white\/20,
+[data-theme="light"] .border-white\/30,
+.theme-light .border-white\/20,
+.theme-light .border-white\/30 {
+  border-color: #D6CCC0 !important;
+}
+
+/* Typography in Light Mode: Deep Espresso, Roasted Mocha, Truffle Stone */
+[data-theme="light"] .text-white,
+.theme-light .text-white {
+  color: #1C1512 !important;
+}
+
+[data-theme="light"] .text-zinc-100,
+[data-theme="light"] .text-zinc-200,
+.theme-light .text-zinc-100,
+.theme-light .text-zinc-200 {
+  color: #2E241F !important;
+}
+
+[data-theme="light"] .text-zinc-300,
+[data-theme="light"] .text-zinc-400,
+.theme-light .text-zinc-300,
+.theme-light .text-zinc-400 {
+  color: #524741 !important;
+}
+
+[data-theme="light"] .text-zinc-500,
+[data-theme="light"] .text-zinc-600,
+.theme-light .text-zinc-500,
+.theme-light .text-zinc-600 {
+  color: #8C7F78 !important;
+}
+
+/* Amber / Gold Text in Light Mode: High-contrast caramelized honey */
+[data-theme="light"] .text-amber-300,
+[data-theme="light"] .text-amber-400,
+[data-theme="light"] .text-amber-500,
+.theme-light .text-amber-300,
+.theme-light .text-amber-400,
+.theme-light .text-amber-500 {
+  color: #B45309 !important;
+}
+
+/* Inputs & Forms in Light Mode */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea,
+.theme-light input,
+.theme-light select,
+.theme-light textarea {
+  color: #1C1512 !important;
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] input::placeholder,
+.theme-light input::placeholder {
+  color: #8C7F78 !important;
+}
+
+/* Ambient glow soft morning sunlight in Light Mode */
+[data-theme="light"] .bg-amber-500\/10,
+.theme-light .bg-amber-500\/10 {
+  background-color: rgba(217, 119, 6, 0.04) !important;
+}
+
+[data-theme="light"] .bg-\[\#C11221\]\/10,
+.theme-light .bg-\[\#C11221\]\/10 {
+  background-color: rgba(185, 28, 28, 0.03) !important;
+}
+
+/* Primary Amber Action Buttons remain radiant with white text */
+[data-theme="light"] .bg-gradient-to-r.from-amber-500.to-orange-500,
+.theme-light .bg-gradient-to-r.from-amber-500.to-orange-500 {
+  background: linear-gradient(135deg, #D97706 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+}
+
