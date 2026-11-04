@@ -2,6 +2,17 @@ import { create } from 'zustand';
 
 export type ThemeMode = 'dark' | 'light';
 
+export const getInitialTheme = (): ThemeMode => {
+  if (typeof window === 'undefined') return 'dark';
+  try {
+    const saved = localStorage.getItem('cafe_theme') as ThemeMode;
+    if (saved === 'light' || saved === 'dark') return saved;
+    const attr = document.documentElement.getAttribute('data-theme') as ThemeMode;
+    if (attr === 'light' || attr === 'dark') return attr;
+  } catch (e) {}
+  return 'dark';
+};
+
 export const applyTheme = (theme: ThemeMode) => {
   if (typeof window === 'undefined') return;
   try {
@@ -117,7 +128,7 @@ export const useAppStore = create<AppState>((set) => ({
   waiterSpecialNotes: '',
   waiterSlipsCount: 0,
   tableManagerOpen: false,
-  theme: 'dark',
+  theme: getInitialTheme(),
   setTableManagerOpen: (open) => set({ tableManagerOpen: open }),
   setTheme: (theme) => {
     applyTheme(theme);
@@ -125,7 +136,10 @@ export const useAppStore = create<AppState>((set) => ({
   },
   toggleTheme: () => {
     set((state) => {
-      const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+      const current = typeof document !== 'undefined'
+        ? (document.documentElement.getAttribute('data-theme') as ThemeMode) || state.theme
+        : state.theme;
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
       applyTheme(nextTheme);
       return { theme: nextTheme };
     });

@@ -185,6 +185,13 @@
   color: #1C1512 !important;
 }
 
+[data-theme="light"] .text-zinc-900,
+[data-theme="light"] .text-zinc-950,
+.theme-light .text-zinc-900,
+.theme-light .text-zinc-950 {
+  color: #110D0B !important;
+}
+
 [data-theme="light"] .text-zinc-100,
 [data-theme="light"] .text-zinc-200,
 .theme-light .text-zinc-100,

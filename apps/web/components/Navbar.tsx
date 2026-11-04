@@ -51,6 +51,12 @@ export function Navbar() {
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const activeTheme = (document.documentElement.getAttribute('data-theme') || localStorage.getItem('cafe_theme') || 'dark') as 'dark' | 'light';
+      if (activeTheme && activeTheme !== theme) {
+        useAppStore.getState().setTheme(activeTheme);
+      }
+    }
     loadTables();
 
     const socket = getSocket();

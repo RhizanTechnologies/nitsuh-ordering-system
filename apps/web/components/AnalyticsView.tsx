@@ -34,8 +34,16 @@ export function AnalyticsView() {
   const [data, setData] = useState<any | null>(null);
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year'>('day');
   const [activeOwnerTab, setActiveOwnerTab] = useState<'analytics' | 'products'>('analytics');
+  const [mountedTheme, setMountedTheme] = useState(theme);
 
-  const isDark = theme !== 'light';
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const active = (document.documentElement.getAttribute('data-theme') || theme) as 'dark' | 'light';
+      setMountedTheme(active);
+    }
+  }, [theme]);
+
+  const isDark = mountedTheme !== 'light';
   const chartGridStroke = isDark ? 'rgba(255,255,255,0.08)' : '#E5DFD5';
   const chartAxisStroke = isDark ? '#A1A1AA' : '#3C3029';
   const chartTooltipBg = isDark ? '#161311' : '#FFFFFF';
@@ -182,15 +190,16 @@ export function AnalyticsView() {
             </div>
 
             {/* Real-time Net Profit */}
-            <div className="bg-gradient-to-br from-[#880814] via-[#A8101E] to-[#4A050B] border border-red-500/40 text-white rounded-3xl p-5 shadow-xl backdrop-blur-xl flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-amber-300 font-black mb-2">
+            <div className="bg-gradient-to-br from-rose-50/90 via-white to-amber-50/50 dark:bg-gradient-to-br dark:from-[#880814] dark:via-[#A8101E] dark:to-[#4A050B] border border-red-200 dark:border-red-500/40 rounded-3xl p-5 shadow-xl backdrop-blur-xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs font-black mb-2 text-rose-800 dark:text-amber-300">
                 <span className="tracking-wide">Estimated Net Profit</span>
-                <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-300 animate-pulse" />
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-white">
-                {kpis.netProfit > 0 ? kpis.netProfit.toFixed(2) : '1,690.40'} <span className="text-xs text-amber-200/80 font-bold">ETB</span>
+              <div className="text-2xl sm:text-3xl font-black text-rose-700 dark:text-white">
+                {kpis.netProfit > 0 ? kpis.netProfit.toFixed(2) : '1,690.40'}{' '}
+                <span className="text-xs font-bold text-rose-900/60 dark:text-amber-200/80">ETB</span>
               </div>
-              <div className="text-xs font-bold text-amber-100/90 mt-2">
+              <div className="text-xs font-bold text-rose-800 dark:text-amber-100/90 mt-2">
                 Margin: {kpis.netMarginPercent > 0 ? kpis.netMarginPercent : '71.8'}% after COGS
               </div>
             </div>
