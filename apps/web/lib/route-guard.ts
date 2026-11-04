@@ -20,7 +20,7 @@ export const STATION_ROUTES: RouteConfig[] = [
   {
     path: '/dashboard',
     label: 'Analytics & Profit',
-    allowedRoles: ['OWNER', 'MANAGER'],
+    allowedRoles: ['OWNER'], // Strictly restricted to OWNER; Manager cannot see financial profit
     icon: 'BarChart3',
   },
   {
@@ -68,8 +68,9 @@ export function getDefaultRouteForRole(role?: UserRole | null): string {
     case 'MAIN_STOREKEEPER':
     case 'KITCHEN_STOREKEEPER':
       return '/inventory';
-    case 'OWNER':
     case 'MANAGER':
+      return '/tables';
+    case 'OWNER':
     default:
       return '/dashboard';
   }
@@ -77,8 +78,13 @@ export function getDefaultRouteForRole(role?: UserRole | null): string {
 
 export function isRouteAllowed(path: string, role?: UserRole | null): boolean {
   if (!role) return false;
-  // If user is OWNER or MANAGER, allow all station routes
-  if (role === 'OWNER' || role === 'MANAGER') return true;
+  // If user is OWNER, allow all station routes
+  if (role === 'OWNER') return true;
+
+  // Manager is strictly prohibited from seeing profit & financial analytics
+  if (role === 'MANAGER' && (path === '/dashboard' || path.startsWith('/dashboard/'))) {
+    return false;
+  }
 
   const matchedRoute = STATION_ROUTES.find(
     (r) => path === r.path || path.startsWith(r.path + '/')

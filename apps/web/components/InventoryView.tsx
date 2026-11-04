@@ -76,6 +76,7 @@ export function InventoryView() {
   const isKitchenChef = role === 'KITCHEN_STOREKEEPER' || role === 'HEAD_CHEF' || role === 'OWNER' || role === 'MANAGER';
   const isKitchenReceiver = role === 'KITCHEN_STOREKEEPER' || role === 'HEAD_CHEF' || role === 'OWNER';
   const isOwnerOrManager = role === 'OWNER' || role === 'MANAGER';
+  const isOwner = role === 'OWNER';
 
   // Wastage form state
   const [wasteIngredientId, setWasteIngredientId] = useState('');
@@ -904,27 +905,44 @@ export function InventoryView() {
                     </div>
                   </div>
 
-                  {/* Margin Banner */}
-                  <div className="grid grid-cols-3 gap-3 mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl">
-                    <div>
-                      <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Portion Food Cost</div>
-                      <div className="text-base font-extrabold text-[#C11221]">
-                        {selectedRecipeItem.costPerPortion?.toFixed(4) || '0.00'} ETB
+                  {/* Margin Banner - Only Owner sees Gross Profit and Margin % Analysis */}
+                  {isOwner ? (
+                    <div className="grid grid-cols-3 gap-3 mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl">
+                      <div>
+                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Portion Food Cost</div>
+                        <div className="text-base font-extrabold text-[#C11221]">
+                          {selectedRecipeItem.costPerPortion?.toFixed(4) || '0.00'} ETB
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Gross Margin</div>
+                        <div className="text-base font-extrabold text-amber-400">
+                          {selectedRecipeItem.grossProfitEstimate?.toFixed(2) || '0.00'} ETB
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
+                        <div className="text-base font-extrabold text-emerald-400">
+                          {selectedRecipeItem.marginPercent?.toFixed(1) || 0}%
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Gross Margin</div>
-                      <div className="text-base font-extrabold text-amber-400">
-                        {selectedRecipeItem.grossProfitEstimate?.toFixed(2) || '0.00'} ETB
+                  ) : (
+                    <div className="mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Standard Production Yield</div>
+                        <div className="text-sm font-extrabold text-white mt-0.5">
+                          {selectedRecipeItem.recipe?.yieldPortions || 1} Portion(s) per recipe batch
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Kitchen Section</div>
+                        <div className="text-xs font-bold text-amber-400 uppercase mt-0.5">
+                          {selectedRecipeItem.prepSection?.replace('_', ' ') || 'HOT KITCHEN'}
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
-                      <div className="text-base font-extrabold text-emerald-400">
-                        {selectedRecipeItem.marginPercent?.toFixed(1) || 0}%
-                      </div>
-                    </div>
-                  </div>
+                  )}
 
                   {/* Ingredients Requirements (Card Format) */}
                   <div className="space-y-3">

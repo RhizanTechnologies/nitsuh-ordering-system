@@ -27,17 +27,20 @@ import {
   Legend,
 } from 'recharts';
 import { ProductManagementView } from '@/components/ProductManagementView';
+import { useAppStore } from '@/lib/store';
 
 export function AnalyticsView() {
+  const { currentUser } = useAppStore();
   const [data, setData] = useState<any | null>(null);
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year'>('day');
   const [activeOwnerTab, setActiveOwnerTab] = useState<'analytics' | 'products'>('analytics');
 
   useEffect(() => {
-    fetchApi(`/analytics/dashboard?timeframe=${timeframe}`).then((res) => {
+    const roleParam = currentUser?.role ? `&role=${currentUser.role}` : '';
+    fetchApi(`/analytics/dashboard?timeframe=${timeframe}${roleParam}`).then((res) => {
       setData(res);
     });
-  }, [timeframe]);
+  }, [timeframe, currentUser?.role]);
 
   const handleExportCSV = () => {
     if (!data?.recentTransactions) return;

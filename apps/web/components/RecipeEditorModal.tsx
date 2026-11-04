@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Calculator, Check, ChefHat } from 'lucide-react';
 import { fetchApi } from '@/lib/api';
+import { useAppStore } from '@/lib/store';
 
 interface RecipeEditorModalProps {
   isOpen: boolean;
@@ -17,6 +18,9 @@ export function RecipeEditorModal({
   menuItem,
   onRecipeSaved,
 }: RecipeEditorModalProps) {
+  const { currentUser } = useAppStore();
+  const isOwner = currentUser?.role === 'OWNER';
+
   if (!isOpen || !menuItem) return null;
 
   const [ingredientsPool, setIngredientsPool] = useState<any[]>([]);
@@ -145,23 +149,36 @@ export function RecipeEditorModal({
           </div>
         )}
 
-        {/* Live Cost & Margin Simulator Bar */}
-        <div className="grid grid-cols-3 gap-3 bg-white/[0.04] border border-white/10 p-4 rounded-2xl text-xs backdrop-blur-xl">
-          <div>
-            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Calculated Food Cost</div>
-            <div className="text-sm font-black text-rose-400 mt-0.5">{portionCost.toFixed(4)} ETB</div>
-          </div>
-          <div>
-            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Selling Price</div>
-            <div className="text-sm font-black text-amber-400 mt-0.5">{sellingPrice.toFixed(2)} ETB</div>
-          </div>
-          <div>
-            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
-            <div className={`text-sm font-black mt-0.5 ${marginPercent >= 60 ? 'text-emerald-400' : 'text-amber-400'}`}>
-              {marginPercent.toFixed(1)}%
+        {/* Live Cost & Margin Simulator Bar - Only Owner sees Selling Price and Profit Margin */}
+        {isOwner ? (
+          <div className="grid grid-cols-3 gap-3 bg-white/[0.04] border border-white/10 p-4 rounded-2xl text-xs backdrop-blur-xl">
+            <div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Calculated Food Cost</div>
+              <div className="text-sm font-black text-rose-400 mt-0.5">{portionCost.toFixed(4)} ETB</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Selling Price</div>
+              <div className="text-sm font-black text-amber-400 mt-0.5">{sellingPrice.toFixed(2)} ETB</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
+              <div className={`text-sm font-black mt-0.5 ${marginPercent >= 60 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {marginPercent.toFixed(1)}%
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 bg-white/[0.04] border border-white/10 p-4 rounded-2xl text-xs backdrop-blur-xl">
+            <div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Calculated Ingredient Cost</div>
+              <div className="text-sm font-black text-amber-400 mt-0.5">{portionCost.toFixed(4)} ETB</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Yield Portions</div>
+              <div className="text-sm font-black text-white mt-0.5">{yieldPortions} Portion(s)</div>
+            </div>
+          </div>
+        )}
 
         {/* Add Ingredient Dropdown */}
         <div className="flex items-center gap-2">

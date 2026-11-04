@@ -196,17 +196,19 @@ export function Navbar() {
             {/* OWNER & MANAGER DESKTOP MANAGEMENT TABS */}
             {isOwnerOrManager && (
               <nav className="flex items-center gap-1 bg-white/[0.04] border border-white/10 p-1 rounded-2xl">
-                <Link
-                  href="/dashboard"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
-                    pathname === '/dashboard'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <BarChart3 className="w-3.5 h-3.5" />
-                  <span>Profit & Analytics</span>
-                </Link>
+                {role === 'OWNER' && (
+                  <Link
+                    href="/dashboard"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                      pathname === '/dashboard'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <BarChart3 className="w-3.5 h-3.5" />
+                    <span>Profit & Analytics</span>
+                  </Link>
+                )}
 
                 <Link
                   href="/inventory"
@@ -362,17 +364,19 @@ export function Navbar() {
         {/* OWNER & MANAGER MOBILE SUB-NAVBAR (Scrollable on small screens) */}
         {isOwnerOrManager && (
           <div className="md:hidden flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar border-t border-white/10 mt-2">
-            <Link
-              href="/dashboard"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
-                pathname === '/dashboard'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Profit</span>
-            </Link>
+            {role === 'OWNER' && (
+              <Link
+                href="/dashboard"
+                className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  pathname === '/dashboard'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                    : 'bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>Profit</span>
+              </Link>
+            )}
             <Link
               href="/inventory"
               className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
