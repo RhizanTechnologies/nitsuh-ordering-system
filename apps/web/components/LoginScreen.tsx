@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { getDefaultRouteForRole } from '@/lib/route-guard';
 import { fetchApi } from '@/lib/api';
+import { NitsuhLogo } from '@/components/NitsuhLogo';
 import { Lock, KeyRound, ArrowRight } from 'lucide-react';
 
 export function LoginScreen() {
@@ -107,17 +108,9 @@ export function LoginScreen() {
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C11221]/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md bg-[#161311]/90 backdrop-blur-2xl rounded-[36px] shadow-2xl border border-white/15 overflow-hidden relative z-10">
-        {/* Header Branding: Nitsuh Crimson & Gold */}
-        <div className="bg-gradient-to-b from-[#C11221]/30 via-white/[0.03] to-transparent p-6 text-center text-white relative border-b border-white/10">
-          <div className="inline-flex w-18 h-18 rounded-3xl bg-white/[0.08] backdrop-blur-xl p-2.5 items-center justify-center mb-3 shadow-2xl border border-white/20 ring-2 ring-amber-500/30">
-            <img src="/nitsuh-logo.png" alt="Nitsuh Foods Logo" className="w-full h-full object-contain" />
-          </div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-wider uppercase text-white flex items-center justify-center gap-1.5 drop-shadow-md">
-            <span className="text-[#EF4444]">NITSUH</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">FOODS</span>
-          </h1>
-          <p className="text-xs text-amber-300 font-bold tracking-tight mt-1">From Savour Bites to Sweet Delights – We Cater It All!</p>
-          <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">Addis Ababa, Ethiopia • Terminal Access • 0966833177</p>
+        {/* Header Branding: Nitsuh Creative Brand Logo & Emblem */}
+        <div className="bg-gradient-to-b from-[#C11221]/25 via-white/[0.03] to-transparent p-6 text-center text-white relative border-b border-white/10">
+          <NitsuhLogo variant="login" />
         </div>
 
         {/* Tab switch (PIN / Email) */}

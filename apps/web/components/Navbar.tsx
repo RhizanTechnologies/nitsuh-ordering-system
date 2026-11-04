@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { getDefaultRouteForRole, isRouteAllowed } from '@/lib/route-guard';
+import { NitsuhLogo } from '@/components/NitsuhLogo';
 import {
   Coffee,
   Bell,
@@ -18,6 +19,7 @@ import {
   ChevronDown,
   Sun,
   Moon,
+  Calendar,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fetchApi, getSocket } from '@/lib/api';
@@ -89,26 +91,12 @@ export function Navbar() {
       <header className="bg-[#12100E]/95 backdrop-blur-xl border-b border-white/10 px-2.5 sm:px-6 py-2.5 sm:py-3 sticky top-0 z-40 text-white shadow-md">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Brand Identity */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-white/[0.08] backdrop-blur-md flex items-center justify-center p-1 shadow-md flex-shrink-0 border border-white/15">
-              <img
-                src="/nitsuh-logo.png"
-                alt="Nitsuh Foods Logo"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <div>
-              <div className="text-[12px] sm:text-sm tracking-wider uppercase font-black text-white leading-none flex items-center gap-1">
-                <span className="text-[#EF4444]">NITSUH</span>
-                <span className="text-[#F89B22]">FOODS</span>
-              </div>
-              <div className="hidden sm:block text-[10px] font-semibold text-zinc-400 tracking-tight mt-0.5">
-                Addis Ababa, Ethiopia • 0966833177
-              </div>
-            </div>
+          <div className="flex items-center gap-3">
+            <NitsuhLogo variant="navbar" />
 
-            <div className="hidden xl:block text-xs font-medium text-zinc-400 pl-3 border-l border-white/10">
-              {format(new Date(), 'EEEE, d MMMM')}
+            <div className="hidden xl:flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 pl-3 border-l border-black/10 dark:border-white/10">
+              <Calendar className="w-3.5 h-3.5 text-amber-500" />
+              <span>{format(new Date(), 'EEEE, d MMMM')}</span>
             </div>
           </div>
 
@@ -181,14 +169,14 @@ export function Navbar() {
 
             {/* OWNER & MANAGER DESKTOP MANAGEMENT TABS */}
             {isOwnerOrManager && (
-              <nav className="flex items-center gap-1 bg-white/[0.04] border border-white/10 p-1 rounded-2xl">
+              <nav className="flex items-center gap-1 bg-white/[0.04] border border-black/10 dark:border-white/10 p-1 rounded-2xl">
                 {role === 'OWNER' && (
                   <Link
                     href="/dashboard"
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                       pathname === '/dashboard'
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                     }`}
                   >
                     <BarChart3 className="w-3.5 h-3.5" />
@@ -201,7 +189,7 @@ export function Navbar() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     pathname === '/inventory'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                 >
                   <Boxes className="w-3.5 h-3.5" />
@@ -213,7 +201,7 @@ export function Navbar() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     pathname === '/tables'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                   title="Configure & Manage Dining Tables"
                 >
@@ -226,7 +214,7 @@ export function Navbar() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     pathname === '/pos'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                 >
                   <MonitorCheck className="w-3.5 h-3.5" />
@@ -238,7 +226,7 @@ export function Navbar() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     pathname === '/kds'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                 >
                   <ChefHat className="w-3.5 h-3.5" />
@@ -250,7 +238,7 @@ export function Navbar() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     pathname === '/waiter'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
@@ -361,14 +349,14 @@ export function Navbar() {
 
         {/* OWNER & MANAGER MOBILE SUB-NAVBAR (Scrollable on small screens) */}
         {isOwnerOrManager && (
-          <div className="md:hidden flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar border-t border-white/10 mt-2">
+          <div className="md:hidden flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar border-t border-black/10 dark:border-white/10 mt-2">
             {role === 'OWNER' && (
               <Link
                 href="/dashboard"
                 className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                   pathname === '/dashboard'
                     ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
-                    : 'bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white'
+                    : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
                 }`}
               >
                 <BarChart3 className="w-3.5 h-3.5" />
@@ -380,7 +368,7 @@ export function Navbar() {
               className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                 pathname === '/inventory'
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white'
+                  : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
               <Boxes className="w-3.5 h-3.5" />
@@ -391,7 +379,7 @@ export function Navbar() {
               className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                 pathname === '/tables'
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white'
+                  : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -402,7 +390,7 @@ export function Navbar() {
               className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                 pathname === '/pos'
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white'
+                  : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
               <MonitorCheck className="w-3.5 h-3.5" />
@@ -413,7 +401,7 @@ export function Navbar() {
               className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                 pathname === '/kds'
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white'
+                  : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
               <ChefHat className="w-3.5 h-3.5" />
@@ -424,7 +412,7 @@ export function Navbar() {
               className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                 pathname === '/waiter'
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-300 hover:text-white'
+                  : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />

@@ -179,7 +179,7 @@
   border-color: #D6CCC0 !important;
 }
 
-/* Typography in Light Mode: Deep Espresso, Roasted Mocha, Truffle Stone */
+/* Typography in Light Mode: Deep Espresso, Roasted Mocha, High-Contrast Truffle */
 [data-theme="light"] .text-white,
 .theme-light .text-white {
   color: #1C1512 !important;
@@ -189,21 +189,32 @@
 [data-theme="light"] .text-zinc-200,
 .theme-light .text-zinc-100,
 .theme-light .text-zinc-200 {
-  color: #2E241F !important;
+  color: #241A15 !important;
 }
 
 [data-theme="light"] .text-zinc-300,
 [data-theme="light"] .text-zinc-400,
 .theme-light .text-zinc-300,
 .theme-light .text-zinc-400 {
-  color: #524741 !important;
+  color: #2F241F !important;
 }
 
 [data-theme="light"] .text-zinc-500,
 [data-theme="light"] .text-zinc-600,
 .theme-light .text-zinc-500,
 .theme-light .text-zinc-600 {
-  color: #8C7F78 !important;
+  color: #4A3E38 !important;
+}
+
+[data-theme="light"] .text-zinc-700,
+.theme-light .text-zinc-700 {
+  color: #5C4E46 !important;
+}
+
+/* Hover fixes in Light Mode - prevent turning invisible white on white */
+[data-theme="light"] .hover\:text-white:hover,
+.theme-light .hover\:text-white:hover {
+  color: #0F0B09 !important;
 }
 
 /* Amber / Gold Text in Light Mode: High-contrast caramelized honey */
@@ -214,6 +225,53 @@
 .theme-light .text-amber-400,
 .theme-light .text-amber-500 {
   color: #B45309 !important;
+}
+
+/* Status Badges & Alert Pills in Light Mode */
+[data-theme="light"] .bg-rose-950\/30,
+[data-theme="light"] .bg-rose-950\/40,
+.theme-light .bg-rose-950\/30,
+.theme-light .bg-rose-950\/40 {
+  background-color: #FFE4E6 !important;
+  border-color: #FECDD3 !important;
+}
+
+[data-theme="light"] .text-rose-200,
+[data-theme="light"] .text-rose-300,
+.theme-light .text-rose-200,
+.theme-light .text-rose-300 {
+  color: #9F1239 !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .bg-amber-950\/30,
+[data-theme="light"] .bg-amber-950\/40,
+.theme-light .bg-amber-950\/30,
+.theme-light .bg-amber-950\/40 {
+  background-color: #FEF3C7 !important;
+  border-color: #FDE68A !important;
+}
+
+[data-theme="light"] .text-amber-200,
+[data-theme="light"] .text-amber-300,
+.theme-light .text-amber-200,
+.theme-light .text-amber-300 {
+  color: #92400E !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .bg-emerald-950\/30,
+.theme-light .bg-emerald-950\/30 {
+  background-color: #D1FAE5 !important;
+  border-color: #A7F3D0 !important;
+}
+
+[data-theme="light"] .text-emerald-200,
+[data-theme="light"] .text-emerald-300,
+.theme-light .text-emerald-200,
+.theme-light .text-emerald-300 {
+  color: #065F46 !important;
+  font-weight: 700 !important;
 }
 
 /* Inputs & Forms in Light Mode */
