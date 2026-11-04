@@ -902,32 +902,32 @@ export function PosView() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setOrderType('DINE_IN')}
-              className={`flex-1 py-2 px-3 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer border ${
+              className={`flex-1 min-w-0 py-2 px-2.5 sm:px-3 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer border ${
                 orderType === 'DINE_IN'
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black border-amber-400 shadow-md shadow-amber-500/20'
                   : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
               }`}
             >
-              <Utensils className="w-3.5 h-3.5" />
-              <span>Dine-In Table</span>
+              <Utensils className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">Dine-In Table</span>
             </button>
 
             <button
               onClick={() => setOrderType('TAKEAWAY')}
-              className={`flex-1 py-2 px-3 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer border ${
+              className={`flex-1 min-w-0 py-2 px-2.5 sm:px-3 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer border ${
                 orderType === 'TAKEAWAY'
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black border-amber-400 shadow-md shadow-amber-500/20'
                   : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
               }`}
             >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>Takeaway</span>
+              <ShoppingBag className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">Takeaway</span>
             </button>
           </div>
 
           {orderType === 'DINE_IN' ? (
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider pl-1 mr-1">Table:</span>
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider pl-1 mr-1 flex-shrink-0">Table:</span>
               {tables.map((t) => {
                 const isSelected = selectedTable === t.tableNumber;
                 const isOccupied = t.status === 'OCCUPIED';
@@ -970,7 +970,7 @@ export function PosView() {
         </div>
 
         {/* Category Navigation Pills - Prominent, Unclipped, with Live Counts */}
-        <div className="flex items-center gap-2 overflow-x-auto py-2 mb-3.5 no-scrollbar flex-shrink-0">
+        <div className="flex items-center gap-2 overflow-x-auto py-2.5 mb-3.5 no-scrollbar flex-shrink-0 min-h-[52px]">
           <button
             onClick={() => {
               setGroupFilter('ALL');

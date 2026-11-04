@@ -236,8 +236,8 @@ export function AnalyticsView() {
                 </div>
               </div>
 
-              <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-64 w-full min-h-[256px] relative">
+                <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={240}>
                   <LineChart data={weeklyTrend}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#222" />
                     <XAxis dataKey="day" stroke="#666" fontSize={11} tickLine={false} />

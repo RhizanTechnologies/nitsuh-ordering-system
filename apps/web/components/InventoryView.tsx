@@ -39,6 +39,8 @@ export function InventoryView() {
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [selectedRecipeItem, setSelectedRecipeItem] = useState<any | null>(null);
   const [ledger, setLedger] = useState<any[]>([]);
+  const [ledgerTypeFilter, setLedgerTypeFilter] = useState('ALL');
+  const [ledgerSearch, setLedgerSearch] = useState('');
   const [alerts, setAlerts] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
 
@@ -1098,74 +1100,131 @@ export function InventoryView() {
         )}
 
         {/* TAB 6: IMMUTABLE AUDIT LEDGER (CARD FORMAT) */}
-        {activeTab === 'ledger' && (
-          <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <div>
-                <h3 className="text-base font-bold text-white font-heading">Immutable Inventory Transaction Ledger</h3>
-                <p className="text-xs text-zinc-400">
-                  Double-entry audit log of all receipts, direct transfers, kitchen consumption, adjustments & wastage.
-                </p>
-              </div>
-              <span className="text-xs font-bold text-amber-400">{ledger.length} entries</span>
-            </div>
+        {activeTab === 'ledger' && (() => {
+          const filteredLedger = ledger.filter((row) => {
+            if (ledgerTypeFilter !== 'ALL') {
+              if (ledgerTypeFilter === 'TRANSFER') {
+                if (!row.transactionType.includes('TRANSFER')) return false;
+              } else if (row.transactionType !== ledgerTypeFilter) {
+                return false;
+              }
+            }
+            if (ledgerSearch.trim()) {
+              const q = ledgerSearch.toLowerCase();
+              const matchName = row.ingredient?.name?.toLowerCase().includes(q);
+              const matchRef = row.referenceId?.toLowerCase().includes(q);
+              const matchReason = row.reason?.toLowerCase().includes(q);
+              if (!matchName && !matchRef && !matchReason) return false;
+            }
+            return true;
+          });
 
-            {/* Transaction Cards Grid (Card Format) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {ledger.map((row) => (
-                <div
-                  key={row.id}
-                  className="p-3.5 bg-white/[0.02] border border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col justify-between gap-2.5 transition backdrop-blur-md"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span
-                        className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
-                          row.transactionType === 'PRODUCTION_CONSUMPTION'
-                            ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                            : row.transactionType === 'WASTAGE'
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                            : row.transactionType === 'TRANSFER_RECEIVE'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : row.transactionType === 'TRANSFER_DISPATCH'
-                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                            : row.transactionType === 'PURCHASE_RECEIPT'
-                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                            : 'bg-zinc-800 text-zinc-300 border border-white/10'
-                        }`}
-                      >
-                        {row.transactionType.replace(/_/g, ' ')}
-                      </span>
-                      <span className="text-[10px] text-zinc-500">
-                        {new Date(row.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-
-                    <div className="font-bold text-xs text-white truncate">{row.ingredient?.name}</div>
-
-                    <div className="text-[11px] text-zinc-400 mt-1 flex items-center justify-between">
-                      <span>Quantity:</span>
-                      <span className="font-bold text-amber-400">
-                        {Number(row.quantity).toLocaleString()} {row.ingredient?.baseUnit?.symbol}
-                      </span>
-                    </div>
-
-                    <div className="text-[10px] text-zinc-500 truncate mt-1">
-                      Reason: {row.reason || row.referenceId || 'N/A'}
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px]">
-                    <span className="text-zinc-400">By {row.user?.name || 'Staff'}</span>
-                    <span className="font-black text-white">
-                      {Number(row.totalCost).toFixed(2)} ETB
-                    </span>
-                  </div>
+          return (
+            <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+                <div>
+                  <h3 className="text-base font-bold text-white font-heading">Immutable Inventory Transaction Ledger</h3>
+                  <p className="text-xs text-zinc-400">
+                    Double-entry audit log of all receipts, direct transfers, kitchen consumption, adjustments & wastage.
+                  </p>
                 </div>
-              ))}
+                <span className="text-xs font-bold text-amber-400">{filteredLedger.length} of {ledger.length} entries</span>
+              </div>
+
+              {/* Filter Strip: Type buttons & Search Input */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+                  {[
+                    { id: 'ALL', label: 'All Events' },
+                    { id: 'PRODUCTION_CONSUMPTION', label: '🍳 Kitchen Production' },
+                    { id: 'TRANSFER', label: '📦 Transfers' },
+                    { id: 'PURCHASE_RECEIPT', label: '🛒 Purchases' },
+                    { id: 'WASTAGE', label: '🗑️ Wastage' },
+                    { id: 'MANUAL_ADJUSTMENT', label: '⚙️ Adjustments' },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setLedgerTypeFilter(f.id)}
+                      className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition cursor-pointer text-xs ${
+                        ledgerTypeFilter === f.id
+                          ? 'bg-amber-500 text-black font-black shadow-md'
+                          : 'bg-white/[0.04] border border-white/10 text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative min-w-[200px]">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <input
+                    type="text"
+                    placeholder="Search ingredient, #order..."
+                    value={ledgerSearch}
+                    onChange={(e) => setLedgerSearch(e.target.value)}
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                  />
+                </div>
+              </div>
+
+              {/* Transaction Cards Grid (Card Format) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filteredLedger.map((row) => (
+                  <div
+                    key={row.id}
+                    className="p-3.5 bg-white/[0.02] border border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col justify-between gap-2.5 transition backdrop-blur-md"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span
+                          className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                            row.transactionType === 'PRODUCTION_CONSUMPTION'
+                              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                              : row.transactionType === 'WASTAGE'
+                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                              : row.transactionType === 'TRANSFER_RECEIVE'
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : row.transactionType === 'TRANSFER_DISPATCH'
+                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              : row.transactionType === 'PURCHASE_RECEIPT'
+                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                              : 'bg-zinc-800 text-zinc-300 border border-white/10'
+                          }`}
+                        >
+                          {row.transactionType.replace(/_/g, ' ')}
+                        </span>
+                        <span className="text-[10px] text-zinc-500">
+                          {new Date(row.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+
+                      <div className="font-bold text-xs text-white truncate">{row.ingredient?.name}</div>
+
+                      <div className="text-[11px] text-zinc-400 mt-1 flex items-center justify-between">
+                        <span>Quantity:</span>
+                        <span className="font-bold text-amber-400">
+                          {Number(row.quantity).toLocaleString()} {row.ingredient?.baseUnit?.symbol}
+                        </span>
+                      </div>
+
+                      <div className="text-[10px] text-zinc-500 truncate mt-1">
+                        Reason: {row.reason || row.referenceId || 'N/A'}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px]">
+                      <span className="text-zinc-400">By {row.user?.name || 'Staff'}</span>
+                      <span className="font-black text-white">
+                        {Number(row.totalCost).toFixed(2)} ETB
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* QUICK STOCK ADJUSTMENT MODAL (Add or Remove stock directly) */}

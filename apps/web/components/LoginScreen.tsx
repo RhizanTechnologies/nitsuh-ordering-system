@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore, KNOWN_STAFF } from '@/lib/store';
 import { getDefaultRouteForRole } from '@/lib/route-guard';
@@ -34,6 +34,27 @@ export function LoginScreen() {
     setPin('');
     setError(null);
   };
+
+  // Physical Numpad, Hardware Keyboard & Barcode Scanner listener
+  useEffect(() => {
+    if (activeTab !== 'pin' || loading) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        handleNumberClick(e.key);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        handleBackspace();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClear();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab, loading, pin]);
 
   const handlePinSubmit = async (pinToTest?: string) => {
     const finalPin = pinToTest || pin;

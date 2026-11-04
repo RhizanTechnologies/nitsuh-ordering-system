@@ -318,7 +318,7 @@ export function Navbar() {
               </button>
 
               {staffMenuOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-[#1A1614] rounded-2xl shadow-2xl border border-white/15 p-2 z-50 text-white">
+                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-[288px] sm:w-72 bg-[#1A1614] rounded-2xl shadow-2xl border border-white/15 p-2 z-50 text-white">
                   <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-3 py-1.5">
                     Terminal Quick Staff Switcher
                   </div>

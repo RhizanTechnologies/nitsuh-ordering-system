@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { fetchApi, getSocket } from '@/lib/api';
-import { ChefHat, Flame, CheckCircle, Clock, Utensils } from 'lucide-react';
+import { ChefHat, Flame, CheckCircle, Clock, Utensils, AlertTriangle, X, Volume2 } from 'lucide-react';
 import { playKitchenChime, playReadyChime } from '@/lib/audio';
 import { calculatePrepTime } from '@/lib/timer-utils';
 
@@ -11,7 +11,18 @@ export function KitchenDisplayView() {
   const { currentUser } = useAppStore();
   const [orders, setOrders] = useState<any[]>([]);
   const [mobileTab, setMobileTab] = useState<'NEW' | 'PREPARING' | 'READY'>('NEW');
+  const [toastError, setToastError] = useState<string | null>(null);
+  const [audioPrompt, setAudioPrompt] = useState(false);
   const [, setTick] = useState(0);
+
+  const enableAudio = () => {
+    try {
+      playKitchenChime();
+      setAudioPrompt(false);
+    } catch (e) {
+      // ignore
+    }
+  };
 
   const loadActiveOrders = () => {
     fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY')
@@ -73,8 +84,10 @@ export function KitchenDisplayView() {
         }
         return prev.map((o) => (o.id === orderId ? updated : o));
       });
+      setToastError(null);
     } catch (err: any) {
-      alert(`Error updating order: ${err.message}`);
+      setToastError(err.message || 'Error updating order status');
+      setTimeout(() => setToastError(null), 5000);
     }
   };
 
@@ -129,6 +142,22 @@ export function KitchenDisplayView() {
           </div>
         </div>
       </div>
+
+      {/* Floating In-App Toast Notification (Zero thread-locking window.alert) */}
+      {toastError && (
+        <div className="mx-3 mt-2 p-3 bg-rose-500/15 border border-rose-500/40 rounded-2xl flex items-center justify-between text-xs text-rose-300 shadow-xl backdrop-blur-xl relative z-20 animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+            <span className="font-semibold">{toastError}</span>
+          </div>
+          <button
+            onClick={() => setToastError(null)}
+            className="p-1 hover:bg-rose-500/20 rounded-lg text-rose-400 hover:text-white transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Mobile Stage Switcher (<md): 1 Tap to View Active Category with ZERO Scrolling */}
       <div className="md:hidden flex items-center p-1 bg-white/[0.04] border border-white/10 rounded-2xl mx-3 mt-2.5 mb-1 gap-1 flex-shrink-0 relative z-10">

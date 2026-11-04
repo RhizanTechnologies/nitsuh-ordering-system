@@ -31,20 +31,22 @@ export class OrdersService {
       specialInstructions?: string;
     }[];
   }) {
-    // If dine-in and tableId specified, verify table is NOT already occupied with an unsettled bill
+    // If dine-in and tableId specified, automatically append to active unsettled bill if guests order more items!
     if (data.tableId && data.orderType !== OrderType.TAKEAWAY) {
       const activeUnsettledOrder = await this.prisma.order.findFirst({
         where: {
           tableId: data.tableId,
           paymentStatus: { not: PaymentStatus.PAID },
-          status: { in: [OrderStatus.CONFIRMED, OrderStatus.IN_PREPARATION, OrderStatus.READY, OrderStatus.SERVED, OrderStatus.DRAFT_NOTE] },
+          status: { in: [OrderStatus.CONFIRMED, OrderStatus.IN_PREPARATION, OrderStatus.READY, OrderStatus.SERVED] },
         },
+        orderBy: { createdAt: 'desc' },
       });
 
       if (activeUnsettledOrder) {
-        throw new BadRequestException(
-          `Table is already occupied with an active unsettled bill (${activeUnsettledOrder.orderNumber}). Settle payment at the cashier before seating new guests.`,
-        );
+        return this.appendItemsToOrder(activeUnsettledOrder.id, {
+          cashierId: data.waiterId,
+          items: data.items,
+        });
       }
     }
 

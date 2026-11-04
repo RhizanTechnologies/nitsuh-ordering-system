@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { fetchApi, getSocket } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
 import {
@@ -13,12 +14,16 @@ import {
   AlertCircle,
   LayoutGrid,
   Check,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  ArrowRight
 } from 'lucide-react';
+import { calculatePrepTime } from '@/lib/timer-utils';
 
 export default function TablesPage() {
   const { currentUser } = useAppStore();
   const [tablesList, setTablesList] = useState<any[]>([]);
+  const [activeOrders, setActiveOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'AVAILABLE' | 'OCCUPIED' | 'RESERVED'>('ALL');
 
@@ -37,8 +42,12 @@ export default function TablesPage() {
   const loadTables = async () => {
     setLoading(true);
     try {
-      const data = await fetchApi('/menu/tables');
-      setTablesList(data);
+      const [tablesData, ordersData] = await Promise.all([
+        fetchApi('/menu/tables'),
+        fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY,SERVED').catch(() => []),
+      ]);
+      setTablesList(tablesData);
+      setActiveOrders(ordersData || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -329,10 +338,39 @@ export default function TablesPage() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-4">
+                <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-3">
                   <Users className="w-3.5 h-3.5 text-zinc-500" />
                   <span>{t.capacity} Guests Capacity</span>
                 </div>
+
+                {isOccupied && (() => {
+                  const activeOrder = activeOrders.find((o) => o.tableId === t.id);
+                  if (!activeOrder) return null;
+                  const prep = calculatePrepTime(activeOrder.createdAt);
+                  return (
+                    <div className="bg-black/40 rounded-2xl p-2.5 mb-3 border border-rose-500/30 text-xs space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-black text-white">{activeOrder.orderNumber}</span>
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${prep.badgeClass}`}>
+                          {prep.formattedTime}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-zinc-300">
+                        <span>Server: <strong className="text-amber-400">{activeOrder.waiter?.name || 'Staff'}</strong></span>
+                        <span className="font-extrabold text-amber-400 font-mono">
+                          {Number(activeOrder.totalAmount || 0).toFixed(2)} ETB
+                        </span>
+                      </div>
+                      <Link
+                        href="/pos"
+                        className="mt-1 w-full py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-black font-extrabold text-[11px] rounded-xl flex items-center justify-center gap-1 transition shadow-md"
+                      >
+                        <span>Settle in POS</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  );
+                })()}
               </div>
 
               {isOwnerOrManager && (

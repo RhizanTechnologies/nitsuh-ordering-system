@@ -32,22 +32,22 @@ export function calculatePrepTime(createdAt: string | Date): PrepTimeInfo {
 
   let delayStatus: DelayStatus = 'NORMAL';
   let label = 'On Time (<10m)';
-  let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-  let cardBorderClass = 'border-emerald-400';
-  let dotColor = 'bg-emerald-500';
+  let badgeClass = 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+  let cardBorderClass = 'border-emerald-500/40';
+  let dotColor = 'bg-emerald-400';
 
   if (minutes >= 20) {
     delayStatus = 'DELAYED';
     label = 'DELAYED (20m+)';
-    badgeClass = 'bg-rose-100 text-rose-800 border-rose-400 font-black animate-pulse';
-    cardBorderClass = 'border-rose-500 ring-2 ring-rose-200';
-    dotColor = 'bg-rose-500';
+    badgeClass = 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-black animate-pulse';
+    cardBorderClass = 'border-rose-500 ring-2 ring-rose-500/30';
+    dotColor = 'bg-rose-400';
   } else if (minutes >= 10) {
     delayStatus = 'WARNING';
     label = 'Warning (10-20m)';
-    badgeClass = 'bg-amber-100 text-amber-900 border-amber-300 font-bold';
-    cardBorderClass = 'border-amber-400';
-    dotColor = 'bg-amber-500';
+    badgeClass = 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold';
+    cardBorderClass = 'border-amber-500/40';
+    dotColor = 'bg-amber-400';
   }
 
   return {

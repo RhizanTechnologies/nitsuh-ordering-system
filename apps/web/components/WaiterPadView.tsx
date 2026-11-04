@@ -553,57 +553,58 @@ export function WaiterPadView() {
 
             {/* Dine-In / Takeaway & Table Strip */}
             <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-1.5 p-1 bg-white/[0.04] border border-white/10 rounded-2xl">
+              <div className="flex items-center gap-1.5 p-1 bg-white/[0.04] border border-white/10 rounded-2xl flex-1 sm:flex-none">
                 <button
                   onClick={() => setOrderType('DINE_IN')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     orderType === 'DINE_IN'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md font-black'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
-                  <Utensils className="w-3.5 h-3.5" />
-                  <span>Dine-In Table</span>
+                  <Utensils className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">Dine-In Table</span>
                 </button>
                 <button
                   onClick={() => setOrderType('TAKEAWAY')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     orderType === 'TAKEAWAY'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md font-black'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>Takeaway</span>
+                  <ShoppingBag className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">Takeaway</span>
                 </button>
               </div>
 
               {orderType === 'DINE_IN' ? (
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                  <span className="text-[11px] font-bold text-zinc-400 uppercase mr-1">Table:</span>
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto">
+                  <span className="text-[11px] font-bold text-zinc-400 uppercase mr-1 flex-shrink-0">Table:</span>
                   {tables.slice(0, 8).map((t) => {
                     const isOccupied = t.status === 'OCCUPIED';
                     const isSelected = waiterTable === t.tableNumber;
                     return (
                       <button
                         key={t.id}
-                        disabled={isOccupied}
                         onClick={() => setWaiterTable(t.tableNumber)}
-                        className={`px-2.5 py-1 rounded-xl text-xs font-bold transition border cursor-pointer ${
-                          isOccupied
-                            ? 'bg-rose-950/40 text-rose-300 border-rose-800/50 opacity-60 cursor-not-allowed'
-                            : isSelected
+                        className={`px-2.5 py-1 rounded-xl text-xs font-bold transition border cursor-pointer flex-shrink-0 ${
+                          isSelected
                             ? 'bg-amber-500 text-black border-amber-400 font-black shadow-md'
+                            : isOccupied
+                            ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25'
                             : 'bg-white/[0.04] border-white/10 text-zinc-300 hover:bg-white/[0.08]'
                         }`}
+                        title={isOccupied ? `${t.tableNumber} is occupied (tap to add items to active bill)` : t.tableNumber}
                       >
-                        {t.tableNumber}
+                        <span>{t.tableNumber}</span>
+                        {isOccupied && <span className="ml-1 text-[9px] opacity-75">•</span>}
                       </button>
                     );
                   })}
                   <button
                     onClick={() => setTableModalOpen(true)}
-                    className="px-2 py-1 bg-white/[0.04] hover:bg-white/[0.08] text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition"
+                    className="px-2 py-1 bg-white/[0.04] hover:bg-white/[0.08] text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex-shrink-0"
                   >
                     All...
                   </button>
@@ -614,13 +615,13 @@ export function WaiterPadView() {
                   placeholder="Customer name for takeaway..."
                   value={takeawayCustomer}
                   onChange={(e) => setTakeawayCustomer(e.target.value)}
-                  className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                  className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-auto"
                 />
               )}
             </div>
 
             {/* Category Navigation Pills - Prominent, Unclipped, with Live Counts */}
-            <div className="flex items-center gap-2 overflow-x-auto py-2 mb-3.5 no-scrollbar flex-shrink-0">
+            <div className="flex items-center gap-2 overflow-x-auto py-2.5 mb-3.5 no-scrollbar flex-shrink-0 min-h-[52px]">
               <button
                 onClick={() => {
                   setGroupFilter('ALL');
@@ -1094,20 +1095,20 @@ export function WaiterPadView() {
           </div>
 
           <button
-            disabled={waiterCart.length === 0 || sending || isCurrentTableOccupied}
+            disabled={waiterCart.length === 0 || sending}
             onClick={handleSendToCashier}
             className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              waiterCart.length === 0 || sending || isCurrentTableOccupied
+              waiterCart.length === 0 || sending
                 ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 text-black active:scale-98 shadow-amber-500/25'
             }`}
           >
             <Send className="w-4 h-4" />
             <span>
-              {isCurrentTableOccupied
-                ? 'Table Occupied (Settle Bill First)'
-                : sending
+              {sending
                 ? 'Sending Order Note...'
+                : isCurrentTableOccupied
+                ? `Append to Table ${waiterTable || ''} (Active Bill)`
                 : 'Send Note to Cashier (Paperless)'}
             </span>
           </button>
