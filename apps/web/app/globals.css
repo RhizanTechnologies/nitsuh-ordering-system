@@ -224,6 +224,22 @@
   color: #0F0B09 !important;
 }
 
+/* Ensure buttons and badges with dark or saturated backgrounds retain pure white text */
+[data-theme="light"] button[class*="from-[#C11221]"],
+[data-theme="light"] button[class*="from-[#C11221]"] *,
+[data-theme="light"] button[class*="bg-[#C11221]"],
+[data-theme="light"] button[class*="bg-[#C11221]"] *,
+[data-theme="light"] button[class*="bg-red-"],
+[data-theme="light"] button[class*="bg-red-"] *,
+[data-theme="light"] button[class*="bg-rose-600"],
+[data-theme="light"] button[class*="bg-rose-600"] *,
+[data-theme="light"] button[class*="bg-emerald-600"],
+[data-theme="light"] button[class*="bg-emerald-600"] *,
+[data-theme="light"] span[class*="bg-[#C11221]"],
+[data-theme="light"] .text-white-force {
+  color: #FFFFFF !important;
+}
+
 /* Amber / Gold Text in Light Mode: High-contrast caramelized honey */
 [data-theme="light"] .text-amber-300,
 [data-theme="light"] .text-amber-400,

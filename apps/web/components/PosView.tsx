@@ -673,18 +673,18 @@ export function PosView() {
             </div>
           )}
           {discountPercent > 0 && (
-            <div className="flex justify-between text-rose-400">
+            <div className="flex justify-between text-rose-500 font-bold">
               <span>Discount ({discountPercent}%)</span>
               <span>-{discountAmount.toFixed(2)} ETB</span>
             </div>
           )}
           <div className="flex justify-between">
             <span>Tax (15% VAT)</span>
-            <span className="text-white font-bold">{tax.toFixed(2)} ETB</span>
+            <span className="text-zinc-950 dark:text-white font-bold">{tax.toFixed(2)} ETB</span>
           </div>
-          <div className="flex justify-between pt-1.5 border-t border-white/10 text-sm font-bold text-white">
+          <div className="flex justify-between pt-1.5 border-t border-black/10 dark:border-white/10 text-sm font-bold text-zinc-950 dark:text-white">
             <span>Total Due</span>
-            <span className="text-amber-400 text-base sm:text-lg font-black">{total.toFixed(2)} ETB</span>
+            <span className="text-amber-600 dark:text-amber-400 text-base sm:text-lg font-black">{total.toFixed(2)} ETB</span>
           </div>
         </div>
 
@@ -697,12 +697,14 @@ export function PosView() {
             }}
             className={`flex-1 py-3 px-3 rounded-2xl font-black text-xs shadow-xl flex items-center justify-center gap-1.5 transition cursor-pointer ${
               cart.length === 0 || loading
-                ? "bg-zinc-800 text-zinc-600 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#C11221] to-[#A30F1C] hover:brightness-110 text-white active:scale-95 shadow-red-950/40"
+                ? "bg-black/5 dark:bg-white/10 text-zinc-500 dark:text-zinc-400 border border-black/10 dark:border-white/10 cursor-not-allowed shadow-none"
+                : "bg-gradient-to-r from-[#C11221] to-[#A30F1C] hover:brightness-110 !text-white active:scale-95 shadow-red-950/40"
             }`}
           >
-            <span>{loading ? "Firing..." : appendOrderTarget ? "Append to Bill" : "Fire to Kitchen"}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span className={cart.length === 0 || loading ? "text-zinc-600 dark:text-zinc-400 font-bold" : "!text-white font-black"}>
+              {loading ? "Firing..." : appendOrderTarget ? "Append to Bill" : "Fire to Kitchen"}
+            </span>
+            <ArrowRight className={`w-4 h-4 ${cart.length === 0 || loading ? "text-zinc-400 dark:text-zinc-500" : "!text-white"}`} />
           </button>
 
           <button
@@ -711,7 +713,11 @@ export function PosView() {
               setPaymentModalOpen(true);
               if (isMobile) setMobileCartOpen(false);
             }}
-            className="py-3 px-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:brightness-110 text-black rounded-2xl font-black text-xs shadow-xl shadow-amber-500/25 flex items-center justify-center gap-1.5 transition disabled:opacity-40 active:scale-95 cursor-pointer"
+            className={`py-3 px-4 rounded-2xl font-black text-xs shadow-xl flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer ${
+              cart.length === 0 && !lastCompletedOrder
+                ? "bg-black/5 dark:bg-white/10 text-zinc-500 dark:text-zinc-400 border border-black/10 dark:border-white/10 cursor-not-allowed shadow-none"
+                : "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:brightness-110 !text-black shadow-amber-500/25"
+            }`}
             title="Pay & Settle Tender"
           >
             <CreditCard className="w-4 h-4" />
@@ -733,9 +739,9 @@ export function PosView() {
         {/* Top Header matching reference look */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div>
-            <div className="text-xs font-semibold text-zinc-400">Hi, {currentUser?.name?.split(' ')[0] || 'Samantha'} 👋</div>
-            <h1 className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-100 to-amber-400">
-              Good Food <span className="text-amber-400">Good Mood!</span>
+            <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Hi, {currentUser?.name?.split(' ')[0] || 'Samantha'} 👋</div>
+            <h1 className="text-lg sm:text-2xl font-black text-zinc-950 dark:text-white font-heading tracking-tight">
+              Good Food <span className="text-amber-600 dark:text-amber-400">Good Mood!</span>
             </h1>
           </div>
 

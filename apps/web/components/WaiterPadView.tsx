@@ -450,13 +450,13 @@ export function WaiterPadView() {
         {/* Top Header matching reference image: Greeting, Hero Title, Avatar */}
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <div className="flex items-center gap-1.5 text-zinc-400 text-xs font-medium mb-1">
+            <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400 text-xs font-semibold mb-1">
               <span>Hi, {currentUser?.name?.split(' ')[0] || 'Alex'}</span>
               <span>👋</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white leading-tight font-heading">
               Good Food <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500">
+              <span className="text-amber-600 dark:text-amber-400">
                 Good Mood!
               </span>
             </h1>
@@ -1100,8 +1100,8 @@ export function WaiterPadView() {
             onClick={handleSendToCashier}
             className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
               waiterCart.length === 0 || sending
-                ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 text-black active:scale-98 shadow-amber-500/25'
+                ? 'bg-black/5 dark:bg-white/10 text-zinc-500 dark:text-zinc-400 border border-black/10 dark:border-white/10 cursor-not-allowed shadow-none'
+                : 'bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 !text-black active:scale-98 shadow-amber-500/25'
             }`}
           >
             <Send className="w-4 h-4" />
