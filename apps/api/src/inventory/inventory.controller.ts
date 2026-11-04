@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { LocationType } from '@cafe/shared-types';
 
@@ -49,6 +49,46 @@ export class InventoryController {
     },
   ) {
     return this.inventoryService.dispatchTransfer(id, body.approvedById, body.dispatchedItems);
+  }
+
+  @Post('transfers/dispatch-batch')
+  async dispatchDirectBatch(
+    @Body()
+    body: {
+      senderId?: string;
+      userId?: string;
+      items: { ingredientId: string; quantity: number }[];
+      notes?: string;
+    },
+  ) {
+    const sender = body.senderId || body.userId || '';
+    return this.inventoryService.dispatchDirectBatch(sender, body.items, body.notes);
+  }
+
+  @Post('transfers/:id/reject')
+  async rejectTransfer(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      rejectedById?: string;
+      userId?: string;
+      reason?: string;
+    },
+  ) {
+    const rejector = body.rejectedById || body.userId || '';
+    return this.inventoryService.rejectTransfer(id, rejector, body.reason);
+  }
+
+  @Patch('ingredients/:id/thresholds')
+  async updateIngredientThresholds(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      reorderThresholdMain?: number;
+      reorderThresholdKitchen?: number;
+    },
+  ) {
+    return this.inventoryService.updateIngredientThresholds(id, body);
   }
 
   @Post('transfers/:id/receive')

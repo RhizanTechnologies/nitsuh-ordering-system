@@ -336,7 +336,12 @@ export class OrdersService {
 
     // If order reaches READY or COMPLETED and hasn't had recipe ingredients deducted yet,
     // deduct actual recipe ingredients from Kitchen Store!
-    if ((status === OrderStatus.READY || status === OrderStatus.SERVED || status === OrderStatus.COMPLETED) && order.status !== OrderStatus.COMPLETED && order.status !== OrderStatus.SERVED) {
+    if (
+      (status === OrderStatus.READY || status === OrderStatus.SERVED || status === OrderStatus.COMPLETED) &&
+      order.status !== OrderStatus.READY &&
+      order.status !== OrderStatus.SERVED &&
+      order.status !== OrderStatus.COMPLETED
+    ) {
       const kitchenStore = await this.prisma.inventoryLocation.findUnique({
         where: { type: LocationType.KITCHEN_STORE },
       });
@@ -344,6 +349,7 @@ export class OrdersService {
       if (kitchenStore) {
         await this.prisma.$transaction(async (tx) => {
           for (const itm of order.items) {
+            // Recipe-based meal production deduction
             if (!itm.menuItem.isDirectSale && itm.menuItem.recipe) {
               const portionQty = itm.quantity;
 
@@ -370,7 +376,37 @@ export class OrdersService {
                     unitCost,
                     totalCost: new Prisma.Decimal(totalGramsNeeded).mul(unitCost),
                     referenceId: order.orderNumber,
-                    reason: `Production for Order ${order.orderNumber}: ${itm.menuItem.name} x${portionQty}`,
+                    reason: `Kitchen Production for Order ${order.orderNumber}: ${itm.menuItem.name} x${portionQty}`,
+                    userId: resolvedUserId,
+                  },
+                });
+              }
+            } else if (itm.menuItem.isDirectSale && itm.menuItem.directIngredientId) {
+              // Direct beverage / retail stock deduction from Kitchen Store
+              const directQty = itm.quantity;
+              const directIng = await tx.ingredient.findUnique({
+                where: { id: itm.menuItem.directIngredientId },
+              });
+
+              if (directIng) {
+                await tx.inventoryBalance.updateMany({
+                  where: {
+                    locationId: kitchenStore.id,
+                    ingredientId: itm.menuItem.directIngredientId,
+                  },
+                  data: { quantity: { decrement: directQty } },
+                });
+
+                await tx.inventoryTransaction.create({
+                  data: {
+                    transactionType: InventoryTransactionType.DIRECT_SALE_DEDUCT,
+                    sourceLocationId: kitchenStore.id,
+                    ingredientId: itm.menuItem.directIngredientId,
+                    quantity: directQty,
+                    unitCost: directIng.currentCostPerBaseUnit,
+                    totalCost: new Prisma.Decimal(directQty).mul(directIng.currentCostPerBaseUnit),
+                    referenceId: order.orderNumber,
+                    reason: `Direct Retail Sale for Order ${order.orderNumber}: ${itm.menuItem.name} x${directQty}`,
                     userId: resolvedUserId,
                   },
                 });

@@ -288,6 +288,243 @@ export class InventoryService {
     });
   }
 
+  // 5.5. Reject Stock Transfer (Head Chef rejects incoming transfer)
+  async rejectTransfer(transferId: string, rejectedById?: string, reason?: string) {
+    let rejector = null;
+    if (rejectedById) {
+      rejector = await this.prisma.user.findUnique({ where: { id: rejectedById } });
+    }
+    if (!rejector) {
+      rejector = await this.prisma.user.findFirst({
+        where: {
+          role: { in: ['HEAD_CHEF', 'KITCHEN_STAFF', 'OWNER', 'MANAGER'] },
+          isActive: true,
+        },
+      });
+    }
+    const resolvedRejectorId = rejector ? rejector.id : (rejectedById || '');
+
+    return this.prisma.$transaction(async (tx) => {
+      const transfer = await tx.stockTransfer.findUnique({
+        where: { id: transferId },
+        include: { items: { include: { ingredient: true } }, sourceLocation: true },
+      });
+
+      if (!transfer || (transfer.status !== TransferStatus.DISPATCHED && transfer.status !== TransferStatus.REQUESTED)) {
+        throw new BadRequestException('Transfer cannot be rejected in current state');
+      }
+
+      // If already dispatched, items had been deducted from Main Store, so return them back!
+      if (transfer.status === TransferStatus.DISPATCHED) {
+        for (const item of transfer.items) {
+          const qtyToRefund = Number(item.dispatchedQty || item.requestedQty);
+
+          await tx.inventoryBalance.upsert({
+            where: {
+              locationId_ingredientId: {
+                locationId: transfer.sourceLocationId,
+                ingredientId: item.ingredientId,
+              },
+            },
+            update: { quantity: { increment: qtyToRefund } },
+            create: {
+              locationId: transfer.sourceLocationId,
+              ingredientId: item.ingredientId,
+              quantity: qtyToRefund,
+            },
+          });
+
+          // Record rejection refund ledger
+          const unitCost = item.ingredient.currentCostPerBaseUnit;
+          await tx.inventoryTransaction.create({
+            data: {
+              transactionType: InventoryTransactionType.TRANSFER_REJECT,
+              sourceLocationId: transfer.destLocationId,
+              destLocationId: transfer.sourceLocationId,
+              ingredientId: item.ingredientId,
+              quantity: qtyToRefund,
+              unitCost,
+              totalCost: new Prisma.Decimal(qtyToRefund).mul(unitCost),
+              referenceId: transfer.transferNumber,
+              reason: `Rejected by Kitchen Head: ${reason || 'Quantity or quality mismatch'}`,
+              userId: resolvedRejectorId,
+            },
+          });
+        }
+      }
+
+      const updated = await tx.stockTransfer.update({
+        where: { id: transferId },
+        data: {
+          status: TransferStatus.REJECTED,
+          notes: reason
+            ? `${transfer.notes ? transfer.notes + ' | ' : ''}[Rejected by Kitchen: ${reason}]`
+            : transfer.notes,
+        },
+        include: {
+          items: { include: { ingredient: true, unit: true } },
+          approvedBy: { select: { id: true, name: true } },
+          requestedBy: { select: { id: true, name: true } },
+        },
+      });
+
+      this.eventsGateway.broadcastTransferUpdated(updated);
+      return updated;
+    });
+  }
+
+  // 5.6. Direct Batch Dispatch to Kitchen (Main Storekeeper sends multiple items in 1 batch)
+  async dispatchDirectBatch(
+    senderId: string,
+    items: { ingredientId: string; quantity: number }[],
+    notes?: string,
+  ) {
+    if (!items || items.length === 0) {
+      throw new BadRequestException('No items provided for dispatch');
+    }
+
+    const mainStore = await this.prisma.inventoryLocation.findUnique({
+      where: { type: LocationType.MAIN_STORE },
+    });
+    const kitchenStore = await this.prisma.inventoryLocation.findUnique({
+      where: { type: LocationType.KITCHEN_STORE },
+    });
+
+    if (!mainStore || !kitchenStore) {
+      throw new BadRequestException('Main or Kitchen store location missing');
+    }
+
+    let sender = await this.prisma.user.findUnique({ where: { id: senderId } });
+    if (!sender) {
+      sender = await this.prisma.user.findFirst({
+        where: { role: { in: ['MAIN_STOREKEEPER', 'OWNER', 'MANAGER'] }, isActive: true },
+      });
+    }
+    const resolvedSenderId = sender ? sender.id : senderId;
+
+    return this.prisma.$transaction(async (tx) => {
+      const transferCount = await tx.stockTransfer.count();
+      const transferNumber = `TR-${String(transferCount + 1).padStart(5, '0')}`;
+
+      // Create transfer record first
+      const transfer = await tx.stockTransfer.create({
+        data: {
+          transferNumber,
+          sourceLocationId: mainStore.id,
+          destLocationId: kitchenStore.id,
+          status: TransferStatus.DISPATCHED,
+          requestedById: resolvedSenderId,
+          approvedById: resolvedSenderId,
+          dispatchedAt: new Date(),
+          notes: notes || 'Direct Batch Delivery from Main Store',
+        },
+      });
+
+      for (const item of items) {
+        if (!item.quantity || item.quantity <= 0) continue;
+
+        const ingredient = await tx.ingredient.findUnique({
+          where: { id: item.ingredientId },
+          include: { baseUnit: true },
+        });
+
+        if (!ingredient) {
+          throw new NotFoundException(`Ingredient with ID ${item.ingredientId} not found`);
+        }
+
+        // Check and deduct Main Store balance
+        const balance = await tx.inventoryBalance.findUnique({
+          where: {
+            locationId_ingredientId: {
+              locationId: mainStore.id,
+              ingredientId: item.ingredientId,
+            },
+          },
+        });
+
+        if (!balance || Number(balance.quantity) < item.quantity) {
+          throw new BadRequestException(
+            `Insufficient Main Store balance for "${ingredient.name}". Requested: ${item.quantity}, Available: ${balance?.quantity || 0} ${ingredient.baseUnit.symbol}`,
+          );
+        }
+
+        // Deduct from Main Store
+        await tx.inventoryBalance.update({
+          where: { id: balance.id },
+          data: { quantity: { decrement: item.quantity } },
+        });
+
+        // Add item to transfer
+        await tx.stockTransferItem.create({
+          data: {
+            transferId: transfer.id,
+            ingredientId: item.ingredientId,
+            requestedQty: item.quantity,
+            dispatchedQty: item.quantity,
+            unitId: ingredient.baseUnitId,
+          },
+        });
+
+        // Record Transaction Ledger
+        const unitCost = ingredient.currentCostPerBaseUnit;
+        await tx.inventoryTransaction.create({
+          data: {
+            transactionType: InventoryTransactionType.TRANSFER_DISPATCH,
+            sourceLocationId: mainStore.id,
+            destLocationId: kitchenStore.id,
+            ingredientId: item.ingredientId,
+            quantity: item.quantity,
+            unitCost,
+            totalCost: new Prisma.Decimal(item.quantity).mul(unitCost),
+            referenceId: transferNumber,
+            reason: `Batch Transfer to Kitchen Store: ${transferNumber}`,
+            userId: resolvedSenderId,
+          },
+        });
+      }
+
+      const completeTransfer = await tx.stockTransfer.findUnique({
+        where: { id: transfer.id },
+        include: {
+          items: { include: { ingredient: { include: { baseUnit: true } }, unit: true } },
+          approvedBy: { select: { id: true, name: true } },
+          requestedBy: { select: { id: true, name: true } },
+          sourceLocation: true,
+          destLocation: true,
+        },
+      });
+
+      this.eventsGateway.broadcastTransferUpdated(completeTransfer);
+      return completeTransfer;
+    });
+  }
+
+  // Update low-stock alert thresholds for an ingredient (Main Store & Kitchen Store)
+  async updateIngredientThresholds(
+    ingredientId: string,
+    thresholds: { reorderThresholdMain?: number; reorderThresholdKitchen?: number },
+  ) {
+    const ingredient = await this.prisma.ingredient.findUnique({
+      where: { id: ingredientId },
+    });
+    if (!ingredient) throw new NotFoundException('Ingredient not found');
+
+    const updated = await this.prisma.ingredient.update({
+      where: { id: ingredientId },
+      data: {
+        ...(thresholds.reorderThresholdMain !== undefined
+          ? { reorderThresholdMain: thresholds.reorderThresholdMain }
+          : {}),
+        ...(thresholds.reorderThresholdKitchen !== undefined
+          ? { reorderThresholdKitchen: thresholds.reorderThresholdKitchen }
+          : {}),
+      },
+      include: { baseUnit: true },
+    });
+
+    return updated;
+  }
+
   // 6. Record Kitchen Wastage / Spoilage
   async recordWastage(
     userId: string,

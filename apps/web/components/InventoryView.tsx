@@ -26,7 +26,9 @@ import {
   PackageCheck,
   ArrowRight,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Sliders,
+  Search
 } from 'lucide-react';
 
 export function InventoryView() {
@@ -54,12 +56,18 @@ export function InventoryView() {
   const [adjustReason, setAdjustReason] = useState('');
   const [adjustSubmitting, setAdjustSubmitting] = useState(false);
 
-  // Direct Send to Kitchen Modal State (Main Storekeeper dispatches directly)
+  // Direct Batch Send to Kitchen Modal State (Main Storekeeper dispatches multiple items)
   const [sendDirectModalOpen, setSendDirectModalOpen] = useState(false);
-  const [sendIngredientId, setSendIngredientId] = useState('');
-  const [sendQuantity, setSendQuantity] = useState('');
+  const [batchQuantities, setBatchQuantities] = useState<Record<string, string>>({});
   const [sendNotes, setSendNotes] = useState('');
+  const [sendSearch, setSendSearch] = useState('');
   const [sendSubmitting, setSendSubmitting] = useState(false);
+
+  // Threshold Settings Modal State (Owner adjusts cutoff levels)
+  const [thresholdModalOpen, setThresholdModalOpen] = useState(false);
+  const [thresholdSearch, setThresholdSearch] = useState('');
+  const [editingThresholds, setEditingThresholds] = useState<Record<string, { main: string; kitchen: string }>>({});
+  const [savingThresholdId, setSavingThresholdId] = useState<string | null>(null);
 
   const role = currentUser?.role;
   const isHeadChefOnly = role === 'HEAD_CHEF' || role === 'KITCHEN_STOREKEEPER' || role === 'KITCHEN_STAFF';
@@ -140,38 +148,41 @@ export function InventoryView() {
     }
   };
 
-  // Main Storekeeper directly dispatches stock to Kitchen Store
-  const handleSendToKitchen = async (e: React.FormEvent) => {
+  // Main Storekeeper directly dispatches multiple stock items in 1 batch to Kitchen
+  const handleSendBatchToKitchen = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sendIngredientId || !sendQuantity) return;
-    const qty = parseFloat(sendQuantity);
-    if (isNaN(qty) || qty <= 0) {
-      alert('Please enter a valid quantity');
+    const activeItems = Object.entries(batchQuantities)
+      .map(([ingredientId, qtyStr]) => ({ ingredientId, quantity: parseFloat(qtyStr) }))
+      .filter((i) => !isNaN(i.quantity) && i.quantity > 0);
+
+    if (activeItems.length === 0) {
+      alert('Please enter a delivery quantity for at least one item.');
       return;
     }
 
     setSendSubmitting(true);
     try {
-      await fetchApi('/inventory/transfers/direct-dispatch', {
+      await fetchApi('/inventory/transfers/dispatch-batch', {
         method: 'POST',
         body: JSON.stringify({
-          sentById: currentUser?.id,
-          items: [{ ingredientId: sendIngredientId, quantity: qty }],
-          notes: sendNotes || 'Dispatched by Main Storekeeper to Kitchen',
+          senderId: currentUser?.id,
+          items: activeItems,
+          notes: sendNotes.trim() || 'Direct batch delivery from Main Store',
         }),
       });
       setSendDirectModalOpen(false);
-      setSendQuantity('');
+      setBatchQuantities({});
       setSendNotes('');
+      setSendSearch('');
       loadData();
     } catch (err: any) {
-      alert(`Error sending to kitchen: ${err.message}`);
+      alert(`Error dispatching batch to kitchen: ${err.message}`);
     } finally {
       setSendSubmitting(false);
     }
   };
 
-  // Kitchen Chef confirms received transfer -> increases Kitchen Store balance
+  // Kitchen Chef confirms received transfer -> adds stock to Kitchen Store
   const handleConfirmKitchenReceipt = async (transferId: string) => {
     try {
       await fetchApi(`/inventory/transfers/${transferId}/receive`, {
@@ -184,6 +195,68 @@ export function InventoryView() {
       loadData();
     } catch (e: any) {
       alert(`Error confirming receipt: ${e.message}`);
+    }
+  };
+
+  // Kitchen Chef rejects incoming transfer -> returns stock back to Main Store
+  const handleRejectKitchenReceipt = async (transferId: string) => {
+    const reason = window.prompt(
+      'Enter reason for rejecting this delivery (e.g. damaged goods, quantity mismatch, wrong items):',
+      'Quantity mismatch / damaged goods',
+    );
+    if (reason === null) return;
+
+    try {
+      await fetchApi(`/inventory/transfers/${transferId}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({
+          rejectedById: currentUser?.id,
+          reason: reason.trim() || 'Rejected by Head Chef',
+        }),
+      });
+      loadData();
+    } catch (e: any) {
+      alert(`Error rejecting delivery: ${e.message}`);
+    }
+  };
+
+  // Open Threshold Cutoffs Configuration Modal
+  const handleOpenThresholdModal = () => {
+    const initial: Record<string, { main: string; kitchen: string }> = {};
+    const seen = new Set<string>();
+    locations.forEach((loc) => {
+      loc.balances?.forEach((b: any) => {
+        if (!seen.has(b.ingredient.id)) {
+          seen.add(b.ingredient.id);
+          initial[b.ingredient.id] = {
+            main: String(b.ingredient.reorderThresholdMain ?? 1000),
+            kitchen: String(b.ingredient.reorderThresholdKitchen ?? 200),
+          };
+        }
+      });
+    });
+    setEditingThresholds(initial);
+    setThresholdModalOpen(true);
+  };
+
+  // Save new threshold cutoff for an ingredient
+  const handleSaveThreshold = async (ingredientId: string) => {
+    const data = editingThresholds[ingredientId];
+    if (!data) return;
+    setSavingThresholdId(ingredientId);
+    try {
+      await fetchApi(`/inventory/ingredients/${ingredientId}/thresholds`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          reorderThresholdMain: parseFloat(data.main) || 0,
+          reorderThresholdKitchen: parseFloat(data.kitchen) || 0,
+        }),
+      });
+      loadData();
+    } catch (e: any) {
+      alert(`Error updating threshold: ${e.message}`);
+    } finally {
+      setSavingThresholdId(null);
     }
   };
 
@@ -255,6 +328,16 @@ export function InventoryView() {
 
   // Transfers dispatched by Main Storekeeper awaiting Kitchen Chef confirmation
   const pendingKitchenReceipts = transfers.filter((t) => t.status === 'DISPATCHED');
+
+  // Kitchen-specific low stock alerts (current kitchen balance <= reorderThresholdKitchen)
+  const kitchenLowStockItems = kitchenStoreLoc?.balances?.filter(
+    (b: any) => Number(b.quantity) <= Number(b.ingredient?.reorderThresholdKitchen ?? 200),
+  ) || [];
+
+  // Main Store low stock alerts (current main store balance <= reorderThresholdMain)
+  const mainLowStockItems = mainStoreLoc?.balances?.filter(
+    (b: any) => Number(b.quantity) <= Number(b.ingredient?.reorderThresholdMain ?? 1000),
+  ) || [];
 
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#0D0B0A] text-white">
@@ -367,42 +450,105 @@ export function InventoryView() {
         {/* TAB 1: STORE BALANCES */}
         {activeTab === 'balances' && (
           <div className="space-y-6">
-            {/* Low-stock Warning Bar */}
-            {alerts.length > 0 && (
-              <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-950/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
-                    <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+            {/* Low-stock Warning System */}
+            {(kitchenLowStockItems.length > 0 || mainLowStockItems.length > 0 || alerts.length > 0) && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-3xl space-y-3 shadow-lg shadow-amber-950/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+                      <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-white">
+                        {isHeadChefOnly
+                          ? 'Kitchen Low-Stock Alert'
+                          : isMainStorekeeper && !isOwnerOrManager
+                          ? 'Main Warehouse Low-Stock Alert'
+                          : 'Store Low-Stock Alert System'}
+                      </h4>
+                      <div className="text-xs text-amber-200">
+                        {isHeadChefOnly ? (
+                          <span>
+                            <strong className="text-amber-400">{kitchenLowStockItems.length}</strong> ingredient(s) are running below the kitchen alert cutoff!
+                          </span>
+                        ) : isMainStorekeeper && !isOwnerOrManager ? (
+                          <span>
+                            <strong className="text-amber-400">{mainLowStockItems.length}</strong> bulk item(s) are running below warehouse alert cutoff!
+                          </span>
+                        ) : (
+                          <span>
+                            Kitchen Floor: <strong className="text-amber-400">{kitchenLowStockItems.length} low</strong> • Main Warehouse: <strong className="text-amber-400">{mainLowStockItems.length} low</strong>
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-amber-200">
-                    <span className="font-bold text-amber-400">{alerts.length} {isHeadChefOnly ? 'kitchen ingredients' : 'ingredients'}</span> are running below their minimum reorder threshold!
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {isOwnerOrManager && (
+                      <button
+                        onClick={handleOpenThresholdModal}
+                        className="px-3.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Sliders className="w-3.5 h-3.5" />
+                        <span>Set Alert Cutoffs</span>
+                      </button>
+                    )}
+                    {!isHeadChefOnly && (
+                      <button
+                        onClick={() => setPurchaseModalOpen(true)}
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs shadow-md transition cursor-pointer"
+                      >
+                        Receive Bulk PO
+                      </button>
+                    )}
+                    {!isHeadChefOnly ? (
+                      <button
+                        onClick={() => setSendDirectModalOpen(true)}
+                        className="px-3.5 py-1.5 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition border border-white/10 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Send className="w-3 h-3 text-amber-400" />
+                        <span>Deliver to Kitchen</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setTransferModalOpen(true)}
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
+                      >
+                        <PlusCircle className="w-3.5 h-3.5" />
+                        <span>Request from Warehouse</span>
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {!isHeadChefOnly && (
-                    <button
-                      onClick={() => setPurchaseModalOpen(true)}
-                      className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs shadow-md transition cursor-pointer"
-                    >
-                      Receive Bulk PO
-                    </button>
-                  )}
-                  {!isHeadChefOnly ? (
-                    <button
-                      onClick={() => setSendDirectModalOpen(true)}
-                      className="px-3.5 py-1.5 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition border border-white/10 cursor-pointer"
-                    >
-                      Send to Kitchen
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setTransferModalOpen(true)}
-                      className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
-                    >
-                      <PlusCircle className="w-3.5 h-3.5" />
-                      <span>Request from Warehouse</span>
-                    </button>
-                  )}
+
+                {/* Details chip list of low items */}
+                <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-white/10">
+                  {isHeadChefOnly
+                    ? kitchenLowStockItems.map((b: any) => (
+                        <span
+                          key={b.ingredient.id}
+                          className="bg-black/30 border border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-zinc-300 flex items-center gap-1.5"
+                        >
+                          <span className="font-bold text-white">{b.ingredient.name}:</span>
+                          <span className="text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
+                          <span className="text-zinc-500">(Cutoff: {b.ingredient.reorderThresholdKitchen} {b.ingredient.baseUnit?.symbol})</span>
+                        </span>
+                      ))
+                    : (isMainStorekeeper && !isOwnerOrManager ? mainLowStockItems : [...kitchenLowStockItems.map((k: any) => ({ ...k, storeLabel: 'Kitchen' })), ...mainLowStockItems.map((m: any) => ({ ...m, storeLabel: 'Main' }))]).map((b: any, idx: number) => (
+                        <span
+                          key={`${b.ingredient.id}-${idx}`}
+                          className="bg-black/30 border border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-zinc-300 flex items-center gap-1.5"
+                        >
+                          {b.storeLabel && (
+                            <span className={`px-1 py-0.2 rounded text-[9px] font-black ${b.storeLabel === 'Kitchen' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                              {b.storeLabel}
+                            </span>
+                          )}
+                          <span className="font-bold text-white">{b.ingredient.name}:</span>
+                          <span className="text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
+                        </span>
+                      ))}
                 </div>
               </div>
             )}
@@ -450,13 +596,23 @@ export function InventoryView() {
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => handleConfirmKitchenReceipt(t.id)}
-                        className="w-full py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
-                      >
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        <span>Confirm Kitchen Receipt & Add to Stock</span>
-                      </button>
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={() => handleConfirmKitchenReceipt(t.id)}
+                          className="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>Accept & Add to Kitchen</span>
+                        </button>
+                        <button
+                          onClick={() => handleRejectKitchenReceipt(t.id)}
+                          className="py-2 px-3 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs rounded-xl transition active:scale-95 cursor-pointer flex items-center gap-1"
+                          title="Reject delivery and return to Main Store"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          <span>Reject</span>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -540,7 +696,7 @@ export function InventoryView() {
                               </button>
                               <button
                                 onClick={() => {
-                                  setSendIngredientId(b.ingredient.id);
+                                  setBatchQuantities((prev) => ({ ...prev, [b.ingredient.id]: prev[b.ingredient.id] || '' }));
                                   setSendDirectModalOpen(true);
                                 }}
                                 className="p-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 rounded-xl transition cursor-pointer"
@@ -714,13 +870,23 @@ export function InventoryView() {
                         </button>
                       )}
                       {t.status === 'DISPATCHED' && isKitchenChef && (
-                        <button
-                          onClick={() => handleConfirmKitchenReceipt(t.id)}
-                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <CheckCircle className="w-3.5 h-3.5" />
-                          <span>Confirm Kitchen Receipt</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleConfirmKitchenReceipt(t.id)}
+                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            <span>Accept</span>
+                          </button>
+                          <button
+                            onClick={() => handleRejectKitchenReceipt(t.id)}
+                            className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1"
+                            title="Reject delivery"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Reject</span>
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1149,96 +1315,312 @@ export function InventoryView() {
         </div>
       )}
 
-      {/* DIRECT SEND TO KITCHEN MODAL (Main Storekeeper dispatches directly) */}
+      {/* DIRECT BATCH SEND TO KITCHEN MODAL (Main Storekeeper dispatches multiple items in 1 batch) */}
       {sendDirectModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-white space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-2xl shadow-2xl text-white space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400">
                   <Send className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white font-heading">Send Stock to Kitchen</h3>
+                  <h3 className="text-base font-bold text-white font-heading">Deliver Batch of Stock to Kitchen</h3>
                   <div className="text-xs text-zinc-400">
-                    Deducts from Main Store and sends In-Transit for Head Chef confirmation
+                    Select stock items, type delivery quantities, and send the full batch to the Kitchen in one click
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setSendDirectModalOpen(false)}
-                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-zinc-400 hover:text-white"
+                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-zinc-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSendToKitchen} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Select Main Store Ingredient
-                </label>
-                <select
-                  value={sendIngredientId}
-                  onChange={(e) => setSendIngredientId(e.target.value)}
-                  required
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-500"
-                >
-                  <option value="" className="bg-[#1C1815] text-zinc-400">Choose ingredient to send...</option>
-                  {mainStoreLoc?.balances?.map((b: any) => (
-                    <option key={b.ingredient.id} value={b.ingredient.id} className="bg-[#1C1815] text-white">
-                      {b.ingredient.name} (Main Store Stock: {b.quantity} {b.ingredient.baseUnit.symbol})
-                    </option>
-                  ))}
-                </select>
+            {/* Quick Search & Filter */}
+            <div className="relative flex-shrink-0">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="text"
+                placeholder="Search main store stock (e.g. Flour, Milk, Beef, Sugar)..."
+                value={sendSearch}
+                onChange={(e) => setSendSearch(e.target.value)}
+                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+              />
+            </div>
+
+            {/* Main Store Stock List with Live Quantity Inputs */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 no-scrollbar min-h-0">
+              {mainStoreLoc?.balances
+                ?.filter((b: any) =>
+                  !sendSearch ||
+                  b.ingredient.name.toLowerCase().includes(sendSearch.toLowerCase()) ||
+                  b.ingredient.category.toLowerCase().includes(sendSearch.toLowerCase()),
+                )
+                .map((b: any) => {
+                  const qtyVal = batchQuantities[b.ingredient.id] || '';
+                  const hasQty = parseFloat(qtyVal) > 0;
+                  const unitSymbol = b.ingredient.baseUnit?.symbol || 'units';
+
+                  return (
+                    <div
+                      key={b.ingredient.id}
+                      className={`p-3 rounded-2xl border transition flex items-center justify-between gap-3 ${
+                        hasQty
+                          ? 'bg-amber-500/10 border-amber-500/50 shadow-md shadow-amber-500/10'
+                          : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.05]'
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-white truncate">{b.ingredient.name}</span>
+                          <span className="text-[10px] bg-white/10 text-zinc-400 px-1.5 py-0.2 rounded-full font-medium">
+                            {b.ingredient.category}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-zinc-400 mt-0.5">
+                          Available in Main: <span className="text-amber-400 font-bold">{b.quantity} {unitSymbol}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="relative">
+                          <input
+                            type="number"
+                            step="any"
+                            min="0"
+                            max={b.quantity}
+                            placeholder="Qty to send"
+                            value={qtyVal}
+                            onChange={(e) =>
+                              setBatchQuantities((prev) => ({
+                                ...prev,
+                                [b.ingredient.id]: e.target.value,
+                              }))
+                            }
+                            className={`w-32 bg-black/40 border rounded-xl px-3 py-1.5 text-xs font-bold text-white text-right focus:outline-none transition ${
+                              hasQty ? 'border-amber-500 text-amber-300' : 'border-white/10 focus:border-amber-500'
+                            }`}
+                          />
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 pointer-events-none">
+                            {unitSymbol}
+                          </span>
+                        </div>
+                        {hasQty && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setBatchQuantities((prev) => {
+                                const next = { ...prev };
+                                delete next[b.ingredient.id];
+                                return next;
+                              })
+                            }
+                            className="p-1 text-zinc-500 hover:text-rose-400 text-xs font-black cursor-pointer"
+                            title="Clear"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Bottom Form Actions */}
+            <form onSubmit={handleSendBatchToKitchen} className="space-y-3 pt-3 border-t border-white/10 flex-shrink-0">
+              <div className="flex items-center justify-between text-xs">
+                <div className="text-zinc-400 flex items-center gap-1.5">
+                  <span className="font-bold text-white">
+                    {
+                      Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length
+                    }{' '}
+                    items
+                  </span>{' '}
+                  queued for delivery
+                </div>
+                {Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setBatchQuantities({})}
+                    className="text-[11px] text-rose-400 hover:underline cursor-pointer font-bold"
+                  >
+                    Clear All
+                  </button>
+                )}
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Quantity to Send to Kitchen
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  placeholder="e.g. 5000"
-                  value={sendQuantity}
-                  onChange={(e) => setSendQuantity(e.target.value)}
-                  required
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Delivery Notes / Instructions (e.g. Morning kitchen prep batch)..."
+                value={sendNotes}
+                onChange={(e) => setSendNotes(e.target.value)}
+                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+              />
 
-              <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                  Delivery Notes / Prep Instructions
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Weekend morning prep delivery"
-                  value={sendNotes}
-                  onChange={(e) => setSendNotes(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setSendDirectModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white"
+                  className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={sendSubmitting || !sendIngredientId || !sendQuantity}
-                  className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  disabled={
+                    sendSubmitting ||
+                    Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length === 0
+                  }
+                  className="px-5 py-2.5 bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 text-black font-black rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>{sendSubmitting ? 'Dispatching...' : 'Dispatch to Kitchen Now'}</span>
+                  <Send className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>
+                    {sendSubmitting
+                      ? 'Dispatching Batch...'
+                      : `Deliver Batch to Kitchen (${
+                          Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length
+                        } items)`}
+                  </span>
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* THRESHOLD CUTOFF SETTINGS MODAL (Owner sets alert levels for Kitchen & Main Store) */}
+      {thresholdModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-2xl shadow-2xl text-white space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400">
+                  <Sliders className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white font-heading">Configure Low-Stock Alert Cutoffs</h3>
+                  <div className="text-xs text-zinc-400">
+                    Owner Settings: Set custom minimum thresholds to alert Head Chef and Main Storekeeper when stock drops
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setThresholdModalOpen(false)}
+                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-zinc-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="relative flex-shrink-0">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="text"
+                placeholder="Search ingredients to set alert cutoffs..."
+                value={thresholdSearch}
+                onChange={(e) => setThresholdSearch(e.target.value)}
+                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 no-scrollbar min-h-0">
+              {Array.from(
+                new Map(
+                  locations
+                    .flatMap((l) => l.balances || [])
+                    .map((b: any) => [b.ingredient.id, b.ingredient]),
+                ).values(),
+              )
+                .filter(
+                  (ing: any) =>
+                    !thresholdSearch ||
+                    ing.name.toLowerCase().includes(thresholdSearch.toLowerCase()) ||
+                    ing.category.toLowerCase().includes(thresholdSearch.toLowerCase()),
+                )
+                .map((ing: any) => {
+                  const state = editingThresholds[ing.id] || {
+                    main: String(ing.reorderThresholdMain ?? 1000),
+                    kitchen: String(ing.reorderThresholdKitchen ?? 200),
+                  };
+                  const unitSymbol = ing.baseUnit?.symbol || 'units';
+                  const isSaving = savingThresholdId === ing.id;
+
+                  return (
+                    <div
+                      key={ing.id}
+                      className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-white/[0.05] transition"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-white">{ing.name}</div>
+                        <div className="text-[10px] text-zinc-400">{ing.category} • Base Unit: {unitSymbol}</div>
+                      </div>
+
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <div className="flex flex-col">
+                          <label className="text-[9px] text-zinc-400 uppercase font-bold">Kitchen Alert (&le;)</label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              step="any"
+                              value={state.kitchen}
+                              onChange={(e) =>
+                                setEditingThresholds((prev) => ({
+                                  ...prev,
+                                  [ing.id]: { ...state, kitchen: e.target.value },
+                                }))
+                              }
+                              className="w-20 bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-500"
+                            />
+                            <span className="text-[10px] text-zinc-500">{unitSymbol}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col">
+                          <label className="text-[9px] text-zinc-400 uppercase font-bold">Main Alert (&le;)</label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              step="any"
+                              value={state.main}
+                              onChange={(e) =>
+                                setEditingThresholds((prev) => ({
+                                  ...prev,
+                                  [ing.id]: { ...state, main: e.target.value },
+                                }))
+                              }
+                              className="w-20 bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-500"
+                            />
+                            <span className="text-[10px] text-zinc-500">{unitSymbol}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={isSaving}
+                          onClick={() => handleSaveThreshold(ing.id)}
+                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-black font-black text-xs rounded-xl shadow transition self-end sm:self-center cursor-pointer disabled:opacity-50"
+                        >
+                          {isSaving ? '...' : 'Save'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            <div className="flex items-center justify-end pt-3 border-t border-white/10 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setThresholdModalOpen(false)}
+                className="px-5 py-2 bg-white/10 hover:bg-white/15 text-white font-bold rounded-2xl text-xs transition cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}
