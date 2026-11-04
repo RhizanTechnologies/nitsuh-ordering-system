@@ -388,11 +388,12 @@ export function WaiterPadView() {
       ? `🛍️ Takeaway (${takeawayCustomer.trim() || 'Customer'})`
       : `🍽️ Table ${waiterTable}`;
 
-  // Filter in-flight orders: ONLY show orders recorded by the current logged-in waiter
+  // Filter in-flight orders: Manager/Owner sees whole floor; individual waiter sees their own
+  const isManagerOrOwner = currentUser?.role === 'MANAGER' || currentUser?.role === 'OWNER';
   const inFlightOrders = activeOrders.filter(
     (o) =>
       ['DRAFT_NOTE', 'CONFIRMED', 'IN_PREPARATION', 'READY'].includes(o.status) &&
-      (!currentUser?.id || o.waiterId === currentUser.id)
+      (isManagerOrOwner || !currentUser?.id || o.waiterId === currentUser.id)
   );
 
   const delayedOrders = inFlightOrders.filter((o) => {

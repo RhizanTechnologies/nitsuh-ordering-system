@@ -25,6 +25,7 @@ export function RecipeEditorModal({
   >([]);
   const [yieldPortions, setYieldPortions] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchApi('/inventory/balances').then((locations) => {
@@ -47,11 +48,13 @@ export function RecipeEditorModal({
         })),
       );
     }
+    setError(null);
   }, [menuItem]);
 
   const handleAddIngredient = (ingredientId: string) => {
     const ing = ingredientsPool.find((i) => i.id === ingredientId);
     if (!ing) return;
+    setError(null);
 
     setRecipeLines((prev) => [
       ...prev,
@@ -84,6 +87,7 @@ export function RecipeEditorModal({
 
   const handleSave = async () => {
     setSaving(true);
+    setError(null);
     try {
       await fetchApi(`/menu/items/${menuItem.id}/recipe`, {
         method: 'POST',
@@ -100,7 +104,7 @@ export function RecipeEditorModal({
       onRecipeSaved();
       onClose();
     } catch (e: any) {
-      alert(`Error saving recipe: ${e.message}`);
+      setError(e.message || 'Error saving recipe');
     } finally {
       setSaving(false);
     }
@@ -131,6 +135,15 @@ export function RecipeEditorModal({
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {error && (
+          <div className="p-3 bg-rose-500/15 border border-rose-500/40 rounded-2xl text-xs text-rose-300 flex items-center justify-between">
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="p-1 hover:bg-rose-500/20 rounded-lg text-rose-400">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Live Cost & Margin Simulator Bar */}
         <div className="grid grid-cols-3 gap-3 bg-white/[0.04] border border-white/10 p-4 rounded-2xl text-xs backdrop-blur-xl">

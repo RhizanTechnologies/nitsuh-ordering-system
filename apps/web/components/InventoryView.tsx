@@ -74,6 +74,7 @@ export function InventoryView() {
   const isHeadChefOnly = role === 'HEAD_CHEF' || role === 'KITCHEN_STOREKEEPER' || role === 'KITCHEN_STAFF';
   const isMainStorekeeper = role === 'MAIN_STOREKEEPER' || role === 'OWNER' || role === 'MANAGER';
   const isKitchenChef = role === 'KITCHEN_STOREKEEPER' || role === 'HEAD_CHEF' || role === 'OWNER' || role === 'MANAGER';
+  const isKitchenReceiver = role === 'KITCHEN_STOREKEEPER' || role === 'HEAD_CHEF' || role === 'OWNER';
   const isOwnerOrManager = role === 'OWNER' || role === 'MANAGER';
 
   // Wastage form state
@@ -817,7 +818,7 @@ export function InventoryView() {
                           Approve & Dispatch
                         </button>
                       )}
-                      {t.status === 'DISPATCHED' && isKitchenChef && (
+                      {t.status === 'DISPATCHED' && isKitchenReceiver && (
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleConfirmKitchenReceipt(t.id)}

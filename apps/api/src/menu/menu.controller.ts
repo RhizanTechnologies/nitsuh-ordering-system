@@ -54,6 +54,20 @@ export class MenuController {
     return this.menuService.deleteMenuItem(id);
   }
 
+  @Post('items/:id/recipe')
+  async saveItemRecipe(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      yieldPortions?: number;
+      ingredients?: { ingredientId: string; quantity: number; unitId?: string }[];
+      ingredientsList?: { ingredientId: string; quantity: number; unitId?: string }[];
+    },
+  ) {
+    const list = body.ingredients || body.ingredientsList || [];
+    return this.menuService.saveRecipe(id, body.yieldPortions || 1, list);
+  }
+
   @Get('tables')
   async getTables() {
     return this.menuService.getTables();

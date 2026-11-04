@@ -265,4 +265,60 @@ export class MenuService {
     await this.prisma.menuItem.delete({ where: { id } });
     return { success: true, message: `Product "${item.name}" deleted successfully.` };
   }
+
+  async saveRecipe(
+    menuItemId: string,
+    yieldPortions: number,
+    ingredients: { ingredientId: string; quantity: number; unitId?: string }[],
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      let recipe = await tx.recipe.findUnique({ where: { menuItemId } });
+      if (!recipe) {
+        recipe = await tx.recipe.create({
+          data: {
+            menuItemId,
+            yieldPortions: Number(yieldPortions) || 1,
+            prepInstructions: 'Chef standard preparation',
+          },
+        });
+      } else {
+        await tx.recipe.update({
+          where: { id: recipe.id },
+          data: { yieldPortions: Number(yieldPortions) || 1, version: { increment: 1 } },
+        });
+        await tx.recipeIngredient.deleteMany({ where: { recipeId: recipe.id } });
+      }
+
+      for (const ing of ingredients) {
+        let unitId = ing.unitId;
+        if (!unitId) {
+          const ingredientRecord = await tx.ingredient.findUnique({
+            where: { id: ing.ingredientId },
+            select: { baseUnitId: true },
+          });
+          unitId = ingredientRecord?.baseUnitId;
+        }
+
+        if (unitId) {
+          await tx.recipeIngredient.create({
+            data: {
+              recipeId: recipe.id,
+              ingredientId: ing.ingredientId,
+              quantity: Number(ing.quantity) || 1,
+              unitId,
+            },
+          });
+        }
+      }
+
+      return tx.recipe.findUnique({
+        where: { id: recipe.id },
+        include: {
+          ingredients: {
+            include: { ingredient: true, unit: true },
+          },
+        },
+      });
+    });
+  }
 }

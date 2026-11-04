@@ -93,13 +93,14 @@ interface AppState {
 
 // Quick staff list for touch PIN login reference
 export const KNOWN_STAFF = [
+  { name: 'John Holland', role: 'MANAGER', pin: '1111', desc: 'Manager (Operations Oversight, Waiter & Main Storekeeper)' },
   { name: 'Samantha W', role: 'CASHIER', pin: '1234', desc: 'Cashier Terminal (POS, Tables, Payments)' },
-  { name: 'Abel Tesfaye', role: 'WAITER', pin: '2222', desc: 'Waiter Mobile Pad (Table Ordering Only)' },
-  { name: 'Sara K', role: 'WAITER', pin: '3333', desc: 'Waiter Mobile Pad (Table Ordering Only)' },
+  { name: 'Abel Tesfaye', role: 'WAITER', pin: '2222', desc: 'Waiter Mobile Pad (Table Ordering)' },
+  { name: 'Sara K', role: 'WAITER', pin: '3333', desc: 'Waiter Mobile Pad (Table Ordering)' },
   { name: 'Chef Dawit', role: 'KITCHEN_STAFF', pin: '4444', desc: 'Kitchen Display System (Cooking Queue Only)' },
   { name: 'Michael', role: 'MAIN_STOREKEEPER', pin: '5555', desc: 'Main Store Warehouse (Purchases & Transfers Only)' },
-  { name: 'Chef Tigist', role: 'HEAD_CHEF', pin: '6666', desc: 'Head Chef & Kitchen Keeper (KDS Live + Kitchen Stock Only)' },
-  { name: 'Adam S', role: 'OWNER', pin: '0000', desc: 'Owner Executive Portal (Full Analytics, Recipes & Settings)' },
+  { name: 'Chef Tigist', role: 'HEAD_CHEF', pin: '6666', desc: 'Head Chef (KDS Live + Verify Stock Transfers)' },
+  { name: 'Adam S', role: 'OWNER', pin: '0000', desc: 'Owner Executive Portal (Full Analytics & Settings)' },
 ];
 
 export const useAppStore = create<AppState>((set) => ({
