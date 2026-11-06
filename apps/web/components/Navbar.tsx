@@ -256,23 +256,28 @@ export function Navbar() {
 
           {/* Right: User Status, Theme Switcher & Explicit Logout */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
-            {/* Educated Light / Dark Theme Switcher */}
+            {/* Unambiguous Segmented Light / Dark Theme Switcher */}
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/10 rounded-xl sm:rounded-2xl transition cursor-pointer text-xs font-bold shadow-xs"
-              title={theme === 'dark' ? 'Switch to Educated Warm Alabaster Bistro (Light Theme)' : 'Switch to Midnight Obsidian (Dark Theme)'}
+              className="flex items-center gap-1 p-1 bg-black/10 dark:bg-white/[0.08] hover:bg-black/15 dark:hover:bg-white/[0.12] border border-black/10 dark:border-white/10 rounded-xl sm:rounded-2xl transition cursor-pointer shadow-xs select-none"
+              title={theme === 'dark' ? 'Currently Midnight Obsidian (Dark). Click to switch to Warm Bistro (Light).' : 'Currently Warm Bistro (Light). Click to switch to Midnight Obsidian (Dark).'}
             >
-              {theme === 'dark' ? (
-                <>
-                  <Sun className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="hidden sm:inline text-[11px] text-zinc-300">Light</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="w-3.5 h-3.5 text-amber-600" />
-                  <span className="hidden sm:inline text-[11px] text-zinc-700 font-bold">Dark</span>
-                </>
-              )}
+              <span className={`flex items-center gap-1 px-2 py-1 rounded-lg sm:rounded-xl text-[11px] font-black transition ${
+                theme === 'light'
+                  ? 'bg-amber-500 text-zinc-950 shadow-sm'
+                  : 'text-zinc-400 hover:text-white'
+              }`}>
+                <Sun className="w-3 h-3 text-current" />
+                <span className="hidden sm:inline">Light</span>
+              </span>
+              <span className={`flex items-center gap-1 px-2 py-1 rounded-lg sm:rounded-xl text-[11px] font-black transition ${
+                theme === 'dark'
+                  ? 'bg-amber-500 text-zinc-950 shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-950'
+              }`}>
+                <Moon className="w-3 h-3 text-current" />
+                <span className="hidden sm:inline">Dark</span>
+              </span>
             </button>
 
             {/* User Profile Pill / Quick Switcher */}

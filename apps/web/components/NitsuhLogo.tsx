@@ -115,11 +115,11 @@ export function NitsuhLogo({
 
         {showSubtitle && (
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-[10px] sm:text-[11px] font-bold text-zinc-600 dark:text-zinc-300 tracking-tight leading-tight">
+            <span className="text-[10px] sm:text-[11px] font-bold text-zinc-700 dark:text-zinc-200 tracking-tight leading-tight">
               Addis Ababa
             </span>
-            <span className="text-zinc-400 dark:text-zinc-500 text-[10px]">•</span>
-            <span className="text-[10px] sm:text-[11px] font-bold text-amber-700 dark:text-amber-400 font-mono tracking-tight leading-tight">
+            <span className="text-zinc-500 dark:text-zinc-400 text-[10px]">•</span>
+            <span className="text-[10px] sm:text-[11px] font-extrabold text-amber-600 dark:text-amber-400 font-mono tracking-tight leading-tight">
               0966833177
             </span>
           </div>

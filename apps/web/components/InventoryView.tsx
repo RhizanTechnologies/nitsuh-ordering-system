@@ -61,6 +61,8 @@ export function InventoryView() {
   // Modals
   const [recipeModalOpen, setRecipeModalOpen] = useState(false);
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
+  const [recipeDishSearch, setRecipeDishSearch] = useState('');
+  const [recipeDishFilter, setRecipeDishFilter] = useState<'ALL' | 'MISSING' | 'CONFIGURED'>('ALL');
 
   // Quick Adjustment Modal State (Add or Remove stock directly)
   const [adjustModalOpen, setAdjustModalOpen] = useState(false);
@@ -1191,159 +1193,330 @@ export function InventoryView() {
         )}
 
         {/* TAB 3: RECIPE STUDIO (CARD FORMAT) */}
-        {activeTab === 'recipes' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: Dish Selector */}
-            <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl space-y-2">
-              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3 font-heading">
-                Select Dish to Configure
-              </h3>
-              <div className="space-y-1.5 max-h-[500px] overflow-y-auto pr-1 no-scrollbar">
-                {menuItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setSelectedRecipeItem(item)}
-                    className={`w-full p-2.5 rounded-2xl text-left flex items-center justify-between transition cursor-pointer ${
-                      selectedRecipeItem?.id === item.id
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                        : 'bg-white/[0.02] hover:bg-white/[0.05] text-white border border-white/5'
-                    }`}
-                  >
-                    <div>
-                      <div className="text-xs font-bold truncate">{item.name}</div>
-                      <div className={`text-[10px] ${selectedRecipeItem?.id === item.id ? 'text-zinc-900 font-semibold' : 'text-zinc-400'}`}>
-                        {item.category?.name}
-                      </div>
-                    </div>
-                    <span className="text-xs font-extrabold">{Number(item.price).toFixed(2)} ETB</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+        {activeTab === 'recipes' && (() => {
+          const itemsWithRecipe = menuItems.filter((i) => i.recipe?.ingredients?.length > 0);
+          const itemsWithoutRecipe = menuItems.filter((i) => !i.recipe?.ingredients?.length && !i.isDirectSale);
 
-            {/* Right 2 cols: Exact Recipe Gram Breakdown (Card Format) */}
-            <div className="lg:col-span-2 bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
-              {selectedRecipeItem ? (
+          const filteredDishes = menuItems.filter((item) => {
+            if (recipeDishFilter === 'MISSING' && (item.recipe?.ingredients?.length > 0 || item.isDirectSale)) return false;
+            if (recipeDishFilter === 'CONFIGURED' && !item.recipe?.ingredients?.length) return false;
+            if (recipeDishSearch.trim()) {
+              const q = recipeDishSearch.toLowerCase();
+              const nameMatch = item.name.toLowerCase().includes(q);
+              const catMatch = item.category?.name?.toLowerCase().includes(q);
+              return nameMatch || catMatch;
+            }
+            return true;
+          });
+
+          return (
+            <div className="space-y-4">
+              {/* Recipe Studio Top Banner with Quick Actions */}
+              <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
-                    <div>
-                      <h3 className="text-lg font-bold text-white font-heading">{selectedRecipeItem.name}</h3>
-                      <p className="text-xs text-zinc-400">
-                        Gram-Level Production Costing & Margin Analysis
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <div className="text-xs text-zinc-400 uppercase font-semibold">Selling Price</div>
-                        <div className="text-xl font-extrabold text-amber-400">
-                          {Number(selectedRecipeItem.price).toFixed(2)} ETB
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setRecipeModalOpen(true)}
-                        className="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit Recipe Grams</span>
-                      </button>
-                    </div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2 font-heading">
+                    <ChefHat className="w-5 h-5 text-amber-400" />
+                    <span>Culinary Recipe Studio & Costing Engine</span>
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Define exact raw ingredient portions (grams/ml/pcs) to automate Kitchen Store inventory deductions and calculate real portion food costs.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 px-3 py-1.5 rounded-2xl text-xs">
+                    <span className="text-zinc-400">Configured:</span>
+                    <strong className="text-emerald-400 font-bold">{itemsWithRecipe.length}</strong>
+                    <span className="text-zinc-600">|</span>
+                    <span className="text-zinc-400">Needs Recipe:</span>
+                    <strong className="text-amber-400 font-bold">{itemsWithoutRecipe.length}</strong>
                   </div>
 
-                  {/* Margin Banner - Only Owner sees Gross Profit and Margin % Analysis */}
-                  {isOwner ? (
-                    <div className="grid grid-cols-3 gap-3 mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl">
-                      <div>
-                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Portion Food Cost</div>
-                        <div className="text-base font-extrabold text-[#C11221]">
-                          {selectedRecipeItem.costPerPortion?.toFixed(4) || '0.00'} ETB
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Gross Margin</div>
-                        <div className="text-base font-extrabold text-amber-400">
-                          {selectedRecipeItem.grossProfitEstimate?.toFixed(2) || '0.00'} ETB
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
-                        <div className="text-base font-extrabold text-emerald-400">
-                          {selectedRecipeItem.marginPercent?.toFixed(1) || 0}%
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl flex items-center justify-between">
-                      <div>
-                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Standard Production Yield</div>
-                        <div className="text-sm font-extrabold text-white mt-0.5">
-                          {selectedRecipeItem.recipe?.yieldPortions || 1} Portion(s) per recipe batch
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Kitchen Section</div>
-                        <div className="text-xs font-bold text-amber-400 uppercase mt-0.5">
-                          {selectedRecipeItem.prepSection?.replace('_', ' ') || 'HOT KITCHEN'}
-                        </div>
-                      </div>
-                    </div>
+                  {isOwnerOrManager && (
+                    <button
+                      onClick={() => {
+                        if (!selectedRecipeItem && menuItems.length > 0) {
+                          setSelectedRecipeItem(itemsWithoutRecipe[0] || menuItems[0]);
+                        }
+                        setRecipeModalOpen(true);
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-2xl text-xs shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    >
+                      <Plus className="w-4 h-4 stroke-[3]" />
+                      <span>+ Add / Build Recipe</span>
+                    </button>
                   )}
+                </div>
+              </div>
 
-                  {/* Ingredients Requirements (Card Format) */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-heading">
-                      Production Ingredient Requirements (Card Format)
-                    </h4>
+              {/* Main Grid: Left Dish Picker & Right Recipe Canvas */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left: Dish Selector with Search & Filter Tabs */}
+                <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-heading">
+                      Select Dish ({filteredDishes.length})
+                    </h3>
+                  </div>
 
-                    {selectedRecipeItem.isDirectSale ? (
-                      <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-300">
-                        This item is a <strong>direct retail sale</strong> (bottled drink). Deducts directly from stock upon sale.
-                      </div>
-                    ) : selectedRecipeItem.recipe?.ingredients?.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-1 no-scrollbar">
-                        {selectedRecipeItem.recipe.ingredients.map((ri: any) => {
-                          const unitCost = Number(ri.ingredient.currentCostPerBaseUnit);
-                          const lineCost = unitCost * Number(ri.quantity);
-                          return (
-                            <div
-                              key={ri.id}
-                              className="p-3 bg-white/[0.02] border border-white/5 hover:border-white/15 rounded-2xl flex items-center justify-between gap-3"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="font-bold text-xs text-white truncate">{ri.ingredient.name}</div>
-                                <div className="text-[10px] text-zinc-400 mt-0.5">
-                                  {unitCost.toFixed(4)} ETB / {ri.unit?.symbol || ri.ingredient.baseUnit?.symbol}
-                                </div>
-                              </div>
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                    <input
+                      type="text"
+                      placeholder="Search dishes to configure..."
+                      value={recipeDishSearch}
+                      onChange={(e) => setRecipeDishSearch(e.target.value)}
+                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
 
-                              <div className="text-right">
-                                <div className="text-xs font-black text-amber-400">
-                                  {Number(ri.quantity)} {ri.unit?.symbol || ri.ingredient.baseUnit?.symbol}
-                                </div>
-                                <div className="text-[10px] font-bold text-zinc-300">
-                                  {lineCost.toFixed(4)} ETB
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
+                  {/* Filter Chips */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                    <button
+                      onClick={() => setRecipeDishFilter('ALL')}
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
+                        recipeDishFilter === 'ALL'
+                          ? 'bg-amber-500 text-zinc-950 font-black'
+                          : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      All ({menuItems.length})
+                    </button>
+                    <button
+                      onClick={() => setRecipeDishFilter('MISSING')}
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
+                        recipeDishFilter === 'MISSING'
+                          ? 'bg-amber-500 text-zinc-950 font-black'
+                          : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Needs Recipe ({itemsWithoutRecipe.length})
+                    </button>
+                    <button
+                      onClick={() => setRecipeDishFilter('CONFIGURED')}
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
+                        recipeDishFilter === 'CONFIGURED'
+                          ? 'bg-amber-500 text-zinc-950 font-black'
+                          : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Configured ({itemsWithRecipe.length})
+                    </button>
+                  </div>
+
+                  {/* Dish Buttons List */}
+                  <div className="space-y-1.5 max-h-[480px] overflow-y-auto pr-1 no-scrollbar">
+                    {filteredDishes.length === 0 ? (
+                      <div className="text-center py-8 text-xs text-zinc-500">
+                        No dishes match your filter
                       </div>
                     ) : (
-                      <div className="p-6 bg-white/[0.02] rounded-2xl text-center space-y-2 border border-white/5">
-                        <p className="text-xs text-zinc-400">No recipe defined yet for this item.</p>
-                        <button
-                          onClick={() => setRecipeModalOpen(true)}
-                          className="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs transition shadow-md cursor-pointer"
-                        >
-                          Build Recipe Now
-                        </button>
-                      </div>
+                      filteredDishes.map((item) => {
+                        const hasRecipe = (item.recipe?.ingredients?.length || 0) > 0;
+                        const isSelected = selectedRecipeItem?.id === item.id;
+
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setSelectedRecipeItem(item)}
+                            className={`w-full p-2.5 rounded-2xl text-left flex items-center justify-between transition cursor-pointer ${
+                              isSelected
+                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
+                                : 'bg-white/[0.02] hover:bg-white/[0.05] text-white border border-white/5'
+                            }`}
+                          >
+                            <div className="min-w-0 flex-1 mr-2">
+                              <div className="text-xs font-bold truncate">{item.name}</div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className={`text-[9px] ${isSelected ? 'text-zinc-900 font-semibold' : 'text-zinc-400'}`}>
+                                  {item.category?.name || 'Dish'}
+                                </span>
+                                {hasRecipe ? (
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-zinc-950/20 text-zinc-950' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'}`}>
+                                    ✓ {item.recipe.ingredients.length} items
+                                  </span>
+                                ) : (
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-zinc-950/20 text-zinc-950' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}`}>
+                                    + Add Recipe
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <span className="text-xs font-extrabold flex-shrink-0">{Number(item.price).toFixed(2)} ETB</span>
+                          </button>
+                        );
+                      })
                     )}
                   </div>
                 </div>
-              ) : null}
+
+                {/* Right 2 cols: Exact Recipe Gram Breakdown (Card Format) */}
+                <div className="lg:col-span-2 bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                  {selectedRecipeItem ? (
+                    <div>
+                      <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 gap-3 flex-wrap">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-black text-white font-heading">{selectedRecipeItem.name}</h3>
+                            {selectedRecipeItem.recipe?.ingredients?.length > 0 ? (
+                              <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                                Recipe Configured
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                                No Recipe Set
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-zinc-400 mt-0.5">
+                            Gram-Level Production Costing & Margin Analysis
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <div className="text-xs text-zinc-400 uppercase font-semibold">Selling Price</div>
+                            <div className="text-xl font-extrabold text-amber-400">
+                              {Number(selectedRecipeItem.price).toFixed(2)} ETB
+                            </div>
+                          </div>
+
+                          {isOwnerOrManager && (
+                            <button
+                              onClick={() => setRecipeModalOpen(true)}
+                              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                            >
+                              <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <span>{selectedRecipeItem.recipe?.ingredients?.length > 0 ? 'Edit Recipe Grams' : '+ Add Recipe Now'}</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Margin Banner - Only Owner sees Gross Profit and Margin % Analysis */}
+                      {isOwner ? (
+                        <div className="grid grid-cols-3 gap-3 mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl">
+                          <div>
+                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Portion Food Cost</div>
+                            <div className="text-base font-extrabold text-[#C11221]">
+                              {selectedRecipeItem.costPerPortion?.toFixed(4) || '0.00'} ETB
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Gross Margin</div>
+                            <div className="text-base font-extrabold text-amber-400">
+                              {selectedRecipeItem.grossProfitEstimate?.toFixed(2) || '0.00'} ETB
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
+                            <div className="text-base font-extrabold text-emerald-400">
+                              {selectedRecipeItem.marginPercent?.toFixed(1) || 0}%
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl flex items-center justify-between">
+                          <div>
+                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Standard Production Yield</div>
+                            <div className="text-sm font-extrabold text-white mt-0.5">
+                              {selectedRecipeItem.recipe?.yieldPortions || 1} Portion(s) per recipe batch
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Kitchen Section</div>
+                            <div className="text-xs font-bold text-amber-400 uppercase mt-0.5">
+                              {selectedRecipeItem.prepSection?.replace('_', ' ') || 'HOT KITCHEN'}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Ingredients Requirements (Card Format) */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-heading">
+                            Production Ingredient Requirements ({selectedRecipeItem.recipe?.ingredients?.length || 0} items)
+                          </h4>
+                          {isOwnerOrManager && selectedRecipeItem.recipe?.ingredients?.length > 0 && (
+                            <button
+                              onClick={() => setRecipeModalOpen(true)}
+                              className="text-[11px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Add More Ingredients</span>
+                            </button>
+                          )}
+                        </div>
+
+                        {selectedRecipeItem.isDirectSale ? (
+                          <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-300">
+                            This item is a <strong>direct retail sale</strong> (bottled drink). Deducts directly from stock upon sale.
+                          </div>
+                        ) : selectedRecipeItem.recipe?.ingredients?.length > 0 ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-1 no-scrollbar">
+                            {selectedRecipeItem.recipe.ingredients.map((ri: any) => {
+                              const unitCost = Number(ri.ingredient?.currentCostPerBaseUnit || 0);
+                              const lineCost = unitCost * Number(ri.quantity || 0);
+                              return (
+                                <div
+                                  key={ri.id}
+                                  className="p-3 bg-white/[0.02] border border-white/5 hover:border-white/15 rounded-2xl flex items-center justify-between gap-3"
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-bold text-xs text-white truncate">{ri.ingredient?.name}</div>
+                                    <div className="text-[10px] text-zinc-400 mt-0.5">
+                                      {unitCost.toFixed(4)} ETB / {ri.unit?.symbol || ri.ingredient?.baseUnit?.symbol}
+                                    </div>
+                                  </div>
+
+                                  <div className="text-right">
+                                    <div className="text-xs font-black text-amber-400">
+                                      {Number(ri.quantity)} {ri.unit?.symbol || ri.ingredient?.baseUnit?.symbol}
+                                    </div>
+                                    <div className="text-[10px] font-bold text-zinc-300">
+                                      {lineCost.toFixed(4)} ETB
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="p-8 bg-white/[0.02] rounded-3xl text-center space-y-3 border border-dashed border-white/10">
+                            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto">
+                              <ChefHat className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-white">No recipe configured yet for {selectedRecipeItem.name}</h4>
+                              <p className="text-xs text-zinc-400 max-w-sm mx-auto mt-1">
+                                Add raw ingredient requirements (e.g. pasta, meat, sauce, oil) so kitchen store auto-deducts upon preparation and real food costs are tracked.
+                              </p>
+                            </div>
+                            {isOwnerOrManager && (
+                              <button
+                                onClick={() => setRecipeModalOpen(true)}
+                                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-2xl text-xs transition shadow-lg shadow-amber-500/25 cursor-pointer inline-flex items-center gap-1.5"
+                              >
+                                <Plus className="w-4 h-4 stroke-[3]" />
+                                <span>+ Add Recipe for {selectedRecipeItem.name}</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-20 text-center text-xs text-zinc-500">
+                      Select a dish from the left list to view or add its recipe.
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB 4: SUPPLIERS & BULK PURCHASES */}
         {activeTab === 'purchases' && (
@@ -1998,7 +2171,9 @@ export function InventoryView() {
         isOpen={recipeModalOpen}
         onClose={() => setRecipeModalOpen(false)}
         menuItem={selectedRecipeItem}
+        allMenuItems={menuItems}
         onRecipeSaved={loadData}
+        onOpenCreateStockItem={handleOpenCreateStockItem}
       />
 
       <PurchaseOrderModal

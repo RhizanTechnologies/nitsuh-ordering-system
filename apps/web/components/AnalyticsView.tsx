@@ -195,11 +195,11 @@ export function AnalyticsView() {
                 <span className="tracking-wide">Estimated Net Profit</span>
                 <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-300 animate-pulse" />
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-rose-700 dark:text-white">
+              <div className="text-2xl sm:text-3xl font-black text-rose-800 dark:text-white dark:text-white-force">
                 {kpis.netProfit > 0 ? kpis.netProfit.toFixed(2) : '1,690.40'}{' '}
-                <span className="text-xs font-bold text-rose-900/60 dark:text-amber-200/80">ETB</span>
+                <span className="text-xs font-bold text-rose-900/70 dark:text-amber-200/90">ETB</span>
               </div>
-              <div className="text-xs font-bold text-rose-800 dark:text-amber-100/90 mt-2">
+              <div className="text-xs font-bold text-rose-800 dark:text-amber-100 mt-2">
                 Margin: {kpis.netMarginPercent > 0 ? kpis.netMarginPercent : '71.8'}% after COGS
               </div>
             </div>
