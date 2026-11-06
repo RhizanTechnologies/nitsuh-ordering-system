@@ -316,34 +316,34 @@ export function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 rounded-xl sm:rounded-2xl shadow-xs transition cursor-pointer"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.12] border border-stone-200 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-xs transition cursor-pointer text-stone-900 dark:text-white"
                 title="View active session"
               >
                 {currentUser.avatarUrl ? (
                   <img
                     src={currentUser.avatarUrl}
                     alt={currentUser.name}
-                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover ring-1 ring-amber-400/50 flex-shrink-0"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover ring-1 ring-amber-500/50 flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-[10px] ring-1 ring-amber-400/50 flex-shrink-0">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-[10px] ring-1 ring-amber-500/50 flex-shrink-0">
                     {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
                   </div>
                 )}
-                <div className="text-left max-w-[65px] sm:max-w-[120px] truncate">
-                  <div className="text-[11px] sm:text-xs font-bold text-white truncate leading-tight">
+                <div className="text-left max-w-[75px] sm:max-w-[130px] truncate">
+                  <div className="text-[11px] sm:text-xs font-black text-stone-900 dark:text-white truncate leading-tight">
                     {currentUser.name}
                   </div>
-                  <div className="text-[8px] sm:text-[9px] font-bold text-amber-400 uppercase truncate">
+                  <div className="text-[8px] sm:text-[9px] font-black text-amber-700 dark:text-amber-400 uppercase truncate">
                     {currentUser.role.replace('_', ' ')}
                   </div>
                 </div>
-                <ChevronDown className={`w-3 h-3 text-zinc-400 ml-0.5 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 text-stone-500 dark:text-zinc-400 ml-0.5 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-[#1A1614] rounded-2xl shadow-2xl border border-white/15 p-3.5 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#1A1614] rounded-2xl shadow-2xl border border-stone-200 dark:border-white/15 p-3.5 z-50 text-stone-900 dark:text-white animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-center gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
                     {currentUser.avatarUrl ? (
                       <img
                         src={currentUser.avatarUrl}
@@ -351,27 +351,27 @@ export function Navbar() {
                         className="w-10 h-10 rounded-full object-cover ring-2 ring-amber-400/40"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-sm ring-2 ring-amber-400/40">
+                      <div className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm ring-2 ring-amber-400/40">
                         {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
                       </div>
                     )}
                     <div className="truncate">
-                      <div className="text-sm font-bold text-white truncate">{currentUser.name}</div>
-                      <div className="text-[11px] text-zinc-400 truncate">{currentUser.email || 'Terminal User'}</div>
-                      <span className="inline-block mt-0.5 text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <div className="text-sm font-black text-stone-900 dark:text-white truncate">{currentUser.name}</div>
+                      <div className="text-[11px] text-stone-500 dark:text-zinc-400 truncate">{currentUser.email || 'Terminal User'}</div>
+                      <span className="inline-block mt-0.5 text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
                         {currentUser.role.replace('_', ' ')}
                       </span>
                     </div>
                   </div>
 
                   {isOwnerOrManager && (
-                    <div className="py-2 border-b border-white/10">
+                    <div className="py-2 border-b border-stone-200 dark:border-white/10">
                       <Link
                         href="/staff"
                         onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-2 py-2 px-3 rounded-xl hover:bg-white/10 text-xs font-bold text-amber-300 transition"
+                        className="flex items-center gap-2 py-2 px-3 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-xs font-bold text-amber-700 dark:text-amber-300 transition"
                       >
-                        <Users className="w-4 h-4 text-amber-400" />
+                        <Users className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                         <span>Staff & Users Console</span>
                       </Link>
                     </div>
@@ -380,24 +380,24 @@ export function Navbar() {
                   <div className="pt-3">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 font-bold text-xs transition cursor-pointer"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#C11221] hover:bg-[#a50f1c] text-white border border-[#a50f1c] font-black text-xs transition shadow-sm cursor-pointer"
                     >
-                      <LogOut className="w-4 h-4 text-red-400" />
-                      Sign Out & Lock Terminal
+                      <LogOut className="w-4 h-4 text-white stroke-[2.5]" />
+                      <span className="text-white font-black">Sign Out & Lock Terminal</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* EXPLICIT RESPONSIVE LOGOUT BUTTON */}
+            {/* EXPLICIT RESPONSIVE LOGOUT BUTTON (Bold, Solid Crimson, High Contrast) */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 bg-red-500/15 hover:bg-red-500/25 active:scale-95 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition shadow-xs flex-shrink-0 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 bg-[#C11221] hover:bg-[#a50f1c] active:scale-95 text-white font-black border border-[#a50f1c] rounded-xl sm:rounded-2xl text-xs transition shadow-md shadow-red-600/25 flex-shrink-0 cursor-pointer"
               title="Logout & Lock Terminal"
             >
-              <LogOut className="w-3.5 h-3.5 text-red-400" />
-              <span className="hidden sm:inline">Logout</span>
+              <LogOut className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+              <span className="inline font-black text-white tracking-wide">Logout</span>
             </button>
           </div>
         </div>
