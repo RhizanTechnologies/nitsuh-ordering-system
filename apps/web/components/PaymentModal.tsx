@@ -19,12 +19,12 @@ export function PaymentModal({
   onConfirmPayment,
   onShowReceipt,
 }: PaymentModalProps) {
-  if (!isOpen) return null;
-
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'MOBILE_PAY'>('CASH');
   const [customTip, setCustomTip] = useState<string>('');
   const [cashReceived, setCashReceived] = useState<string>('');
   const [processing, setProcessing] = useState(false);
+
+  if (!isOpen) return null;
 
   const tipNumber = Math.max(0, parseFloat(customTip) || 0);
   const totalPayable = orderTotal + tipNumber;

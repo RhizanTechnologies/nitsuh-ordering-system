@@ -17,8 +17,6 @@ export function PurchaseOrderModal({
   onPurchaseRecorded,
   currentUserId,
 }: PurchaseOrderModalProps) {
-  if (!isOpen) return null;
-
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -30,18 +28,22 @@ export function PurchaseOrderModal({
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     fetchApi('/inventory/suppliers').then((data) => {
-      setSuppliers(data);
-      if (data.length > 0) setSelectedSupplierId(data[0].id);
+      setSuppliers(data || []);
+      if (data && data.length > 0) setSelectedSupplierId(data[0].id);
     });
 
     fetchApi('/inventory/balances').then((locations) => {
-      const main = locations.find((l: any) => l.type === 'MAIN_STORE');
-      if (main) {
-        setIngredients(main.balances.map((b: any) => b.ingredient));
+      const main = locations?.find?.((l: any) => l.type === 'MAIN_STORE');
+      if (main && Array.isArray(main.balances)) {
+        setIngredients(main.balances.map((b: any) => b.ingredient).filter(Boolean));
       }
     });
-  }, []);
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const handleAddItem = (ingredientId: string) => {
     const ing = ingredients.find((i) => i.id === ingredientId);

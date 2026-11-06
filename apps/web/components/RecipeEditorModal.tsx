@@ -21,8 +21,6 @@ export function RecipeEditorModal({
   const { currentUser } = useAppStore();
   const isOwner = currentUser?.role === 'OWNER';
 
-  if (!isOpen || !menuItem) return null;
-
   const [ingredientsPool, setIngredientsPool] = useState<any[]>([]);
   const [recipeLines, setRecipeLines] = useState<
     { ingredientId: string; quantity: number; unitId: string; name: string; unitCost: number; symbol: string }[]
@@ -32,28 +30,38 @@ export function RecipeEditorModal({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchApi('/inventory/balances').then((locations) => {
-      const mainStore = locations.find((l: any) => l.type === 'MAIN_STORE');
-      if (mainStore) {
-        setIngredientsPool(mainStore.balances.map((b: any) => b.ingredient));
-      }
-    });
+    if (!isOpen || !menuItem) return;
 
-    if (menuItem.recipe && menuItem.recipe.ingredients) {
+    fetchApi('/inventory/ingredients')
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setIngredientsPool(data);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load ingredients pool:', err);
+      });
+
+    if (menuItem.recipe && Array.isArray(menuItem.recipe.ingredients)) {
       setYieldPortions(Number(menuItem.recipe.yieldPortions || 1));
       setRecipeLines(
         menuItem.recipe.ingredients.map((ri: any) => ({
           ingredientId: ri.ingredientId,
-          quantity: Number(ri.quantity),
-          unitId: ri.unitId,
-          name: ri.ingredient.name,
-          unitCost: Number(ri.ingredient.currentCostPerBaseUnit || 0),
-          symbol: ri.unit?.symbol || ri.ingredient.baseUnit?.symbol || 'g',
+          quantity: Number(ri.quantity || 0),
+          unitId: ri.unitId || ri.ingredient?.baseUnitId || '',
+          name: ri.ingredient?.name || 'Ingredient',
+          unitCost: Number(ri.ingredient?.currentCostPerBaseUnit || 0),
+          symbol: ri.unit?.symbol || ri.ingredient?.baseUnit?.symbol || 'g',
         })),
       );
+    } else {
+      setYieldPortions(1);
+      setRecipeLines([]);
     }
     setError(null);
-  }, [menuItem]);
+  }, [isOpen, menuItem]);
+
+  if (!isOpen || !menuItem) return null;
 
   const handleAddIngredient = (ingredientId: string) => {
     const ing = ingredientsPool.find((i) => i.id === ingredientId);
