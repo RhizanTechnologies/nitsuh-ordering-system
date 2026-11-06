@@ -722,7 +722,7 @@ export function WaiterPadView() {
             )}
 
             {/* Food Grid matching Reference Image */}
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-5">
               {filteredItems.map((item) => {
                 const inCart = waiterCart.find((c) => c.menuItemId === item.id);
                 const qty = inCart ? inCart.quantity : 0;
@@ -733,81 +733,91 @@ export function WaiterPadView() {
                   <div
                     key={item.id}
                     onClick={() => openItemCustomizer(item)}
-                    className={`group relative bg-white/[0.04] hover:bg-white/[0.07] backdrop-blur-xl rounded-3xl p-3 sm:p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                    className={`group relative bg-white dark:bg-[#161311] rounded-3xl p-3 sm:p-3.5 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xs hover:shadow-md ${
                       isSelected
-                        ? 'border-[#C11221] shadow-lg shadow-[#C11221]/20 ring-1 ring-[#C11221]'
-                        : 'border-white/10 hover:border-amber-500/40'
+                        ? 'border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/30 shadow-lg shadow-amber-500/15'
+                        : 'border-stone-200/90 dark:border-white/10 hover:border-amber-500/50'
                     }`}
                   >
-                    {/* Top Row: Spicy / Fasting badge on left, Heart on right */}
-                    <div className="flex items-center justify-between gap-1 w-full mb-2 z-10">
-                      <div>
+                    {/* Generous High-Impact Culinary Image (Tashkent Cafe Style) */}
+                    <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-3 bg-stone-100 dark:bg-black/40 border border-stone-200/60 dark:border-white/10 flex-shrink-0">
+                      <MenuImage
+                        src={item.imageUrl}
+                        alt={item.name}
+                        categoryName={item.category?.name}
+                        prepSection={item.prepSection}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 drop-shadow-sm"
+                      />
+
+                      {/* Floating Category / Dietary Badge (Top-Left) */}
+                      <div className="absolute top-2.5 left-2.5 z-10">
                         {isBurger(item.category?.name || '', item.name) || item.name.toLowerCase().includes('spicy') ? (
-                          <span className="bg-[#C11221] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                          <span className="bg-[#C11221] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 backdrop-blur-md">
                             <Flame className="w-2.5 h-2.5 fill-white" />
                             <span>Spicy</span>
                           </span>
                         ) : isFastingItem(item) ? (
-                          <span className="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md">
+                          <span className="bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 backdrop-blur-md">
                             🌱 Fasting
                           </span>
                         ) : (
-                          <span className="text-[10px] text-zinc-500 font-semibold truncate max-w-[80px]">
-                            {item.category?.name || 'Chef'}
+                          <span className="bg-black/55 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                            {item.category?.name || 'Dish'}
                           </span>
                         )}
                       </div>
 
+                      {/* Favorite Heart (Top-Right) */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleFavorite(item.id);
                         }}
-                        className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-black/60 transition cursor-pointer"
+                        className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-black/45 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition cursor-pointer"
+                        title={isFav ? 'Remove from favorites' : 'Add to favorites'}
                       >
                         <Heart
-                          className={`w-3.5 h-3.5 ${
-                            isFav ? 'text-[#C11221] fill-[#C11221]' : 'text-zinc-400 group-hover:text-white'
+                          className={`w-4 h-4 ${
+                            isFav ? 'text-[#C11221] fill-[#C11221]' : 'text-white/80 group-hover:text-white'
                           }`}
                         />
                       </button>
-                    </div>
 
-                    {/* Centered Dish Image */}
-                    <div className="relative w-full h-24 sm:h-32 flex items-center justify-center my-1">
-                      <div className="w-24 h-24 sm:w-28 sm:h-28 relative flex items-center justify-center">
-                        <MenuImage
-                          src={item.imageUrl}
-                          alt={item.name}
-                          categoryName={item.category?.name}
-                          prepSection={item.prepSection}
-                          className="w-full h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] group-hover:scale-105 transition-transform"
-                        />
-                      </div>
-
-                      {/* Prominent Selected Badge if in cart */}
+                      {/* Selected Overlay Badge if in cart */}
                       {isSelected && (
-                        <div className="absolute top-0 right-0 z-20 bg-[#C11221] text-white font-black text-xs px-2 py-0.5 rounded-full shadow-lg border border-white/30 animate-in zoom-in-75">
-                          x{qty}
+                        <div className="absolute bottom-2.5 right-2.5 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs px-2.5 py-1 rounded-xl shadow-lg border border-amber-300/40 flex items-center gap-1 animate-in zoom-in-75">
+                          <span>x{qty} in order</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Title & Price & Plus Button */}
-                    <div className="mt-2 pt-1">
-                      <h4
-                        className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-amber-400 transition"
-                        title={item.name}
-                      >
-                        {item.name}
-                      </h4>
+                    {/* Dish Name, Description & Action */}
+                    <div className="flex flex-col flex-1 justify-between">
+                      <div>
+                        <h4
+                          className="text-sm sm:text-base font-black text-stone-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition"
+                          title={item.name}
+                        >
+                          {item.name}
+                        </h4>
 
-                      <div className="flex items-center justify-between gap-1 mt-1.5">
-                        <div className="text-xs sm:text-sm font-extrabold text-amber-400 tracking-tight">
-                          {Number(item.price).toFixed(2)} <span className="text-[10px] text-zinc-400">ETB</span>
+                        {item.description && (
+                          <p
+                            className="text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-1 mt-0.5 leading-relaxed"
+                            title={item.description}
+                          >
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Price & Add Action Pill */}
+                      <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-stone-100 dark:border-white/5">
+                        <div className="text-sm sm:text-base font-black text-amber-700 dark:text-amber-400 tracking-tight">
+                          {Number(item.price).toFixed(2)} <span className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold">ETB</span>
                         </div>
 
-                        {/* Circular Golden Amber Plus Button */}
+                        {/* Tashkent-style Action Pill */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -818,10 +828,11 @@ export function WaiterPadView() {
                               imageUrl: item.imageUrl,
                             });
                           }}
-                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black flex items-center justify-center shadow-lg shadow-amber-500/25 active:scale-95 transition-all cursor-pointer flex-shrink-0"
-                          title="Quick add to order"
+                          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 font-black text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0"
+                          title="Add to table order"
                         >
-                          <Plus className="w-4 h-4 stroke-[3]" />
+                          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>Add</span>
                         </button>
                       </div>
                     </div>
