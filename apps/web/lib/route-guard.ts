@@ -53,6 +53,12 @@ export const STATION_ROUTES: RouteConfig[] = [
     allowedRoles: ['OWNER', 'MANAGER'],
     icon: 'LayoutGrid',
   },
+  {
+    path: '/staff',
+    label: 'Staff & Security',
+    allowedRoles: ['OWNER', 'MANAGER'],
+    icon: 'Users',
+  },
 ];
 
 export function getDefaultRouteForRole(role?: UserRole | null): string {

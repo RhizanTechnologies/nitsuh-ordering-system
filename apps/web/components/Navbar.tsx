@@ -20,6 +20,7 @@ import {
   Sun,
   Moon,
   Calendar,
+  Users,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fetchApi, getSocket } from '@/lib/api';
@@ -159,6 +160,21 @@ export function Navbar() {
                   <ChefHat className="w-3.5 h-3.5" />
                   <span>Kitchen Display (KDS)</span>
                 </Link>
+                {isOwnerOrManager && (
+                  <Link
+                    href="/staff"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                      pathname === '/staff'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                    }`}
+                    title="Staff & User Management"
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    <span>Staff & Users</span>
+                  </Link>
+                )}
+
                 <Link
                   href="/inventory"
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
@@ -187,6 +203,21 @@ export function Navbar() {
                   >
                     <BarChart3 className="w-3.5 h-3.5" />
                     <span>Profit & Analytics</span>
+                  </Link>
+                )}
+
+                {isOwnerOrManager && (
+                  <Link
+                    href="/staff"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                      pathname === '/staff'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                    }`}
+                    title="Staff & User Management"
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    <span>Staff & Users</span>
                   </Link>
                 )}
 
@@ -333,6 +364,19 @@ export function Navbar() {
                     </div>
                   </div>
 
+                  {isOwnerOrManager && (
+                    <div className="py-2 border-b border-white/10">
+                      <Link
+                        href="/staff"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-2 py-2 px-3 rounded-xl hover:bg-white/10 text-xs font-bold text-amber-300 transition"
+                      >
+                        <Users className="w-4 h-4 text-amber-400" />
+                        <span>Staff & Users Console</span>
+                      </Link>
+                    </div>
+                  )}
+
                   <div className="pt-3">
                     <button
                       onClick={handleLogout}
@@ -374,6 +418,17 @@ export function Navbar() {
                 <span>Profit</span>
               </Link>
             )}
+            <Link
+              href="/staff"
+              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                pathname === '/staff'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                  : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Staff</span>
+            </Link>
             <Link
               href="/inventory"
               className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${

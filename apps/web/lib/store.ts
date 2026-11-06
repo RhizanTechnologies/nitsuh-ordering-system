@@ -32,6 +32,7 @@ export const applyTheme = (theme: ThemeMode) => {
 export interface StaffUser {
   id: string;
   name: string;
+  employeeCode?: string;
   email: string;
   role: 'OWNER' | 'MANAGER' | 'CASHIER' | 'WAITER' | 'KITCHEN_STAFF' | 'MAIN_STOREKEEPER' | 'KITCHEN_STOREKEEPER' | 'HEAD_CHEF';
   avatarUrl?: string;

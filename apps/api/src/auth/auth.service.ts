@@ -10,10 +10,24 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async loginWithPassword(email: string, pass: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+  async loginWithPassword(identifier: string, pass: string) {
+    const trimmed = identifier?.trim();
+    if (!trimmed) {
+      throw new UnauthorizedException('Please enter your Employee Code, Name, or Email');
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: trimmed.toLowerCase() },
+          { employeeCode: trimmed.toUpperCase() },
+          { name: { equals: trimmed, mode: 'insensitive' } },
+        ],
+      },
+    });
+
     if (!user || !user.isActive) {
-      throw new UnauthorizedException('Invalid email or inactive account');
+      throw new UnauthorizedException('Invalid identifier or inactive account');
     }
 
     const matches = await bcrypt.compare(pass, user.passwordHash);
@@ -21,12 +35,19 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role, name: user.name };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      employeeCode: user.employeeCode,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
       user: {
         id: user.id,
         name: user.name,
+        employeeCode: user.employeeCode,
         email: user.email,
         role: user.role,
         avatarUrl: user.avatarUrl,
@@ -51,12 +72,19 @@ export class AuthService {
       );
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role, name: user.name };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      employeeCode: user.employeeCode,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
       user: {
         id: user.id,
         name: user.name,
+        employeeCode: user.employeeCode,
         email: user.email,
         role: user.role,
         avatarUrl: user.avatarUrl,
@@ -70,6 +98,7 @@ export class AuthService {
       select: {
         id: true,
         name: true,
+        employeeCode: true,
         email: true,
         role: true,
         avatarUrl: true,

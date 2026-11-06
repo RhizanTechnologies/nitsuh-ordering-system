@@ -7,8 +7,9 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
-    return this.authService.loginWithPassword(body.email, body.password);
+  async login(@Body() body: { email?: string; identifier?: string; password: string }) {
+    const ident = body.identifier || body.email || '';
+    return this.authService.loginWithPassword(ident, body.password);
   }
 
   @Post('login-pin')
