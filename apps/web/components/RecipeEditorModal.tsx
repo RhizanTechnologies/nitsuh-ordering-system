@@ -179,8 +179,8 @@ export function RecipeEditorModal({
     );
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-[#161311] text-white rounded-[32px] max-w-2xl w-full p-6 shadow-2xl border border-white/15 space-y-4 max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-[#161311] text-white rounded-[32px] max-w-2xl sm:max-w-3xl w-full p-4 sm:p-6 shadow-2xl border border-white/15 space-y-4 max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header with Dish Switcher */}
         <div className="flex items-start justify-between pb-3 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
@@ -261,40 +261,55 @@ export function RecipeEditorModal({
           </div>
         )}
 
-        {/* Batch Yield Control & Ingredient Adder Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-shrink-0">
-          {/* Yield Portions Stepper */}
-          <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-2xl px-3 py-2">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Yield:</span>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setYieldPortions((prev) => Math.max(1, prev - 1))}
-                className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center cursor-pointer"
-              >
-                -
-              </button>
-              <input
-                type="number"
-                min="1"
-                step="1"
-                value={yieldPortions}
-                onChange={(e) => setYieldPortions(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-10 bg-transparent text-center font-black text-xs text-amber-400 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setYieldPortions((prev) => prev + 1)}
-                className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center cursor-pointer"
-              >
-                +
-              </button>
+        {/* Batch Yield Control & Ingredient Adder Controls (Fully Responsive) */}
+        <div className="space-y-2 flex-shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            {/* Yield Portions Stepper */}
+            <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-2xl px-3 py-1.5">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Yield:</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setYieldPortions((prev) => Math.max(1, prev - 1))}
+                  className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center cursor-pointer transition active:scale-95"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={yieldPortions}
+                  onChange={(e) => setYieldPortions(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-10 bg-transparent text-center font-black text-xs text-amber-400 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setYieldPortions((prev) => prev + 1)}
+                  className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center cursor-pointer transition active:scale-95"
+                >
+                  +
+                </button>
+              </div>
+              <span className="text-[11px] text-zinc-400 font-medium whitespace-nowrap">portion(s)</span>
             </div>
-            <span className="text-[11px] text-zinc-400 font-medium">portion(s)</span>
+
+            {/* Quick Link to New Stock Item if needed */}
+            {onOpenCreateStockItem && (
+              <button
+                type="button"
+                onClick={onOpenCreateStockItem}
+                className="px-3 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 hover:text-amber-300 border border-amber-500/30 rounded-2xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 active:scale-95 ml-auto"
+                title="Create a new stock item in inventory"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ New Ingredient</span>
+              </button>
+            )}
           </div>
 
-          {/* Add Ingredient Selector */}
-          <div className="flex-1 flex items-center gap-2">
+          {/* Full-width Responsive Ingredient Selector */}
+          <div className="w-full min-w-0">
             <select
               value={selectedIngredientId}
               onChange={(e) => {
@@ -303,7 +318,7 @@ export function RecipeEditorModal({
                   handleAddIngredient(val);
                 }
               }}
-              className="flex-1 bg-[#1e1a17] border border-white/10 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+              className="w-full min-w-0 max-w-full bg-[#1e1a17] border border-white/10 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer truncate"
             >
               <option value="">+ Add an ingredient from inventory...</option>
               {availableIngredients.map((ing) => (
@@ -312,18 +327,6 @@ export function RecipeEditorModal({
                 </option>
               ))}
             </select>
-
-            {onOpenCreateStockItem && (
-              <button
-                type="button"
-                onClick={onOpenCreateStockItem}
-                className="px-3 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-2xl text-xs font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 flex-shrink-0"
-                title="Create a new stock ingredient in inventory"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">New Ingredient</span>
-              </button>
-            )}
           </div>
         </div>
 
@@ -412,17 +415,17 @@ export function RecipeEditorModal({
         </div>
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/10 flex-shrink-0">
-          <div className="text-xs text-zinc-400">
-            Total Recipe Cost: <strong className="text-white">{portionCost.toFixed(4)} ETB</strong> / portion
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-white/10 flex-shrink-0">
+          <div className="text-xs text-zinc-400 text-center sm:text-left">
+            Total Recipe Cost: <strong className="text-white font-bold">{portionCost.toFixed(4)} ETB</strong> / portion
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white cursor-pointer transition hover:bg-white/5"
             >
               Cancel
             </button>
@@ -430,10 +433,10 @@ export function RecipeEditorModal({
               type="button"
               disabled={saving || recipeLines.length === 0}
               onClick={handleSave}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black text-xs shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5 disabled:opacity-40 cursor-pointer active:scale-95"
+              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black text-xs shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer active:scale-95"
             >
               <Check className="w-4 h-4 stroke-[3]" />
-              <span>{saving ? 'Saving Recipe...' : 'Save Recipe & Recalculate'}</span>
+              <span>{saving ? 'Saving...' : 'Save Recipe & Recalculate'}</span>
             </button>
           </div>
         </div>
