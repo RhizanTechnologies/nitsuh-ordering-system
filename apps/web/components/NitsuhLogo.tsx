@@ -58,13 +58,13 @@ export function NitsuhLogo({
           
           {showSubtitle && (
             <div className="space-y-1 mt-1.5">
-              <p className="text-xs sm:text-sm font-bold text-amber-500 dark:text-amber-300 tracking-tight">
+              <p className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-300 tracking-tight">
                 From Savour Bites to Sweet Delights – We Cater It All!
               </p>
-              <div className="flex items-center justify-center gap-2 text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
+              <div className="flex items-center justify-center gap-2 text-[11px] font-semibold text-stone-600 dark:text-zinc-400">
                 <span>Addis Ababa, Ethiopia</span>
-                <span className="w-1 h-1 rounded-full bg-amber-400" />
-                <span className="font-mono text-zinc-700 dark:text-zinc-300">0966833177</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                <span className="font-mono text-stone-800 dark:text-zinc-200 font-bold">0966833177</span>
               </div>
             </div>
           )}
