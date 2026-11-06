@@ -34,14 +34,21 @@ export class AuthService {
     };
   }
 
-  // Fast 4-6 digit touch PIN switch (especially designed for Waiters and Cashiers at the counter)
-  async loginWithPin(pin: string) {
+  // Fast 4-6 digit touch PIN switch with optional specific employee targeting
+  async loginWithPin(pin: string, userId?: string) {
+    const whereClause: any = { pinCode: pin, isActive: true };
+    if (userId) {
+      whereClause.id = userId;
+    }
+
     const user = await this.prisma.user.findFirst({
-      where: { pinCode: pin, isActive: true },
+      where: whereClause,
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid employee PIN');
+      throw new UnauthorizedException(
+        userId ? 'Incorrect PIN for the selected employee' : 'Invalid employee PIN',
+      );
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role, name: user.name };

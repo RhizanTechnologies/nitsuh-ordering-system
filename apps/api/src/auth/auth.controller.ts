@@ -12,8 +12,8 @@ export class AuthController {
   }
 
   @Post('login-pin')
-  async loginWithPin(@Body() body: { pin: string }) {
-    return this.authService.loginWithPin(body.pin);
+  async loginWithPin(@Body() body: { pin: string; userId?: string }) {
+    return this.authService.loginWithPin(body.pin, body.userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
