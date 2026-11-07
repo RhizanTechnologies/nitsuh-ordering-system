@@ -430,7 +430,7 @@ export function WaiterPadView() {
     <div className="flex-1 min-h-0 flex flex-col md:flex-row h-full overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white relative transition-colors">
       {/* Background ambient lighting glows */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#B83E18]/5 dark:bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/5 dark:bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Real-time Ready Alert Toast */}
       {readyToast && (
@@ -506,18 +506,18 @@ export function WaiterPadView() {
             {/* Search Pill with Equalizer Filter Icon matching reference */}
             <div className="mb-4 flex items-center gap-2.5">
               <div className="flex-1 relative flex items-center">
-                <Search className="w-4 h-4 text-zinc-400 absolute left-4 pointer-events-none" />
+                <Search className="w-4 h-4 text-stone-400 dark:text-zinc-400 absolute left-4 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search your favorite food..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 hover:border-white/20 focus:border-amber-500/50 rounded-2xl pl-11 pr-10 py-3 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none transition shadow-inner backdrop-blur-xl"
+                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-200/90 dark:border-white/10 hover:border-amber-500/40 focus:border-amber-500 rounded-2xl pl-11 pr-10 py-3 text-xs sm:text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none transition shadow-xs backdrop-blur-xl"
                 />
                 {search && (
                   <button
                     onClick={() => setSearch('')}
-                    className="absolute right-3.5 p-1 text-zinc-400 hover:text-white"
+                    className="absolute right-3.5 p-1 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -527,7 +527,7 @@ export function WaiterPadView() {
               {/* Equalizer / Filter button opening Table Plan */}
               <button
                 onClick={() => setTableModalOpen(true)}
-                className="p-3 bg-white/[0.05] hover:bg-white/[0.09] active:scale-95 border border-white/10 rounded-2xl text-zinc-300 hover:text-amber-400 transition shadow-inner cursor-pointer"
+                className="p-3 bg-white dark:bg-white/[0.05] hover:bg-stone-50 dark:hover:bg-white/[0.09] active:scale-95 border border-stone-200/90 dark:border-white/10 rounded-2xl text-stone-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition shadow-xs cursor-pointer"
                 title="Table Floor Plan"
               >
                 <SlidersHorizontal className="w-5 h-5" />
@@ -536,13 +536,13 @@ export function WaiterPadView() {
 
             {/* Dine-In / Takeaway & Table Strip */}
             <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-1.5 p-1 bg-white/[0.04] border border-white/10 rounded-2xl flex-1 sm:flex-none">
+              <div className="flex items-center gap-1.5 p-1 bg-stone-100 dark:bg-white/[0.04] border border-stone-200/80 dark:border-white/10 rounded-2xl flex-1 sm:flex-none">
                 <button
                   onClick={() => setOrderType('DINE_IN')}
                   className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     orderType === 'DINE_IN'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md font-black'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-md font-black'
+                      : 'text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <Utensils className="w-3.5 h-3.5 flex-shrink-0" />
@@ -552,8 +552,8 @@ export function WaiterPadView() {
                   onClick={() => setOrderType('TAKEAWAY')}
                   className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                     orderType === 'TAKEAWAY'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md font-black'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-md font-black'
+                      : 'text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <ShoppingBag className="w-3.5 h-3.5 flex-shrink-0" />
@@ -563,7 +563,7 @@ export function WaiterPadView() {
 
               {orderType === 'DINE_IN' ? (
                 <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto">
-                  <span className="text-[11px] font-bold text-zinc-400 uppercase mr-1 flex-shrink-0">Table:</span>
+                  <span className="text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mr-1 flex-shrink-0">Table:</span>
                   {tables.slice(0, 8).map((t) => {
                     const isOccupied = t.status === 'OCCUPIED';
                     const isSelected = waiterTable === t.tableNumber;
@@ -573,10 +573,10 @@ export function WaiterPadView() {
                         onClick={() => setWaiterTable(t.tableNumber)}
                         className={`px-2.5 py-1 rounded-xl text-xs font-bold transition border cursor-pointer flex-shrink-0 ${
                           isSelected
-                            ? 'bg-amber-500 text-black border-amber-400 font-black shadow-md'
+                            ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-md'
                             : isOccupied
-                            ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25'
-                            : 'bg-white/[0.04] border-white/10 text-zinc-300 hover:bg-white/[0.08]'
+                            ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30 hover:bg-amber-500/25'
+                            : 'bg-white dark:bg-white/[0.04] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:bg-stone-50 dark:hover:bg-white/[0.08]'
                         }`}
                         title={isOccupied ? `${t.tableNumber} is occupied (tap to add items to active bill)` : t.tableNumber}
                       >
@@ -587,7 +587,7 @@ export function WaiterPadView() {
                   })}
                   <button
                     onClick={() => setTableModalOpen(true)}
-                    className="px-2 py-1 bg-white/[0.04] hover:bg-white/[0.08] text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex-shrink-0"
+                    className="px-2 py-1 bg-white dark:bg-white/[0.04] hover:bg-stone-50 dark:hover:bg-white/[0.08] text-amber-700 dark:text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex-shrink-0"
                   >
                     All...
                   </button>
@@ -598,7 +598,7 @@ export function WaiterPadView() {
                   placeholder="Customer name for takeaway..."
                   value={takeawayCustomer}
                   onChange={(e) => setTakeawayCustomer(e.target.value)}
-                  className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-auto"
+                  className="bg-white dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-auto"
                 />
               )}
             </div>
@@ -612,14 +612,14 @@ export function WaiterPadView() {
                 }}
                 className={`flex-shrink-0 px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-black transition cursor-pointer border ${
                   groupFilter === 'ALL' && !selectedCategory
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400'
-                    : 'bg-white/[0.05] border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.08]'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400'
+                    : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.08]'
                 }`}
               >
                 <span>🍽️</span>
                 <span>All Items</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  groupFilter === 'ALL' && !selectedCategory ? 'bg-black/30 text-black' : 'bg-white/10 text-zinc-400'
+                  groupFilter === 'ALL' && !selectedCategory ? 'bg-black/20 text-stone-950' : 'bg-stone-100 dark:bg-white/10 text-stone-600 dark:text-zinc-400'
                 }`}>
                   {allItems.length}
                 </span>
@@ -649,15 +649,15 @@ export function WaiterPadView() {
                     }}
                     className={`flex-shrink-0 px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-bold transition cursor-pointer border ${
                       isActive
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400 font-black'
-                        : 'bg-white/[0.05] border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.08]'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400 font-black'
+                        : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.08]'
                     }`}
                   >
                     <span className="text-base">{cat.emoji}</span>
                     <span>{cat.label}</span>
                     {count > 0 && (
                       <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                        isActive ? 'bg-black/30 text-black font-black' : 'bg-white/10 text-zinc-400'
+                        isActive ? 'bg-black/20 text-stone-950 font-black' : 'bg-stone-100 dark:bg-white/10 text-stone-600 dark:text-zinc-400'
                       }`}>
                         {count}
                       </span>

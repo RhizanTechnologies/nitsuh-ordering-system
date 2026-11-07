@@ -746,7 +746,7 @@ export function PosView() {
     <div className="flex-1 min-h-0 flex flex-col lg:flex-row h-full overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white relative transition-colors">
       {/* Background ambient lighting glows */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#B83E18]/5 dark:bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/5 dark:bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Left: Menu Browse & Item Selection (ALWAYS visible on both mobile and desktop) */}
       <div className="flex-1 min-h-0 flex flex-col p-3.5 sm:p-6 overflow-y-auto pb-28 lg:pb-6 relative z-10 no-scrollbar">
@@ -881,26 +881,26 @@ export function PosView() {
 
         {/* Search Bar matching reference style */}
         <div className="relative mb-3">
-          <div className="flex items-center bg-white/[0.05] border border-white/10 focus-within:border-amber-500/50 rounded-2xl px-3.5 py-2.5 shadow-inner transition">
-            <Search className="w-4 h-4 text-zinc-400 mr-2.5 flex-shrink-0" />
+          <div className="flex items-center bg-white dark:bg-white/[0.05] border border-stone-200/90 dark:border-white/10 focus-within:border-amber-500 rounded-2xl px-3.5 py-2.5 shadow-xs transition">
+            <Search className="w-4 h-4 text-stone-400 dark:text-zinc-400 mr-2.5 flex-shrink-0" />
             <input
               type="text"
               placeholder="Search dishes, burgers, pizza, coffee..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent text-xs sm:text-sm font-semibold text-white focus:outline-none placeholder-zinc-500 pr-6"
+              className="w-full bg-transparent text-xs sm:text-sm font-semibold text-stone-900 dark:text-white focus:outline-none placeholder-stone-400 dark:placeholder-zinc-500 pr-6"
             />
             {searchQuery ? (
               <button
                 onClick={() => setSearchQuery('')}
-                className="p-1 text-zinc-400 hover:text-white rounded-full transition absolute right-3"
+                className="p-1 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white rounded-full transition absolute right-3"
               >
                 <X className="w-4 h-4" />
               </button>
             ) : (
               <button
                 onClick={() => setTableModalOpen(true)}
-                className="text-zinc-400 hover:text-amber-400 transition absolute right-3 cursor-pointer"
+                className="text-stone-400 hover:text-amber-600 dark:text-zinc-400 dark:hover:text-amber-400 transition absolute right-3 cursor-pointer"
                 title="Table Floor Plan"
               >
                 <SlidersHorizontal className="w-4 h-4" />
@@ -916,8 +916,8 @@ export function PosView() {
               onClick={() => setOrderType('DINE_IN')}
               className={`flex-1 min-w-0 py-2 px-2.5 sm:px-3 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer border ${
                 orderType === 'DINE_IN'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black border-amber-400 shadow-md shadow-amber-500/20'
-                  : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/20'
+                  : 'bg-white dark:bg-white/[0.04] border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
               }`}
             >
               <Utensils className="w-3.5 h-3.5 flex-shrink-0" />
@@ -928,8 +928,8 @@ export function PosView() {
               onClick={() => setOrderType('TAKEAWAY')}
               className={`flex-1 min-w-0 py-2 px-2.5 sm:px-3 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer border ${
                 orderType === 'TAKEAWAY'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black border-amber-400 shadow-md shadow-amber-500/20'
-                  : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/20'
+                  : 'bg-white dark:bg-white/[0.04] border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
               }`}
             >
               <ShoppingBag className="w-3.5 h-3.5 flex-shrink-0" />
@@ -939,7 +939,7 @@ export function PosView() {
 
           {orderType === 'DINE_IN' ? (
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider pl-1 mr-1 flex-shrink-0">Table:</span>
+              <span className="text-[10px] font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider pl-1 mr-1 flex-shrink-0">Table:</span>
               {tables.map((t) => {
                 const isSelected = selectedTable === t.tableNumber;
                 const isOccupied = t.status === 'OCCUPIED';
@@ -950,10 +950,10 @@ export function PosView() {
                     onClick={() => handleSelectTable(t.tableNumber)}
                     className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition cursor-pointer border flex-shrink-0 ${
                       isSelected
-                        ? 'bg-amber-500 text-black font-black border-amber-400 shadow-md'
+                        ? 'bg-amber-500 text-stone-950 font-black border-amber-400 shadow-md'
                         : isOccupied
-                        ? 'bg-rose-950/40 text-rose-300 border-rose-500/30'
-                        : 'bg-white/[0.04] border-white/10 text-zinc-300 hover:bg-white/[0.08]'
+                        ? 'bg-amber-500/15 text-amber-800 dark:text-rose-300 border-amber-500/30 dark:border-rose-500/30'
+                        : 'bg-white dark:bg-white/[0.04] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:bg-stone-50 dark:hover:bg-white/[0.08]'
                     }`}
                   >
                     <span>{t.tableNumber}</span>
@@ -962,7 +962,7 @@ export function PosView() {
               })}
               <button
                 onClick={() => setTableModalOpen(true)}
-                className="px-2.5 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-amber-400 font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer flex-shrink-0"
+                className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-white/[0.06] hover:bg-stone-50 dark:hover:bg-white/[0.1] border border-stone-200/90 dark:border-white/10 text-amber-700 dark:text-amber-400 font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer flex-shrink-0"
               >
                 <LayoutGrid className="w-3 h-3" />
                 <span>Plan</span>
@@ -975,7 +975,7 @@ export function PosView() {
                 placeholder="Takeaway Customer Name..."
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-2xl px-3.5 py-2 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                className="w-full bg-white dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
               />
             </div>
           )}
@@ -990,14 +990,14 @@ export function PosView() {
             }}
             className={`flex-shrink-0 px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-black transition cursor-pointer border ${
               groupFilter === 'ALL' && !selectedCategory
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400'
-                : 'bg-white/[0.05] border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.08]'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400'
+                : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.08]'
             }`}
           >
             <span>🍽️</span>
             <span>All Items</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-              groupFilter === 'ALL' && !selectedCategory ? 'bg-black/30 text-black' : 'bg-white/10 text-zinc-400'
+              groupFilter === 'ALL' && !selectedCategory ? 'bg-black/20 text-stone-950' : 'bg-stone-100 dark:bg-white/10 text-stone-600 dark:text-zinc-400'
             }`}>
               {allItems.length}
             </span>
@@ -1027,15 +1027,15 @@ export function PosView() {
                 }}
                 className={`flex-shrink-0 px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-bold transition cursor-pointer border ${
                   isActive
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400 font-black'
-                    : 'bg-white/[0.05] border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.08]'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400 font-black'
+                    : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.08]'
                 }`}
               >
                 <span className="text-base">{cat.emoji}</span>
                 <span>{cat.label}</span>
                 {count > 0 && (
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    isActive ? 'bg-black/30 text-black font-black' : 'bg-white/10 text-zinc-400'
+                    isActive ? 'bg-black/20 text-stone-950 font-black' : 'bg-stone-100 dark:bg-white/10 text-stone-600 dark:text-zinc-400'
                   }`}>
                     {count}
                   </span>
