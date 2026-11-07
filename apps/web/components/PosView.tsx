@@ -1162,23 +1162,54 @@ export function PosView() {
                       </span>
                     </div>
 
-                    {/* Round Terracotta Quick Select Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart({
-                          id: item.id,
-                          name: item.name,
-                          price: Number(item.price),
-                          imageUrl: item.imageUrl,
-                          isDirectSale: item.isDirectSale,
-                        });
-                      }}
-                      className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-90 text-white flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
-                      title="Add to cart"
-                    >
-                      <Plus className="w-4 h-4 stroke-[3]" />
-                    </button>
+                    {/* Stepper Pill if selected, or Round Quick-Add Button */}
+                    {qty > 0 ? (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1 sm:gap-1.5 bg-[#B83E18] text-white p-1 rounded-full shadow-md shadow-[#B83E18]/30 flex-shrink-0 animate-in zoom-in-75 duration-150"
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateQuantity(item.id, -1);
+                          }}
+                          className="w-6 h-6 rounded-full bg-black/20 hover:bg-black/35 active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+                          title="Reduce amount"
+                        >
+                          <Minus className="w-3 h-3 stroke-[3]" />
+                        </button>
+                        <span className="text-xs font-black px-1 min-w-[16px] text-center select-none">
+                          {qty}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateQuantity(item.id, 1);
+                          }}
+                          className="w-6 h-6 rounded-full bg-black/20 hover:bg-black/35 active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+                          title="Add more"
+                        >
+                          <Plus className="w-3 h-3 stroke-[3]" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart({
+                            id: item.id,
+                            name: item.name,
+                            price: Number(item.price),
+                            imageUrl: item.imageUrl,
+                            isDirectSale: item.isDirectSale,
+                          });
+                        }}
+                        className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-90 text-white flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
+                        title="Add to cart"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3]" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
