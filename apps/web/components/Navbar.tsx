@@ -88,6 +88,7 @@ export function Navbar() {
   const isOwnerOrManager = role === 'OWNER' || role === 'MANAGER';
 
   const handleLogout = () => {
+    setProfileOpen(false);
     logout();
     router.push('/login');
   };
@@ -342,63 +343,61 @@ export function Navbar() {
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#1A1614] rounded-2xl shadow-2xl border border-stone-200 dark:border-white/15 p-3.5 z-50 text-stone-900 dark:text-white animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
-                    {currentUser.avatarUrl ? (
-                      <img
-                        src={currentUser.avatarUrl}
-                        alt={currentUser.name}
-                        className="w-10 h-10 rounded-full object-cover ring-2 ring-amber-400/40"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm ring-2 ring-amber-400/40">
-                        {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
+                <>
+                  {/* Backdrop click dismiss */}
+                  <div
+                    className="fixed inset-0 z-40 bg-transparent"
+                    onClick={() => setProfileOpen(false)}
+                  />
+
+                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#1A1614] rounded-2xl shadow-2xl border border-stone-200 dark:border-white/15 p-3.5 z-50 text-stone-900 dark:text-white animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
+                      {currentUser.avatarUrl ? (
+                        <img
+                          src={currentUser.avatarUrl}
+                          alt={currentUser.name}
+                          className="w-10 h-10 rounded-full object-cover ring-2 ring-amber-400/40"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm ring-2 ring-amber-400/40">
+                          {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
+                        </div>
+                      )}
+                      <div className="truncate">
+                        <div className="text-sm font-black text-stone-900 dark:text-white truncate">{currentUser.name}</div>
+                        <div className="text-[11px] text-stone-500 dark:text-zinc-400 truncate">{currentUser.email || 'Terminal User'}</div>
+                        <span className="inline-block mt-0.5 text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                          {currentUser.role.replace('_', ' ')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {isOwnerOrManager && (
+                      <div className="py-2 border-b border-stone-200 dark:border-white/10">
+                        <Link
+                          href="/staff"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-2 py-2 px-3 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-xs font-bold text-amber-700 dark:text-amber-300 transition"
+                        >
+                          <Users className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          <span>Staff & Users Console</span>
+                        </Link>
                       </div>
                     )}
-                    <div className="truncate">
-                      <div className="text-sm font-black text-stone-900 dark:text-white truncate">{currentUser.name}</div>
-                      <div className="text-[11px] text-stone-500 dark:text-zinc-400 truncate">{currentUser.email || 'Terminal User'}</div>
-                      <span className="inline-block mt-0.5 text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                        {currentUser.role.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </div>
 
-                  {isOwnerOrManager && (
-                    <div className="py-2 border-b border-stone-200 dark:border-white/10">
-                      <Link
-                        href="/staff"
-                        onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-2 py-2 px-3 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-xs font-bold text-amber-700 dark:text-amber-300 transition"
+                    <div className="pt-3">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#C11221] hover:bg-[#a50f1c] text-white border border-[#a50f1c] font-black text-xs transition shadow-sm cursor-pointer"
                       >
-                        <Users className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                        <span>Staff & Users Console</span>
-                      </Link>
+                        <LogOut className="w-4 h-4 text-white stroke-[2.5]" />
+                        <span className="text-white font-black">Sign Out & Lock Terminal</span>
+                      </button>
                     </div>
-                  )}
-
-                  <div className="pt-3">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#C11221] hover:bg-[#a50f1c] text-white border border-[#a50f1c] font-black text-xs transition shadow-sm cursor-pointer"
-                    >
-                      <LogOut className="w-4 h-4 text-white stroke-[2.5]" />
-                      <span className="text-white font-black">Sign Out & Lock Terminal</span>
-                    </button>
                   </div>
-                </div>
+                </>
               )}
             </div>
-
-            {/* EXPLICIT RESPONSIVE LOGOUT BUTTON (Bold, Solid Crimson, High Contrast) */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 bg-[#C11221] hover:bg-[#a50f1c] active:scale-95 text-white font-black border border-[#a50f1c] rounded-xl sm:rounded-2xl text-xs transition shadow-md shadow-red-600/25 flex-shrink-0 cursor-pointer"
-              title="Logout & Lock Terminal"
-            >
-              <LogOut className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-              <span className="inline font-black text-white tracking-wide">Logout</span>
-            </button>
           </div>
         </div>
 
