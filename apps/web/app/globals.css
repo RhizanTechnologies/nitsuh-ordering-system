@@ -96,6 +96,22 @@
   background: var(--brand-amber);
 }
 
+/* Hide scrollbar completely on horizontal category bars and all .no-scrollbar containers */
+.no-scrollbar,
+.overflow-x-auto,
+[class*="overflow-x-auto"] {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar,
+[class*="overflow-x-auto"]::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* Educated Light Theme Visual Transformation Rules */
 [data-theme="light"] body,
 .theme-light body {
