@@ -418,7 +418,7 @@ export function ProductManagementView() {
           <div>
             <h2 className="text-base font-black text-white flex items-center gap-2">
               <Utensils className="w-5 h-5 text-amber-400" />
-              <span>Menu Products, Recipes & Add-ons Studio</span>
+              <span>Menu Products</span>
             </h2>
           </div>
 
@@ -436,7 +436,7 @@ export function ProductManagementView() {
                 className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 transition active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
-                <span>Add New Product</span>
+                <span>Add Product</span>
               </button>
             ) : (
               <button
@@ -444,7 +444,7 @@ export function ProductManagementView() {
                 className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 transition active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
-                <span>Create Real Add-on</span>
+                <span>Add Modifier</span>
               </button>
             )}
           </div>
@@ -461,7 +461,7 @@ export function ProductManagementView() {
             }`}
           >
             <Utensils className="w-3.5 h-3.5" />
-            <span>Products & Recipes</span>
+            <span>Products</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
               activeTab === 'products' ? 'bg-black/20 text-black font-extrabold' : 'bg-white/10 text-zinc-400'
             }`}>
@@ -478,7 +478,7 @@ export function ProductManagementView() {
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Real Kitchen Add-ons & Modifiers</span>
+            <span>Add-ons</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
               activeTab === 'addons' ? 'bg-black/20 text-black font-extrabold' : 'bg-white/10 text-zinc-400'
             }`}>
@@ -504,7 +504,7 @@ export function ProductManagementView() {
               <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search products by name, ingredients, or category..."
+                placeholder="Search products..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -537,7 +537,7 @@ export function ProductManagementView() {
                     : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
                 }`}
               >
-                All Categories ({items.length})
+                All ({items.length})
               </button>
               {categories.map((c) => (
                 <button
@@ -564,36 +564,25 @@ export function ProductManagementView() {
           </div>
         )}
 
-        {/* Tab 2: Add-ons Search & Metrics Row */}
+        {/* Tab 2: Add-ons Search Row */}
         {activeTab === 'addons' && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex-1 relative">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search add-ons by name, linked ingredient, category, or product..."
-                value={addonSearch}
-                onChange={(e) => setAddonSearch(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-2xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none transition shadow-inner"
-              />
-              {addonSearch && (
-                <button
-                  onClick={() => setAddonSearch('')}
-                  className="p-1 text-zinc-400 hover:text-white rounded-full transition absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3 text-xs text-zinc-400">
-              <div className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-2">
-                <span className="text-[10px] uppercase font-bold text-zinc-500">Inventory Linked:</span>
-                <span className="font-extrabold text-amber-400">
-                  {addons.filter((a) => a.ingredientId).length} / {addons.length}
-                </span>
-              </div>
-            </div>
+          <div className="relative">
+            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search add-ons..."
+              value={addonSearch}
+              onChange={(e) => setAddonSearch(e.target.value)}
+              className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-2xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none transition shadow-inner"
+            />
+            {addonSearch && (
+              <button
+                onClick={() => setAddonSearch('')}
+                className="p-1 text-zinc-400 hover:text-white rounded-full transition absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -650,7 +639,7 @@ export function ProductManagementView() {
             </div>
           </div>
 
-          {/* VIEW MODE 1: 1 PRODUCT PER PAGE (STUDIO SHOWCASE) */}
+          {/* VIEW MODE 1: 1 PRODUCT PER PAGE (CLEAN SHOWCASE) */}
           {viewMode === 'single' && (
             <div>
               {filteredItems.length === 0 ? (
@@ -658,360 +647,124 @@ export function ProductManagementView() {
                   No products found matching your search.
                 </div>
               ) : currentSingleItem ? (
-                <div className="bg-white/[0.04] border border-white/10 hover:border-amber-500/20 rounded-3xl p-5 sm:p-7 shadow-2xl backdrop-blur-xl space-y-6 transition">
+                <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl max-w-lg mx-auto space-y-6">
                   {/* Stepper / Pagination Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setSingleIndex((p) => Math.max(0, p - 1))}
-                        disabled={safeSingleIndex === 0}
-                        className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white border border-white/10 flex items-center gap-1 transition cursor-pointer"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span>Previous</span>
-                      </button>
+                  <div className="flex items-center justify-between gap-2 pb-4 border-b border-white/10">
+                    <button
+                      onClick={() => setSingleIndex((p) => Math.max(0, p - 1))}
+                      disabled={safeSingleIndex === 0}
+                      className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white border border-white/10 flex items-center gap-1 transition cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Previous</span>
+                    </button>
 
-                      <span className="text-xs font-bold text-zinc-400 px-1">
-                        Product <span className="text-amber-400 font-black">{safeSingleIndex + 1}</span> of{' '}
-                        <span className="text-white font-black">{filteredItems.length}</span>
-                      </span>
+                    <span className="text-xs font-bold text-zinc-400">
+                      <span className="text-amber-400 font-black">{safeSingleIndex + 1}</span> of{' '}
+                      <span className="text-white font-black">{filteredItems.length}</span>
+                    </span>
 
-                      <button
-                        onClick={() => setSingleIndex((p) => Math.min(filteredItems.length - 1, p + 1))}
-                        disabled={safeSingleIndex >= filteredItems.length - 1}
-                        className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white border border-white/10 flex items-center gap-1 transition cursor-pointer"
-                      >
-                        <span>Next</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
+                    <button
+                      onClick={() => setSingleIndex((p) => Math.min(filteredItems.length - 1, p + 1))}
+                      disabled={safeSingleIndex >= filteredItems.length - 1}
+                      className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white border border-white/10 flex items-center gap-1 transition cursor-pointer"
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Clean Visual & Product Details */}
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className="w-52 h-52 sm:w-64 sm:h-64 rounded-3xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl">
+                      <MenuImage
+                        src={currentSingleItem.imageUrl}
+                        alt={currentSingleItem.name}
+                        categoryName={currentSingleItem.category?.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
 
-                    {/* Quick Jump Selector */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Jump to:</span>
-                      <select
-                        value={currentSingleItem.id}
-                        onChange={(e) => {
-                          const idx = filteredItems.findIndex((it) => it.id === e.target.value);
-                          if (idx !== -1) setSingleIndex(idx);
-                        }}
-                        className="bg-[#1C1815] border border-white/15 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-500/50 cursor-pointer max-w-[240px]"
-                      >
-                        {filteredItems.map((it, idx) => (
-                          <option key={it.id} value={it.id} className="bg-[#1C1815] text-white">
-                            {idx + 1}. {it.name}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-amber-400 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 inline-block">
+                        {currentSingleItem.category?.name || 'General'}
+                      </span>
+                      <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">
+                        {currentSingleItem.name}
+                      </h2>
+                      <div className="text-2xl sm:text-3xl font-black text-amber-400">
+                        {Number(currentSingleItem.price || 0).toFixed(2)} <span className="text-base font-bold text-amber-500">ETB</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Main Product Display */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    {/* Left: Image & Quick Actions */}
-                    <div className="lg:col-span-5 space-y-4">
-                      <div className="relative aspect-square sm:aspect-4/3 rounded-3xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl">
-                        <MenuImage
-                          src={currentSingleItem.imageUrl}
-                          alt={currentSingleItem.name}
-                          categoryName={currentSingleItem.category?.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                          <span className="text-xs font-black bg-[#161311]/90 backdrop-blur-md px-3 py-1 rounded-xl border border-white/15 text-white shadow-md">
-                            {currentSingleItem.category?.name || 'Uncategorized'}
-                          </span>
-                          {currentSingleItem.isDirectSale && (
-                            <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-blue-600 text-white shadow-md">
-                              Retail
-                            </span>
-                          )}
-                        </div>
-                        {currentSingleItem.prepSection && (
-                          <span className="absolute top-3 right-3 text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 backdrop-blur-md px-2.5 py-1 rounded-xl">
-                            {currentSingleItem.prepSection.replace('_', ' ')}
-                          </span>
-                        )}
-                      </div>
+                  {/* Clean Actions */}
+                  <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/10">
+                    <button
+                      onClick={() => openEditModal(currentSingleItem)}
+                      className="flex-1 py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition cursor-pointer"
+                    >
+                      <Edit2 className="w-4 h-4 stroke-[2.5]" />
+                      <span>Edit Product</span>
+                    </button>
 
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <button
-                          onClick={() => {
-                            setSelectedRecipeItem(currentSingleItem);
-                            setRecipeModalOpen(true);
-                          }}
-                          className="py-2.5 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <ChefHat className="w-4 h-4 stroke-[2.5]" />
-                          <span>Recipe & Ingredients</span>
-                        </button>
-
-                        <button
-                          onClick={() => openEditModal(currentSingleItem)}
-                          className="py-2.5 px-3 bg-white/[0.05] hover:bg-white/[0.1] text-white border border-white/10 font-bold text-xs rounded-2xl flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                          <span>Edit Details</span>
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => handleDeleteProduct(currentSingleItem)}
-                        className="w-full py-2 text-xs font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition border border-rose-500/20 cursor-pointer flex items-center justify-center gap-1.5"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete Product</span>
-                      </button>
-                    </div>
-
-                    {/* Right: Details, Financials & Recipe Breakdown */}
-                    <div className="lg:col-span-7 space-y-5">
-                      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 pb-3 border-b border-white/10">
-                        <div>
-                          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                            {currentSingleItem.name}
-                          </h2>
-                          {currentSingleItem.description && (
-                            <p className="text-xs sm:text-sm text-zinc-400 mt-1 leading-relaxed">
-                              {currentSingleItem.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-left sm:text-right shrink-0">
-                          <div className="text-2xl sm:text-3xl font-black text-amber-400">
-                            {Number(currentSingleItem.price || 0).toFixed(2)} <span className="text-sm font-bold text-amber-500">ETB</span>
-                          </div>
-                          <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Selling Price (VAT Inc.)</span>
-                        </div>
-                      </div>
-
-                      {/* 3 Financial KPI Cards */}
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3.5">
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">
-                            Food Cost
-                          </span>
-                          <div className="text-base sm:text-lg font-black text-rose-400">
-                            {Number(currentSingleItem.costPerPortion || 0) > 0
-                              ? `${Number(currentSingleItem.costPerPortion).toFixed(2)} ETB`
-                              : '0.00 ETB'}
-                          </div>
-                          <span className="text-[10px] text-zinc-500">Raw cost per portion</span>
-                        </div>
-
-                        <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3.5">
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">
-                            Gross Margin
-                          </span>
-                          <div
-                            className={`text-base sm:text-lg font-black ${
-                              Number(currentSingleItem.marginPercent || 0) >= 60
-                                ? 'text-emerald-400'
-                                : Number(currentSingleItem.marginPercent || 0) >= 40
-                                ? 'text-amber-400'
-                                : 'text-rose-400'
-                            }`}
-                          >
-                            {Number(currentSingleItem.marginPercent || 0).toFixed(1)}%
-                          </div>
-                          <span className="text-[10px] text-zinc-500">Margin ratio</span>
-                        </div>
-
-                        <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3.5">
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">
-                            Net Profit
-                          </span>
-                          <div className="text-base sm:text-lg font-black text-emerald-400">
-                            {(Number(currentSingleItem.price || 0) - Number(currentSingleItem.costPerPortion || 0)).toFixed(2)} ETB
-                          </div>
-                          <span className="text-[10px] text-zinc-500">Profit per portion</span>
-                        </div>
-                      </div>
-
-                      {/* Recipe Ingredients Breakdown */}
-                      <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <ChefHat className="w-4 h-4 text-amber-400" />
-                            <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                              Recipe Ingredients ({currentSingleItem.recipe?.ingredients?.length || 0})
-                            </h4>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setSelectedRecipeItem(currentSingleItem);
-                              setRecipeModalOpen(true);
-                            }}
-                            className="text-[11px] font-bold text-amber-400 hover:text-amber-300 transition cursor-pointer"
-                          >
-                            + Edit Recipe
-                          </button>
-                        </div>
-
-                        {currentSingleItem.recipe?.ingredients?.length > 0 ? (
-                          <div className="space-y-1.5 max-h-48 overflow-y-auto no-scrollbar pr-1">
-                            {currentSingleItem.recipe.ingredients.map((ing: any, i: number) => (
-                              <div
-                                key={ing.id || i}
-                                className="flex items-center justify-between text-xs py-1.5 px-3 rounded-xl bg-white/[0.03] border border-white/5"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                  <span className="font-semibold text-white">{ing.ingredient?.name || 'Ingredient'}</span>
-                                  <span className="text-[11px] text-zinc-400">
-                                    ({ing.quantity} {ing.ingredient?.unit || ''})
-                                  </span>
-                                </div>
-                                <span className="font-mono text-zinc-300 font-bold">
-                                  {Number(ing.costContribution || 0).toFixed(2)} ETB
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="p-3 text-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 font-semibold">
-                            No recipe ingredients configured. Click "Edit Recipe" to link stock items.
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Applicable Add-ons */}
-                      {currentSingleItem.applicableAddons?.length > 0 && (
-                        <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-4 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-purple-400" />
-                            <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                              Linked Add-ons ({currentSingleItem.applicableAddons.length})
-                            </h4>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {currentSingleItem.applicableAddons.map((addon: any) => (
-                              <span
-                                key={addon.id}
-                                className="px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-bold"
-                              >
-                                {addon.name} (+{Number(addon.price).toFixed(2)} ETB)
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <button
+                      onClick={() => handleDeleteProduct(currentSingleItem)}
+                      className="py-3 px-4 text-xs font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-2xl transition border border-rose-500/20 cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
+                    </button>
                   </div>
                 </div>
               ) : null}
             </div>
           )}
 
-          {/* VIEW MODE 2: 1 PER ROW (LIST VIEW) */}
+          {/* VIEW MODE 2: 1 PER ROW (CLEAN LIST VIEW) */}
           {viewMode === 'list' && (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {filteredItems.length === 0 ? (
                 <div className="py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl">
                   No products found matching your search.
                 </div>
               ) : (
                 filteredItems.map((item) => {
-                  const ingredientsCount = item.recipe?.ingredients?.length || 0;
-                  const hasRecipe = ingredientsCount > 0;
-                  const cost = Number(item.costPerPortion || 0);
                   const price = Number(item.price || 0);
-                  const margin = Number(item.marginPercent || 0);
-                  const addonsCount = item.applicableAddons?.length || 0;
 
                   return (
                     <div
                       key={item.id}
-                      className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition"
+                      className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-2xl p-3 sm:p-4 shadow-md backdrop-blur-xl flex items-center justify-between gap-4 transition"
                     >
-                      <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-black/40 border border-white/10 shrink-0">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-black/40 border border-white/10 shrink-0">
                           <MenuImage
                             src={item.imageUrl}
                             alt={item.name}
                             categoryName={item.category?.name}
                             className="w-full h-full object-cover"
                           />
-                          {item.isDirectSale && (
-                            <span className="absolute bottom-1 left-1 text-[8px] font-black px-1.5 py-0.5 rounded bg-blue-600 text-white">
-                              Retail
-                            </span>
-                          )}
                         </div>
 
-                        <div className="flex-1 min-w-0 space-y-1.5">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                              {item.category?.name || 'General'}
-                            </span>
-                            {item.prepSection && (
-                              <span className="text-[10px] font-bold text-zinc-400">
-                                • {item.prepSection.replace('_', ' ')}
-                              </span>
-                            )}
-                          </div>
-
-                          <h3 className="font-extrabold text-sm sm:text-base text-white leading-tight">
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-0.5">
+                            {item.category?.name || 'General'}
+                          </span>
+                          <h3 className="font-extrabold text-sm sm:text-base text-white truncate">
                             {item.name}
                           </h3>
-
-                          {item.description && (
-                            <p className="text-xs text-zinc-400 line-clamp-1 leading-snug">
-                              {item.description}
-                            </p>
-                          )}
-
-                          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                            <span className="font-semibold text-zinc-400">
-                              Cost: <strong className="text-rose-400">{cost > 0 ? `${cost.toFixed(2)} ETB` : '—'}</strong>
-                            </span>
-                            <span className="text-zinc-600">•</span>
-                            <span className="font-semibold text-zinc-400">
-                              Margin:{' '}
-                              <strong className={margin >= 60 ? 'text-emerald-400' : 'text-amber-400'}>
-                                {margin > 0 ? `${margin.toFixed(1)}%` : '—'}
-                              </strong>
-                            </span>
-                            <span className="text-zinc-600">•</span>
-                            {hasRecipe ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-lg border border-emerald-500/25">
-                                <Check className="w-3 h-3" />
-                                {ingredientsCount} ingredients
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-lg border border-amber-500/25">
-                                <AlertCircle className="w-3 h-3" />
-                                No recipe
-                              </span>
-                            )}
-                            {addonsCount > 0 && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-400 bg-purple-500/15 px-2 py-0.5 rounded-lg border border-purple-500/25">
-                                <Layers className="w-3 h-3" />
-                                {addonsCount} add-ons
-                              </span>
-                            )}
-                          </div>
                         </div>
                       </div>
 
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/10 shrink-0">
+                      <div className="flex items-center gap-4 shrink-0">
                         <div className="text-right">
-                          <div className="text-base sm:text-xl font-black text-amber-400">
-                            {price.toFixed(2)} <span className="text-xs font-bold text-amber-500">ETB</span>
-                          </div>
+                          <span className="text-sm sm:text-base font-black text-amber-400">
+                            {price.toFixed(2)} ETB
+                          </span>
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => {
-                              setSelectedRecipeItem(item);
-                              setRecipeModalOpen(true);
-                            }}
-                            className="py-1.5 px-3 bg-amber-500/15 hover:bg-amber-500 hover:text-black text-amber-400 border border-amber-500/30 rounded-xl font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <ChefHat className="w-3.5 h-3.5" />
-                            <span>Recipe</span>
-                          </button>
                           <button
                             onClick={() => openEditModal(item)}
                             className="p-2 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-xl transition border border-white/10 cursor-pointer"
@@ -1035,121 +788,51 @@ export function ProductManagementView() {
             </div>
           )}
 
-          {/* VIEW MODE 3: GRID VIEW (RESPONSIVE, 1 COLUMN ON MOBILE) */}
+          {/* VIEW MODE 3: GRID VIEW (CLEAN RESPONSIVE GRID) */}
           {viewMode === 'grid' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {filteredItems.length === 0 ? (
                 <div className="col-span-full py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl">
                   No products found matching your search.
                 </div>
               ) : (
                 filteredItems.map((item) => {
-                  const ingredientsCount = item.recipe?.ingredients?.length || 0;
-                  const hasRecipe = ingredientsCount > 0;
-                  const cost = Number(item.costPerPortion || 0);
                   const price = Number(item.price || 0);
-                  const margin = Number(item.marginPercent || 0);
-                  const addonsCount = item.applicableAddons?.length || 0;
 
                   return (
                     <div
                       key={item.id}
-                      className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-3xl p-4 shadow-xl backdrop-blur-xl flex flex-col justify-between transition"
+                      className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-2xl sm:rounded-3xl p-3.5 shadow-md backdrop-blur-xl flex flex-col justify-between transition"
                     >
                       <div>
-                        <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-black/40 mb-3 border border-white/10">
+                        <div className="relative aspect-square rounded-2xl overflow-hidden bg-black/40 mb-3 border border-white/10">
                           <MenuImage
                             src={item.imageUrl}
                             alt={item.name}
                             categoryName={item.category?.name}
                             className="w-full h-full object-cover"
                           />
-                          <span className="absolute top-2 left-2 text-[10px] font-bold bg-[#161311]/85 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-white/10 text-white">
-                            {item.category?.name}
-                          </span>
-                          {item.isDirectSale && (
-                            <span className="absolute top-2 right-2 text-[9px] font-bold px-2 py-0.5 rounded-lg bg-blue-600 text-white shadow">
-                              Retail
-                            </span>
-                          )}
                         </div>
 
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <h3 className="font-extrabold text-sm text-white line-clamp-1" title={item.name}>
-                            {item.name}
-                          </h3>
-                          <span className="text-sm font-black text-amber-400 whitespace-nowrap">
-                            {price.toFixed(2)} ETB
-                          </span>
-                        </div>
-
-                        {item.description && (
-                          <p className="text-[11px] text-zinc-400 line-clamp-2 mb-3" title={item.description}>
-                            {item.description}
-                          </p>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-2 bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 mb-3 text-xs">
-                          <div>
-                            <div className="text-[9px] text-zinc-400 font-bold uppercase">Food Cost</div>
-                            <div className="text-xs font-bold text-rose-400 mt-0.5">
-                              {cost > 0 ? `${cost.toFixed(2)} ETB` : '—'}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-[9px] text-zinc-400 font-bold uppercase">Gross Margin</div>
-                            <div
-                              className={`text-xs font-black mt-0.5 ${
-                                margin >= 60 ? 'text-emerald-400' : margin >= 40 ? 'text-amber-400' : 'text-rose-400'
-                              }`}
-                            >
-                              {margin > 0 ? `${margin.toFixed(1)}%` : '—'}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mb-3 flex flex-wrap gap-1.5">
-                          {hasRecipe ? (
-                            <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-bold text-[10px]">
-                              <Check className="w-3 h-3 text-emerald-400" />
-                              <span>{ingredientsCount} ingredients</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-lg font-bold text-[10px]">
-                              <AlertCircle className="w-3 h-3 text-amber-400" />
-                              <span>No recipe set</span>
-                            </span>
-                          )}
-
-                          {addonsCount > 0 && (
-                            <span className="inline-flex items-center gap-1 bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-lg font-bold text-[10px]">
-                              <Layers className="w-3 h-3 text-purple-400" />
-                              <span>{addonsCount} add-ons</span>
-                            </span>
-                          )}
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">
+                          {item.category?.name || 'General'}
+                        </span>
+                        <h3 className="font-extrabold text-sm sm:text-base text-white truncate" title={item.name}>
+                          {item.name}
+                        </h3>
+                        <div className="text-base font-black text-amber-400 mt-1">
+                          {price.toFixed(2)} ETB
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 pt-2 border-t border-white/10">
-                        <button
-                          onClick={() => {
-                            setSelectedRecipeItem(item);
-                            setRecipeModalOpen(true);
-                          }}
-                          className="flex-1 py-1.5 px-2 bg-amber-500/15 hover:bg-amber-500 hover:text-black text-amber-400 border border-amber-500/30 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                          <ChefHat className="w-3.5 h-3.5" />
-                          <span>Recipe</span>
-                        </button>
-
+                      <div className="flex items-center gap-1.5 pt-3 border-t border-white/10 mt-3">
                         <button
                           onClick={() => openEditModal(item)}
-                          className="p-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-xl transition cursor-pointer border border-white/10"
-                          title="Edit product details"
+                          className="flex-1 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-bold text-xs rounded-xl transition border border-white/10 cursor-pointer flex items-center justify-center gap-1"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
                         </button>
-
                         <button
                           onClick={() => handleDeleteProduct(item)}
                           className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
@@ -1167,7 +850,7 @@ export function ProductManagementView() {
         </div>
       )}
 
-      {/* TAB 2 CONTENT: REAL KITCHEN ADD-ONS & MODIFIERS */}
+      {/* TAB 2 CONTENT: CLEAN ADD-ONS */}
       {activeTab === 'addons' && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1175,96 +858,45 @@ export function ProductManagementView() {
               <div className="col-span-full py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl p-6">
                 <Layers className="w-8 h-8 text-amber-500/40 mx-auto mb-2" />
                 <div className="font-bold text-white text-sm mb-1">No add-ons found</div>
-                <p className="max-w-sm mx-auto text-zinc-400 mb-4">
-                  Create real add-ons (e.g. Extra Cheese, Double Patty) linked directly to inventory ingredients with automated portion deductions.
-                </p>
                 <button
                   onClick={openAddAddonModal}
-                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs rounded-xl cursor-pointer"
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs rounded-xl cursor-pointer mt-3"
                 >
-                  + Create First Add-on
+                  + Add Modifier
                 </button>
               </div>
             ) : (
               filteredAddons.map((addon) => {
                 const scopeLabel = addon.menuItem
-                  ? `Product: ${addon.menuItem.name}`
+                  ? addon.menuItem.name
                   : addon.category
-                  ? `Category: ${addon.category.name}`
-                  : 'All Dishes (Global)';
-                const scopeBadgeClass = addon.menuItem
-                  ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                  : addon.category
-                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+                  ? addon.category.name
+                  : 'All Dishes';
 
                 return (
                   <div
                     key={addon.id}
-                    className={`p-4 rounded-3xl border transition shadow-xl backdrop-blur-xl flex flex-col justify-between ${
+                    className={`p-4 rounded-2xl border transition shadow-md backdrop-blur-xl flex items-center justify-between gap-3 ${
                       addon.isActive
                         ? 'bg-white/[0.04] border-white/10 hover:border-amber-500/30'
                         : 'bg-white/[0.02] border-white/5 opacity-60'
                     }`}
                   >
                     <div>
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                          <h3 className="font-extrabold text-sm text-white">{addon.name}</h3>
-                          <span className={`inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded-md border ${scopeBadgeClass}`}>
-                            {scopeLabel}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-base font-black text-amber-400">
-                            +{Number(addon.price).toFixed(2)} ETB
-                          </span>
-                          <div className="text-[10px] text-zinc-400">selling price</div>
-                        </div>
-                      </div>
-
-                      {/* Linked Inventory Deduction Box */}
-                      <div className="bg-black/30 border border-white/10 rounded-2xl p-3 mb-3 space-y-1.5">
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
-                          <span>Kitchen Store Deduction</span>
-                          <span className="text-emerald-400 font-bold">Automated</span>
-                        </div>
-                        {addon.ingredient ? (
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-white font-semibold truncate" title={addon.ingredient.name}>
-                              {addon.ingredient.name}
-                            </span>
-                            <span className="font-black text-amber-300 font-mono ml-2">
-                              {addon.quantity} {addon.ingredient.baseUnit?.symbol || addon.unit?.symbol || 'g'}
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="text-[11px] text-zinc-500 italic">No ingredient linked (pure price bump)</div>
-                        )}
-                      </div>
-
-                      {/* Financial Breakdown */}
-                      <div className="grid grid-cols-2 gap-2 bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 mb-3 text-xs">
-                        <div>
-                          <div className="text-[9px] text-zinc-400 font-bold uppercase">Add-on Cost</div>
-                          <div className="text-xs font-bold text-rose-400 mt-0.5">
-                            {Number(addon.costPerAddon || 0).toFixed(2)} ETB
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-[9px] text-zinc-400 font-bold uppercase">Gross Margin</div>
-                          <div className={`text-xs font-black mt-0.5 ${Number(addon.marginPercent || 0) >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                            {Number(addon.marginPercent || 0).toFixed(1)}% ({Number(addon.profitPerAddon || 0) >= 0 ? '+' : ''}{Number(addon.profitPerAddon || 0).toFixed(2)} ETB)
-                          </div>
-                        </div>
-                      </div>
+                      <h3 className="font-extrabold text-sm sm:text-base text-white">{addon.name}</h3>
+                      <span className="text-[10px] font-bold text-zinc-400">
+                        {scopeLabel}
+                      </span>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center justify-between pt-3 border-t border-white/10 gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm sm:text-base font-black text-amber-400 whitespace-nowrap">
+                        +{Number(addon.price).toFixed(2)} ETB
+                      </span>
+
                       <button
                         onClick={() => handleToggleAddonActive(addon)}
-                        className={`text-[10px] font-black px-2.5 py-1 rounded-xl transition cursor-pointer ${
+                        className={`text-[10px] font-bold px-2 py-1 rounded-lg transition cursor-pointer ${
                           addon.isActive
                             ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                             : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
@@ -1273,22 +905,20 @@ export function ProductManagementView() {
                         {addon.isActive ? 'Active' : 'Paused'}
                       </button>
 
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => openEditAddonModal(addon)}
-                          className="p-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-xl transition cursor-pointer border border-white/10"
-                          title="Edit add-on"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteAddon(addon)}
-                          className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
-                          title="Delete add-on"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => openEditAddonModal(addon)}
+                        className="p-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-lg transition border border-white/10 cursor-pointer"
+                        title="Edit add-on"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAddon(addon)}
+                        className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
+                        title="Delete add-on"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 );
