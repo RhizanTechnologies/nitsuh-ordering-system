@@ -423,7 +423,6 @@ export function WaiterPadView() {
     { id: 'DRINKS', label: 'Drink', emoji: '🥤' },
     { id: 'COFFEE', label: 'Coffee', emoji: '☕' },
     { id: 'BAKERY', label: 'Bakery', emoji: '🍰' },
-    { id: 'FASTING', label: 'Fasting', emoji: '🌱' },
   ];
 
   return (
@@ -667,30 +666,6 @@ export function WaiterPadView() {
               })}
             </div>
 
-            {/* Section Header matching Reference Image */}
-            <div className="flex items-center justify-between mb-4 px-1">
-              <div>
-                <h2 className="text-base sm:text-xl font-black text-stone-900 dark:text-white font-heading tracking-tight flex items-center gap-1.5">
-                  <span>Popular Picks</span>
-                  <span className="text-amber-500">🍗</span>
-                </h2>
-                <p className="text-[11px] sm:text-xs text-stone-500 dark:text-zinc-400 font-medium">
-                  Customer favorites & all-time house bestsellers
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setGroupFilter('ALL');
-                  setSearch('');
-                  setSelectedCategory('');
-                }}
-                className="text-xs font-bold text-stone-700 dark:text-zinc-300 hover:text-[#B83E18] dark:hover:text-amber-400 flex items-center gap-1 transition"
-              >
-                <span>View All ({allItems.length})</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
             {/* Empty State when no items match */}
             {filteredItems.length === 0 && (
               <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8 text-center my-4">
@@ -746,24 +721,6 @@ export function WaiterPadView() {
                         prepSection={item.prepSection}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 drop-shadow-sm"
                       />
-
-                      {/* Floating Category / Dietary Badge (Top-Left) */}
-                      <div className="absolute top-2 left-2 z-10">
-                        {isBurger(item.category?.name || '', item.name) || item.name.toLowerCase().includes('spicy') ? (
-                          <span className="bg-[#B83E18] text-white text-[8px] sm:text-[9px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 backdrop-blur-md">
-                            <Flame className="w-2.5 h-2.5 fill-white" />
-                            <span>Spicy</span>
-                          </span>
-                        ) : isFastingItem(item) ? (
-                          <span className="bg-emerald-600 text-white text-[8px] sm:text-[9px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 backdrop-blur-md">
-                            🌱 Fasting
-                          </span>
-                        ) : (
-                          <span className="bg-black/55 backdrop-blur-md text-white text-[8px] sm:text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                            {item.category?.name || 'Dish'}
-                          </span>
-                        )}
-                      </div>
 
                       {/* Favorite Heart (Top-Right) */}
                       <button
