@@ -815,19 +815,24 @@ export function WaiterPadView() {
                         {qty > 0 ? (
                           <div
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1 sm:gap-1.5 bg-[#B83E18] text-white p-1 rounded-full shadow-md shadow-[#B83E18]/30 flex-shrink-0 animate-in zoom-in-75 duration-150"
+                            className="flex items-center gap-1 sm:gap-1.5 bg-[#B83E18] text-pure-white stepper-btn p-1 rounded-full shadow-md shadow-[#B83E18]/30 flex-shrink-0 animate-in zoom-in-75 duration-150"
+                            style={{ color: '#ffffff' }}
                           >
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 updateWaiterQuantity(item.id, -1);
                               }}
-                              className="w-6 h-6 rounded-full bg-black/20 hover:bg-black/35 active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+                              className="w-6 h-6 rounded-full bg-white/25 hover:bg-white/40 active:scale-90 text-pure-white stepper-btn flex items-center justify-center transition cursor-pointer"
                               title="Reduce amount"
+                              style={{ color: '#ffffff' }}
                             >
-                              <Minus className="w-3 h-3 stroke-[3]" />
+                              <Minus className="w-3.5 h-3.5 stroke-[3] text-pure-white" style={{ stroke: '#ffffff', color: '#ffffff' }} />
                             </button>
-                            <span className="text-xs font-black px-1 min-w-[16px] text-center select-none">
+                            <span
+                              className="text-xs font-black px-1.5 min-w-[18px] text-center select-none text-pure-white stepper-btn font-mono"
+                              style={{ color: '#ffffff' }}
+                            >
                               {qty}
                             </span>
                             <button
@@ -835,10 +840,11 @@ export function WaiterPadView() {
                                 e.stopPropagation();
                                 updateWaiterQuantity(item.id, 1);
                               }}
-                              className="w-6 h-6 rounded-full bg-black/20 hover:bg-black/35 active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+                              className="w-6 h-6 rounded-full bg-white/25 hover:bg-white/40 active:scale-90 text-pure-white stepper-btn flex items-center justify-center transition cursor-pointer"
                               title="Add more"
+                              style={{ color: '#ffffff' }}
                             >
-                              <Plus className="w-3 h-3 stroke-[3]" />
+                              <Plus className="w-3.5 h-3.5 stroke-[3] text-pure-white" style={{ stroke: '#ffffff', color: '#ffffff' }} />
                             </button>
                           </div>
                         ) : (
@@ -852,10 +858,11 @@ export function WaiterPadView() {
                                 imageUrl: item.imageUrl,
                               });
                             }}
-                            className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-90 text-white flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
+                            className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-90 text-pure-white stepper-btn flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
                             title="Add to table order"
+                            style={{ color: '#ffffff' }}
                           >
-                            <Plus className="w-4 h-4 stroke-[3]" />
+                            <Plus className="w-4 h-4 stroke-[3] text-pure-white" style={{ stroke: '#ffffff', color: '#ffffff' }} />
                           </button>
                         )}
                       </div>

@@ -228,7 +228,27 @@
   color: #0F0B09 !important;
 }
 
-/* Ensure buttons and badges with dark or saturated backgrounds retain pure white text */
+/* Stepper and action button pure crisp white contrast overrides */
+.text-pure-white,
+.text-pure-white *,
+.stepper-btn,
+.stepper-btn *,
+[data-theme="light"] .text-pure-white,
+[data-theme="light"] .text-pure-white *,
+.theme-light .text-pure-white,
+.theme-light .text-pure-white *,
+[data-theme="light"] .stepper-btn,
+[data-theme="light"] .stepper-btn *,
+.theme-light .stepper-btn,
+.theme-light .stepper-btn *,
+[data-theme="light"] [class*="bg-[#B83E18]"],
+[data-theme="light"] [class*="bg-[#B83E18]"] *,
+.theme-light [class*="bg-[#B83E18]"],
+.theme-light [class*="bg-[#B83E18]"] *,
+[data-theme="light"] [class*="bg-[#C11221]"],
+[data-theme="light"] [class*="bg-[#C11221]"] *,
+.theme-light [class*="bg-[#C11221]"],
+.theme-light [class*="bg-[#C11221]"] *,
 [data-theme="light"] button[class*="from-[#C11221]"],
 [data-theme="light"] button[class*="from-[#C11221]"] *,
 [data-theme="light"] button[class*="bg-[#C11221]"],
@@ -240,7 +260,10 @@
 [data-theme="light"] button[class*="bg-emerald-600"],
 [data-theme="light"] button[class*="bg-emerald-600"] *,
 [data-theme="light"] span[class*="bg-[#C11221]"],
-[data-theme="light"] .text-white-force {
+[data-theme="light"] .text-white-force,
+[data-theme="light"] .text-white-force *,
+.theme-light .text-white-force,
+.theme-light .text-white-force * {
   color: #FFFFFF !important;
   stroke: #FFFFFF !important;
 }
