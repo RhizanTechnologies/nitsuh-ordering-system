@@ -19,7 +19,6 @@ import {
   ChevronDown,
   Sun,
   Moon,
-  Volume2,
   Users,
 } from 'lucide-react';
 import { fetchApi, getSocket } from '@/lib/api';
@@ -243,30 +242,8 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Right: Round Audio Button, Round Theme Switcher & Profile Pill matching reference */}
+          {/* Right: Round Theme Switcher & Profile Pill */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* Audio Feedback Button matching reference */}
-            <button
-              onClick={() => {
-                try {
-                  const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-                  const osc = audioCtx.createOscillator();
-                  const gain = audioCtx.createGain();
-                  osc.connect(gain);
-                  gain.connect(audioCtx.destination);
-                  osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-                  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                  osc.start();
-                  osc.stop(audioCtx.currentTime + 0.3);
-                } catch (e) {}
-              }}
-              className="w-9 h-9 rounded-full bg-white dark:bg-[#1C1815] hover:bg-stone-50 dark:hover:bg-white/[0.08] border border-stone-200/90 dark:border-white/10 shadow-xs flex items-center justify-center text-amber-600 dark:text-amber-400 hover:scale-105 active:scale-95 transition cursor-pointer"
-              title="Sound Alerts"
-            >
-              <Volume2 className="w-4 h-4" />
-            </button>
-
             {/* Circular Theme Toggle Button matching reference */}
             <button
               onClick={toggleTheme}

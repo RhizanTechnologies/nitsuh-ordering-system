@@ -1149,12 +1149,6 @@ export function PosView() {
                     >
                       {item.name}
                     </h3>
-                    <p
-                      className="text-[11px] sm:text-xs text-stone-500 dark:text-zinc-400 line-clamp-2 mt-1 leading-relaxed"
-                      title={item.description || ''}
-                    >
-                      {item.description || 'Authentic dish prepared fresh to order with choice house ingredients.'}
-                    </p>
                   </div>
 
                   {/* Price & Action Row matching Reference */}
@@ -1168,7 +1162,7 @@ export function PosView() {
                       </span>
                     </div>
 
-                    {/* Round Terracotta Action Button matching Reference */}
+                    {/* Round Terracotta Quick Select Button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1180,10 +1174,10 @@ export function PosView() {
                           isDirectSale: item.isDirectSale,
                         });
                       }}
-                      className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-95 text-white flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
+                      className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-90 text-white flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
                       title="Add to cart"
                     >
-                      <Eye className="w-4 h-4" />
+                      <Plus className="w-4 h-4 stroke-[3]" />
                     </button>
                   </div>
                 </div>

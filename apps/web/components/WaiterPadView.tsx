@@ -723,8 +723,15 @@ export function WaiterPadView() {
                 return (
                   <div
                     key={item.id}
-                    onClick={() => openItemCustomizer(item)}
-                    className={`group relative bg-white dark:bg-[#161311] rounded-3xl p-3 sm:p-3.5 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.12)] ${
+                    onClick={() =>
+                      addToWaiterCart({
+                        id: item.id,
+                        name: item.name,
+                        price: Number(item.price),
+                        imageUrl: item.imageUrl,
+                      })
+                    }
+                    className={`group relative bg-white dark:bg-[#161311] rounded-3xl p-3 sm:p-3.5 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.12)] active:scale-[0.98] ${
                       isSelected
                         ? 'border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/30'
                         : 'border-stone-200/90 dark:border-white/10 hover:border-[#B83E18]/50 dark:hover:border-amber-500/50'
@@ -782,7 +789,7 @@ export function WaiterPadView() {
                       )}
                     </div>
 
-                    {/* Dish Name, Description & Action */}
+                    {/* Dish Name & Direct Action Row */}
                     <div className="flex flex-col flex-1 justify-between">
                       <div>
                         <h4
@@ -791,13 +798,6 @@ export function WaiterPadView() {
                         >
                           {item.name}
                         </h4>
-
-                        <p
-                          className="text-[11px] sm:text-xs text-stone-500 dark:text-zinc-400 line-clamp-2 mt-1 leading-relaxed"
-                          title={item.description || ''}
-                        >
-                          {item.description || 'Authentic dish prepared fresh to order with choice house ingredients.'}
-                        </p>
                       </div>
 
                       {/* Price & Action Row matching Reference */}
@@ -811,16 +811,21 @@ export function WaiterPadView() {
                           </span>
                         </div>
 
-                        {/* Round Terracotta Action Button matching Reference Image */}
+                        {/* Round Terracotta Quick Select Button */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            openItemCustomizer(item);
+                            addToWaiterCart({
+                              id: item.id,
+                              name: item.name,
+                              price: Number(item.price),
+                              imageUrl: item.imageUrl,
+                            });
                           }}
-                          className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-95 text-white flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
-                          title="View / Customize Order"
+                          className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-90 text-white flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
+                          title="Add to table order"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Plus className="w-4 h-4 stroke-[3]" />
                         </button>
                       </div>
                     </div>
