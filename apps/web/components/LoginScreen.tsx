@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { getDefaultRouteForRole } from '@/lib/route-guard';
 import { fetchApi } from '@/lib/api';
 import { NitsuhLogo } from '@/components/NitsuhLogo';
-import { Lock, KeyRound, ArrowRight, UserCircle, Check, Sun, Moon, HelpCircle, Sparkles, X, ShieldAlert } from 'lucide-react';
+import { Lock, KeyRound, ArrowRight, UserCircle, Check, Sun, Moon, HelpCircle, Sparkles, X, ShieldAlert, ChevronDown } from 'lucide-react';
 
 export function LoginScreen() {
   const router = useRouter();
@@ -20,6 +20,8 @@ export function LoginScreen() {
   const [staffList, setStaffList] = useState<any[]>([]);
   const [selectedStaffId, setSelectedStaffId] = useState<string>('');
   const [staffLoading, setStaffLoading] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Email/Employee Code login state
   const [email, setEmail] = useState('');
@@ -34,6 +36,39 @@ export function LoginScreen() {
   const [forgotError, setForgotError] = useState<string | null>(null);
   const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
 
+  // Close custom dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Clean raw staff names (e.g. remove legacy parenthetical notes like '(Waiter)')
+  const cleanStaffName = (name: string) => {
+    return (name || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+  };
+
+  const formatRoleName = (role: string) => {
+    switch (role) {
+      case 'WAITER': return 'Waiter';
+      case 'CASHIER': return 'Cashier';
+      case 'KITCHEN_STAFF': return 'Kitchen Cook';
+      case 'HEAD_CHEF': return 'Head Chef';
+      case 'MAIN_STOREKEEPER': return 'Main Storekeeper';
+      case 'KITCHEN_STOREKEEPER': return 'Kitchen Storekeeper';
+      case 'MANAGER': return 'Manager';
+      case 'OWNER': return 'Owner';
+      default: return role;
+    }
+  };
+
+  // Filter out OWNER from the PIN dropdown list (Owners sign in via Manager Password tab)
+  const visibleStaffList = staffList.filter((s) => s.role !== 'OWNER');
+
   // Load active staff profiles for the dropdown
   useEffect(() => {
     fetchApi('/auth/staff')
@@ -41,7 +76,8 @@ export function LoginScreen() {
         if (Array.isArray(data)) {
           setStaffList(data);
           const savedStaffId = typeof window !== 'undefined' ? localStorage.getItem('nitsuh_last_staff_id') : null;
-          if (savedStaffId && data.some((s) => s.id === savedStaffId)) {
+          // Only restore saved staff if not OWNER
+          if (savedStaffId && data.some((s) => s.id === savedStaffId && s.role !== 'OWNER')) {
             setSelectedStaffId(savedStaffId);
           }
         }
@@ -54,7 +90,7 @@ export function LoginScreen() {
       });
   }, []);
 
-  const selectedStaff = staffList.find((s) => s.id === selectedStaffId);
+  const selectedStaff = visibleStaffList.find((s) => s.id === selectedStaffId);
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -292,83 +328,110 @@ export function LoginScreen() {
             }`}
           >
             <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span>Manager Password</span>
+            <span>Manager / Owner Password</span>
           </button>
         </div>
 
         {/* PIN LOGIN TAB */}
         {activeTab === 'pin' ? (
           <div className="p-5 sm:p-6 flex flex-col items-center space-y-3.5">
-            {/* Step 1: Employee Name Dropdown */}
-            <div className="w-full">
+            {/* Step 1: Employee Name Modern Dropdown */}
+            <div className="w-full relative" ref={dropdownRef}>
               <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1.5 text-center">
                 1. Select Your Staff Name
               </label>
-              <div className="relative">
-                <select
-                  value={selectedStaffId}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setSelectedStaffId(id);
-                    setError(null);
-                    setPin('');
-                    if (id && typeof window !== 'undefined') {
-                      localStorage.setItem('nitsuh_last_staff_id', id);
-                    }
-                  }}
-                  disabled={staffLoading}
-                  className="w-full bg-stone-50 dark:bg-[#201B17] border border-stone-300 dark:border-amber-500/40 text-stone-900 dark:text-amber-300 font-extrabold text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/30 cursor-pointer transition shadow-xs"
-                >
-                  <option value="" className="bg-white dark:bg-[#161311] text-stone-500 dark:text-zinc-400">
-                    {staffLoading ? 'Loading staff profiles...' : '-- Choose Your Profile / Name --'}
-                  </option>
-                  {staffList.map((staff) => (
-                    <option key={staff.id} value={staff.id} className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white py-1">
-                      {staff.name} — ({staff.role}) [{staff.employeeCode || 'STAFF'}]
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
 
-            {/* Selected Employee Visual Card */}
-            {selectedStaff ? (
-              <div className="w-full bg-amber-50/70 dark:bg-white/[0.04] border border-amber-200/80 dark:border-white/10 rounded-2xl p-2.5 flex items-center justify-between gap-2.5 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  {selectedStaff.avatarUrl ? (
-                    <img
-                      src={selectedStaff.avatarUrl}
-                      alt={selectedStaff.name}
-                      className="w-9 h-9 rounded-xl object-cover border border-amber-500/40 flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/40 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                      {selectedStaff.name.charAt(0)}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <div className="text-xs font-black text-stone-900 dark:text-white truncate flex items-center gap-1.5">
-                      <span>{selectedStaff.name}</span>
-                      <span className="font-mono text-[9px] px-1 py-0.2 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300">
-                        {selectedStaff.employeeCode}
-                      </span>
-                    </div>
-                    <span className={`inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded-md border mt-0.5 ${getRoleBadge(selectedStaff.role).color}`}>
-                      {getRoleBadge(selectedStaff.role).label}
+              {/* Modern Trigger Button */}
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                disabled={staffLoading}
+                className="w-full flex items-center justify-between gap-3 bg-stone-50 dark:bg-[#1A1614] border border-stone-300 dark:border-amber-500/40 rounded-2xl px-4 py-3 text-left transition shadow-xs hover:border-amber-500/60 focus:outline-none focus:ring-2 focus:ring-amber-500/30 cursor-pointer"
+              >
+                {selectedStaff ? (
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {selectedStaff.avatarUrl ? (
+                      <img
+                        src={selectedStaff.avatarUrl}
+                        alt={selectedStaff.name}
+                        className="w-7 h-7 rounded-xl object-cover border border-amber-500/40 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-black text-xs flex-shrink-0">
+                        {cleanStaffName(selectedStaff.name).charAt(0)}
+                      </div>
+                    )}
+                    <span className="text-xs sm:text-sm font-black text-stone-900 dark:text-white truncate">
+                      {cleanStaffName(selectedStaff.name)}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ml-auto flex-shrink-0 ${getRoleBadge(selectedStaff.role).color}`}>
+                      {formatRoleName(selectedStaff.role)}
                     </span>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-stone-500 dark:text-zinc-400 text-xs font-semibold py-0.5">
+                    <UserCircle className="w-5 h-5 text-stone-400 dark:text-zinc-500 flex-shrink-0" />
+                    <span>{staffLoading ? 'Loading staff profiles...' : 'Choose your profile / name...'}</span>
+                  </div>
+                )}
+                <ChevronDown className={`w-4 h-4 text-stone-500 dark:text-zinc-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-                <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold flex items-center gap-1 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 px-2 py-1 rounded-xl flex-shrink-0">
-                  <Check className="w-3 h-3" />
-                  <span>Ready</span>
+              {/* Modern Floating Menu */}
+              {isDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#1C1815] border border-stone-200 dark:border-white/15 rounded-2xl shadow-2xl overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-150 max-h-56 overflow-y-auto no-scrollbar">
+                  {visibleStaffList.length === 0 ? (
+                    <div className="px-4 py-3 text-xs text-stone-500 dark:text-zinc-400 text-center">
+                      {staffLoading ? 'Loading staff...' : 'No staff profiles found'}
+                    </div>
+                  ) : (
+                    visibleStaffList.map((staff) => {
+                      const isSelected = staff.id === selectedStaffId;
+                      const roleBadge = getRoleBadge(staff.role);
+                      return (
+                        <button
+                          key={staff.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedStaffId(staff.id);
+                            setIsDropdownOpen(false);
+                            setError(null);
+                            setPin('');
+                            if (typeof window !== 'undefined') {
+                              localStorage.setItem('nitsuh_last_staff_id', staff.id);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-left transition cursor-pointer ${
+                            isSelected
+                              ? 'bg-amber-500/15 dark:bg-amber-500/20 text-stone-950 dark:text-white'
+                              : 'hover:bg-stone-100 dark:hover:bg-white/[0.06] text-stone-800 dark:text-zinc-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                              isSelected ? 'bg-amber-500 text-stone-950 font-black' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-300'
+                            }`}>
+                              {cleanStaffName(staff.name).charAt(0)}
+                            </div>
+                            <span className="text-xs font-black truncate">
+                              {cleanStaffName(staff.name)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${roleBadge.color}`}>
+                              {formatRoleName(staff.role)}
+                            </span>
+                            {isSelected && (
+                              <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
-              </div>
-            ) : (
-              <div className="w-full py-2.5 px-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl text-[11px] text-amber-800 dark:text-amber-300 text-center font-medium">
-                👆 Select your name above, then tap your private PIN.
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Step 2: PIN Dots Display */}
             <div className="text-center pt-1">
@@ -444,11 +507,11 @@ export function LoginScreen() {
           <form onSubmit={handleEmailSubmit} className="p-6 space-y-4">
             <div>
               <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5">
-                Employee Code, Name or Email
+                Manager / Owner Username, Code or Email
               </label>
               <input
                 type="text"
-                placeholder="e.g. EMP-002, Adam, or email"
+                placeholder="e.g. Adam, John, or EMP-002"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
