@@ -19,6 +19,7 @@ import {
   ChevronDown,
   Sun,
   Moon,
+  Volume2,
   Users,
 } from 'lucide-react';
 import { fetchApi, getSocket } from '@/lib/api';
@@ -94,7 +95,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="bg-[#12100E]/95 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 py-2 sticky top-0 z-40 text-white shadow-md">
+      <header className="bg-[#FAF7F2]/95 dark:bg-[#12100E]/95 backdrop-blur-xl border-b border-stone-200/80 dark:border-white/10 px-3.5 sm:px-6 py-2.5 sticky top-0 z-40 text-stone-900 dark:text-white shadow-xs transition-colors">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Brand Identity */}
           <div className="flex items-center gap-3">
@@ -105,110 +106,110 @@ export function Navbar() {
           <div className="hidden md:flex items-center">
             {/* HEAD CHEF & KITCHEN KEEPER DUAL ACCESS (KDS Live + Kitchen Stock) */}
             {(role === 'HEAD_CHEF' || role === 'KITCHEN_STOREKEEPER') && (
-              <nav className="flex items-center gap-1.5 bg-white/[0.04] border border-white/10 p-1 rounded-2xl">
+              <nav className="flex items-center gap-1 bg-stone-200/60 dark:bg-white/[0.05] border border-stone-300/60 dark:border-white/10 p-1 rounded-full">
                 <Link
                   href="/kds"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                     pathname === '/kds'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <ChefHat className="w-3.5 h-3.5" />
-                  <span>Kitchen Display (KDS)</span>
+                  <span>Kitchen Display</span>
                 </Link>
                 {isOwnerOrManager && (
                   <Link
                     href="/staff"
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                       pathname === '/staff'
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                        : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                        : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                     }`}
                     title="Staff & User Management"
                   >
                     <Users className="w-3.5 h-3.5" />
-                    <span>Staff & Users</span>
+                    <span>Staff</span>
                   </Link>
                 )}
 
                 <Link
                   href="/inventory"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                     pathname === '/inventory'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <Boxes className="w-3.5 h-3.5" />
-                  <span>Kitchen Store Stock</span>
+                  <span>Stock</span>
                 </Link>
               </nav>
             )}
 
             {/* OWNER & MANAGER DESKTOP MANAGEMENT TABS */}
             {isOwnerOrManager && (
-              <nav className="flex items-center gap-1 bg-white/[0.04] border border-black/10 dark:border-white/10 p-1 rounded-2xl">
+              <nav className="flex items-center gap-1 bg-stone-200/60 dark:bg-white/[0.05] border border-stone-300/60 dark:border-white/10 p-1 rounded-full">
                 {role === 'OWNER' && (
                   <Link
                     href="/dashboard"
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                       pathname === '/dashboard'
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                        : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                        : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                     }`}
                   >
                     <BarChart3 className="w-3.5 h-3.5" />
-                    <span>Profit & Analytics</span>
+                    <span>Analytics</span>
                   </Link>
                 )}
 
                 {isOwnerOrManager && (
                   <Link
                     href="/staff"
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                       pathname === '/staff'
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                        : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                        : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                     }`}
                     title="Staff & User Management"
                   >
                     <Users className="w-3.5 h-3.5" />
-                    <span>Staff & Users</span>
+                    <span>Staff</span>
                   </Link>
                 )}
 
                 <Link
                   href="/inventory"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                     pathname === '/inventory'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <Boxes className="w-3.5 h-3.5" />
-                  <span>Dual Inventory</span>
+                  <span>Stock</span>
                 </Link>
 
                 <Link
                   href="/tables"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                     pathname === '/tables'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                   }`}
                   title="Configure & Manage Dining Tables"
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
-                  <span>Tables ({tables.length})</span>
+                  <span>Tables</span>
                 </Link>
 
                 <Link
                   href="/pos"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                     pathname === '/pos'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <MonitorCheck className="w-3.5 h-3.5" />
@@ -217,10 +218,10 @@ export function Navbar() {
 
                 <Link
                   href="/kds"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                     pathname === '/kds'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <ChefHat className="w-3.5 h-3.5" />
@@ -229,10 +230,10 @@ export function Navbar() {
 
                 <Link
                   href="/waiter"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                     pathname === '/waiter'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
@@ -242,22 +243,44 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Right: User Status, Theme Switcher & Explicit Logout */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
-            {/* Minimal Compact Theme Toggle */}
+          {/* Right: Round Audio Button, Round Theme Switcher & Profile Pill matching reference */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Audio Feedback Button matching reference */}
             <button
-              onClick={toggleTheme}
-              className="w-8 h-8 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 flex items-center justify-center transition cursor-pointer text-amber-400"
-              title={theme === 'dark' ? 'Switch to Warm Bistro (Light)' : 'Switch to Midnight Obsidian (Dark)'}
+              onClick={() => {
+                try {
+                  const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+                  const osc = audioCtx.createOscillator();
+                  const gain = audioCtx.createGain();
+                  osc.connect(gain);
+                  gain.connect(audioCtx.destination);
+                  osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                  osc.start();
+                  osc.stop(audioCtx.currentTime + 0.3);
+                } catch (e) {}
+              }}
+              className="w-9 h-9 rounded-full bg-white dark:bg-[#1C1815] hover:bg-stone-50 dark:hover:bg-white/[0.08] border border-stone-200/90 dark:border-white/10 shadow-xs flex items-center justify-center text-amber-600 dark:text-amber-400 hover:scale-105 active:scale-95 transition cursor-pointer"
+              title="Sound Alerts"
             >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-zinc-300" />}
+              <Volume2 className="w-4 h-4" />
             </button>
 
-            {/* User Profile Pill */}
+            {/* Circular Theme Toggle Button matching reference */}
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-full bg-white dark:bg-[#1C1815] hover:bg-stone-50 dark:hover:bg-white/[0.08] border border-stone-200/90 dark:border-white/10 shadow-xs flex items-center justify-center text-amber-500 dark:text-amber-400 hover:scale-105 active:scale-95 transition cursor-pointer"
+              title={theme === 'dark' ? 'Switch to Warm Bistro (Light)' : 'Switch to Midnight Obsidian (Dark)'}
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-stone-600" />}
+            </button>
+
+            {/* User Profile Pill matching reference */}
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 px-2.5 py-1.5 bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 rounded-xl transition cursor-pointer text-white"
+                className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1C1815] hover:bg-stone-50 dark:hover:bg-white/[0.08] border border-stone-200/90 dark:border-white/10 rounded-full shadow-xs transition cursor-pointer text-stone-900 dark:text-white"
                 title="View active session"
               >
                 {currentUser.avatarUrl ? (
@@ -267,14 +290,14 @@ export function Navbar() {
                     className="w-6 h-6 rounded-full object-cover ring-1 ring-amber-500/50 flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-[10px] ring-1 ring-amber-500/50 flex-shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-[10px] ring-1 ring-amber-500/50 flex-shrink-0">
                     {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
                   </div>
                 )}
-                <span className="text-xs font-bold text-white truncate max-w-[90px]">
+                <span className="text-xs font-bold text-stone-900 dark:text-white truncate max-w-[90px]">
                   {currentUser.name.split(' ')[0]}
                 </span>
-                <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-stone-400 dark:text-zinc-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {profileOpen && (

@@ -583,7 +583,7 @@ export function ProductManagementView() {
                       )}
                     </div>
 
-                    <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-start justify-between gap-2 mb-1">
                       <h3 className="font-extrabold text-sm text-white truncate" title={item.name}>
                         {item.name}
                       </h3>
@@ -591,6 +591,12 @@ export function ProductManagementView() {
                         {price.toFixed(2)} ETB
                       </span>
                     </div>
+
+                    {item.description && (
+                      <p className="text-[11px] text-zinc-400 line-clamp-1 mb-2" title={item.description}>
+                        {item.description}
+                      </p>
+                    )}
 
                     {/* Financial & Recipe Badges */}
                     <div className="grid grid-cols-2 gap-2 bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 mb-3 text-xs">

@@ -93,7 +93,7 @@ export default function ProtectedAppLayout({
 
   // 4. Authorized View
   return (
-    <main className="h-screen max-h-screen flex flex-col bg-[#0D0B0A] text-white overflow-hidden transition-colors duration-200">
+    <main className="h-screen max-h-screen flex flex-col bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white overflow-hidden transition-colors duration-200">
       <Navbar />
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {children}

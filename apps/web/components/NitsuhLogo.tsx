@@ -75,39 +75,38 @@ export function NitsuhLogo({
     );
   }
 
-  // Navbar & Compact Variant (Clean & Minimal)
+  // Navbar & Compact Variant (Matching Reference Design)
   return (
     <Link
       href="/"
-      className={`group flex items-center gap-2 transition select-none ${className}`}
+      className={`group flex items-center gap-2.5 transition select-none ${className}`}
       title="Nitsuh Foods"
     >
-      {/* Artisan Emblem Pill */}
+      {/* Circular Emblem matching Reference (Yellow/Amber circle with logo) */}
       <div className="relative flex-shrink-0">
-        <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-[#1F1B18] via-[#2A1810] to-[#14110E] p-1 shadow-xs border border-amber-500/30 ring-1 ring-white/10 flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-amber-400 via-amber-500 to-orange-500 p-1 shadow-xs ring-1 ring-amber-400/40 flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
           <img
             src="/nitsuh-logo.png"
             alt="Nitsuh Foods"
-            className="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(245,158,11,0.3)] relative z-10"
+            className="w-full h-full object-contain filter drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)] relative z-10"
           />
         </div>
       </div>
 
-      {/* Typographic Identity */}
-      <div className="flex items-center gap-1 leading-none">
-        <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#F87171]">
-          NITSUH
-        </span>
-        <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#D97706] via-[#F59E0B] to-[#FBBF24]">
-          FOODS
+      {/* Typographic Identity: Brand Name + Tag Badge + Subtitle */}
+      <div className="flex flex-col text-left">
+        <div className="flex items-center gap-1.5 leading-none">
+          <span className="font-heading font-black text-sm sm:text-base tracking-tight text-stone-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">
+            NITSUH
+          </span>
+          <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full bg-rose-500/15 text-[#B83E18] dark:text-rose-400 border border-rose-500/30">
+            FOODS
+          </span>
+        </div>
+        <span className="text-[10px] sm:text-[11px] text-stone-500 dark:text-zinc-400 font-medium leading-none mt-1">
+          Real Taste & Savoury Bites
         </span>
       </div>
-
-      {shouldShowSubtitle && (
-        <span className="hidden lg:inline text-[10px] font-bold text-zinc-500 dark:text-zinc-400 pl-2 border-l border-white/10">
-          Addis Ababa
-        </span>
-      )}
     </Link>
   );
 }

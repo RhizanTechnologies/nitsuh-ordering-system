@@ -36,6 +36,8 @@ import {
   Star,
   Sparkles,
   User,
+  Eye,
+  ArrowRight,
 } from 'lucide-react';
 import { TablePlanModal } from '@/components/TablePlanModal';
 
@@ -425,10 +427,10 @@ export function WaiterPadView() {
   ];
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col md:flex-row h-full overflow-hidden bg-[#0D0B0A] text-white relative">
-      {/* Background ambient lighting glows matching dark luxury look */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="flex-1 min-h-0 flex flex-col md:flex-row h-full overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white relative transition-colors">
+      {/* Background ambient lighting glows */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#B83E18]/5 dark:bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Real-time Ready Alert Toast */}
       {readyToast && (
@@ -665,18 +667,27 @@ export function WaiterPadView() {
               })}
             </div>
 
-            {/* Section Header: "Popular Now" & "View All" */}
-            <div className="flex items-center justify-between mb-3 px-1">
-              <h2 className="text-base sm:text-lg font-black text-white tracking-wide">Popular Now</h2>
+            {/* Section Header matching Reference Image */}
+            <div className="flex items-center justify-between mb-4 px-1">
+              <div>
+                <h2 className="text-base sm:text-xl font-black text-stone-900 dark:text-white font-heading tracking-tight flex items-center gap-1.5">
+                  <span>Popular Picks</span>
+                  <span className="text-amber-500">🍗</span>
+                </h2>
+                <p className="text-[11px] sm:text-xs text-stone-500 dark:text-zinc-400 font-medium">
+                  Customer favorites & all-time house bestsellers
+                </p>
+              </div>
               <button
                 onClick={() => {
                   setGroupFilter('ALL');
                   setSearch('');
                   setSelectedCategory('');
                 }}
-                className="text-xs font-semibold text-zinc-400 hover:text-amber-400 transition"
+                className="text-xs font-bold text-stone-700 dark:text-zinc-300 hover:text-[#B83E18] dark:hover:text-amber-400 flex items-center gap-1 transition"
               >
-                View All ({allItems.length})
+                <span>View All ({allItems.length})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -701,8 +712,8 @@ export function WaiterPadView() {
               </div>
             )}
 
-            {/* Food Grid matching Reference Image (2 columns on mobile/small screens) */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2.5 sm:gap-4 md:gap-5">
+            {/* Food Grid matching Reference Image (2 columns on mobile/small screens, up to 4 on large) */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
               {filteredItems.map((item) => {
                 const inCart = waiterCart.find((c) => c.menuItemId === item.id);
                 const qty = inCart ? inCart.quantity : 0;
@@ -713,14 +724,14 @@ export function WaiterPadView() {
                   <div
                     key={item.id}
                     onClick={() => openItemCustomizer(item)}
-                    className={`group relative bg-white dark:bg-[#161311] rounded-2xl sm:rounded-3xl p-2 sm:p-3.5 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xs hover:shadow-md ${
+                    className={`group relative bg-white dark:bg-[#161311] rounded-3xl p-3 sm:p-3.5 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.12)] ${
                       isSelected
-                        ? 'border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/30 shadow-lg shadow-amber-500/15'
-                        : 'border-stone-200/90 dark:border-white/10 hover:border-amber-500/50'
+                        ? 'border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/30'
+                        : 'border-stone-200/90 dark:border-white/10 hover:border-[#B83E18]/50 dark:hover:border-amber-500/50'
                     }`}
                   >
-                    {/* Generous High-Impact Culinary Image (Tashkent Cafe Style) */}
-                    <div className="relative w-full aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden mb-2 sm:mb-3 bg-stone-100 dark:bg-black/40 border border-stone-200/60 dark:border-white/10 flex-shrink-0">
+                    {/* Generous High-Impact Culinary Image */}
+                    <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-2.5 sm:mb-3 bg-stone-100 dark:bg-black/40 border border-stone-200/60 dark:border-white/10 flex-shrink-0">
                       <MenuImage
                         src={item.imageUrl}
                         alt={item.name}
@@ -730,18 +741,18 @@ export function WaiterPadView() {
                       />
 
                       {/* Floating Category / Dietary Badge (Top-Left) */}
-                      <div className="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5 z-10">
+                      <div className="absolute top-2 left-2 z-10">
                         {isBurger(item.category?.name || '', item.name) || item.name.toLowerCase().includes('spicy') ? (
-                          <span className="bg-[#C11221] text-white text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 backdrop-blur-md">
-                            <Flame className="w-2 sm:w-2.5 h-2 sm:h-2.5 fill-white" />
+                          <span className="bg-[#B83E18] text-white text-[8px] sm:text-[9px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 backdrop-blur-md">
+                            <Flame className="w-2.5 h-2.5 fill-white" />
                             <span>Spicy</span>
                           </span>
                         ) : isFastingItem(item) ? (
-                          <span className="bg-emerald-600 text-white text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 backdrop-blur-md">
+                          <span className="bg-emerald-600 text-white text-[8px] sm:text-[9px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 backdrop-blur-md">
                             🌱 Fasting
                           </span>
                         ) : (
-                          <span className="bg-black/55 backdrop-blur-md text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full shadow-sm">
+                          <span className="bg-black/55 backdrop-blur-md text-white text-[8px] sm:text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                             {item.category?.name || 'Dish'}
                           </span>
                         )}
@@ -753,11 +764,11 @@ export function WaiterPadView() {
                           e.stopPropagation();
                           toggleFavorite(item.id);
                         }}
-                        className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 z-10 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-black/45 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition cursor-pointer"
+                        className="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition cursor-pointer"
                         title={isFav ? 'Remove from favorites' : 'Add to favorites'}
                       >
                         <Heart
-                          className={`w-3 sm:w-4 h-3 sm:h-4 ${
+                          className={`w-3.5 h-3.5 ${
                             isFav ? 'text-[#C11221] fill-[#C11221]' : 'text-white/80 group-hover:text-white'
                           }`}
                         />
@@ -765,45 +776,51 @@ export function WaiterPadView() {
 
                       {/* Selected Overlay Badge if in cart */}
                       {isSelected && (
-                        <div className="absolute bottom-1.5 right-1.5 sm:bottom-2.5 sm:right-2.5 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-[9px] sm:text-xs px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl shadow-lg border border-amber-300/40 flex items-center gap-1 animate-in zoom-in-75">
+                        <div className="absolute bottom-2 right-2 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full shadow-lg border border-amber-300/40 flex items-center gap-1">
                           <span>x{qty} in order</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Dish Name & Action */}
+                    {/* Dish Name, Description & Action */}
                     <div className="flex flex-col flex-1 justify-between">
                       <div>
                         <h4
-                          className="text-xs sm:text-base font-black text-stone-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition"
+                          className="text-xs sm:text-base font-black text-stone-900 dark:text-white truncate group-hover:text-[#B83E18] dark:group-hover:text-amber-400 transition"
                           title={item.name}
                         >
                           {item.name}
                         </h4>
+
+                        <p
+                          className="text-[11px] sm:text-xs text-stone-500 dark:text-zinc-400 line-clamp-2 mt-1 leading-relaxed"
+                          title={item.description || ''}
+                        >
+                          {item.description || 'Authentic dish prepared fresh to order with choice house ingredients.'}
+                        </p>
                       </div>
 
-                      {/* Price & Add Action Pill */}
-                      <div className="flex items-center justify-between gap-1.5 sm:gap-2 mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t border-stone-100 dark:border-white/5">
-                        <div className="text-xs sm:text-base font-black text-amber-700 dark:text-amber-400 tracking-tight">
-                          {Number(item.price).toFixed(2)} <span className="text-[9px] sm:text-[10px] text-stone-500 dark:text-zinc-400 font-bold">ETB</span>
+                      {/* Price & Action Row matching Reference */}
+                      <div className="flex items-end justify-between gap-2 mt-3 pt-2.5 border-t border-stone-100 dark:border-white/5">
+                        <div>
+                          <div className="text-xs sm:text-base font-black text-[#B83E18] dark:text-amber-400 tracking-tight leading-none">
+                            {Number(item.price).toLocaleString()} <span className="text-[10px] sm:text-xs font-bold text-stone-500 dark:text-zinc-400">ETB</span>
+                          </div>
+                          <span className="text-[9px] text-stone-400 dark:text-zinc-500 font-bold uppercase tracking-wider block mt-1">
+                            VAT Inc.
+                          </span>
                         </div>
 
-                        {/* Tashkent-style Action Pill */}
+                        {/* Round Terracotta Action Button matching Reference Image */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            addToWaiterCart({
-                              id: item.id,
-                              name: item.name,
-                              price: Number(item.price),
-                              imageUrl: item.imageUrl,
-                            });
+                            openItemCustomizer(item);
                           }}
-                          className="px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 font-black text-[10px] sm:text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1 cursor-pointer flex-shrink-0"
-                          title="Add to table order"
+                          className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-95 text-white flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
+                          title="View / Customize Order"
                         >
-                          <Plus className="w-3 sm:w-3.5 h-3 sm:h-3.5 stroke-[3]" />
-                          <span>Add</span>
+                          <Eye className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -948,27 +965,27 @@ export function WaiterPadView() {
         )}
       </div>
 
-      {/* DESKTOP/TABLET Right Column: Waiter Digital Slip Drawer - Luxury Frosted Dark Glass */}
-      <div className="hidden md:flex w-80 lg:w-96 bg-[#12100E]/95 backdrop-blur-2xl border-l border-white/10 flex-col h-full shadow-2xl flex-shrink-0 relative z-20">
-        <div className="p-4 border-b border-white/10 bg-white/[0.02] flex items-center justify-between">
+      {/* DESKTOP/TABLET Right Column: Waiter Digital Slip Drawer */}
+      <div className="hidden md:flex w-80 lg:w-96 bg-white dark:bg-[#12100E]/95 backdrop-blur-2xl border-l border-stone-200/90 dark:border-white/10 flex-col h-full shadow-xl flex-shrink-0 relative z-20 text-stone-900 dark:text-white transition-colors">
+        <div className="p-4 border-b border-stone-200/90 dark:border-white/10 bg-stone-50/50 dark:bg-white/[0.02] flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-500 uppercase tracking-wider">
               {orderType === 'TAKEAWAY' ? 'Takeaway Order' : 'Dining Table Note'}
             </div>
-            <div className="text-sm font-black text-white">{destinationLabel}</div>
+            <div className="text-sm font-black text-stone-900 dark:text-white">{destinationLabel}</div>
           </div>
           <button
             onClick={clearWaiterCart}
-            className="text-xs font-semibold text-zinc-500 hover:text-[#C11221] cursor-pointer transition"
+            className="text-xs font-semibold text-stone-500 dark:text-zinc-500 hover:text-[#B83E18] cursor-pointer transition"
           >
             Clear All
           </button>
         </div>
 
         {/* Special Instructions Note Input */}
-        <div className="p-3 border-b border-white/10">
-          <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1.5 flex items-center gap-1.5">
-            <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+        <div className="p-3 border-b border-stone-200/90 dark:border-white/10">
+          <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5 flex items-center gap-1.5">
+            <MessageSquare className="w-3.5 h-3.5 text-amber-500" />
             Special Note for Cashier & Kitchen
           </label>
           <input
@@ -976,34 +993,34 @@ export function WaiterPadView() {
             placeholder="e.g. Less spicy, extra hot, pack tightly"
             value={waiterSpecialNotes}
             onChange={(e) => setWaiterSpecialNotes(e.target.value)}
-            className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+            className="w-full bg-stone-50 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
           />
         </div>
 
         {/* Selected Items List */}
         <div className="flex-1 overflow-y-auto p-3.5 space-y-2.5 no-scrollbar">
           {waiterCart.length === 0 ? (
-            <div className="h-44 flex flex-col items-center justify-center text-center text-zinc-500">
-              <ShoppingBag className="w-8 h-8 mb-2 stroke-1 text-zinc-600" />
+            <div className="h-44 flex flex-col items-center justify-center text-center text-stone-400 dark:text-zinc-500">
+              <ShoppingBag className="w-8 h-8 mb-2 stroke-1 text-stone-400 dark:text-zinc-600" />
               <p className="text-xs font-medium">No items picked for {destinationLabel} yet.</p>
-              <p className="text-[11px] text-zinc-600 mt-0.5">Click any food card or + to add.</p>
+              <p className="text-[11px] text-stone-400 dark:text-zinc-600 mt-0.5">Click any food card to customize & add.</p>
             </div>
           ) : (
             waiterCart.map((item) => (
               <div
                 key={item.menuItemId}
-                className="bg-white/[0.04] border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-2 hover:border-amber-500/30 transition"
+                className="bg-stone-50 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-2xl p-3 flex items-center justify-between gap-2 hover:border-amber-500/30 transition"
               >
                 <div className="pr-2 min-w-0 flex-1">
-                  <div className="text-xs font-bold text-white truncate">{item.name}</div>
-                  <div className="text-[10px] text-zinc-400 font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
+                  <div className="text-xs font-bold text-stone-900 dark:text-white truncate">{item.name}</div>
+                  <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
                     <span>{item.price.toFixed(2)} ETB × {item.quantity}</span>
                     {item.tip && item.tip > 0 ? (
-                      <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 rounded font-bold text-[9px] flex items-center gap-1">
+                      <span className="bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 px-1.5 py-0.2 rounded font-bold text-[9px] flex items-center gap-1">
                         <span>Tip: +{item.tip.toFixed(2)} ETB</span>
                         <button
                           onClick={() => setWaiterItemTip(item.menuItemId, 0)}
-                          className="text-amber-400 hover:text-rose-400 font-black ml-0.5"
+                          className="text-amber-600 hover:text-rose-600 font-black ml-0.5"
                           title="Remove tip"
                         >
                           ×
@@ -1020,7 +1037,7 @@ export function WaiterPadView() {
                             }
                           }
                         }}
-                        className="text-[9px] font-bold text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 bg-white/[0.04] px-1.5 py-0.5 rounded transition cursor-pointer"
+                        className="text-[9px] font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 bg-white/60 dark:bg-white/[0.04] px-1.5 py-0.5 rounded transition cursor-pointer"
                         title="Add custom tip"
                       >
                         + Tip
@@ -1030,20 +1047,20 @@ export function WaiterPadView() {
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs font-black text-amber-400">
+                  <span className="text-xs font-black text-[#B83E18] dark:text-amber-400">
                     {((item.price + (item.tip || 0)) * item.quantity).toFixed(2)} ETB
                   </span>
-                  <div className="flex items-center gap-1 bg-white/[0.06] border border-white/10 rounded-xl px-1.5 py-0.5">
+                  <div className="flex items-center gap-1 bg-stone-200/60 dark:bg-white/[0.06] border border-stone-300/80 dark:border-white/10 rounded-xl px-1.5 py-0.5">
                     <button
                       onClick={() => updateWaiterQuantity(item.menuItemId, -1)}
-                      className="text-zinc-400 hover:text-white p-0.5"
+                      className="text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white p-0.5"
                     >
                       <Minus className="w-2.5 h-2.5" />
                     </button>
-                    <span className="text-xs font-black px-1 text-white">{item.quantity}</span>
+                    <span className="text-xs font-black px-1 text-stone-900 dark:text-white">{item.quantity}</span>
                     <button
                       onClick={() => updateWaiterQuantity(item.menuItemId, 1)}
-                      className="text-zinc-400 hover:text-white p-0.5"
+                      className="text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white p-0.5"
                     >
                       <Plus className="w-2.5 h-2.5" />
                     </button>
@@ -1055,25 +1072,25 @@ export function WaiterPadView() {
         </div>
 
         {/* Send to Cashier Summary & Button */}
-        <div className="p-4 border-t border-white/10 bg-white/[0.02] space-y-3">
-          <div className="space-y-1.5 text-xs text-zinc-400">
+        <div className="p-4 border-t border-stone-200/90 dark:border-white/10 bg-stone-50/50 dark:bg-white/[0.02] space-y-3">
+          <div className="space-y-1.5 text-xs text-stone-500 dark:text-zinc-400">
             <div className="flex justify-between items-center">
               <span>Subtotal ({totalWaiterItems} items)</span>
-              <span className="font-bold text-white">{totalWaiterBase.toFixed(2)} ETB</span>
+              <span className="font-bold text-stone-900 dark:text-white">{totalWaiterBase.toFixed(2)} ETB</span>
             </div>
             {totalWaiterTip > 0 && (
-              <div className="flex justify-between items-center text-amber-400 font-bold">
+              <div className="flex justify-between items-center text-amber-600 dark:text-amber-400 font-bold">
                 <span>Server Tip (No VAT)</span>
                 <span>+{totalWaiterTip.toFixed(2)} ETB</span>
               </div>
             )}
             <div className="flex justify-between items-center">
               <span>15% VAT</span>
-              <span className="font-bold text-white">{totalWaiterTax.toFixed(2)} ETB</span>
+              <span className="font-bold text-stone-900 dark:text-white">{totalWaiterTax.toFixed(2)} ETB</span>
             </div>
-            <div className="flex justify-between items-center pt-2 border-t border-white/10 font-black text-sm text-white">
+            <div className="flex justify-between items-center pt-2 border-t border-stone-200/90 dark:border-white/10 font-black text-sm text-stone-900 dark:text-white">
               <span>Total Bill</span>
-              <span className="text-lg text-amber-400">{totalWaiterSum.toFixed(2)} ETB</span>
+              <span className="text-lg text-[#B83E18] dark:text-amber-400">{totalWaiterSum.toFixed(2)} ETB</span>
             </div>
           </div>
 
