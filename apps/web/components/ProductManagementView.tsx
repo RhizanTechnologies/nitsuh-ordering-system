@@ -547,9 +547,9 @@ export function ProductManagementView() {
         )}
       </div>
 
-      {/* TAB 1 CONTENT: PRODUCTS GRID */}
+      {/* TAB 1 CONTENT: PRODUCTS GRID (2 columns on mobile/smaller screens) */}
       {activeTab === 'products' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4">
           {filteredItems.length === 0 ? (
             <div className="col-span-full py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl">
               No products found matching your search.
@@ -566,7 +566,7 @@ export function ProductManagementView() {
               return (
                 <div
                   key={item.id}
-                  className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-3xl p-4 shadow-xl backdrop-blur-xl flex flex-col justify-between transition"
+                  className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 shadow-xl backdrop-blur-xl flex flex-col justify-between transition"
                 >
                   <div>
                     <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/40 mb-3 border border-white/10">

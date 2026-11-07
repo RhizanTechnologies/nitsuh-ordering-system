@@ -729,8 +729,8 @@ export function WaiterPadView() {
               </div>
             )}
 
-            {/* Food Grid matching Reference Image */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-5">
+            {/* Food Grid matching Reference Image (2 columns on mobile/small screens) */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2.5 sm:gap-4 md:gap-5">
               {filteredItems.map((item) => {
                 const inCart = waiterCart.find((c) => c.menuItemId === item.id);
                 const qty = inCart ? inCart.quantity : 0;
@@ -741,14 +741,14 @@ export function WaiterPadView() {
                   <div
                     key={item.id}
                     onClick={() => openItemCustomizer(item)}
-                    className={`group relative bg-white dark:bg-[#161311] rounded-3xl p-3 sm:p-3.5 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xs hover:shadow-md ${
+                    className={`group relative bg-white dark:bg-[#161311] rounded-2xl sm:rounded-3xl p-2 sm:p-3.5 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xs hover:shadow-md ${
                       isSelected
                         ? 'border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/30 shadow-lg shadow-amber-500/15'
                         : 'border-stone-200/90 dark:border-white/10 hover:border-amber-500/50'
                     }`}
                   >
                     {/* Generous High-Impact Culinary Image (Tashkent Cafe Style) */}
-                    <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-3 bg-stone-100 dark:bg-black/40 border border-stone-200/60 dark:border-white/10 flex-shrink-0">
+                    <div className="relative w-full aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden mb-2 sm:mb-3 bg-stone-100 dark:bg-black/40 border border-stone-200/60 dark:border-white/10 flex-shrink-0">
                       <MenuImage
                         src={item.imageUrl}
                         alt={item.name}
@@ -758,18 +758,18 @@ export function WaiterPadView() {
                       />
 
                       {/* Floating Category / Dietary Badge (Top-Left) */}
-                      <div className="absolute top-2.5 left-2.5 z-10">
+                      <div className="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5 z-10">
                         {isBurger(item.category?.name || '', item.name) || item.name.toLowerCase().includes('spicy') ? (
-                          <span className="bg-[#C11221] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 backdrop-blur-md">
-                            <Flame className="w-2.5 h-2.5 fill-white" />
+                          <span className="bg-[#C11221] text-white text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 backdrop-blur-md">
+                            <Flame className="w-2 sm:w-2.5 h-2 sm:h-2.5 fill-white" />
                             <span>Spicy</span>
                           </span>
                         ) : isFastingItem(item) ? (
-                          <span className="bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 backdrop-blur-md">
+                          <span className="bg-emerald-600 text-white text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 backdrop-blur-md">
                             🌱 Fasting
                           </span>
                         ) : (
-                          <span className="bg-black/55 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                          <span className="bg-black/55 backdrop-blur-md text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full shadow-sm">
                             {item.category?.name || 'Dish'}
                           </span>
                         )}
@@ -781,11 +781,11 @@ export function WaiterPadView() {
                           e.stopPropagation();
                           toggleFavorite(item.id);
                         }}
-                        className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-black/45 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition cursor-pointer"
+                        className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 z-10 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-black/45 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition cursor-pointer"
                         title={isFav ? 'Remove from favorites' : 'Add to favorites'}
                       >
                         <Heart
-                          className={`w-4 h-4 ${
+                          className={`w-3 sm:w-4 h-3 sm:h-4 ${
                             isFav ? 'text-[#C11221] fill-[#C11221]' : 'text-white/80 group-hover:text-white'
                           }`}
                         />
@@ -793,7 +793,7 @@ export function WaiterPadView() {
 
                       {/* Selected Overlay Badge if in cart */}
                       {isSelected && (
-                        <div className="absolute bottom-2.5 right-2.5 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs px-2.5 py-1 rounded-xl shadow-lg border border-amber-300/40 flex items-center gap-1 animate-in zoom-in-75">
+                        <div className="absolute bottom-1.5 right-1.5 sm:bottom-2.5 sm:right-2.5 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-[9px] sm:text-xs px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl shadow-lg border border-amber-300/40 flex items-center gap-1 animate-in zoom-in-75">
                           <span>x{qty} in order</span>
                         </div>
                       )}
@@ -803,7 +803,7 @@ export function WaiterPadView() {
                     <div className="flex flex-col flex-1 justify-between">
                       <div>
                         <h4
-                          className="text-sm sm:text-base font-black text-stone-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition"
+                          className="text-xs sm:text-base font-black text-stone-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition"
                           title={item.name}
                         >
                           {item.name}
@@ -811,7 +811,7 @@ export function WaiterPadView() {
 
                         {item.description && (
                           <p
-                            className="text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-1 mt-0.5 leading-relaxed"
+                            className="text-[10px] sm:text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-1 mt-0.5 leading-tight hidden xs:block sm:block"
                             title={item.description}
                           >
                             {item.description}
@@ -820,9 +820,9 @@ export function WaiterPadView() {
                       </div>
 
                       {/* Price & Add Action Pill */}
-                      <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-stone-100 dark:border-white/5">
-                        <div className="text-sm sm:text-base font-black text-amber-700 dark:text-amber-400 tracking-tight">
-                          {Number(item.price).toFixed(2)} <span className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold">ETB</span>
+                      <div className="flex items-center justify-between gap-1.5 sm:gap-2 mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t border-stone-100 dark:border-white/5">
+                        <div className="text-xs sm:text-base font-black text-amber-700 dark:text-amber-400 tracking-tight">
+                          {Number(item.price).toFixed(2)} <span className="text-[9px] sm:text-[10px] text-stone-500 dark:text-zinc-400 font-bold">ETB</span>
                         </div>
 
                         {/* Tashkent-style Action Pill */}
@@ -836,10 +836,10 @@ export function WaiterPadView() {
                               imageUrl: item.imageUrl,
                             });
                           }}
-                          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 font-black text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0"
+                          className="px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 font-black text-[10px] sm:text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1 cursor-pointer flex-shrink-0"
                           title="Add to table order"
                         >
-                          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                          <Plus className="w-3 sm:w-3.5 h-3 sm:h-3.5 stroke-[3]" />
                           <span>Add</span>
                         </button>
                       </div>
