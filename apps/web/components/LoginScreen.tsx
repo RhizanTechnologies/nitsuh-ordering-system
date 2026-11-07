@@ -295,8 +295,8 @@ export function LoginScreen() {
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C11221]/10 dark:bg-[#C11221]/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md bg-white dark:bg-[#161311]/95 backdrop-blur-2xl rounded-[36px] shadow-2xl border border-stone-200/90 dark:border-white/15 overflow-hidden relative z-10 transition-colors duration-300">
-        {/* Header Branding: Nitsuh Creative Brand Logo & Emblem */}
-        <div className="bg-gradient-to-b from-amber-500/10 via-stone-50/50 to-transparent dark:from-[#C11221]/25 dark:via-white/[0.03] dark:to-transparent p-6 text-center relative border-b border-stone-200/80 dark:border-white/10">
+        {/* Header Branding: Nitsuh Clean Brand Logo & Emblem */}
+        <div className="bg-gradient-to-b from-amber-500/10 via-stone-50/50 to-transparent dark:from-amber-500/10 dark:via-white/[0.02] dark:to-transparent p-6 text-center relative border-b border-stone-200/80 dark:border-white/10">
           <NitsuhLogo variant="login" />
         </div>
 

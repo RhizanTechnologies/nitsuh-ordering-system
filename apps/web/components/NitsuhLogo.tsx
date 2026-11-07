@@ -19,56 +19,31 @@ export function NitsuhLogo({
   if (variant === 'login' || variant === 'hero') {
     return (
       <div className={`flex flex-col items-center text-center ${className}`}>
-        {/* Creative Jewel Emblem */}
-        <div className="relative mb-4 group">
-          {/* Ambient luminous aura */}
-          <div className="absolute -inset-2 bg-gradient-to-r from-red-600/30 via-amber-500/30 to-rose-600/30 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition duration-500" />
-          
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-[#1C1815] via-[#2A1810] to-[#120F0D] p-3 shadow-2xl border border-amber-500/30 ring-1 ring-white/20 flex items-center justify-center overflow-hidden">
-            {/* Fine metallic inner border */}
-            <div className="absolute inset-1 rounded-[20px] border border-amber-400/20 pointer-events-none" />
-            
-            {/* Background radiant radial flare */}
-            <div className="absolute inset-0 bg-radial from-amber-500/20 via-transparent to-transparent opacity-60" />
-
-            {/* Official Logo Image with drop shadow */}
+        {/* Clean Circular Brand Emblem */}
+        <div className="relative mb-3 flex items-center justify-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-amber-400 via-amber-500 to-orange-500 p-2 shadow-lg ring-4 ring-amber-500/20 flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-105">
             <img
               src="/nitsuh-logo.png"
-              alt="Nitsuh Foods Brand Emblem"
-              className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(245,158,11,0.35)] relative z-10 transition-transform duration-300 group-hover:scale-105"
+              alt="Nitsuh Foods"
+              className="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.25)] relative z-10"
             />
-          </div>
-
-          {/* Micro Quality Seal Tag */}
-          <div className="absolute -bottom-2 inset-x-0 flex justify-center">
-            <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-[9px] font-black tracking-widest uppercase text-zinc-950 px-2.5 py-0.5 rounded-full shadow-md border border-amber-300/40">
-              PURE TASTE
-            </span>
           </div>
         </div>
 
         {/* Brand Typographic Lockup */}
-        <div className="mt-2">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-wider uppercase leading-tight flex items-center justify-center gap-2">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EF4444] via-[#F87171] to-[#DC2626] drop-shadow-sm">
+        <div className="flex flex-col items-center">
+          <div className="flex items-center gap-2 leading-none">
+            <span className="font-heading font-black text-2xl sm:text-3xl tracking-tight text-stone-900 dark:text-white">
               NITSUH
             </span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-orange-400 drop-shadow-sm">
+            <span className="text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/15 text-[#B83E18] dark:text-rose-400 border border-rose-500/30">
               FOODS
             </span>
-          </h1>
-          
+          </div>
           {shouldShowSubtitle && (
-            <div className="space-y-1 mt-1.5">
-              <p className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-300 tracking-tight">
-                From Savour Bites to Sweet Delights – We Cater It All!
-              </p>
-              <div className="flex items-center justify-center gap-2 text-[11px] font-semibold text-stone-600 dark:text-zinc-400">
-                <span>Addis Ababa, Ethiopia</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                <span className="font-mono text-stone-800 dark:text-zinc-200 font-bold">0966833177</span>
-              </div>
-            </div>
+            <p className="text-xs sm:text-sm text-stone-500 dark:text-zinc-400 font-medium mt-1 tracking-tight">
+              Real Taste &amp; Savoury Bites
+            </p>
           )}
         </div>
       </div>
