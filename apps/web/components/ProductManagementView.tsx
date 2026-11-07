@@ -53,6 +53,25 @@ export function ProductManagementView() {
   const [savingProduct, setSavingProduct] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
+  // Tab: 'products' | 'addons'
+  const [activeTab, setActiveTab] = useState<'products' | 'addons'>('products');
+
+  // Real Add-ons Management
+  const [addons, setAddons] = useState<any[]>([]);
+  const [ingredientsPool, setIngredientsPool] = useState<any[]>([]);
+  const [addonSearch, setAddonSearch] = useState('');
+  const [addonModalOpen, setAddonModalOpen] = useState(false);
+  const [isEditingAddon, setIsEditingAddon] = useState(false);
+  const [editingAddonId, setEditingAddonId] = useState<string | null>(null);
+  const [formAddonName, setFormAddonName] = useState('');
+  const [formAddonPrice, setFormAddonPrice] = useState('');
+  const [formAddonIngredientId, setFormAddonIngredientId] = useState('');
+  const [formAddonQty, setFormAddonQty] = useState('');
+  const [formAddonTargetType, setFormAddonTargetType] = useState<'GLOBAL' | 'CATEGORY' | 'ITEM'>('GLOBAL');
+  const [formAddonCategoryId, setFormAddonCategoryId] = useState('');
+  const [formAddonItemId, setFormAddonItemId] = useState('');
+  const [savingAddon, setSavingAddon] = useState(false);
+
   const processAndSetImage = (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('Please upload a valid image file (PNG, JPG, WebP).');
@@ -117,13 +136,115 @@ export function ProductManagementView() {
 
   const loadData = () => {
     setLoading(true);
-    Promise.all([fetchApi('/menu/items'), fetchApi('/menu/categories')])
-      .then(([itemsData, catsData]) => {
-        setItems(itemsData);
-        setCategories(catsData);
+    Promise.all([
+      fetchApi('/menu/items'),
+      fetchApi('/menu/categories'),
+      fetchApi('/menu/addons'),
+      fetchApi('/inventory/ingredients'),
+    ])
+      .then(([itemsData, catsData, addonsData, ingredientsData]) => {
+        setItems(itemsData || []);
+        setCategories(catsData || []);
+        setAddons(addonsData || []);
+        setIngredientsPool(ingredientsData || []);
       })
       .catch((err) => console.error('Failed to load menu data:', err))
       .finally(() => setLoading(false));
+  };
+
+  const openAddAddonModal = () => {
+    setIsEditingAddon(false);
+    setEditingAddonId(null);
+    setFormAddonName('');
+    setFormAddonPrice('');
+    setFormAddonIngredientId(ingredientsPool[0]?.id || '');
+    setFormAddonQty('30');
+    setFormAddonTargetType('GLOBAL');
+    setFormAddonCategoryId(categories[0]?.id || '');
+    setFormAddonItemId(items[0]?.id || '');
+    setAddonModalOpen(true);
+  };
+
+  const openEditAddonModal = (addon: any) => {
+    setIsEditingAddon(true);
+    setEditingAddonId(addon.id);
+    setFormAddonName(addon.name);
+    setFormAddonPrice(String(addon.price));
+    setFormAddonIngredientId(addon.ingredientId || '');
+    setFormAddonQty(String(addon.quantity || '0'));
+    if (addon.menuItemId) {
+      setFormAddonTargetType('ITEM');
+      setFormAddonItemId(addon.menuItemId);
+    } else if (addon.categoryId) {
+      setFormAddonTargetType('CATEGORY');
+      setFormAddonCategoryId(addon.categoryId);
+    } else {
+      setFormAddonTargetType('GLOBAL');
+    }
+    setAddonModalOpen(true);
+  };
+
+  const handleSaveAddon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formAddonName.trim() || !formAddonPrice) return;
+    setSavingAddon(true);
+
+    try {
+      const payload = {
+        name: formAddonName.trim(),
+        price: parseFloat(formAddonPrice),
+        ingredientId: formAddonIngredientId || null,
+        quantity: parseFloat(formAddonQty) || 0,
+        categoryId: formAddonTargetType === 'CATEGORY' ? formAddonCategoryId : null,
+        menuItemId: formAddonTargetType === 'ITEM' ? formAddonItemId : null,
+      };
+
+      if (isEditingAddon && editingAddonId) {
+        await fetchApi(`/menu/addons/${editingAddonId}`, {
+          method: 'PATCH',
+          body: JSON.stringify(payload),
+        });
+        setActionMessage(`Add-on "${formAddonName}" updated successfully!`);
+      } else {
+        await fetchApi('/menu/addons', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        setActionMessage(`New Add-on "${formAddonName}" created!`);
+      }
+
+      setAddonModalOpen(false);
+      loadData();
+      setTimeout(() => setActionMessage(null), 4000);
+    } catch (err: any) {
+      alert(`Error saving add-on: ${err.message}`);
+    } finally {
+      setSavingAddon(false);
+    }
+  };
+
+  const handleDeleteAddon = async (addon: any) => {
+    if (!confirm(`Are you sure you want to delete add-on "${addon.name}"?`)) return;
+    try {
+      await fetchApi(`/menu/addons/${addon.id}`, { method: 'DELETE' });
+      setActionMessage(`Add-on "${addon.name}" removed.`);
+      loadData();
+      setTimeout(() => setActionMessage(null), 4000);
+    } catch (err: any) {
+      alert(`Failed to delete add-on: ${err.message}`);
+    }
+  };
+
+  const handleToggleAddonActive = async (addon: any) => {
+    try {
+      await fetchApi(`/menu/addons/${addon.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isActive: !addon.isActive }),
+      });
+      loadData();
+    } catch (err: any) {
+      alert(`Failed to update add-on status: ${err.message}`);
+    }
   };
 
   useEffect(() => {
@@ -143,6 +264,19 @@ export function ProductManagementView() {
       return matchSearch && matchCat;
     });
   }, [items, search, selectedCatId]);
+
+  const filteredAddons = useMemo(() => {
+    const q = addonSearch.trim().toLowerCase();
+    return addons.filter((a) => {
+      if (!q) return true;
+      return (
+        a.name.toLowerCase().includes(q) ||
+        a.ingredient?.name?.toLowerCase().includes(q) ||
+        a.category?.name?.toLowerCase().includes(q) ||
+        a.menuItem?.name?.toLowerCase().includes(q)
+      );
+    });
+  }, [addons, addonSearch]);
 
   const openAddModal = () => {
     setIsEditing(false);
@@ -226,6 +360,14 @@ export function ProductManagementView() {
     }
   };
 
+  const selectedIngredient = ingredientsPool.find((i) => i.id === formAddonIngredientId);
+  const addonQtyNum = parseFloat(formAddonQty) || 0;
+  const addonPriceNum = parseFloat(formAddonPrice) || 0;
+  const unitCostNum = selectedIngredient ? Number(selectedIngredient.currentCostPerBaseUnit || 0) : 0;
+  const addonEstimatedCost = addonQtyNum * unitCostNum;
+  const addonGrossProfit = addonPriceNum - addonEstimatedCost;
+  const addonMarginPercent = addonPriceNum > 0 ? (addonGrossProfit / addonPriceNum) * 100 : 0;
+
   return (
     <div className="space-y-6 text-white">
       {/* Top Action & Control Bar */}
@@ -234,10 +376,10 @@ export function ProductManagementView() {
           <div>
             <h2 className="text-base font-black text-white flex items-center gap-2">
               <Utensils className="w-5 h-5 text-amber-400" />
-              <span>Menu Products & Recipe Studio</span>
+              <span>Menu Products, Recipes & Add-ons Studio</span>
             </h2>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Manage selling prices, prep stations, and configure exact ingredient amounts (grams/ml) for accurate automated food cost deductions.
+              Manage product pricing, standard portion recipes, and configure real kitchen add-ons with automatic inventory stock deductions.
             </p>
           </div>
 
@@ -249,14 +391,61 @@ export function ProductManagementView() {
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
-            <button
-              onClick={openAddModal}
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 transition active:scale-95 cursor-pointer"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Add New Product</span>
-            </button>
+            {activeTab === 'products' ? (
+              <button
+                onClick={openAddModal}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 transition active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>Add New Product</span>
+              </button>
+            ) : (
+              <button
+                onClick={openAddAddonModal}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 transition active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>Create Real Add-on</span>
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`px-4 py-2 rounded-2xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
+              activeTab === 'products'
+                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/10'
+            }`}
+          >
+            <Utensils className="w-3.5 h-3.5" />
+            <span>Products & Recipes</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+              activeTab === 'products' ? 'bg-black/20 text-black font-extrabold' : 'bg-white/10 text-zinc-400'
+            }`}>
+              {items.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('addons')}
+            className={`px-4 py-2 rounded-2xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
+              activeTab === 'addons'
+                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/10'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Real Kitchen Add-ons & Modifiers</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+              activeTab === 'addons' ? 'bg-black/20 text-black font-extrabold' : 'bg-white/10 text-zinc-400'
+            }`}>
+              {addons.length}
+            </span>
+          </button>
         </div>
 
         {/* Feedback Alert Toast */}
@@ -269,181 +458,576 @@ export function ProductManagementView() {
           </div>
         )}
 
-        {/* Filters & Search Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <div className="flex-1 relative">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search products by name, ingredients, or category..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-2xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none transition shadow-inner"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="p-1 text-zinc-400 hover:text-white rounded-full transition absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+        {/* Tab 1: Products Filter & Search Row */}
+        {activeTab === 'products' && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-1 relative">
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search products by name, ingredients, or category..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-2xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none transition shadow-inner"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="p-1 text-zinc-400 hover:text-white rounded-full transition absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            <button
-              onClick={() => setSelectedCatId('')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border cursor-pointer ${
-                selectedCatId === ''
-                  ? 'bg-amber-500 text-black border-amber-400 font-black shadow-md'
-                  : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
-              }`}
-            >
-              All Categories ({items.length})
-            </button>
-            {categories.map((c) => (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
               <button
-                key={c.id}
-                onClick={() => setSelectedCatId(c.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border flex items-center gap-1.5 cursor-pointer ${
-                  selectedCatId === c.id
+                onClick={() => setSelectedCatId('')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border cursor-pointer ${
+                  selectedCatId === ''
                     ? 'bg-amber-500 text-black border-amber-400 font-black shadow-md'
                     : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
                 }`}
               >
-                <span>{c.name}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  selectedCatId === c.id ? 'bg-black text-amber-300 font-bold' : 'bg-white/10 text-zinc-400'
-                }`}>
-                  {c._count?.menuItems || 0}
-                </span>
+                All Categories ({items.length})
               </button>
-            ))}
+              {categories.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCatId(c.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border flex items-center gap-1.5 cursor-pointer ${
+                    selectedCatId === c.id
+                      ? 'bg-amber-500 text-black border-amber-400 font-black shadow-md'
+                      : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <span>{c.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                    selectedCatId === c.id ? 'bg-black text-amber-300 font-bold' : 'bg-white/10 text-zinc-400'
+                  }`}>
+                    {c._count?.menuItems || 0}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* Products Cards Grid (Modern Responsive Card Format) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredItems.length === 0 ? (
-          <div className="col-span-full py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl">
-            No products found matching your search.
-          </div>
-        ) : (
-          filteredItems.map((item) => {
-            const ingredientsCount = item.recipe?.ingredients?.length || 0;
-            const hasRecipe = ingredientsCount > 0;
-            const cost = Number(item.costPerPortion || 0);
-            const price = Number(item.price || 0);
-            const margin = Number(item.marginPercent || 0);
+        {/* Tab 2: Add-ons Search & Metrics Row */}
+        {activeTab === 'addons' && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex-1 relative">
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search add-ons by name, linked ingredient, category, or product..."
+                value={addonSearch}
+                onChange={(e) => setAddonSearch(e.target.value)}
+                className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-2xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none transition shadow-inner"
+              />
+              {addonSearch && (
+                <button
+                  onClick={() => setAddonSearch('')}
+                  className="p-1 text-zinc-400 hover:text-white rounded-full transition absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
 
-            return (
-              <div
-                key={item.id}
-                className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-3xl p-4 shadow-xl backdrop-blur-xl flex flex-col justify-between transition"
-              >
-                <div>
-                  <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/40 mb-3 border border-white/10">
-                    <MenuImage
-                      src={item.imageUrl}
-                      alt={item.name}
-                      categoryName={item.category?.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <span className="absolute top-2 left-2 text-[10px] font-bold bg-[#161311]/85 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 text-white">
-                      {item.category?.name}
-                    </span>
-                    {item.isDirectSale && (
-                      <span className="absolute top-2 right-2 text-[9px] font-bold px-2 py-0.5 rounded-lg bg-blue-600 text-white shadow">
-                        Retail
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-extrabold text-sm text-white truncate" title={item.name}>
-                      {item.name}
-                    </h3>
-                    <span className="text-sm font-black text-amber-400 whitespace-nowrap">
-                      {price.toFixed(2)} ETB
-                    </span>
-                  </div>
-
-                  {item.description && (
-                    <p className="text-[11px] text-zinc-400 line-clamp-1 mb-2.5" title={item.description}>
-                      {item.description}
-                    </p>
-                  )}
-
-                  {/* Financial & Recipe Badges */}
-                  <div className="grid grid-cols-2 gap-2 bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 mb-3 text-xs">
-                    <div>
-                      <div className="text-[9px] text-zinc-400 font-bold uppercase">Food Cost</div>
-                      <div className="text-xs font-bold text-rose-400 mt-0.5">
-                        {cost > 0 ? `${cost.toFixed(2)} ETB` : '—'}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[9px] text-zinc-400 font-bold uppercase">Gross Margin</div>
-                      <div className={`text-xs font-black mt-0.5 ${margin >= 60 ? 'text-emerald-400' : margin >= 40 ? 'text-amber-400' : 'text-rose-400'}`}>
-                        {margin > 0 ? `${margin.toFixed(1)}%` : '—'}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Recipe Status */}
-                  <div className="mb-3">
-                    {hasRecipe ? (
-                      <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-bold text-[10px]">
-                        <Check className="w-3 h-3 text-emerald-400" />
-                        <span>{ingredientsCount} recipe ingredients defined</span>
-                      </span>
-                    ) : item.isDirectSale ? (
-                      <span className="text-[10px] text-zinc-500 font-semibold">Direct Stock Unit</span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-lg font-bold text-[10px]">
-                        <AlertCircle className="w-3 h-3 text-amber-400" />
-                        <span>No recipe ingredients set</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1.5 pt-2 border-t border-white/10">
-                  <button
-                    onClick={() => {
-                      setSelectedRecipeItem(item);
-                      setRecipeModalOpen(true);
-                    }}
-                    className="flex-1 py-1.5 px-2 bg-amber-500/15 hover:bg-amber-500 hover:text-black text-amber-400 border border-amber-500/30 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1 cursor-pointer"
-                    title="Configure ingredients and recipe amounts"
-                  >
-                    <ChefHat className="w-3.5 h-3.5" />
-                    <span>Ingredients</span>
-                  </button>
-
-                  <button
-                    onClick={() => openEditModal(item)}
-                    className="p-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-xl transition cursor-pointer border border-white/10"
-                    title="Edit product details"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteProduct(item)}
-                    className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
-                    title="Delete product"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+            <div className="flex items-center gap-3 text-xs text-zinc-400">
+              <div className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-2">
+                <span className="text-[10px] uppercase font-bold text-zinc-500">Inventory Linked:</span>
+                <span className="font-extrabold text-amber-400">
+                  {addons.filter((a) => a.ingredientId).length} / {addons.length}
+                </span>
               </div>
-            );
-          })
+            </div>
+          </div>
         )}
       </div>
+
+      {/* TAB 1 CONTENT: PRODUCTS GRID */}
+      {activeTab === 'products' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredItems.length === 0 ? (
+            <div className="col-span-full py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl">
+              No products found matching your search.
+            </div>
+          ) : (
+            filteredItems.map((item) => {
+              const ingredientsCount = item.recipe?.ingredients?.length || 0;
+              const hasRecipe = ingredientsCount > 0;
+              const cost = Number(item.costPerPortion || 0);
+              const price = Number(item.price || 0);
+              const margin = Number(item.marginPercent || 0);
+              const addonsCount = item.applicableAddons?.length || 0;
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-3xl p-4 shadow-xl backdrop-blur-xl flex flex-col justify-between transition"
+                >
+                  <div>
+                    <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/40 mb-3 border border-white/10">
+                      <MenuImage
+                        src={item.imageUrl}
+                        alt={item.name}
+                        categoryName={item.category?.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <span className="absolute top-2 left-2 text-[10px] font-bold bg-[#161311]/85 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10 text-white">
+                        {item.category?.name}
+                      </span>
+                      {item.isDirectSale && (
+                        <span className="absolute top-2 right-2 text-[9px] font-bold px-2 py-0.5 rounded-lg bg-blue-600 text-white shadow">
+                          Retail
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="font-extrabold text-sm text-white truncate" title={item.name}>
+                        {item.name}
+                      </h3>
+                      <span className="text-sm font-black text-amber-400 whitespace-nowrap">
+                        {price.toFixed(2)} ETB
+                      </span>
+                    </div>
+
+                    {item.description && (
+                      <p className="text-[11px] text-zinc-400 line-clamp-1 mb-2.5" title={item.description}>
+                        {item.description}
+                      </p>
+                    )}
+
+                    {/* Financial & Recipe Badges */}
+                    <div className="grid grid-cols-2 gap-2 bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 mb-3 text-xs">
+                      <div>
+                        <div className="text-[9px] text-zinc-400 font-bold uppercase">Food Cost</div>
+                        <div className="text-xs font-bold text-rose-400 mt-0.5">
+                          {cost > 0 ? `${cost.toFixed(2)} ETB` : '—'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] text-zinc-400 font-bold uppercase">Gross Margin</div>
+                        <div className={`text-xs font-black mt-0.5 ${margin >= 60 ? 'text-emerald-400' : margin >= 40 ? 'text-amber-400' : 'text-rose-400'}`}>
+                          {margin > 0 ? `${margin.toFixed(1)}%` : '—'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Recipe & Addons Status */}
+                    <div className="mb-3 flex flex-wrap gap-1.5">
+                      {hasRecipe ? (
+                        <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-bold text-[10px]">
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span>{ingredientsCount} recipe ingredients</span>
+                        </span>
+                      ) : item.isDirectSale ? (
+                        <span className="text-[10px] text-zinc-500 font-semibold">Direct Stock Unit</span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-lg font-bold text-[10px]">
+                          <AlertCircle className="w-3 h-3 text-amber-400" />
+                          <span>No recipe set</span>
+                        </span>
+                      )}
+
+                      {addonsCount > 0 && (
+                        <span className="inline-flex items-center gap-1 bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-lg font-bold text-[10px]">
+                          <Layers className="w-3 h-3 text-purple-400" />
+                          <span>{addonsCount} add-on modifiers</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1.5 pt-2 border-t border-white/10">
+                    <button
+                      onClick={() => {
+                        setSelectedRecipeItem(item);
+                        setRecipeModalOpen(true);
+                      }}
+                      className="flex-1 py-1.5 px-2 bg-amber-500/15 hover:bg-amber-500 hover:text-black text-amber-400 border border-amber-500/30 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1 cursor-pointer"
+                      title="Configure ingredients and recipe amounts"
+                    >
+                      <ChefHat className="w-3.5 h-3.5" />
+                      <span>Ingredients</span>
+                    </button>
+
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="p-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-xl transition cursor-pointer border border-white/10"
+                      title="Edit product details"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteProduct(item)}
+                      className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
+                      title="Delete product"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {/* TAB 2 CONTENT: REAL KITCHEN ADD-ONS & MODIFIERS */}
+      {activeTab === 'addons' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredAddons.length === 0 ? (
+              <div className="col-span-full py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl p-6">
+                <Layers className="w-8 h-8 text-amber-500/40 mx-auto mb-2" />
+                <div className="font-bold text-white text-sm mb-1">No add-ons found</div>
+                <p className="max-w-sm mx-auto text-zinc-400 mb-4">
+                  Create real add-ons (e.g. Extra Cheese, Double Patty) linked directly to inventory ingredients with automated portion deductions.
+                </p>
+                <button
+                  onClick={openAddAddonModal}
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs rounded-xl cursor-pointer"
+                >
+                  + Create First Add-on
+                </button>
+              </div>
+            ) : (
+              filteredAddons.map((addon) => {
+                const scopeLabel = addon.menuItem
+                  ? `Product: ${addon.menuItem.name}`
+                  : addon.category
+                  ? `Category: ${addon.category.name}`
+                  : 'All Dishes (Global)';
+                const scopeBadgeClass = addon.menuItem
+                  ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                  : addon.category
+                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+
+                return (
+                  <div
+                    key={addon.id}
+                    className={`p-4 rounded-3xl border transition shadow-xl backdrop-blur-xl flex flex-col justify-between ${
+                      addon.isActive
+                        ? 'bg-white/[0.04] border-white/10 hover:border-amber-500/30'
+                        : 'bg-white/[0.02] border-white/5 opacity-60'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                          <h3 className="font-extrabold text-sm text-white">{addon.name}</h3>
+                          <span className={`inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded-md border ${scopeBadgeClass}`}>
+                            {scopeLabel}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-base font-black text-amber-400">
+                            +{Number(addon.price).toFixed(2)} ETB
+                          </span>
+                          <div className="text-[10px] text-zinc-400">selling price</div>
+                        </div>
+                      </div>
+
+                      {/* Linked Inventory Deduction Box */}
+                      <div className="bg-black/30 border border-white/10 rounded-2xl p-3 mb-3 space-y-1.5">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
+                          <span>Kitchen Store Deduction</span>
+                          <span className="text-emerald-400 font-bold">Automated</span>
+                        </div>
+                        {addon.ingredient ? (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-white font-semibold truncate" title={addon.ingredient.name}>
+                              {addon.ingredient.name}
+                            </span>
+                            <span className="font-black text-amber-300 font-mono ml-2">
+                              {addon.quantity} {addon.ingredient.baseUnit?.symbol || addon.unit?.symbol || 'g'}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-[11px] text-zinc-500 italic">No ingredient linked (pure price bump)</div>
+                        )}
+                      </div>
+
+                      {/* Financial Breakdown */}
+                      <div className="grid grid-cols-2 gap-2 bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 mb-3 text-xs">
+                        <div>
+                          <div className="text-[9px] text-zinc-400 font-bold uppercase">Add-on Cost</div>
+                          <div className="text-xs font-bold text-rose-400 mt-0.5">
+                            {Number(addon.costPerAddon || 0).toFixed(2)} ETB
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[9px] text-zinc-400 font-bold uppercase">Gross Margin</div>
+                          <div className={`text-xs font-black mt-0.5 ${Number(addon.marginPercent || 0) >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                            {Number(addon.marginPercent || 0).toFixed(1)}% ({Number(addon.profitPerAddon || 0) >= 0 ? '+' : ''}{Number(addon.profitPerAddon || 0).toFixed(2)} ETB)
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-between pt-3 border-t border-white/10 gap-2">
+                      <button
+                        onClick={() => handleToggleAddonActive(addon)}
+                        className={`text-[10px] font-black px-2.5 py-1 rounded-xl transition cursor-pointer ${
+                          addon.isActive
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                        }`}
+                      >
+                        {addon.isActive ? 'Active' : 'Paused'}
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => openEditAddonModal(addon)}
+                          className="p-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-xl transition cursor-pointer border border-white/10"
+                          title="Edit add-on"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAddon(addon)}
+                          className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
+                          title="Delete add-on"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CREATE / EDIT ADD-ON MODAL */}
+      {addonModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="bg-[#161311] border border-white/15 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div>
+                <h3 className="font-extrabold text-sm sm:text-base text-white flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-amber-400" />
+                  <span>{isEditingAddon ? 'Edit Kitchen Add-on' : 'Create Real Kitchen Add-on'}</span>
+                </h3>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Set extra selling price and link to real stock ingredient for automatic Kitchen Store deductions.
+                </p>
+              </div>
+              <button
+                onClick={() => setAddonModalOpen(false)}
+                className="p-1.5 text-zinc-400 hover:text-white rounded-xl bg-white/[0.05] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAddon} className="space-y-4">
+              {/* Add-on Name */}
+              <div>
+                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                  Add-on Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Extra Mozzarella Cheese, Extra Beef Patty (100g)"
+                  value={formAddonName}
+                  onChange={(e) => setFormAddonName(e.target.value)}
+                  className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Selling Price */}
+              <div>
+                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                  Extra Selling Price (ETB charged to guest) *
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  required
+                  placeholder="e.g. 35.00"
+                  value={formAddonPrice}
+                  onChange={(e) => setFormAddonPrice(e.target.value)}
+                  className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-black text-amber-400 placeholder-zinc-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Scope Selector */}
+              <div>
+                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                  Applicable Products Scope
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'GLOBAL', label: 'All Dishes' },
+                    { id: 'CATEGORY', label: 'Category' },
+                    { id: 'ITEM', label: 'Single Item' },
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setFormAddonTargetType(s.id as any)}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition border cursor-pointer ${
+                        formAddonTargetType === s.id
+                          ? 'bg-amber-500 text-black border-amber-400 font-black shadow'
+                          : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category Dropdown if CATEGORY */}
+              {formAddonTargetType === 'CATEGORY' && (
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                    Select Target Category
+                  </label>
+                  <select
+                    value={formAddonCategoryId}
+                    onChange={(e) => setFormAddonCategoryId(e.target.value)}
+                    className="w-full bg-[#1e1a17] border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Item Dropdown if ITEM */}
+              {formAddonTargetType === 'ITEM' && (
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                    Select Target Product
+                  </label>
+                  <select
+                    value={formAddonItemId}
+                    onChange={(e) => setFormAddonItemId(e.target.value)}
+                    className="w-full bg-[#1e1a17] border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {items.map((i) => (
+                      <option key={i.id} value={i.id}>
+                        {i.name} ({Number(i.price).toFixed(2)} ETB)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Linked Ingredient Selector */}
+              <div className="pt-2 border-t border-white/10">
+                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                  Linked Inventory Ingredient (for stock deduction)
+                </label>
+                <select
+                  value={formAddonIngredientId}
+                  onChange={(e) => setFormAddonIngredientId(e.target.value)}
+                  className="w-full bg-[#1e1a17] border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                >
+                  <option value="">No stock deduction (price bump only)</option>
+                  {ingredientsPool.map((ing) => (
+                    <option key={ing.id} value={ing.id}>
+                      {ing.name} ({ing.category}) • Cost: {Number(ing.currentCostPerBaseUnit).toFixed(4)} ETB / {ing.baseUnit?.symbol || 'g'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Portion Deduction Quantity */}
+              {formAddonIngredientId && (
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                    Portion Deduction Quantity ({selectedIngredient?.baseUnit?.symbol || 'g'}) *
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      required
+                      placeholder="e.g. 40"
+                      value={formAddonQty}
+                      onChange={(e) => setFormAddonQty(e.target.value)}
+                      className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none"
+                    />
+                    <span className="text-xs font-bold text-amber-400 bg-white/10 px-3 py-2 rounded-xl">
+                      {selectedIngredient?.baseUnit?.symbol || 'g'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Live Financial Calculation Card */}
+              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3.5 space-y-2 text-xs">
+                <div className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+                  Live Cost & Margin Analysis
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-black/30 p-2 rounded-xl border border-white/5">
+                    <div className="text-[9px] text-zinc-400 uppercase font-bold">Selling Price</div>
+                    <div className="text-xs font-black text-white mt-0.5">
+                      {addonPriceNum.toFixed(2)} ETB
+                    </div>
+                  </div>
+                  <div className="bg-black/30 p-2 rounded-xl border border-white/5">
+                    <div className="text-[9px] text-zinc-400 uppercase font-bold">Stock Cost</div>
+                    <div className="text-xs font-black text-rose-400 mt-0.5">
+                      {addonEstimatedCost.toFixed(2)} ETB
+                    </div>
+                  </div>
+                  <div className="bg-black/30 p-2 rounded-xl border border-white/5">
+                    <div className="text-[9px] text-zinc-400 uppercase font-bold">Gross Margin</div>
+                    <div className={`text-xs font-black mt-0.5 ${addonMarginPercent >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      {addonMarginPercent.toFixed(1)}%
+                    </div>
+                  </div>
+                </div>
+                {formAddonIngredientId && selectedIngredient && (
+                  <p className="text-[10px] text-zinc-400 italic text-center pt-1">
+                    Every order with this add-on will deduct exactly {addonQtyNum} {selectedIngredient.baseUnit?.symbol || 'g'} of {selectedIngredient.name} from Kitchen Store.
+                  </p>
+                )}
+              </div>
+
+              {/* Modal Buttons */}
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setAddonModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingAddon}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs shadow-lg shadow-amber-500/25 transition disabled:opacity-50 cursor-pointer active:scale-95"
+                >
+                  {savingAddon ? 'Saving...' : isEditingAddon ? 'Update Add-on' : 'Create Add-on'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* RECIPE STUDIO MODAL */}
       {selectedRecipeItem && (

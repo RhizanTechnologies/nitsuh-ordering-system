@@ -48,6 +48,8 @@ export interface CartItem {
   specialInstructions?: string;
   imageUrl?: string;
   isDirectSale?: boolean;
+  selectedAddonIds?: string[];
+  selectedAddons?: any[];
 }
 
 interface AppState {
@@ -78,7 +80,17 @@ interface AppState {
   setTableManagerOpen: (open: boolean) => void;
 
   // POS Cart Actions
-  addToCart: (item: { id: string; name: string; price: number; imageUrl?: string; isDirectSale?: boolean }) => void;
+  addToCart: (item: {
+    id: string;
+    name: string;
+    price: number;
+    imageUrl?: string;
+    isDirectSale?: boolean;
+    quantity?: number;
+    specialInstructions?: string;
+    selectedAddonIds?: string[];
+    selectedAddons?: any[];
+  }) => void;
   removeFromCart: (menuItemId: string) => void;
   updateQuantity: (menuItemId: string, delta: number) => void;
   setItemTip: (menuItemId: string, tip: number) => void;
@@ -93,6 +105,8 @@ interface AppState {
     imageUrl?: string;
     quantity?: number;
     specialInstructions?: string;
+    selectedAddonIds?: string[];
+    selectedAddons?: any[];
   }) => void;
   updateWaiterQuantity: (menuItemId: string, delta: number) => void;
   setWaiterItemTip: (menuItemId: string, tip: number) => void;
@@ -178,11 +192,12 @@ export const useAppStore = create<AppState>((set) => ({
 
   addToCart: (item) =>
     set((state) => {
-      const existing = state.cart.find((c) => c.menuItemId === item.id);
+      const addQty = item.quantity && item.quantity > 0 ? item.quantity : 1;
+      const existing = state.cart.find((c) => c.menuItemId === item.id && c.name === item.name);
       if (existing) {
         return {
           cart: state.cart.map((c) =>
-            c.menuItemId === item.id ? { ...c, quantity: c.quantity + 1 } : c,
+            c.menuItemId === item.id && c.name === item.name ? { ...c, quantity: c.quantity + addQty } : c,
           ),
         };
       }
@@ -193,9 +208,12 @@ export const useAppStore = create<AppState>((set) => ({
             menuItemId: item.id,
             name: item.name,
             price: item.price,
-            quantity: 1,
+            quantity: addQty,
             imageUrl: item.imageUrl,
             isDirectSale: item.isDirectSale,
+            specialInstructions: item.specialInstructions,
+            selectedAddonIds: item.selectedAddonIds,
+            selectedAddons: item.selectedAddons,
           },
         ],
       };
@@ -239,11 +257,11 @@ export const useAppStore = create<AppState>((set) => ({
   addToWaiterCart: (item) =>
     set((state) => {
       const addQty = item.quantity && item.quantity > 0 ? item.quantity : 1;
-      const existing = state.waiterCart.find((c) => c.menuItemId === item.id);
+      const existing = state.waiterCart.find((c) => c.menuItemId === item.id && c.name === item.name);
       if (existing) {
         return {
           waiterCart: state.waiterCart.map((c) =>
-            c.menuItemId === item.id
+            c.menuItemId === item.id && c.name === item.name
               ? {
                   ...c,
                   quantity: c.quantity + addQty,
@@ -263,6 +281,8 @@ export const useAppStore = create<AppState>((set) => ({
             quantity: addQty,
             imageUrl: item.imageUrl,
             specialInstructions: item.specialInstructions,
+            selectedAddonIds: item.selectedAddonIds,
+            selectedAddons: item.selectedAddons,
           },
         ],
       };

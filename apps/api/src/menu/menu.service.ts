@@ -43,6 +43,26 @@ export class MenuService {
         directIngredient: {
           include: { baseUnit: true },
         },
+        addons: {
+          where: { isActive: true },
+          include: {
+            ingredient: { include: { baseUnit: true } },
+            unit: true,
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    // Also fetch category-level and global addons to associate with items
+    const categoryAndGlobalAddons = await this.prisma.menuItemAddon.findMany({
+      where: {
+        isActive: true,
+        menuItemId: null,
+      },
+      include: {
+        ingredient: { include: { baseUnit: true } },
+        unit: true,
       },
       orderBy: { name: 'asc' },
     });
@@ -65,13 +85,167 @@ export class MenuService {
       const grossProfit = price - portionCost;
       const marginPercent = price > 0 ? (grossProfit / price) * 100 : 0;
 
+      // Merge item-specific addons + category addons + global addons
+      const matchedAddons = [
+        ...(item.addons || []),
+        ...categoryAndGlobalAddons.filter(
+          (a) => a.categoryId === item.categoryId || a.categoryId === null,
+        ),
+      ];
+      // Deduplicate by id
+      const uniqueAddonsMap = new Map();
+      for (const a of matchedAddons) {
+        if (!uniqueAddonsMap.has(a.id)) {
+          const addonIngCost = a.ingredient
+            ? Number(a.ingredient.currentCostPerBaseUnit) * Number(a.quantity || 0)
+            : 0;
+          uniqueAddonsMap.set(a.id, {
+            ...a,
+            costPerAddon: Number(addonIngCost.toFixed(4)),
+            price: Number(a.price),
+            quantity: Number(a.quantity || 0),
+          });
+        }
+      }
+
       return {
         ...item,
         costPerPortion: Number(portionCost.toFixed(4)),
         grossProfitEstimate: Number(grossProfit.toFixed(2)),
         marginPercent: Number(marginPercent.toFixed(1)),
+        applicableAddons: Array.from(uniqueAddonsMap.values()),
       };
     });
+  }
+
+  // --- ADDONS MANAGEMENT (Owner & Manager) ---
+  async getAllAddons() {
+    const addons = await this.prisma.menuItemAddon.findMany({
+      include: {
+        ingredient: { include: { baseUnit: true } },
+        unit: true,
+        category: true,
+        menuItem: true,
+      },
+      orderBy: [{ categoryId: 'asc' }, { name: 'asc' }],
+    });
+
+    return addons.map((a) => {
+      const ingCost = a.ingredient
+        ? Number(a.ingredient.currentCostPerBaseUnit) * Number(a.quantity || 0)
+        : 0;
+      const price = Number(a.price);
+      const profit = price - ingCost;
+      const margin = price > 0 ? (profit / price) * 100 : 0;
+
+      return {
+        ...a,
+        price,
+        quantity: Number(a.quantity || 0),
+        costPerAddon: Number(ingCost.toFixed(4)),
+        profitPerAddon: Number(profit.toFixed(2)),
+        marginPercent: Number(margin.toFixed(1)),
+      };
+    });
+  }
+
+  async createAddon(data: {
+    name: string;
+    price: number;
+    ingredientId?: string;
+    quantity?: number;
+    unitId?: string;
+    categoryId?: string;
+    menuItemId?: string;
+  }) {
+    if (!data.name || !data.name.trim()) {
+      throw new BadRequestException('Add-on name is required');
+    }
+    if (data.price === undefined || data.price === null || isNaN(Number(data.price))) {
+      throw new BadRequestException('Valid price is required');
+    }
+
+    let unitId = data.unitId;
+    if (!unitId && data.ingredientId) {
+      const ing = await this.prisma.ingredient.findUnique({
+        where: { id: data.ingredientId },
+        select: { baseUnitId: true },
+      });
+      if (ing) unitId = ing.baseUnitId;
+    }
+
+    return this.prisma.menuItemAddon.create({
+      data: {
+        name: data.name.trim(),
+        price: Number(data.price),
+        ingredientId: data.ingredientId || null,
+        quantity: data.quantity !== undefined ? Number(data.quantity) : 0,
+        unitId: unitId || null,
+        categoryId: data.categoryId || null,
+        menuItemId: data.menuItemId || null,
+        isActive: true,
+      },
+      include: {
+        ingredient: { include: { baseUnit: true } },
+        unit: true,
+        category: true,
+        menuItem: true,
+      },
+    });
+  }
+
+  async updateAddon(
+    id: string,
+    data: {
+      name?: string;
+      price?: number;
+      ingredientId?: string | null;
+      quantity?: number;
+      unitId?: string | null;
+      categoryId?: string | null;
+      menuItemId?: string | null;
+      isActive?: boolean;
+    },
+  ) {
+    const existing = await this.prisma.menuItemAddon.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Add-on not found');
+
+    let unitId = data.unitId;
+    if (unitId === undefined && data.ingredientId) {
+      const ing = await this.prisma.ingredient.findUnique({
+        where: { id: data.ingredientId },
+        select: { baseUnitId: true },
+      });
+      if (ing) unitId = ing.baseUnitId;
+    }
+
+    return this.prisma.menuItemAddon.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+        ...(data.price !== undefined ? { price: Number(data.price) } : {}),
+        ...(data.ingredientId !== undefined ? { ingredientId: data.ingredientId } : {}),
+        ...(data.quantity !== undefined ? { quantity: Number(data.quantity) } : {}),
+        ...(unitId !== undefined ? { unitId } : {}),
+        ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
+        ...(data.menuItemId !== undefined ? { menuItemId: data.menuItemId } : {}),
+        ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+      },
+      include: {
+        ingredient: { include: { baseUnit: true } },
+        unit: true,
+        category: true,
+        menuItem: true,
+      },
+    });
+  }
+
+  async deleteAddon(id: string) {
+    const existing = await this.prisma.menuItemAddon.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Add-on not found');
+
+    await this.prisma.menuItemAddon.delete({ where: { id } });
+    return { success: true, message: `Add-on "${existing.name}" deleted.` };
   }
 
   async getTables() {

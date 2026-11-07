@@ -29,6 +29,8 @@ export class OrdersService {
       menuItemId: string;
       quantity: number;
       specialInstructions?: string;
+      selectedAddonIds?: string[];
+      selectedAddons?: any[];
     }[];
   }) {
     // If dine-in and tableId specified, automatically append to active unsettled bill if guests order more items!
@@ -74,20 +76,74 @@ export class OrdersService {
       },
     });
 
+    // Fetch any referenced addons to ensure exact pricing & ingredient deduction
+    const allAddonIds: string[] = [];
+    for (const itm of data.items) {
+      if (Array.isArray(itm.selectedAddonIds)) {
+        allAddonIds.push(...itm.selectedAddonIds);
+      }
+      if (Array.isArray(itm.selectedAddons)) {
+        for (const a of itm.selectedAddons) {
+          if (a?.id) allAddonIds.push(a.id);
+        }
+      }
+    }
+    const dbAddons = allAddonIds.length > 0
+      ? await this.prisma.menuItemAddon.findMany({
+          where: { id: { in: Array.from(new Set(allAddonIds)) } },
+          include: { ingredient: { include: { baseUnit: true } }, unit: true },
+        })
+      : [];
+
     let subtotal = 0;
     let totalTip = 0;
     const orderItemsCreate = data.items.map((cartItem) => {
       const mi = menuItems.find((m) => m.id === cartItem.menuItemId);
       if (!mi) throw new NotFoundException(`Item not found`);
 
-      const price = Number(mi.price);
+      // Resolve selected addons
+      const selectedAddonsSnapshot: any[] = [];
+      let addonsPriceTotal = 0;
+      let addonsCostTotal = 0;
+
+      const itemAddonIds = [
+        ...(cartItem.selectedAddonIds || []),
+        ...(cartItem.selectedAddons?.map((a: any) => a.id) || []),
+      ];
+      const uniqueAddonIds = Array.from(new Set(itemAddonIds.filter(Boolean)));
+
+      for (const addonId of uniqueAddonIds) {
+        const addon = dbAddons.find((a) => a.id === addonId);
+        if (addon) {
+          const aPrice = Number(addon.price);
+          const aQty = Number(addon.quantity || 0);
+          const aCost = addon.ingredient
+            ? Number(addon.ingredient.currentCostPerBaseUnit) * aQty
+            : 0;
+
+          addonsPriceTotal += aPrice;
+          addonsCostTotal += aCost;
+          selectedAddonsSnapshot.push({
+            id: addon.id,
+            name: addon.name,
+            price: aPrice,
+            ingredientId: addon.ingredientId,
+            ingredientName: addon.ingredient?.name,
+            quantity: aQty,
+            unitSymbol: addon.ingredient?.baseUnit?.symbol || addon.unit?.symbol || 'g',
+            costAtSale: Number(aCost.toFixed(4)),
+          });
+        }
+      }
+
+      const unitPrice = Number(mi.price) + addonsPriceTotal;
       const tipPerItem = Number((cartItem as any).tip || 0);
-      const lineSubtotal = price * cartItem.quantity;
+      const lineSubtotal = unitPrice * cartItem.quantity;
       const lineTip = tipPerItem * cartItem.quantity;
       subtotal += lineSubtotal;
       totalTip += lineTip;
 
-      // Calculate cost at sale
+      // Calculate cost at sale (base recipe + addon ingredients)
       let costPerPortion = 0;
       if (mi.isDirectSale && mi.directIngredient) {
         costPerPortion = Number(mi.directIngredient.currentCostPerBaseUnit);
@@ -96,16 +152,18 @@ export class OrdersService {
           costPerPortion += Number(ri.ingredient.currentCostPerBaseUnit) * Number(ri.quantity);
         }
       }
+      costPerPortion += addonsCostTotal;
 
       return {
         menuItemId: mi.id,
         quantity: cartItem.quantity,
-        unitPrice: mi.price,
+        unitPrice: unitPrice,
         tip: tipPerItem,
         subtotal: lineSubtotal,
         specialInstructions: cartItem.specialInstructions,
         status: ItemPrepStatus.PENDING,
-        costAtSale: costPerPortion,
+        costAtSale: Number(costPerPortion.toFixed(4)),
+        selectedAddons: selectedAddonsSnapshot.length > 0 ? selectedAddonsSnapshot : undefined,
       };
     });
 
@@ -414,6 +472,45 @@ export class OrdersService {
                 });
               }
             }
+
+            // Real Add-on ingredient stock deduction from Kitchen Store
+            const itmAddons = (itm.selectedAddons as any[]) || [];
+            if (Array.isArray(itmAddons) && itmAddons.length > 0) {
+              const portionQty = itm.quantity;
+              for (const addon of itmAddons) {
+                if (addon.ingredientId && Number(addon.quantity) > 0) {
+                  const totalAddonGrams = Number(addon.quantity) * portionQty;
+                  const addonIng = await tx.ingredient.findUnique({
+                    where: { id: addon.ingredientId },
+                  });
+                  const unitCost = addonIng ? addonIng.currentCostPerBaseUnit : new Prisma.Decimal(0);
+
+                  // Deduct from Kitchen Store balance
+                  await tx.inventoryBalance.updateMany({
+                    where: {
+                      locationId: kitchenStore.id,
+                      ingredientId: addon.ingredientId,
+                    },
+                    data: { quantity: { decrement: totalAddonGrams } },
+                  });
+
+                  // Record in immutable transaction ledger
+                  await tx.inventoryTransaction.create({
+                    data: {
+                      transactionType: InventoryTransactionType.PRODUCTION_CONSUMPTION,
+                      sourceLocationId: kitchenStore.id,
+                      ingredientId: addon.ingredientId,
+                      quantity: totalAddonGrams,
+                      unitCost,
+                      totalCost: new Prisma.Decimal(totalAddonGrams).mul(unitCost),
+                      referenceId: order.orderNumber,
+                      reason: `Add-on Production for Order ${order.orderNumber}: ${addon.name} for ${itm.menuItem.name} x${portionQty}`,
+                      userId: resolvedUserId,
+                    },
+                  });
+                }
+              }
+            }
           }
         });
       }
@@ -501,7 +598,13 @@ export class OrdersService {
     orderId: string,
     data: {
       cashierId?: string;
-      items: { menuItemId: string; quantity: number; specialInstructions?: string }[];
+      items: {
+        menuItemId: string;
+        quantity: number;
+        specialInstructions?: string;
+        selectedAddonIds?: string[];
+        selectedAddons?: any[];
+      }[];
     },
   ) {
     const order = await this.prisma.order.findUnique({
@@ -522,14 +625,69 @@ export class OrdersService {
       },
     });
 
+    // Fetch referenced addons
+    const allAddonIds: string[] = [];
+    for (const itm of data.items) {
+      if (Array.isArray(itm.selectedAddonIds)) {
+        allAddonIds.push(...itm.selectedAddonIds);
+      }
+      if (Array.isArray(itm.selectedAddons)) {
+        for (const a of itm.selectedAddons) {
+          if (a?.id) allAddonIds.push(a.id);
+        }
+      }
+    }
+    const dbAddons = allAddonIds.length > 0
+      ? await this.prisma.menuItemAddon.findMany({
+          where: { id: { in: Array.from(new Set(allAddonIds)) } },
+          include: { ingredient: { include: { baseUnit: true } }, unit: true },
+        })
+      : [];
+
     let addedSubtotal = 0;
     let addedTip = 0;
     for (const cartItem of data.items) {
       const mi = menuItems.find((m) => m.id === cartItem.menuItemId);
       if (!mi) continue;
-      const price = Number(mi.price);
+
+      // Resolve selected addons
+      const selectedAddonsSnapshot: any[] = [];
+      let addonsPriceTotal = 0;
+      let addonsCostTotal = 0;
+
+      const itemAddonIds = [
+        ...(cartItem.selectedAddonIds || []),
+        ...(cartItem.selectedAddons?.map((a: any) => a.id) || []),
+      ];
+      const uniqueAddonIds = Array.from(new Set(itemAddonIds.filter(Boolean)));
+
+      for (const addonId of uniqueAddonIds) {
+        const addon = dbAddons.find((a) => a.id === addonId);
+        if (addon) {
+          const aPrice = Number(addon.price);
+          const aQty = Number(addon.quantity || 0);
+          const aCost = addon.ingredient
+            ? Number(addon.ingredient.currentCostPerBaseUnit) * aQty
+            : 0;
+
+          addonsPriceTotal += aPrice;
+          addonsCostTotal += aCost;
+          selectedAddonsSnapshot.push({
+            id: addon.id,
+            name: addon.name,
+            price: aPrice,
+            ingredientId: addon.ingredientId,
+            ingredientName: addon.ingredient?.name,
+            quantity: aQty,
+            unitSymbol: addon.ingredient?.baseUnit?.symbol || addon.unit?.symbol || 'g',
+            costAtSale: Number(aCost.toFixed(4)),
+          });
+        }
+      }
+
+      const unitPrice = Number(mi.price) + addonsPriceTotal;
       const tipPerItem = Number((cartItem as any).tip || 0);
-      const lineSubtotal = price * cartItem.quantity;
+      const lineSubtotal = unitPrice * cartItem.quantity;
       const lineTip = tipPerItem * cartItem.quantity;
       addedSubtotal += lineSubtotal;
       addedTip += lineTip;
@@ -542,18 +700,20 @@ export class OrdersService {
           costPerPortion += Number(ri.ingredient.currentCostPerBaseUnit) * Number(ri.quantity);
         }
       }
+      costPerPortion += addonsCostTotal;
 
       await this.prisma.orderItem.create({
         data: {
           orderId,
           menuItemId: mi.id,
           quantity: cartItem.quantity,
-          unitPrice: mi.price,
+          unitPrice: unitPrice,
           tip: tipPerItem,
           subtotal: lineSubtotal,
           specialInstructions: cartItem.specialInstructions,
           status: ItemPrepStatus.PENDING,
-          costAtSale: costPerPortion,
+          costAtSale: Number(costPerPortion.toFixed(4)),
+          selectedAddons: selectedAddonsSnapshot.length > 0 ? selectedAddonsSnapshot : undefined,
         },
       });
     }

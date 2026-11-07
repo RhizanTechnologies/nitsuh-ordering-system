@@ -76,9 +76,7 @@ export function WaiterPadView() {
   const [selectedDetailItem, setSelectedDetailItem] = useState<any | null>(null);
   const [customSize, setCustomSize] = useState<'Regular' | 'Large' | 'X Large'>('Regular');
   const [customQty, setCustomQty] = useState(1);
-  const [customCheese, setCustomCheese] = useState(false);
-  const [customExtraPatty, setCustomExtraPatty] = useState(false);
-  const [customExtraSauce, setCustomExtraSauce] = useState(false);
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [customItemNote, setCustomItemNote] = useState('');
   const [favorites, setFavorites] = useState<string[]>([]);
 
@@ -287,31 +285,37 @@ export function WaiterPadView() {
   // Customizer calculations
   const getCustomUnitPrice = (item: any) => {
     if (!item) return 0;
+    const basePrice = Number(item.price || 0);
     const sizeAddon = customSize === 'Large' ? 30 : customSize === 'X Large' ? 50 : 0;
-    const cheeseAddon = customCheese ? 25 : 0;
-    const pattyAddon = customExtraPatty ? 60 : 0;
-    const sauceAddon = customExtraSauce ? 15 : 0;
-    return Number(item.price) + sizeAddon + cheeseAddon + pattyAddon + sauceAddon;
+    const addons = (item.applicableAddons || []).filter((a: any) => selectedAddonIds.includes(a.id));
+    const addonsTotal = addons.reduce((sum: number, a: any) => sum + Number(a.price || 0), 0);
+    return basePrice + sizeAddon + addonsTotal;
   };
 
   const openItemCustomizer = (item: any) => {
     setSelectedDetailItem(item);
     setCustomSize('Regular');
     setCustomQty(1);
-    setCustomCheese(false);
-    setCustomExtraPatty(false);
-    setCustomExtraSauce(false);
+    setSelectedAddonIds([]);
     setCustomItemNote('');
+  };
+
+  const toggleAddon = (addonId: string) => {
+    setSelectedAddonIds((prev) =>
+      prev.includes(addonId) ? prev.filter((id) => id !== addonId) : [...prev, addonId]
+    );
   };
 
   const handleAddCustomizedToCart = () => {
     if (!selectedDetailItem) return;
     const unitPrice = getCustomUnitPrice(selectedDetailItem);
+    const chosenAddons = (selectedDetailItem.applicableAddons || []).filter((a: any) =>
+      selectedAddonIds.includes(a.id)
+    );
+    const addonLabels = chosenAddons.map((a: any) => `+${a.name}`);
     const specs = [
       customSize !== 'Regular' ? `Size: ${customSize}` : '',
-      customCheese ? '+Cheese' : '',
-      customExtraPatty ? '+Extra Patty' : '',
-      customExtraSauce ? '+Extra Sauce' : '',
+      ...addonLabels,
       customItemNote ? `Note: ${customItemNote}` : '',
     ].filter(Boolean).join(', ');
 
@@ -322,6 +326,8 @@ export function WaiterPadView() {
       imageUrl: selectedDetailItem.imageUrl,
       quantity: customQty,
       specialInstructions: specs || undefined,
+      selectedAddonIds: selectedAddonIds,
+      selectedAddons: chosenAddons,
     });
 
     setSelectedDetailItem(null);
@@ -349,6 +355,8 @@ export function WaiterPadView() {
             quantity: i.quantity,
             tip: i.tip || 0,
             specialInstructions: i.specialInstructions || waiterSpecialNotes,
+            selectedAddonIds: i.selectedAddonIds || [],
+            selectedAddons: i.selectedAddons || [],
           })),
         }),
       });
@@ -1413,73 +1421,58 @@ export function WaiterPadView() {
                   </div>
                 </div>
 
-                {/* Add-ons with animated toggle switches matching reference */}
+                {/* Dynamic Real Add-ons with animated toggle switches */}
                 <div className="space-y-2.5 pt-1">
-                  {/* Add Cheese */}
-                  <div
-                    onClick={() => setCustomCheese(!customCheese)}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/10 cursor-pointer hover:bg-white/[0.06] transition"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-white">Add Cheese</div>
-                      <div className="text-[10px] text-zinc-400">+25.00 ETB</div>
-                    </div>
-                    <div
-                      className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                        customCheese ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-zinc-700'
-                      }`}
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
-                          customCheese ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </div>
+                  <div className="flex items-center justify-between text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                    <span>Add-ons & Extras</span>
+                    <span className="text-[10px] text-amber-500 font-semibold">Kitchen Inventory Tracked</span>
                   </div>
 
-                  {/* Extra Patty */}
-                  <div
-                    onClick={() => setCustomExtraPatty(!customExtraPatty)}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/10 cursor-pointer hover:bg-white/[0.06] transition"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-white">Extra Patty / Meat</div>
-                      <div className="text-[10px] text-zinc-400">+60.00 ETB</div>
+                  {(!selectedDetailItem.applicableAddons || selectedDetailItem.applicableAddons.length === 0) ? (
+                    <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 text-[11px] text-zinc-500 text-center">
+                      Standard portion recipe (no extra add-on modifiers configured for this dish).
                     </div>
-                    <div
-                      className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                        customExtraPatty ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-zinc-700'
-                      }`}
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
-                          customExtraPatty ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Add Special Sauce */}
-                  <div
-                    onClick={() => setCustomExtraSauce(!customExtraSauce)}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/10 cursor-pointer hover:bg-white/[0.06] transition"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-white">Add Special Sauce</div>
-                      <div className="text-[10px] text-zinc-400">+15.00 ETB</div>
-                    </div>
-                    <div
-                      className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                        customExtraSauce ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-zinc-700'
-                      }`}
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
-                          customExtraSauce ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </div>
-                  </div>
+                  ) : (
+                    selectedDetailItem.applicableAddons.map((addon: any) => {
+                      const isSelected = selectedAddonIds.includes(addon.id);
+                      return (
+                        <div
+                          key={addon.id}
+                          onClick={() => toggleAddon(addon.id)}
+                          className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition ${
+                            isSelected
+                              ? 'bg-amber-500/10 border-amber-500/40 text-white shadow-sm shadow-amber-500/10'
+                              : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] text-zinc-200'
+                          }`}
+                        >
+                          <div>
+                            <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                              <span>{addon.name}</span>
+                              {addon.quantity > 0 && addon.ingredient && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-white/10 text-zinc-300 font-mono">
+                                  {addon.quantity} {addon.ingredient.baseUnit?.symbol || addon.unit?.symbol || 'g'}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-amber-400 font-bold mt-0.5">
+                              +{Number(addon.price).toFixed(2)} ETB
+                            </div>
+                          </div>
+                          <div
+                            className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
+                              isSelected ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-zinc-700'
+                            }`}
+                          >
+                            <div
+                              className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
+                                isSelected ? 'translate-x-5' : 'translate-x-0'
+                              }`}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
 
                 {/* Special Instructions Note Input */}

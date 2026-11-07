@@ -229,6 +229,8 @@ export function PosView() {
               quantity: c.quantity,
               tip: c.tip || 0,
               specialInstructions: c.specialInstructions,
+              selectedAddonIds: c.selectedAddonIds || [],
+              selectedAddons: c.selectedAddons || [],
             })),
           }),
         });
@@ -257,6 +259,8 @@ export function PosView() {
             quantity: c.quantity,
             tip: c.tip || 0,
             specialInstructions: c.specialInstructions,
+            selectedAddonIds: c.selectedAddonIds || [],
+            selectedAddons: c.selectedAddons || [],
           })),
         }),
       });
@@ -295,16 +299,22 @@ export function PosView() {
 
     for (const item of slip.items) {
       for (let i = 0; i < item.quantity; i++) {
+        const itemAddons = Array.isArray((item as any).selectedAddons) ? (item as any).selectedAddons : [];
+        const itemAddonIds = itemAddons.map((a: any) => a.id).filter(Boolean);
+        const displayName = item.specialInstructions
+          ? `${item.menuItem.name} (${item.specialInstructions})`
+          : item.menuItem.name;
+
         addToCart({
           id: item.menuItemId,
-          name: item.menuItem.name,
+          name: displayName,
           price: Number(item.unitPrice),
           imageUrl: item.menuItem.imageUrl,
           isDirectSale: item.menuItem.isDirectSale,
+          specialInstructions: item.specialInstructions || undefined,
+          selectedAddonIds: itemAddonIds,
+          selectedAddons: itemAddons,
         });
-      }
-      if (item.specialInstructions) {
-        setItemNotes(item.menuItemId, item.specialInstructions);
       }
     }
 
@@ -371,7 +381,10 @@ export function PosView() {
           items: cart.map((c) => ({
             menuItemId: c.menuItemId,
             quantity: c.quantity,
+            tip: c.tip || 0,
             specialInstructions: c.specialInstructions,
+            selectedAddonIds: c.selectedAddonIds || [],
+            selectedAddons: c.selectedAddons || [],
           })),
         }),
       });

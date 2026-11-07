@@ -146,6 +146,7 @@ model Unit {
   recipeIngredients  RecipeIngredient[]
   stockTransferItems StockTransferItem[]
   purchaseOrderItems PurchaseOrderItem[]
+  addons             MenuItemAddon[]
 }
 
 model Ingredient {
@@ -168,6 +169,7 @@ model Ingredient {
   stockTransferItems    StockTransferItem[]
   directSoldInMenuItems MenuItem[]             @relation("DirectIngredient")
   purchaseOrderItems    PurchaseOrderItem[]
+  addons                MenuItemAddon[]
 }
 
 model InventoryLocation {
@@ -254,33 +256,57 @@ model StockTransferItem {
 }
 
 model Category {
-  id           String     @id @default(uuid())
-  name         String     @unique
-  displayOrder Int        @default(0)
+  id           String          @id @default(uuid())
+  name         String          @unique
+  displayOrder Int             @default(0)
   iconName     String?
-  badgeColor   String?    // E.g. bg-emerald-800, bg-amber-600
-  isActive     Boolean    @default(true)
+  badgeColor   String?         // E.g. bg-emerald-800, bg-amber-600
+  isActive     Boolean         @default(true)
   menuItems    MenuItem[]
+  addons       MenuItemAddon[]
 }
 
 model MenuItem {
-  id                 String       @id @default(uuid())
+  id                 String          @id @default(uuid())
   categoryId         String
-  category           Category     @relation(fields: [categoryId], references: [id])
+  category           Category        @relation(fields: [categoryId], references: [id])
   name               String
   description        String?
-  price              Decimal      @db.Decimal(10, 2)
-  isDirectSale       Boolean      @default(false) // Direct retail items (bottled water, soda)
+  price              Decimal         @db.Decimal(10, 2)
+  isDirectSale       Boolean         @default(false) // Direct retail items (bottled water, soda)
   directIngredientId String?
-  directIngredient   Ingredient?  @relation("DirectIngredient", fields: [directIngredientId], references: [id])
-  prepSection        String       @default("HOT_KITCHEN") // HOT_KITCHEN, COLD_KITCHEN, BAR_COFFEE, BAKERY
+  directIngredient   Ingredient?     @relation("DirectIngredient", fields: [directIngredientId], references: [id])
+  prepSection        String          @default("HOT_KITCHEN") // HOT_KITCHEN, COLD_KITCHEN, BAR_COFFEE, BAKERY
   imageUrl           String?
-  isAvailable        Boolean      @default(true)
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  isAvailable        Boolean         @default(true)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
   recipe     Recipe?
   orderItems OrderItem[]
+  addons     MenuItemAddon[]
+}
+
+model MenuItemAddon {
+  id           String      @id @default(uuid())
+  name         String      // e.g. "Extra Cheese", "Extra Patty", "Extra Special Sauce"
+  price        Decimal     @db.Decimal(10, 2) // Extra selling price charged to customer
+  ingredientId String?     // Linked inventory ingredient for stock deduction & cost calculation
+  ingredient   Ingredient? @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+  quantity     Decimal     @db.Decimal(12, 4) @default(0) // Quantity deducted per portion in base units (e.g. grams, ml, pcs)
+  unitId       String?
+  unit         Unit?       @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  categoryId   String?     // Optional: category-wide add-on (e.g. Burgers, Pizza, Coffee)
+  category     Category?   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  menuItemId   String?     // Optional: specific to a single menu item
+  menuItem     MenuItem?   @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([ingredientId])
+  @@index([menuItemId])
+  @@index([categoryId])
 }
 
 model Recipe {
@@ -355,6 +381,7 @@ model OrderItem {
   specialInstructions String?
   status              ItemPrepStatus @default(PENDING)
   costAtSale          Decimal?       @db.Decimal(10, 4) // Snapshot of exact ingredient cost per portion
+  selectedAddons      Json?          // Array of { id, name, price, ingredientId, quantity, unitSymbol, costAtSale }
 }
 
 model Payment {

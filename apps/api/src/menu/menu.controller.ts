@@ -92,4 +92,49 @@ export class MenuController {
   async deleteTable(@Param('id') id: string) {
     return this.menuService.deleteTable(id);
   }
+
+  // --- ADD-ONS ENDPOINTS ---
+  @Get('addons')
+  async getAddons() {
+    return this.menuService.getAllAddons();
+  }
+
+  @Post('addons')
+  async createAddon(
+    @Body()
+    body: {
+      name: string;
+      price: number;
+      ingredientId?: string;
+      quantity?: number;
+      unitId?: string;
+      categoryId?: string;
+      menuItemId?: string;
+    },
+  ) {
+    return this.menuService.createAddon(body);
+  }
+
+  @Patch('addons/:id')
+  async updateAddon(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      name?: string;
+      price?: number;
+      ingredientId?: string | null;
+      quantity?: number;
+      unitId?: string | null;
+      categoryId?: string | null;
+      menuItemId?: string | null;
+      isActive?: boolean;
+    },
+  ) {
+    return this.menuService.updateAddon(id, body);
+  }
+
+  @Delete('addons/:id')
+  async deleteAddon(@Param('id') id: string) {
+    return this.menuService.deleteAddon(id);
+  }
 }
