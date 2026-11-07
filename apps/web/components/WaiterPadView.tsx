@@ -454,58 +454,30 @@ export function WaiterPadView() {
       )}
 
       {/* Main Left Column: Handheld Order Selector OR Live Table Orders */}
-      <div className="flex-1 min-h-0 flex flex-col p-4 sm:p-6 overflow-y-auto pb-28 md:pb-6 relative z-10 no-scrollbar">
-        {/* Top Header matching reference image: Greeting, Hero Title, Avatar */}
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
-            <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400 text-xs font-semibold mb-1">
-              <span>Hi, {currentUser?.name?.split(' ')[0] || 'Alex'}</span>
-              <span>👋</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white leading-tight font-heading">
-              Good Food <br />
-              <span className="text-amber-600 dark:text-amber-400">
-                Good Mood!
+      <div className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-28 md:pb-6 relative z-10 no-scrollbar">
+        {/* Top Bar: View Tab Toggle for Active Tables */}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <button
+            onClick={() => setActiveTab(activeTab === 'menu' ? 'tables' : 'menu')}
+            className={`px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold ${
+              activeTab === 'tables'
+                ? 'bg-amber-500 text-black border-amber-400 font-extrabold shadow-lg shadow-amber-500/20'
+                : 'bg-white/[0.05] border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.08]'
+            }`}
+            title="Toggle Live Table Preparation Monitor"
+          >
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span>{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
+            {inFlightOrders.length > 0 && (
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                  delayedOrders.length > 0 ? 'bg-[#C11221] text-white animate-pulse' : 'bg-amber-400 text-black'
+                }`}
+              >
+                {inFlightOrders.length}
               </span>
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* View Tab Toggle for Active Tables */}
-            <button
-              onClick={() => setActiveTab(activeTab === 'menu' ? 'tables' : 'menu')}
-              className={`p-2.5 rounded-2xl border transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'tables'
-                  ? 'bg-amber-500 text-black border-amber-400 font-extrabold shadow-lg shadow-amber-500/20'
-                  : 'bg-white/[0.05] border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.08]'
-              }`}
-              title="Toggle Live Table Preparation Monitor"
-            >
-              <Clock className="w-4 h-4" />
-              <span className="hidden sm:inline text-xs font-bold">
-                {activeTab === 'tables' ? 'Back to Food' : 'Live Status'}
-              </span>
-              {inFlightOrders.length > 0 && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                    delayedOrders.length > 0 ? 'bg-[#C11221] text-white animate-pulse' : 'bg-amber-400 text-black'
-                  }`}
-                >
-                  {inFlightOrders.length}
-                </span>
-              )}
-            </button>
-
-            {/* Staff Avatar with status dot */}
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-[#C11221] p-0.5 shadow-md">
-                <div className="w-full h-full rounded-full bg-[#161311] flex items-center justify-center font-bold text-xs text-amber-400">
-                  {currentUser?.name?.charAt(0) || 'W'}
-                </div>
-              </div>
-              <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#C11221] border-2 border-[#0D0B0A]" />
-            </div>
-          </div>
+            )}
+          </button>
         </div>
 
         {/* Success Alert */}
@@ -799,7 +771,7 @@ export function WaiterPadView() {
                       )}
                     </div>
 
-                    {/* Dish Name, Description & Action */}
+                    {/* Dish Name & Action */}
                     <div className="flex flex-col flex-1 justify-between">
                       <div>
                         <h4
@@ -808,15 +780,6 @@ export function WaiterPadView() {
                         >
                           {item.name}
                         </h4>
-
-                        {item.description && (
-                          <p
-                            className="text-[10px] sm:text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-1 mt-0.5 leading-tight hidden xs:block sm:block"
-                            title={item.description}
-                          >
-                            {item.description}
-                          </p>
-                        )}
                       </div>
 
                       {/* Price & Add Action Pill */}

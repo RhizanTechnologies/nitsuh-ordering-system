@@ -373,11 +373,6 @@ export function InventoryView() {
             <h2 className="text-base font-extrabold text-white font-heading tracking-wide">
               {isHeadChefOnly ? 'Kitchen Pantry Stock & Requisitions' : 'Dual-Store Inventory & Recipe Engine'}
             </h2>
-            <div className="text-xs text-zinc-400">
-              {isHeadChefOnly
-                ? 'Kitchen Store (Production Floor) • Managed by Head Chef'
-                : 'Main Store (Bulk) ➔ Kitchen Store (Cooking floor) with live transfer reconciliation'}
-            </div>
           </div>
         </div>
 

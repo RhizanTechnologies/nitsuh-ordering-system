@@ -19,10 +19,8 @@ import {
   ChevronDown,
   Sun,
   Moon,
-  Calendar,
   Users,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { fetchApi, getSocket } from '@/lib/api';
 import { TablePlanModal } from '@/components/TablePlanModal';
 
@@ -96,57 +94,15 @@ export function Navbar() {
 
   return (
     <>
-      <header className="bg-[#12100E]/95 backdrop-blur-xl border-b border-white/10 px-2.5 sm:px-6 py-2.5 sm:py-3 sticky top-0 z-40 text-white shadow-md">
+      <header className="bg-[#12100E]/95 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 py-2 sticky top-0 z-40 text-white shadow-md">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Brand Identity */}
           <div className="flex items-center gap-3">
             <NitsuhLogo variant="navbar" />
-
-            <div className="hidden xl:flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 pl-3 border-l border-black/10 dark:border-white/10">
-              <Calendar className="w-3.5 h-3.5 text-amber-500" />
-              <span>{format(new Date(), 'EEEE, d MMMM')}</span>
-            </div>
           </div>
 
           {/* Center: ROLE STATION OR OWNER/MANAGER TABS */}
           <div className="hidden md:flex items-center">
-            {/* WAITER ONLY BADGE */}
-            {role === 'WAITER' && (
-              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/[0.06] border border-white/10 text-white rounded-xl text-xs font-bold shadow-sm">
-                <Smartphone className="w-3.5 h-3.5 text-amber-400" />
-                <span>Waiter Mobile Pad</span>
-              </div>
-            )}
-
-            {/* CASHIER ONLY BADGE */}
-            {role === 'CASHIER' && (
-              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/[0.06] border border-white/10 text-white rounded-xl text-xs font-bold shadow-sm">
-                <MonitorCheck className="w-3.5 h-3.5 text-amber-400" />
-                <span>Cashier POS & Settle Bill</span>
-                {waiterSlipsCount > 0 && (
-                  <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse shadow-sm shadow-amber-500/50">
-                    {waiterSlipsCount} Notes
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* KITCHEN ONLY BADGE */}
-            {role === 'KITCHEN_STAFF' && (
-              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/[0.06] border border-white/10 text-white rounded-xl text-xs font-bold shadow-sm">
-                <ChefHat className="w-3.5 h-3.5 text-amber-400" />
-                <span>Kitchen Display (KDS Live)</span>
-              </div>
-            )}
-
-            {/* MAIN STOREKEEPER ONLY BADGE */}
-            {role === 'MAIN_STOREKEEPER' && (
-              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/[0.06] border border-white/10 text-white rounded-xl text-xs font-bold shadow-sm">
-                <Boxes className="w-3.5 h-3.5 text-amber-400" />
-                <span>Main Store Bulk Warehouse</span>
-              </div>
-            )}
-
             {/* HEAD CHEF & KITCHEN KEEPER DUAL ACCESS (KDS Live + Kitchen Stock) */}
             {(role === 'HEAD_CHEF' || role === 'KITCHEN_STOREKEEPER') && (
               <nav className="flex items-center gap-1.5 bg-white/[0.04] border border-white/10 p-1 rounded-2xl">
@@ -288,58 +244,37 @@ export function Navbar() {
 
           {/* Right: User Status, Theme Switcher & Explicit Logout */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
-            {/* Unambiguous Segmented Light / Dark Theme Switcher */}
+            {/* Minimal Compact Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-1 p-1 bg-black/10 dark:bg-white/[0.08] hover:bg-black/15 dark:hover:bg-white/[0.12] border border-black/10 dark:border-white/10 rounded-xl sm:rounded-2xl transition cursor-pointer shadow-xs select-none"
-              title={theme === 'dark' ? 'Currently Midnight Obsidian (Dark). Click to switch to Warm Bistro (Light).' : 'Currently Warm Bistro (Light). Click to switch to Midnight Obsidian (Dark).'}
+              className="w-8 h-8 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 flex items-center justify-center transition cursor-pointer text-amber-400"
+              title={theme === 'dark' ? 'Switch to Warm Bistro (Light)' : 'Switch to Midnight Obsidian (Dark)'}
             >
-              <span className={`flex items-center gap-1 px-2 py-1 rounded-lg sm:rounded-xl text-[11px] font-black transition ${
-                theme === 'light'
-                  ? 'bg-amber-500 text-zinc-950 shadow-sm'
-                  : 'text-zinc-400 hover:text-white'
-              }`}>
-                <Sun className="w-3 h-3 text-current" />
-                <span className="hidden sm:inline">Light</span>
-              </span>
-              <span className={`flex items-center gap-1 px-2 py-1 rounded-lg sm:rounded-xl text-[11px] font-black transition ${
-                theme === 'dark'
-                  ? 'bg-amber-500 text-zinc-950 shadow-sm'
-                  : 'text-zinc-600 hover:text-zinc-950'
-              }`}>
-                <Moon className="w-3 h-3 text-current" />
-                <span className="hidden sm:inline">Dark</span>
-              </span>
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-zinc-300" />}
             </button>
 
-            {/* User Profile Pill / Quick Switcher */}
-            {/* Authenticated Staff User Pill */}
+            {/* User Profile Pill */}
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.12] border border-stone-200 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-xs transition cursor-pointer text-stone-900 dark:text-white"
+                className="flex items-center gap-2 px-2.5 py-1.5 bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 rounded-xl transition cursor-pointer text-white"
                 title="View active session"
               >
                 {currentUser.avatarUrl ? (
                   <img
                     src={currentUser.avatarUrl}
                     alt={currentUser.name}
-                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover ring-1 ring-amber-500/50 flex-shrink-0"
+                    className="w-6 h-6 rounded-full object-cover ring-1 ring-amber-500/50 flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-[10px] ring-1 ring-amber-500/50 flex-shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-[10px] ring-1 ring-amber-500/50 flex-shrink-0">
                     {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
                   </div>
                 )}
-                <div className="text-left max-w-[75px] sm:max-w-[130px] truncate">
-                  <div className="text-[11px] sm:text-xs font-black text-stone-900 dark:text-white truncate leading-tight">
-                    {currentUser.name}
-                  </div>
-                  <div className="text-[8px] sm:text-[9px] font-black text-amber-700 dark:text-amber-400 uppercase truncate">
-                    {currentUser.role.replace('_', ' ')}
-                  </div>
-                </div>
-                <ChevronDown className={`w-3 h-3 text-stone-500 dark:text-zinc-400 ml-0.5 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                <span className="text-xs font-bold text-white truncate max-w-[90px]">
+                  {currentUser.name.split(' ')[0]}
+                </span>
+                <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {profileOpen && (

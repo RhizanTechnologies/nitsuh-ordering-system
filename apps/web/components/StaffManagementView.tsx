@@ -381,9 +381,6 @@ export function StaffManagementView() {
                     Owner Terminal
                   </span>
                 </h1>
-                <p className="text-xs text-stone-600 dark:text-zinc-400 font-medium">
-                  Internal terminal identities, 4-digit touch PIN codes, role security & instant PIN recovery
-                </p>
               </div>
             </div>
           </div>

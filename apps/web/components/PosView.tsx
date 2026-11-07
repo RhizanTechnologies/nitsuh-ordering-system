@@ -749,22 +749,14 @@ export function PosView() {
 
       {/* Main Left: Menu Browse & Item Selection (ALWAYS visible on both mobile and desktop) */}
       <div className="flex-1 min-h-0 flex flex-col p-3.5 sm:p-6 overflow-y-auto pb-28 lg:pb-6 relative z-10 no-scrollbar">
-        {/* Top Header matching reference look */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Hi, {currentUser?.name?.split(' ')[0] || 'Samantha'} 👋</div>
-            <h1 className="text-lg sm:text-2xl font-black text-zinc-950 dark:text-white font-heading tracking-tight">
-              Good Food <span className="text-amber-600 dark:text-amber-400">Good Mood!</span>
-            </h1>
-          </div>
-
-          {/* Quick Active Orders button */}
+        {/* Top Control Bar */}
+        <div className="flex items-center justify-between gap-3 mb-3">
           <button
             onClick={() => setActiveOrdersModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 rounded-2xl text-xs font-bold text-white shadow-md active:scale-95 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 rounded-xl text-xs font-bold text-white shadow-md active:scale-95 transition cursor-pointer"
           >
             <Clock className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Active Tickets</span>
+            <span>Active Tickets</span>
             <span className="bg-[#C11221] text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">
               {activeOrders.filter((o) => o.paymentStatus !== "PAID").length}
             </span>
@@ -1138,11 +1130,6 @@ export function PosView() {
                     >
                       {item.name}
                     </h3>
-                    {item.description && (
-                      <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-1 mt-0.5 leading-tight hidden xs:block sm:block" title={item.description}>
-                        {item.description}
-                      </p>
-                    )}
                   </div>
 
                   {/* Price & Action Row */}
