@@ -17,15 +17,24 @@ import {
   Utensils
 } from 'lucide-react';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  LineChart as RechartsLineChart,
+  Line as RechartsLine,
+  XAxis as RechartsXAxis,
+  YAxis as RechartsYAxis,
+  CartesianGrid as RechartsCartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer as RechartsResponsiveContainer,
+  Legend as RechartsLegend,
 } from 'recharts';
+
+const LineChart = RechartsLineChart as any;
+const Line = RechartsLine as any;
+const XAxis = RechartsXAxis as any;
+const YAxis = RechartsYAxis as any;
+const CartesianGrid = RechartsCartesianGrid as any;
+const Tooltip = RechartsTooltip as any;
+const ResponsiveContainer = RechartsResponsiveContainer as any;
+const Legend = RechartsLegend as any;
 import { ProductManagementView } from '@/components/ProductManagementView';
 import { useAppStore } from '@/lib/store';
 

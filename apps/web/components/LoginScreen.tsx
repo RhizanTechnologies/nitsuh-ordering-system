@@ -20,6 +20,7 @@ export function LoginScreen() {
   const [staffList, setStaffList] = useState<any[]>([]);
   const [selectedStaffId, setSelectedStaffId] = useState<string>('');
   const [staffLoading, setStaffLoading] = useState(true);
+  const [staffError, setStaffError] = useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -69,8 +70,9 @@ export function LoginScreen() {
   // Filter out OWNER from the PIN dropdown list (Owners sign in via Manager Password tab)
   const visibleStaffList = staffList.filter((s) => s.role !== 'OWNER');
 
-  // Load active staff profiles for the dropdown
-  useEffect(() => {
+  const loadStaffProfiles = () => {
+    setStaffLoading(true);
+    setStaffError(null);
     fetchApi('/auth/staff')
       .then((data) => {
         if (Array.isArray(data)) {
@@ -84,10 +86,16 @@ export function LoginScreen() {
       })
       .catch((err) => {
         console.error('Failed to load staff list:', err);
+        setStaffError(err?.message || 'Could not load staff profiles');
       })
       .finally(() => {
         setStaffLoading(false);
       });
+  };
+
+  // Load active staff profiles for the dropdown
+  useEffect(() => {
+    loadStaffProfiles();
   }, []);
 
   const selectedStaff = visibleStaffList.find((s) => s.id === selectedStaffId);
@@ -381,8 +389,20 @@ export function LoginScreen() {
               {isDropdownOpen && (
                 <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#1C1815] border border-stone-200 dark:border-white/15 rounded-2xl shadow-2xl overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-150 max-h-56 overflow-y-auto no-scrollbar">
                   {visibleStaffList.length === 0 ? (
-                    <div className="px-4 py-3 text-xs text-stone-500 dark:text-zinc-400 text-center">
-                      {staffLoading ? 'Loading staff...' : 'No staff profiles found'}
+                    <div className="px-4 py-4 text-xs text-stone-500 dark:text-zinc-400 text-center flex flex-col items-center gap-2">
+                      <span>{staffLoading ? 'Loading staff profiles...' : staffError ? staffError : 'No staff profiles found'}</span>
+                      {!staffLoading && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            loadStaffProfiles();
+                          }}
+                          className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg text-[11px] transition"
+                        >
+                          Retry
+                        </button>
+                      )}
                     </div>
                   ) : (
                     visibleStaffList.map((staff) => {

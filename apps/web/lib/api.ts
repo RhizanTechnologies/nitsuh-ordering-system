@@ -1,8 +1,33 @@
 import io, { Socket } from 'socket.io-client';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+export function getApiBase(): string {
+  // 1. Explicit environment variable set by Vercel or user
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+  }
+
+  // 2. Client-side browser check: if running on a remote domain (e.g. *.vercel.app), use deployed backend
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1'
+  ) {
+    return 'https://nitsuh-ordering-system-orpin.vercel.app';
+  }
+
+  // 3. Server-side production build check
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://nitsuh-ordering-system-orpin.vercel.app';
+  }
+
+  // 4. Local development default
+  return 'http://localhost:4000';
+}
+
+export const API_BASE = getApiBase();
 
 export async function fetchApi(endpoint: string, options?: RequestInit) {
+  const base = getApiBase();
   const token = typeof window !== 'undefined' ? localStorage.getItem('cafe_token') : null;
   const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -12,7 +37,7 @@ export async function fetchApi(endpoint: string, options?: RequestInit) {
     ...(options?.headers || {}),
   };
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
+  const res = await fetch(`${base}${endpoint}`, {
     ...options,
     headers,
   });
@@ -41,7 +66,8 @@ let socketInstance: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socketInstance) {
-    socketInstance = io(API_BASE, {
+    const base = getApiBase();
+    socketInstance = io(base, {
       transports: ['websocket'],
     });
   }
