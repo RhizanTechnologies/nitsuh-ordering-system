@@ -6,10 +6,33 @@
   "scripts": {
     "dev": "pnpm --parallel run dev",
     "build": "pnpm --recursive run build",
+    "postinstall": "pnpm --filter @cafe/api run prisma:generate",
     "lint": "pnpm --recursive run lint",
     "test": "pnpm --recursive run test",
     "docker:db:up": "docker compose up -d",
     "docker:db:down": "docker compose down"
+  },
+  "dependencies": {
+    "@cafe/shared-types": "workspace:*",
+    "@nestjs/common": "^10.3.8",
+    "@nestjs/core": "^10.3.8",
+    "@nestjs/jwt": "^10.2.0",
+    "@nestjs/passport": "^10.0.3",
+    "@nestjs/platform-express": "^10.3.8",
+    "@nestjs/platform-socket.io": "^10.3.8",
+    "@nestjs/websockets": "^10.3.8",
+    "@prisma/client": "^5.14.0",
+    "bcryptjs": "^3.0.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "dotenv": "^16.4.5",
+    "express": "^5.3.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "prisma": "^5.14.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "typescript": "^5.4.5"
