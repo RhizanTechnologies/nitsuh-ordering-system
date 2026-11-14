@@ -27,13 +27,39 @@ export async function bootstrapServer(): Promise<any> {
       next();
     });
 
-    expressApp.use(express.json({ limit: '25mb' }));
-    expressApp.use(express.urlencoded({ extended: true, limit: '25mb' }));
+    // Handle pre-parsed or consumed body from Vercel Serverless runtime
+    expressApp.use((req: any, res: any, next: any) => {
+      if (req.body !== undefined && req.body !== null) {
+        if (typeof req.body === 'string') {
+          try {
+            req.body = JSON.parse(req.body);
+          } catch (e) {}
+        }
+        req._body = true;
+      } else if (req.readable === false || req.readableEnded) {
+        req.body = req.body || {};
+        req._body = true;
+      }
+      next();
+    });
 
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+    // Only run express body parser if stream has not already been consumed
+    expressApp.use((req: any, res: any, next: any) => {
+      if (req._body) {
+        return next();
+      }
+      return express.json({ limit: '25mb' })(req, res, (err: any) => {
+        if (err) return next(err);
+        return express.urlencoded({ extended: true, limit: '25mb' })(req, res, next);
+      });
+    });
+
+    const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), {
+      bodyParser: false,
+    });
 
     app.enableCors({
-      origin: '*',
+      origin: true,
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
     });
@@ -52,8 +78,20 @@ export async function bootstrapServer(): Promise<any> {
   return cachedApp;
 }
 
-export default async function handler(req: Request, res: Response) {
+export default async function handler(req: any, res: any) {
   try {
+    if (req.body !== undefined && req.body !== null) {
+      if (typeof req.body === 'string') {
+        try {
+          req.body = JSON.parse(req.body);
+        } catch (e) {}
+      }
+      req._body = true;
+    } else if (req.readable === false || req.readableEnded) {
+      req.body = req.body || {};
+      req._body = true;
+    }
+
     const server = await bootstrapServer();
     return server(req, res);
   } catch (error: any) {

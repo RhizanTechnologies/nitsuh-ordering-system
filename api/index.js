@@ -2,6 +2,19 @@ let appHandler = null;
 
 module.exports = async (req, res) => {
   try {
+    // If Vercel has already parsed or consumed the request stream, mark _body to prevent body-parser crash
+    if (req.body !== undefined && req.body !== null) {
+      if (typeof req.body === 'string') {
+        try {
+          req.body = JSON.parse(req.body);
+        } catch (e) {}
+      }
+      req._body = true;
+    } else if (req.readable === false || req.readableEnded) {
+      req.body = req.body || {};
+      req._body = true;
+    }
+
     if (!appHandler) {
       const path = require('path');
       const apiNodeModules = path.join(__dirname, '../apps/api/node_modules');
