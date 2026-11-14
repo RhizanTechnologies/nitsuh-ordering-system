@@ -1,87 +1,52 @@
 const path = require('path');
-const fs = require('fs');
 
-let handler = null;
-let initError = null;
-
-function getHandler() {
-  if (handler) return handler;
-  try {
-    // Try multiple possible paths for the compiled bundle depending on Vercel Lambda layout
-    const candidates = [
-      path.join(__dirname, '../dist/src/serverless'),
-      path.join(process.cwd(), 'dist/src/serverless'),
-      path.join(process.cwd(), 'apps/api/dist/src/serverless'),
-    ];
-
-    let loaded = null;
-    let lastErr = null;
-
-    for (const cand of candidates) {
-      try {
-        loaded = require(cand);
-        if (loaded) break;
-      } catch (e) {
-        lastErr = e;
-      }
-    }
-
-    if (!loaded) {
-      throw lastErr || new Error('Could not find compiled serverless bundle in candidates');
-    }
-
-    handler = loaded.default || loaded;
-    return handler;
-  } catch (err) {
-    initError = err;
-    console.error('Failed to load serverless bundle:', err);
-    return null;
-  }
+// Add apps/api/node_modules and root node_modules to module lookup paths
+const localNodeModules = path.join(__dirname, '../node_modules');
+const rootNodeModules = path.join(__dirname, '../../../node_modules');
+if (!module.paths.includes(localNodeModules)) {
+  module.paths.unshift(localNodeModules);
+}
+if (!module.paths.includes(rootNodeModules)) {
+  module.paths.push(rootNodeModules);
 }
 
+// Static requires for Vercel Node File Trace (@vercel/nft)
+require('reflect-metadata');
+require('@nestjs/core');
+require('@nestjs/common');
+require('@nestjs/platform-express');
+require('@nestjs/websockets');
+require('@nestjs/platform-socket.io');
+require('@nestjs/jwt');
+require('@nestjs/passport');
+require('passport');
+require('passport-jwt');
+require('bcryptjs');
+require('class-transformer');
+require('class-validator');
+require('rxjs');
+require('express');
+require('@prisma/client');
+
+const serverless = require('../dist/src/serverless');
+
+const handler = serverless.default || serverless;
+
 module.exports = async (req, res) => {
-  const h = getHandler();
-
-  if (!h) {
-    res.statusCode = 500;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(
-      JSON.stringify(
-        {
-          status: 'error',
-          stage: 'module_initialization',
-          errorName: initError?.name,
-          errorMessage: initError?.message,
-          stack: initError?.stack,
-          cwd: process.cwd(),
-          dirname: __dirname,
-          cwdFiles: fs.existsSync(process.cwd()) ? fs.readdirSync(process.cwd()) : [],
-        },
-        null,
-        2,
-      ),
-    );
-  }
-
   try {
-    return await h(req, res);
+    return await handler(req, res);
   } catch (err) {
     console.error('Handler execution error:', err);
     if (!res.headersSent) {
       res.statusCode = 500;
       res.setHeader('Content-Type', 'application/json');
-      return res.end(
-        JSON.stringify(
-          {
-            status: 'error',
-            stage: 'request_handling',
-            errorName: err?.name,
-            errorMessage: err?.message,
-            stack: err?.stack,
-          },
-          null,
-          2,
-        ),
+      res.end(
+        JSON.stringify({
+          status: 'error',
+          stage: 'handler_execution',
+          message: err?.message || 'Server error',
+          stack: err?.stack,
+        }),
       );
     }
   }
