@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
 import { PrismaService } from './prisma.service';
 import { EventsGateway } from './events/events.gateway';
 import { AuthModule } from './auth/auth.module';
@@ -17,7 +18,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     OrdersModule,
     AnalyticsModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [PrismaService, EventsGateway],
 })
 export class AppModule {}
