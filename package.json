@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm --parallel run dev",
     "build": "pnpm --recursive run build",
-    "postinstall": "pnpm --filter @cafe/api run prisma:generate",
+    "postinstall": "pnpm --filter @cafe/api run prisma:generate && pnpm --filter @cafe/api run build",
     "lint": "pnpm --recursive run lint",
     "test": "pnpm --recursive run test",
     "docker:db:up": "docker compose up -d",

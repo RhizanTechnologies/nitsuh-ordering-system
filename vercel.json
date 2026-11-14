@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "pnpm --filter @cafe/api run build",
   "functions": {
     "api/index.js": {
       "includeFiles": "apps/api/dist/**"
