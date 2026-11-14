@@ -8,10 +8,12 @@ async function main() {
 
   // 1. Create Default Users (Owner, Manager, Cashier, Waiter, Kitchen, Storekeepers)
   const defaultPassword = await bcrypt.hash('password123', 10);
+  const selamawitPassword = await bcrypt.hash('nitsuh123', 10);
 
   const usersData = [
     {
       name: 'Samantha W',
+      employeeCode: 'EMP-001',
       email: 'samantha@greengrounds.com',
       pinCode: '1234',
       passwordHash: defaultPassword,
@@ -20,6 +22,7 @@ async function main() {
     },
     {
       name: 'Adam S (Owner)',
+      employeeCode: 'EMP-002',
       email: 'adam@greengrounds.com',
       pinCode: '0000',
       passwordHash: defaultPassword,
@@ -28,6 +31,7 @@ async function main() {
     },
     {
       name: 'John Holland (Manager)',
+      employeeCode: 'EMP-003',
       email: 'john@greengrounds.com',
       pinCode: '1111',
       passwordHash: defaultPassword,
@@ -36,6 +40,7 @@ async function main() {
     },
     {
       name: 'Abel Tesfaye (Waiter)',
+      employeeCode: 'EMP-004',
       email: 'abel.waiter@greengrounds.com',
       pinCode: '2222',
       passwordHash: defaultPassword,
@@ -44,6 +49,7 @@ async function main() {
     },
     {
       name: 'Sara K (Waiter)',
+      employeeCode: 'EMP-005',
       email: 'sara.waiter@greengrounds.com',
       pinCode: '3333',
       passwordHash: defaultPassword,
@@ -52,6 +58,7 @@ async function main() {
     },
     {
       name: 'Chef Dawit (Kitchen)',
+      employeeCode: 'EMP-006',
       email: 'chef.dawit@greengrounds.com',
       pinCode: '4444',
       passwordHash: defaultPassword,
@@ -60,6 +67,7 @@ async function main() {
     },
     {
       name: 'Michael (Main Store)',
+      employeeCode: 'EMP-007',
       email: 'michael.main@greengrounds.com',
       pinCode: '5555',
       passwordHash: defaultPassword,
@@ -67,9 +75,28 @@ async function main() {
       avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
     },
     {
-      name: 'Daniel (Kitchen Store)',
-      email: 'daniel.kitchen@greengrounds.com',
+      name: 'Chef Tigist',
+      employeeCode: 'EMP-008',
+      email: 'chef.tigist@greengrounds.com',
       pinCode: '6666',
+      passwordHash: defaultPassword,
+      role: UserRole.HEAD_CHEF,
+      avatarUrl: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=150'
+    },
+    {
+      name: 'Selamawit T',
+      employeeCode: 'EMP-009',
+      email: 'selamawit@greengrounds.com',
+      pinCode: '8888',
+      passwordHash: selamawitPassword,
+      role: UserRole.WAITER,
+      avatarUrl: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150'
+    },
+    {
+      name: 'Daniel (Kitchen Store)',
+      employeeCode: 'EMP-010',
+      email: 'daniel.kitchen@greengrounds.com',
+      pinCode: '7777',
       passwordHash: defaultPassword,
       role: UserRole.KITCHEN_STOREKEEPER,
       avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150'
@@ -80,7 +107,15 @@ async function main() {
   for (const u of usersData) {
     users[u.email] = await prisma.user.upsert({
       where: { email: u.email },
-      update: { pinCode: u.pinCode, role: u.role, name: u.name, avatarUrl: u.avatarUrl },
+      update: {
+        name: u.name,
+        employeeCode: u.employeeCode,
+        pinCode: u.pinCode,
+        passwordHash: u.passwordHash,
+        role: u.role,
+        avatarUrl: u.avatarUrl,
+        isActive: true,
+      },
       create: u
     });
   }

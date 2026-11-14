@@ -67,8 +67,8 @@ export function LoginScreen() {
     }
   };
 
-  // Filter out OWNER from the PIN dropdown list (Owners sign in via Manager Password tab)
-  const visibleStaffList = staffList.filter((s) => s.role !== 'OWNER');
+  // Include all staff profiles in the dropdown
+  const visibleStaffList = staffList;
 
   const loadStaffProfiles = () => {
     setStaffLoading(true);
@@ -78,8 +78,7 @@ export function LoginScreen() {
         if (Array.isArray(data)) {
           setStaffList(data);
           const savedStaffId = typeof window !== 'undefined' ? localStorage.getItem('nitsuh_last_staff_id') : null;
-          // Only restore saved staff if not OWNER
-          if (savedStaffId && data.some((s) => s.id === savedStaffId && s.role !== 'OWNER')) {
+          if (savedStaffId && data.some((s) => s.id === savedStaffId)) {
             setSelectedStaffId(savedStaffId);
           }
         }
