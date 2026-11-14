@@ -12,6 +12,11 @@ export class AppController {
     };
   }
 
+  @Get('api')
+  getApiHealth() {
+    return this.getHealth();
+  }
+
   @Get('health')
   getHealthCheck() {
     return {
