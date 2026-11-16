@@ -30,6 +30,7 @@ import {
   BarChart3,
   X,
 } from 'lucide-react';
+import { StaffAvatarUploader, AVATAR_PRESETS } from './StaffAvatarUploader';
 
 interface StaffMember {
   id: string;
@@ -48,17 +49,6 @@ interface StaffMember {
     shifts: number;
   };
 }
-
-const AVATAR_PRESETS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', // Female Exec
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', // Male Manager
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', // Female Cashier
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', // Male Waiter
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', // Female Waiter
-  'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150', // Chef Male
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150', // Chef Female
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150', // Storekeeper
-];
 
 export function StaffManagementView() {
   const { currentUser } = useAppStore();
@@ -810,27 +800,13 @@ export function StaffManagementView() {
                 </div>
               )}
 
-              {/* Avatar Selector */}
-              <div>
-                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-2">
-                  Select Staff Avatar Icon
-                </label>
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {AVATAR_PRESETS.map((url, idx) => (
-                    <img
-                      key={idx}
-                      src={url}
-                      alt="avatar preset"
-                      onClick={() => setFormAvatar(url)}
-                      className={`w-10 h-10 rounded-xl object-cover cursor-pointer transition border-2 flex-shrink-0 ${
-                        formAvatar === url
-                          ? 'border-amber-500 scale-105 ring-2 ring-amber-400/40'
-                          : 'border-transparent opacity-60 hover:opacity-100'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+              {/* Custom Staff Photo & Avatar Uploader */}
+              <StaffAvatarUploader
+                value={formAvatar}
+                onChange={setFormAvatar}
+                staffName={formName}
+                label="Staff Profile Photo / Avatar"
+              />
 
               <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-stone-200 dark:border-white/10">
                 <button
@@ -998,26 +974,13 @@ export function StaffManagementView() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1.5">
-                  Change Avatar
-                </label>
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {AVATAR_PRESETS.map((url, idx) => (
-                    <img
-                      key={idx}
-                      src={url}
-                      alt="avatar"
-                      onClick={() => setEditAvatar(url)}
-                      className={`w-9 h-9 rounded-xl object-cover cursor-pointer transition border-2 flex-shrink-0 ${
-                        editAvatar === url
-                          ? 'border-amber-500 scale-105 ring-2 ring-amber-400/40'
-                          : 'border-transparent opacity-60 hover:opacity-100'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+              {/* Custom Staff Photo & Avatar Uploader */}
+              <StaffAvatarUploader
+                value={editAvatar}
+                onChange={setEditAvatar}
+                staffName={editName}
+                label="Update Staff Photo / Avatar"
+              />
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
                 <button
