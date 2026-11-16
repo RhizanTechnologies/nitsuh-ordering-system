@@ -77,6 +77,10 @@ export class UsersService {
 
   // Register new staff member (no email or phone required)
   async createUser(dto: CreateUserDto, creatorId?: string) {
+    if (dto.role === UserRole.OWNER) {
+      throw new BadRequestException('Owner accounts cannot be created via staff registration. Owner is system reserved.');
+    }
+
     const trimmedName = dto.name?.trim();
     if (!trimmedName) {
       throw new BadRequestException('Employee name is required');
@@ -171,6 +175,9 @@ export class UsersService {
     }
 
     if (dto.role !== undefined) {
+      if (dto.role === UserRole.OWNER && existing.role !== UserRole.OWNER) {
+        throw new BadRequestException('Staff roles cannot be changed to Owner');
+      }
       updateData.role = dto.role;
     }
 

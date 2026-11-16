@@ -347,8 +347,9 @@ export function StaffManagementView() {
   const storeStaff = staffList.filter((s) => s.role === 'MAIN_STOREKEEPER' || s.role === 'KITCHEN_STOREKEEPER').length;
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* Toast Notification */}
+    <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 no-scrollbar">
+      <div className="max-w-7xl mx-auto space-y-6 pb-16">
+        {/* Toast Notification */}
       {successToast && (
         <div className="fixed top-20 right-5 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3 duration-200">
           <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
@@ -682,8 +683,8 @@ export function StaffManagementView() {
 
       {/* ================= MODAL: REGISTER NEW STAFF ================= */}
       {isRegisterOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative my-8">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl relative my-8">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
@@ -725,7 +726,7 @@ export function StaffManagementView() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
                     Role & Station <span className="text-rose-500">*</span>
@@ -742,7 +743,6 @@ export function StaffManagementView() {
                     <option value="MAIN_STOREKEEPER">Main Storekeeper</option>
                     <option value="KITCHEN_STOREKEEPER">Kitchen Storekeeper</option>
                     <option value="MANAGER">General Manager</option>
-                    <option value="OWNER">Owner / Executive</option>
                   </select>
                 </div>
 
@@ -785,7 +785,7 @@ export function StaffManagementView() {
                 />
               </div>
 
-              {(formRole === 'OWNER' || formRole === 'MANAGER') && (
+              {formRole === 'MANAGER' && (
                 <div>
                   <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
                     Management Password (Optional)
@@ -907,8 +907,8 @@ export function StaffManagementView() {
 
       {/* ================= MODAL: EDIT PROFILE ================= */}
       {isEditOpen && selectedStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative my-8">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
               <h3 className="text-sm font-black text-stone-900 dark:text-white">Edit Staff Profile</h3>
               <button
@@ -939,7 +939,7 @@ export function StaffManagementView() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
                     Employee Code
@@ -969,7 +969,6 @@ export function StaffManagementView() {
                     <option value="MAIN_STOREKEEPER">Main Storekeeper</option>
                     <option value="KITCHEN_STOREKEEPER">Kitchen Storekeeper</option>
                     <option value="MANAGER">General Manager</option>
-                    <option value="OWNER">Owner / Executive</option>
                   </select>
                 </div>
               </div>
@@ -1058,6 +1057,7 @@ export function StaffManagementView() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

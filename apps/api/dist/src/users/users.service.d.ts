@@ -21,6 +21,13 @@ export declare class UsersService {
     constructor(prisma: PrismaService);
     getAllUsers(): Promise<{
         id: string;
+        name: string;
+        employeeCode: string;
+        email: string;
+        pinCode: string;
+        role: import("@prisma/client").$Enums.UserRole;
+        isActive: boolean;
+        avatarUrl: string;
         createdAt: Date;
         updatedAt: Date;
         _count: {
@@ -28,18 +35,9 @@ export declare class UsersService {
             ordersWaitered: number;
             shifts: number;
         };
-        name: string;
-        employeeCode: string;
-        email: string;
-        pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
-        isActive: boolean;
-        avatarUrl: string;
     }[]>;
     getUserById(id: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
         employeeCode: string;
         email: string;
@@ -47,10 +45,11 @@ export declare class UsersService {
         role: import("@prisma/client").$Enums.UserRole;
         isActive: boolean;
         avatarUrl: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     createUser(dto: CreateUserDto, creatorId?: string): Promise<{
         id: string;
-        createdAt: Date;
         name: string;
         employeeCode: string;
         email: string;
@@ -58,10 +57,10 @@ export declare class UsersService {
         role: import("@prisma/client").$Enums.UserRole;
         isActive: boolean;
         avatarUrl: string;
+        createdAt: Date;
     }>;
     updateUser(id: string, dto: UpdateUserDto, updaterId?: string): Promise<{
         id: string;
-        updatedAt: Date;
         name: string;
         employeeCode: string;
         email: string;
@@ -69,14 +68,15 @@ export declare class UsersService {
         role: import("@prisma/client").$Enums.UserRole;
         isActive: boolean;
         avatarUrl: string;
+        updatedAt: Date;
     }>;
     resetPin(id: string, newPin: string, modifierId?: string): Promise<{
         id: string;
-        updatedAt: Date;
         name: string;
         employeeCode: string;
         pinCode: string;
         role: import("@prisma/client").$Enums.UserRole;
+        updatedAt: Date;
     }>;
     resetPassword(id: string, newPass: string, modifierId?: string): Promise<{
         message: string;

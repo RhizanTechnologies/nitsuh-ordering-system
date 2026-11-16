@@ -240,7 +240,7 @@ export function StaffAvatarUploader({
       </div>
 
       {/* Tabs for Upload Method */}
-      <div className="flex border-b border-stone-200 dark:border-white/10 text-xs font-bold">
+      <div className="flex border-b border-stone-200 dark:border-white/10 text-xs font-bold overflow-x-auto no-scrollbar">
         <button
           type="button"
           onClick={() => setActiveTab('upload')}

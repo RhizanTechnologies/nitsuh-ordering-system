@@ -97,6 +97,9 @@ let UsersService = class UsersService {
         return user;
     }
     async createUser(dto, creatorId) {
+        if (dto.role === client_1.UserRole.OWNER) {
+            throw new common_1.BadRequestException('Owner accounts cannot be created via staff registration. Owner is system reserved.');
+        }
         const trimmedName = dto.name?.trim();
         if (!trimmedName) {
             throw new common_1.BadRequestException('Employee name is required');
@@ -175,6 +178,9 @@ let UsersService = class UsersService {
             updateData.name = trimmed;
         }
         if (dto.role !== undefined) {
+            if (dto.role === client_1.UserRole.OWNER && existing.role !== client_1.UserRole.OWNER) {
+                throw new common_1.BadRequestException('Staff roles cannot be changed to Owner');
+            }
             updateData.role = dto.role;
         }
         if (dto.avatarUrl !== undefined) {
