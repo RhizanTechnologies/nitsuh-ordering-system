@@ -34,7 +34,8 @@ import {
   SlidersHorizontal,
   Clock,
   Eye,
-  Check
+  Check,
+  ChevronDown
 } from 'lucide-react';
 
 export function PosView() {
@@ -749,20 +750,6 @@ export function PosView() {
 
       {/* Main Left: Menu Browse & Item Selection (ALWAYS visible on both mobile and desktop) */}
       <div className="flex-1 min-h-0 flex flex-col p-3.5 sm:p-6 overflow-y-auto pb-28 lg:pb-6 relative z-10 no-scrollbar">
-        {/* Top Control Bar */}
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <button
-            onClick={() => setActiveOrdersModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 rounded-xl text-xs font-bold text-white shadow-md active:scale-95 transition cursor-pointer"
-          >
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
-            <span>Active Tickets</span>
-            <span className="bg-[#C11221] text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">
-              {activeOrders.filter((o) => o.paymentStatus !== "PAID").length}
-            </span>
-          </button>
-        </div>
-
         {/* INCOMING WAITER SLIPS SECTION: Cashier Reviews & Fired to Kitchen */}
         {incomingSlips.length > 0 && (
           <div className="mb-4 bg-amber-950/20 border border-amber-500/40 rounded-3xl p-3.5 sm:p-4 shadow-2xl backdrop-blur-xl animate-in fade-in">
@@ -878,118 +865,145 @@ export function PosView() {
           </div>
         )}
 
-        {/* Search Bar matching reference style */}
-        <div className="relative mb-3">
-          <div className="flex items-center bg-white dark:bg-white/[0.05] border border-stone-200/90 dark:border-white/10 focus-within:border-amber-500 rounded-2xl px-3.5 py-2.5 shadow-xs transition">
-            <Search className="w-4 h-4 text-stone-400 dark:text-zinc-400 mr-2.5 flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Search dishes, burgers, pizza, coffee..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent text-xs sm:text-sm font-semibold text-stone-900 dark:text-white focus:outline-none placeholder-stone-400 dark:placeholder-zinc-500 pr-6"
-            />
-            {searchQuery ? (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="p-1 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white rounded-full transition absolute right-3"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                onClick={() => setTableModalOpen(true)}
-                className="text-stone-400 hover:text-amber-600 dark:text-zinc-400 dark:hover:text-amber-400 transition absolute right-3 cursor-pointer"
-                title="Table Floor Plan"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
+        {/* ================= UNIFIED POS ACTION BAR ================= */}
+        <div className="bg-white/90 dark:bg-[#161311]/90 backdrop-blur-xl border border-stone-200/90 dark:border-white/10 rounded-2xl sm:rounded-3xl p-2 sm:p-2.5 mb-2.5 shadow-xs transition-colors">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            {/* Fulfillment Mode (Dine-In vs Takeaway) & Table Picker */}
+            <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+              {/* Segmented Mode Switcher */}
+              <div className="flex items-center bg-stone-100 dark:bg-white/[0.06] p-0.5 rounded-xl border border-stone-200/80 dark:border-white/10 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setOrderType('DINE_IN')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-black transition cursor-pointer ${
+                    orderType === 'DINE_IN'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs'
+                      : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                  }`}
+                  title="Dine-In Table Order"
+                >
+                  <Utensils className="w-3.5 h-3.5" />
+                  <span>Dine-In</span>
+                </button>
 
-        {/* Order Destination Selector (Dine-In Table vs Takeaway) */}
-        <div className="space-y-2 mb-3">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setOrderType('DINE_IN')}
-              className={`flex-1 min-w-0 py-2 px-2.5 sm:px-3 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer border ${
-                orderType === 'DINE_IN'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/20'
-                  : 'bg-white dark:bg-white/[0.04] border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
-              }`}
-            >
-              <Utensils className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="truncate">Dine-In Table</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderType('TAKEAWAY')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-black transition cursor-pointer ${
+                    orderType === 'TAKEAWAY'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs'
+                      : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                  }`}
+                  title="Takeaway Order"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>Takeaway</span>
+                </button>
+              </div>
 
-            <button
-              onClick={() => setOrderType('TAKEAWAY')}
-              className={`flex-1 min-w-0 py-2 px-2.5 sm:px-3 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer border ${
-                orderType === 'TAKEAWAY'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/20'
-                  : 'bg-white dark:bg-white/[0.04] border-stone-200/80 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
-              }`}
-            >
-              <ShoppingBag className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="truncate">Takeaway</span>
-            </button>
-          </div>
+              {/* Dine-In: Fast Table Dropdown + Graphical Floor Plan Trigger */}
+              {orderType === 'DINE_IN' ? (
+                <div className="flex items-center gap-1 flex-1 sm:flex-initial min-w-0">
+                  <div className="relative flex-1 sm:flex-initial min-w-0">
+                    <select
+                      value={selectedTable}
+                      onChange={(e) => handleSelectTable(e.target.value)}
+                      className="w-full sm:w-auto appearance-none bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl pl-2.5 pr-7 py-1.5 text-xs font-extrabold text-amber-900 dark:text-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer transition truncate"
+                      title="Select Table"
+                    >
+                      {tables.length === 0 && (
+                        <option value={selectedTable} className="bg-white dark:bg-[#1A1614] text-stone-900 dark:text-white font-bold">
+                          {selectedTable}
+                        </option>
+                      )}
+                      {tables.map((t) => (
+                        <option
+                          key={t.id}
+                          value={t.tableNumber}
+                          className="bg-white dark:bg-[#1A1614] text-stone-900 dark:text-white font-bold"
+                        >
+                          {t.tableNumber} {t.status === 'OCCUPIED' ? '• (Occupied)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
 
-          {orderType === 'DINE_IN' ? (
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-              <span className="text-[10px] font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider pl-1 mr-1 flex-shrink-0">Table:</span>
-              {tables.map((t) => {
-                const isSelected = selectedTable === t.tableNumber;
-                const isOccupied = t.status === 'OCCUPIED';
-
-                return (
                   <button
-                    key={t.id}
-                    onClick={() => handleSelectTable(t.tableNumber)}
-                    className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition cursor-pointer border flex-shrink-0 ${
-                      isSelected
-                        ? 'bg-amber-500 text-stone-950 font-black border-amber-400 shadow-md'
-                        : isOccupied
-                        ? 'bg-amber-500/15 text-amber-800 dark:text-rose-300 border-amber-500/30 dark:border-rose-500/30'
-                        : 'bg-white dark:bg-white/[0.04] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:bg-stone-50 dark:hover:bg-white/[0.08]'
-                    }`}
+                    type="button"
+                    onClick={() => setTableModalOpen(true)}
+                    className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] border border-stone-200/80 dark:border-white/10 rounded-xl text-stone-600 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer flex-shrink-0"
+                    title="Open Table Floor Plan"
                   >
-                    <span>{t.tableNumber}</span>
+                    <LayoutGrid className="w-3.5 h-3.5" />
                   </button>
-                );
-              })}
+                </div>
+              ) : (
+                /* Takeaway: Quick Customer Name */
+                <input
+                  type="text"
+                  placeholder="Customer name..."
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  className="flex-1 sm:w-36 bg-stone-100 dark:bg-white/[0.06] border border-stone-200/80 dark:border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+              )}
+            </div>
+
+            {/* Search Input & Active Tickets */}
+            <div className="flex items-center gap-2 flex-1 sm:max-w-md min-w-0">
+              <div className="flex items-center bg-stone-100 dark:bg-white/[0.05] border border-stone-200/80 dark:border-white/10 focus-within:border-amber-500 rounded-xl px-3 py-1.5 flex-1 min-w-0 transition relative">
+                <Search className="w-3.5 h-3.5 text-stone-400 dark:text-zinc-400 mr-2 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search dishes, burgers, pizza..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent text-xs font-semibold text-stone-900 dark:text-white focus:outline-none placeholder-stone-400 dark:placeholder-zinc-500 pr-5"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="p-0.5 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white transition absolute right-2"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Active Tickets Pill */}
               <button
-                onClick={() => setTableModalOpen(true)}
-                className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-white/[0.06] hover:bg-stone-50 dark:hover:bg-white/[0.1] border border-stone-200/90 dark:border-white/10 text-amber-700 dark:text-amber-400 font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer flex-shrink-0"
+                type="button"
+                onClick={() => setActiveOrdersModalOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] border border-stone-200/80 dark:border-white/10 rounded-xl text-xs font-bold text-stone-800 dark:text-zinc-200 transition cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
+                title="View active kitchen orders & unpaid tabs"
               >
-                <LayoutGrid className="w-3 h-3" />
-                <span>Plan</span>
+                <Clock className="w-3.5 h-3.5 text-amber-500" />
+                <span className="hidden sm:inline">Tickets</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                  activeOrders.filter((o) => o.paymentStatus !== "PAID").length > 0
+                    ? 'bg-[#C11221] text-white animate-pulse'
+                    : 'bg-stone-200 dark:bg-white/10 text-stone-600 dark:text-zinc-400'
+                }`}>
+                  {activeOrders.filter((o) => o.paymentStatus !== "PAID").length}
+                </span>
               </button>
             </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Takeaway Customer Name..."
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full bg-white dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
-              />
-            </div>
-          )}
+          </div>
         </div>
 
-        {/* Category Navigation Pills - Prominent, Unclipped, with Live Counts */}
-        <div className="flex items-center gap-2 overflow-x-auto py-2.5 mb-3.5 no-scrollbar flex-shrink-0 min-h-[52px]">
+        {/* Category Navigation Pills - Streamlined & Compact with Live Counts */}
+        <div className="flex items-center gap-1.5 overflow-x-auto py-1 mb-3 no-scrollbar flex-shrink-0">
           <button
+            type="button"
             onClick={() => {
               setGroupFilter('ALL');
               setSelectedCategory('');
             }}
-            className={`flex-shrink-0 px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-black transition cursor-pointer border ${
+            className={`flex-shrink-0 px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-black transition cursor-pointer border ${
               groupFilter === 'ALL' && !selectedCategory
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-xs ring-1 ring-amber-400'
                 : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.08]'
             }`}
           >
@@ -1020,17 +1034,18 @@ export function PosView() {
             return (
               <button
                 key={cat.id}
+                type="button"
                 onClick={() => {
                   setGroupFilter(isActive ? 'ALL' : (cat.id as any));
                   setSelectedCategory('');
                 }}
-                className={`flex-shrink-0 px-3.5 py-2 rounded-2xl flex items-center gap-2 text-xs font-bold transition cursor-pointer border ${
+                className={`flex-shrink-0 px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-bold transition cursor-pointer border ${
                   isActive
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/25 ring-1 ring-amber-400 font-black'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-xs ring-1 ring-amber-400 font-black'
                     : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.08]'
                 }`}
               >
-                <span className="text-base">{cat.emoji}</span>
+                <span className="text-sm">{cat.emoji}</span>
                 <span>{cat.label}</span>
                 {count > 0 && (
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${

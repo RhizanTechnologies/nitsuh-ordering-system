@@ -338,84 +338,84 @@ export function Navbar() {
 
         {/* OWNER & MANAGER MOBILE SUB-NAVBAR (Scrollable on small screens) */}
         {isOwnerOrManager && (
-          <div className="md:hidden flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar border-t border-black/10 dark:border-white/10 mt-2">
+          <div className="md:hidden flex items-center gap-1 overflow-x-auto pt-1.5 pb-0.5 no-scrollbar border-t border-stone-200/80 dark:border-white/10 mt-1.5">
             {role === 'OWNER' && (
               <Link
                 href="/dashboard"
-                className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
                   pathname === '/dashboard'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-xs'
                     : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
                 }`}
               >
-                <BarChart3 className="w-3.5 h-3.5" />
+                <BarChart3 className="w-3 h-3" />
                 <span>Profit</span>
               </Link>
             )}
             <Link
               href="/staff"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
                 pathname === '/staff'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-xs'
                   : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
-              <Users className="w-3.5 h-3.5" />
+              <Users className="w-3 h-3" />
               <span>Staff</span>
             </Link>
             <Link
               href="/inventory"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
                 pathname === '/inventory'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-xs'
                   : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
-              <Boxes className="w-3.5 h-3.5" />
+              <Boxes className="w-3 h-3" />
               <span>Inventory</span>
             </Link>
             <Link
               href="/tables"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
                 pathname === '/tables'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-xs'
                   : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
+              <LayoutGrid className="w-3 h-3" />
               <span>Tables</span>
             </Link>
             <Link
               href="/pos"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
                 pathname === '/pos'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-xs'
                   : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
-              <MonitorCheck className="w-3.5 h-3.5" />
+              <MonitorCheck className="w-3 h-3" />
               <span>POS</span>
             </Link>
             <Link
               href="/kds"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
                 pathname === '/kds'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-xs'
                   : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
-              <ChefHat className="w-3.5 h-3.5" />
+              <ChefHat className="w-3 h-3" />
               <span>KDS</span>
             </Link>
             <Link
               href="/waiter"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
                 pathname === '/waiter'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-xs'
                   : 'bg-black/5 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-zinc-800 dark:text-zinc-300 hover:text-black dark:hover:text-white'
               }`}
             >
-              <Smartphone className="w-3.5 h-3.5" />
+              <Smartphone className="w-3 h-3" />
               <span>Waiter</span>
             </Link>
           </div>
