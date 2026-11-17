@@ -462,19 +462,19 @@ export function WaiterPadView() {
         <div className="flex items-center justify-between gap-2 mb-3">
           <button
             onClick={() => setActiveTab(activeTab === 'menu' ? 'tables' : 'menu')}
-            className={`px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold ${
+            className={`px-3.5 py-1.5 rounded-2xl border transition-all flex items-center gap-2 cursor-pointer text-xs font-bold ${
               activeTab === 'tables'
-                ? 'bg-amber-500 text-black border-amber-400 font-extrabold shadow-lg shadow-amber-500/20'
-                : 'bg-white/[0.05] border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.08]'
+                ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-md shadow-amber-500/20'
+                : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-800 dark:text-zinc-200 hover:text-stone-950 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/[0.08] shadow-xs'
             }`}
             title="Toggle Live Table Preparation Monitor"
           >
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
-            <span>{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
+            <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span className="font-black text-stone-900 dark:text-zinc-100">{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
             {inFlightOrders.length > 0 && (
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  delayedOrders.length > 0 ? 'bg-[#C11221] text-white animate-pulse' : 'bg-amber-400 text-black'
+                className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                  delayedOrders.length > 0 ? 'bg-[#C11221] text-white animate-pulse' : 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30'
                 }`}
               >
                 {inFlightOrders.length}
@@ -833,10 +833,10 @@ export function WaiterPadView() {
               </div>
 
               {inFlightOrders.length === 0 ? (
-                <div className="py-12 text-center text-zinc-500">
-                  <Clock className="w-10 h-10 mx-auto mb-2 opacity-40 text-amber-400" />
-                  <p className="text-sm font-bold text-zinc-300">No active tables being prepared right now.</p>
-                  <p className="text-xs text-zinc-500 mt-1">Take an order to start tracking prep time!</p>
+                <div className="py-12 text-center text-stone-500 dark:text-zinc-500">
+                  <Clock className="w-10 h-10 mx-auto mb-2 opacity-40 text-amber-500 dark:text-amber-400" />
+                  <p className="text-sm font-bold text-stone-800 dark:text-zinc-300">No active tables being prepared right now.</p>
+                  <p className="text-xs text-stone-500 dark:text-zinc-500 mt-1">Take an order to start tracking prep time!</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -851,18 +851,18 @@ export function WaiterPadView() {
                         key={order.id}
                         className={`p-4 rounded-2xl border backdrop-blur-xl transition-all ${
                           isReady
-                            ? 'bg-emerald-950/40 border-emerald-500/60 shadow-lg shadow-emerald-500/10'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-500/60 shadow-lg shadow-emerald-500/10'
                             : isDelayed
-                            ? 'bg-rose-950/40 border-rose-500/60 shadow-lg shadow-rose-500/10'
+                            ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-500/60 shadow-lg shadow-rose-500/10'
                             : isWarning
-                            ? 'bg-amber-950/30 border-amber-500/50'
-                            : 'bg-white/[0.04] border-white/10'
+                            ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-500/50'
+                            : 'bg-white dark:bg-white/[0.04] border-stone-200 dark:border-white/10'
                         }`}
                       >
                         <div className="flex items-start justify-between">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-black text-white">#{order.orderNumber}</span>
+                              <span className="text-sm font-black text-stone-900 dark:text-white">#{order.orderNumber}</span>
                               <Badge
                                 variant={
                                   isReady
@@ -875,7 +875,7 @@ export function WaiterPadView() {
                                 {order.status}
                               </Badge>
                             </div>
-                            <div className="text-xs font-bold text-zinc-300 mt-0.5">
+                            <div className="text-xs font-bold text-stone-700 dark:text-zinc-300 mt-0.5">
                               {order.orderType === 'TAKEAWAY'
                                 ? `🛍️ Takeaway (${order.customerName})`
                                 : `🍽️ Table ${order.table?.tableNumber || 'Guest'}`}
@@ -1421,20 +1421,20 @@ export function WaiterPadView() {
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="p-4 bg-[#12100E] border-t border-white/10 flex items-center justify-between gap-3 relative z-20">
+            <div className="p-4 bg-stone-900 dark:bg-[#12100E] border-t border-stone-800 dark:border-white/10 flex items-center justify-between gap-3 relative z-20">
               {/* Frosted Stepper [- 1 +] */}
-              <div className="flex items-center gap-2 bg-white/[0.06] border border-white/15 rounded-2xl px-3 py-2 text-white">
+              <div className="flex items-center gap-2 bg-white/[0.08] dark:bg-white/[0.06] border border-white/15 rounded-2xl px-3 py-2 text-white">
                 <button
                   disabled={customQty <= 1}
                   onClick={() => setCustomQty((q) => Math.max(1, q - 1))}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white disabled:opacity-30 active:scale-95 cursor-pointer"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-zinc-300 hover:text-white disabled:opacity-30 active:scale-95 cursor-pointer"
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
                 <span className="w-6 text-center text-sm font-black text-white">{customQty}</span>
                 <button
                   onClick={() => setCustomQty((q) => q + 1)}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white active:scale-95 cursor-pointer"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-zinc-300 hover:text-white active:scale-95 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                 </button>

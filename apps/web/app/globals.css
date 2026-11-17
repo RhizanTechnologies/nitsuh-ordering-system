@@ -79,6 +79,28 @@
   }
 }
 
+/* ==========================================================================
+   GLOBAL THEME CONTRAST & HOVER COLOR SAFEGUARDS (LIGHT MODE)
+   Ensures text, tabs, pills, and buttons NEVER turn invisible white on hover
+   ========================================================================== */
+html:not(.dark),
+[data-theme="light"],
+.theme-light {
+  /* Prevent accidental hover:text-white from turning text white on light background */
+  .hover\:text-white:not([class*="bg-[#C11221]"]):not([class*="bg-red-"]):not([class*="bg-rose-"]):not([class*="bg-amber-600"]):not([class*="bg-emerald-600"]):not([class*="bg-stone-900"]):not([class*="bg-black"]):not([class*="bg-gradient-"]):hover {
+    color: var(--text-primary) !important;
+  }
+
+  /* Safeguard un-prefixed text-zinc-300 / text-zinc-400 from having low contrast on light theme */
+  .text-zinc-300:not([class*="bg-stone-900"]):not([class*="bg-black"]):not([class*="bg-[#1"]):not([class*="bg-[#0"]):not([class*="dark:"]) {
+    color: var(--text-secondary);
+  }
+
+  .text-zinc-400:not([class*="bg-stone-900"]):not([class*="bg-black"]):not([class*="bg-[#1"]):not([class*="bg-[#0"]):not([class*="dark:"]) {
+    color: var(--text-secondary);
+  }
+}
+
 /* Custom smooth scrollbar */
 ::-webkit-scrollbar {
   width: 5px;

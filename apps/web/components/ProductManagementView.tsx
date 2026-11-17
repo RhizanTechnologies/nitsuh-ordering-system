@@ -451,19 +451,19 @@ export function ProductManagementView() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+        <div className="flex items-center gap-2 border-b border-stone-200 dark:border-white/10 pb-3">
           <button
             onClick={() => setActiveTab('products')}
             className={`px-4 py-2 rounded-2xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'products'
-                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
-                : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/10'
+                ? 'bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20'
+                : 'bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-white/10'
             }`}
           >
             <Utensils className="w-3.5 h-3.5" />
             <span>Products</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-              activeTab === 'products' ? 'bg-black/20 text-black font-extrabold' : 'bg-white/10 text-zinc-400'
+              activeTab === 'products' ? 'bg-black/20 text-stone-950 font-extrabold' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
             }`}>
               {items.length}
             </span>
@@ -473,14 +473,14 @@ export function ProductManagementView() {
             onClick={() => setActiveTab('addons')}
             className={`px-4 py-2 rounded-2xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'addons'
-                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
-                : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/10'
+                ? 'bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20'
+                : 'bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-white/10'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
             <span>Add-ons</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-              activeTab === 'addons' ? 'bg-black/20 text-black font-extrabold' : 'bg-white/10 text-zinc-400'
+              activeTab === 'addons' ? 'bg-black/20 text-stone-950 font-extrabold' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
             }`}>
               {addons.length}
             </span>
@@ -533,8 +533,8 @@ export function ProductManagementView() {
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border cursor-pointer ${
                   selectedCatId === ''
-                    ? 'bg-amber-500 text-black border-amber-400 font-black shadow-md'
-                    : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
+                    ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-md'
+                    : 'bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                 }`}
               >
                 All ({items.length})
@@ -548,13 +548,13 @@ export function ProductManagementView() {
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border flex items-center gap-1.5 cursor-pointer ${
                     selectedCatId === c.id
-                      ? 'bg-amber-500 text-black border-amber-400 font-black shadow-md'
-                      : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
+                      ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-md'
+                      : 'bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
                   <span>{c.name}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    selectedCatId === c.id ? 'bg-black text-amber-300 font-bold' : 'bg-white/10 text-zinc-400'
+                    selectedCatId === c.id ? 'bg-black/20 text-stone-950 font-bold' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
                   }`}>
                     {c._count?.menuItems || 0}
                   </span>
@@ -591,14 +591,14 @@ export function ProductManagementView() {
       {activeTab === 'products' && (
         <div className="space-y-4">
           {/* View Mode Switcher & Stats Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02] border border-white/5 p-3 rounded-2xl">
-            <div className="flex items-center gap-1 bg-white/[0.04] border border-white/10 p-1 rounded-xl w-fit">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-stone-100/60 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 p-3 rounded-2xl">
+            <div className="flex items-center gap-1 bg-stone-200/80 dark:bg-white/[0.04] border border-stone-300/80 dark:border-white/10 p-1 rounded-xl w-fit">
               <button
                 onClick={() => setViewMode('single')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                   viewMode === 'single'
-                    ? 'bg-amber-500 text-black font-black shadow-md'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'bg-amber-500 text-stone-950 font-black shadow-md'
+                    : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                 }`}
                 title="View one product per page with full recipe and margin details"
               >
@@ -609,8 +609,8 @@ export function ProductManagementView() {
                 onClick={() => setViewMode('list')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                   viewMode === 'list'
-                    ? 'bg-amber-500 text-black font-black shadow-md'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'bg-amber-500 text-stone-950 font-black shadow-md'
+                    : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                 }`}
                 title="View products in clean 1-per-row list"
               >
@@ -621,8 +621,8 @@ export function ProductManagementView() {
                 onClick={() => setViewMode('grid')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                   viewMode === 'grid'
-                    ? 'bg-amber-500 text-black font-black shadow-md'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'bg-amber-500 text-stone-950 font-black shadow-md'
+                    : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                 }`}
                 title="View products in responsive grid"
               >

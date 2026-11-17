@@ -161,18 +161,18 @@ export function KitchenDisplayView() {
       )}
 
       {/* Mobile Stage Switcher (<md): 1 Tap to View Active Category with ZERO Scrolling */}
-      <div className="md:hidden flex items-center p-1 bg-white/[0.04] border border-white/10 rounded-2xl mx-3 mt-2.5 mb-1 gap-1 flex-shrink-0 relative z-10">
+      <div className="md:hidden flex items-center p-1 bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-2xl mx-3 mt-2.5 mb-1 gap-1 flex-shrink-0 relative z-10">
         <button
           onClick={() => setMobileTab('NEW')}
           className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
             mobileTab === 'NEW'
-              ? 'bg-amber-500 text-black shadow-md'
-              : 'text-zinc-400 hover:text-white'
+              ? 'bg-amber-500 text-stone-950 shadow-md font-black'
+              : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
           }`}
         >
           <span>🟡 New</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-            mobileTab === 'NEW' ? 'bg-black/30 text-black' : 'bg-white/10 text-zinc-400'
+            mobileTab === 'NEW' ? 'bg-black/20 text-stone-950 font-black' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
           }`}>
             {newOrders.length}
           </span>
@@ -182,13 +182,13 @@ export function KitchenDisplayView() {
           onClick={() => setMobileTab('PREPARING')}
           className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
             mobileTab === 'PREPARING'
-              ? 'bg-orange-500 text-black shadow-md'
-              : 'text-zinc-400 hover:text-white'
+              ? 'bg-orange-500 text-white shadow-md font-black'
+              : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
           }`}
         >
           <span>🔥 Cooking</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-            mobileTab === 'PREPARING' ? 'bg-black/30 text-black' : 'bg-white/10 text-zinc-400'
+            mobileTab === 'PREPARING' ? 'bg-black/20 text-white font-black' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
           }`}>
             {preparingOrders.length}
           </span>
@@ -198,13 +198,13 @@ export function KitchenDisplayView() {
           onClick={() => setMobileTab('READY')}
           className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
             mobileTab === 'READY'
-              ? 'bg-emerald-500 text-black shadow-md'
-              : 'text-zinc-400 hover:text-white'
+              ? 'bg-emerald-500 text-white shadow-md font-black'
+              : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
           }`}
         >
           <span>✅ Ready</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-            mobileTab === 'READY' ? 'bg-black/30 text-black' : 'bg-white/10 text-zinc-400'
+            mobileTab === 'READY' ? 'bg-black/20 text-white font-black' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
           }`}>
             {readyOrders.length}
           </span>

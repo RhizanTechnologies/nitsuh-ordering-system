@@ -454,8 +454,8 @@ export function InventoryView() {
               onClick={() => setActiveTab('wastage')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'wastage'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-lg shadow-amber-500/20'
+                  : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5'
               }`}
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -467,8 +467,8 @@ export function InventoryView() {
             onClick={() => setActiveTab('ledger')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'ledger'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-lg shadow-amber-500/20'
+                : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5'
             }`}
           >
             <History className="w-3.5 h-3.5" />
