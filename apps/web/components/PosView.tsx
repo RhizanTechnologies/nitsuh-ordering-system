@@ -1095,15 +1095,6 @@ export function PosView() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 drop-shadow-sm"
                   />
 
-                  {/* Favorite Heart Toggle (Top-Right) */}
-                  <button
-                    onClick={(e) => toggleFavorite(item.id, e)}
-                    className="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition cursor-pointer"
-                    title={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                  >
-                    <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : 'text-white/80 group-hover:text-white'}`} />
-                  </button>
-
                   {/* Selection Overlay */}
                   {isSelected && (
                     <div className="absolute bottom-2 right-2 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full shadow-lg border border-amber-300/40 flex items-center gap-1">

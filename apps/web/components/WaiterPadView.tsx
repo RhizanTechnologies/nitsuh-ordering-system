@@ -32,6 +32,7 @@ import {
   Leaf,
   Heart,
   ChevronLeft,
+  ChevronDown,
   SlidersHorizontal,
   Star,
   Sparkles,
@@ -502,45 +503,34 @@ export function WaiterPadView() {
         {/* TAB 1: MENU & ORDER CREATION */}
         {activeTab === 'menu' && (
           <>
-            {/* Search Pill with Equalizer Filter Icon matching reference */}
-            <div className="mb-4 flex items-center gap-2.5">
-              <div className="flex-1 relative flex items-center">
-                <Search className="w-4 h-4 text-stone-400 dark:text-zinc-400 absolute left-4 pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search your favorite food..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-200/90 dark:border-white/10 hover:border-amber-500/40 focus:border-amber-500 rounded-2xl pl-11 pr-10 py-3 text-xs sm:text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none transition shadow-xs backdrop-blur-xl"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch('')}
-                    className="absolute right-3.5 p-1 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {/* Equalizer / Filter button opening Table Plan */}
-              <button
-                onClick={() => setTableModalOpen(true)}
-                className="p-3 bg-white dark:bg-white/[0.05] hover:bg-stone-50 dark:hover:bg-white/[0.09] active:scale-95 border border-stone-200/90 dark:border-white/10 rounded-2xl text-stone-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition shadow-xs cursor-pointer"
-                title="Table Floor Plan"
-              >
-                <SlidersHorizontal className="w-5 h-5" />
-              </button>
+            {/* Search Pill - Clean Full Width */}
+            <div className="mb-4 relative flex items-center">
+              <Search className="w-4 h-4 text-stone-400 dark:text-zinc-400 absolute left-4 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search your favorite food..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-white dark:bg-white/[0.05] border border-stone-200/90 dark:border-white/10 hover:border-amber-500/40 focus:border-amber-500 rounded-2xl pl-11 pr-10 py-3 text-xs sm:text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none transition shadow-xs backdrop-blur-xl"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-3.5 p-1 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
-            {/* Dine-In / Takeaway & Table Strip */}
-            <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
+            {/* Dine-In / Takeaway & Single Table Dropdown */}
+            <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-1.5 p-1 bg-stone-100 dark:bg-white/[0.04] border border-stone-200/80 dark:border-white/10 rounded-2xl flex-1 sm:flex-none">
                 <button
                   onClick={() => setOrderType('DINE_IN')}
-                  className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
                     orderType === 'DINE_IN'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-md font-black'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs font-black'
                       : 'text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
@@ -549,9 +539,9 @@ export function WaiterPadView() {
                 </button>
                 <button
                   onClick={() => setOrderType('TAKEAWAY')}
-                  className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
                     orderType === 'TAKEAWAY'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-md font-black'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs font-black'
                       : 'text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
@@ -561,35 +551,32 @@ export function WaiterPadView() {
               </div>
 
               {orderType === 'DINE_IN' ? (
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto">
-                  <span className="text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mr-1 flex-shrink-0">Table:</span>
-                  {tables.slice(0, 8).map((t) => {
-                    const isOccupied = t.status === 'OCCUPIED';
-                    const isSelected = waiterTable === t.tableNumber;
-                    return (
-                      <button
-                        key={t.id}
-                        onClick={() => setWaiterTable(t.tableNumber)}
-                        className={`px-2.5 py-1 rounded-xl text-xs font-bold transition border cursor-pointer flex-shrink-0 ${
-                          isSelected
-                            ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-md'
-                            : isOccupied
-                            ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30 hover:bg-amber-500/25'
-                            : 'bg-white dark:bg-white/[0.04] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:bg-stone-50 dark:hover:bg-white/[0.08]'
-                        }`}
-                        title={isOccupied ? `${t.tableNumber} is occupied (tap to add items to active bill)` : t.tableNumber}
-                      >
-                        <span>{t.tableNumber}</span>
-                        {isOccupied && <span className="ml-1 text-[9px] opacity-75">•</span>}
-                      </button>
-                    );
-                  })}
-                  <button
-                    onClick={() => setTableModalOpen(true)}
-                    className="px-2 py-1 bg-white dark:bg-white/[0.04] hover:bg-stone-50 dark:hover:bg-white/[0.08] text-amber-700 dark:text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex-shrink-0"
-                  >
-                    All...
-                  </button>
+                <div className="flex items-center gap-2 w-full sm:w-auto flex-1 sm:flex-none justify-end">
+                  <span className="text-xs font-bold text-stone-600 dark:text-zinc-400 whitespace-nowrap">
+                    Table:
+                  </span>
+                  <div className="relative w-full sm:w-60">
+                    <select
+                      value={waiterTable}
+                      onChange={(e) => setWaiterTable(e.target.value)}
+                      className="w-full appearance-none bg-white dark:bg-[#1A1614] border border-stone-200/90 dark:border-white/10 hover:border-amber-500/50 rounded-2xl px-3.5 py-2 pr-9 text-xs font-bold text-stone-900 dark:text-white shadow-xs focus:outline-none focus:ring-2 focus:ring-amber-500/30 cursor-pointer transition"
+                    >
+                      {tables.map((t) => {
+                        const isOccupied = t.status === 'OCCUPIED';
+                        const hasOrder = t.orders && t.orders.length > 0;
+                        return (
+                          <option
+                            key={t.id}
+                            value={t.tableNumber}
+                            className="bg-white dark:bg-[#1A1614] text-stone-900 dark:text-white font-bold py-1"
+                          >
+                            Table {t.tableNumber} ({t.capacity} seats){isOccupied || hasOrder ? ' • Seated' : ' • Open'}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-stone-400 dark:text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </div>
               ) : (
                 <input
@@ -597,7 +584,7 @@ export function WaiterPadView() {
                   placeholder="Customer name for takeaway..."
                   value={takeawayCustomer}
                   onChange={(e) => setTakeawayCustomer(e.target.value)}
-                  className="bg-white dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-auto"
+                  className="bg-white dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-64"
                 />
               )}
             </div>
@@ -721,22 +708,6 @@ export function WaiterPadView() {
                         prepSection={item.prepSection}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 drop-shadow-sm"
                       />
-
-                      {/* Favorite Heart (Top-Right) */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(item.id);
-                        }}
-                        className="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 transition cursor-pointer"
-                        title={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                      >
-                        <Heart
-                          className={`w-3.5 h-3.5 ${
-                            isFav ? 'text-[#C11221] fill-[#C11221]' : 'text-white/80 group-hover:text-white'
-                          }`}
-                        />
-                      </button>
 
                       {/* Selected Overlay Badge if in cart */}
                       {isSelected && (
@@ -1115,32 +1086,23 @@ export function WaiterPadView() {
         </div>
       </div>
 
-      {/* MOBILE FLOATING DOCK (matching reference image) */}
-      <div className="md:hidden fixed bottom-3 left-4 right-4 z-40 bg-white/95 dark:bg-[#161311]/90 backdrop-blur-2xl border border-stone-200/90 dark:border-white/15 rounded-3xl p-2 px-5 shadow-2xl flex items-center justify-between transition-colors">
-        {/* Home */}
+      {/* MOBILE FLOATING DOCK */}
+      <div className="md:hidden fixed bottom-3 left-4 right-4 z-40 bg-white/95 dark:bg-[#161311]/90 backdrop-blur-2xl border border-stone-200/90 dark:border-white/15 rounded-3xl p-2 px-6 shadow-2xl flex items-center justify-around transition-colors">
+        {/* Menu */}
         <button
           onClick={() => setActiveTab('menu')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition cursor-pointer ${
+          className={`flex flex-col items-center gap-1 py-1 px-4 rounded-2xl transition cursor-pointer ${
             activeTab === 'menu' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-stone-500 dark:text-zinc-500 hover:text-stone-800 dark:hover:text-zinc-300'
           }`}
         >
           <Utensils className="w-5 h-5" />
-          <span className="text-[10px] font-bold">Home</span>
-        </button>
-
-        {/* Tables */}
-        <button
-          onClick={() => setTableModalOpen(true)}
-          className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-stone-500 dark:text-zinc-500 hover:text-stone-800 dark:hover:text-zinc-300 transition cursor-pointer"
-        >
-          <LayoutGrid className="w-5 h-5" />
-          <span className="text-[10px] font-bold">Tables</span>
+          <span className="text-[10px] font-bold">Menu</span>
         </button>
 
         {/* Orders / Cart Button */}
         <button
           onClick={() => setShowMobileDrawer(true)}
-          className="relative flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-stone-500 dark:text-zinc-500 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
+          className="relative flex flex-col items-center gap-1 py-1 px-4 rounded-2xl text-stone-500 dark:text-zinc-500 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
         >
           <div className="relative">
             <ShoppingBag className="w-5 h-5 text-stone-600 dark:text-zinc-300" />
@@ -1150,25 +1112,25 @@ export function WaiterPadView() {
               </span>
             )}
           </div>
-          <span className="text-[10px] font-bold">Orders</span>
+          <span className="text-[10px] font-bold">Review Slip</span>
         </button>
 
         {/* Live Status */}
         <button
           onClick={() => setActiveTab('tables')}
-          className={`relative flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition cursor-pointer ${
+          className={`relative flex flex-col items-center gap-1 py-1 px-4 rounded-2xl transition cursor-pointer ${
             activeTab === 'tables' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-stone-500 dark:text-zinc-500 hover:text-stone-800 dark:hover:text-zinc-300'
           }`}
         >
           <Clock className="w-5 h-5" />
           {inFlightOrders.length > 0 && (
             <span
-              className={`absolute top-0 right-2 w-2 h-2 rounded-full ${
+              className={`absolute top-0 right-3 w-2 h-2 rounded-full ${
                 delayedOrders.length > 0 ? 'bg-rose-500 animate-ping' : 'bg-amber-400'
               }`}
             />
           )}
-          <span className="text-[10px] font-bold">Status</span>
+          <span className="text-[10px] font-bold">Kitchen Status</span>
         </button>
       </div>
 
@@ -1282,25 +1244,13 @@ export function WaiterPadView() {
             <div className="relative h-60 sm:h-64 w-full overflow-hidden bg-gradient-to-b from-amber-950/20 to-black/60 flex items-center justify-center flex-shrink-0">
               <div className="absolute inset-0 bg-radial from-amber-500/15 via-transparent to-transparent blur-xl" />
 
-              {/* Top Navigation Bar: Back & Favorite Buttons */}
+              {/* Top Navigation Bar: Back Button */}
               <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
                 <button
                   onClick={() => setSelectedDetailItem(null)}
                   className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-white flex items-center justify-center hover:bg-black/60 active:scale-95 transition-all shadow-lg cursor-pointer"
                 >
                   <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => toggleFavorite(selectedDetailItem.id)}
-                  className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-white flex items-center justify-center hover:bg-black/60 active:scale-95 transition-all shadow-lg cursor-pointer"
-                >
-                  <Heart
-                    className={`w-5 h-5 ${
-                      favorites.includes(selectedDetailItem.id)
-                        ? 'text-[#C11221] fill-[#C11221]'
-                        : 'text-zinc-400'
-                    }`}
-                  />
                 </button>
               </div>
 
