@@ -41,6 +41,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { TablePlanModal } from '@/components/TablePlanModal';
+import { Button, Badge, Input } from '@/components/ui';
 
 export function WaiterPadView() {
   const {
@@ -661,16 +662,18 @@ export function WaiterPadView() {
                 <p className="text-xs text-zinc-400 mt-1">
                   Try different search keywords or clear current filters.
                 </p>
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => {
                     setSearch('');
                     setSelectedCategory('');
                     setGroupFilter('ALL');
                   }}
-                  className="mt-3 px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black text-xs font-extrabold rounded-xl shadow-md cursor-pointer"
+                  className="mt-3"
                 >
                   Reset Filters
-                </button>
+                </Button>
               </div>
             )}
 
@@ -860,17 +863,17 @@ export function WaiterPadView() {
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-black text-white">#{order.orderNumber}</span>
-                              <span
-                                className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase border ${
+                              <Badge
+                                variant={
                                   isReady
-                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                    ? 'success'
                                     : isDelayed
-                                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
-                                    : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                                }`}
+                                    ? 'destructive'
+                                    : 'amber'
+                                }
                               >
                                 {order.status}
-                              </span>
+                              </Badge>
                             </div>
                             <div className="text-xs font-bold text-zinc-300 mt-0.5">
                               {order.orderType === 'TAKEAWAY'
@@ -917,13 +920,14 @@ export function WaiterPadView() {
                           </span>
 
                           {isReady && (
-                            <button
+                            <Button
+                              variant="success"
+                              size="sm"
                               onClick={() => handleMarkServed(order.id)}
-                              className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-extrabold text-xs rounded-xl shadow-lg flex items-center gap-1 cursor-pointer"
                             >
                               <Check className="w-3.5 h-3.5 stroke-[3]" />
                               <span>Mark Served</span>
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </div>
@@ -1065,14 +1069,12 @@ export function WaiterPadView() {
             </div>
           </div>
 
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             disabled={waiterCart.length === 0 || sending}
             onClick={handleSendToCashier}
-            className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              waiterCart.length === 0 || sending
-                ? 'bg-black/5 dark:bg-white/10 text-zinc-500 dark:text-zinc-400 border border-black/10 dark:border-white/10 cursor-not-allowed shadow-none'
-                : 'bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 !text-black active:scale-98 shadow-amber-500/25'
-            }`}
+            className="w-full"
           >
             <Send className="w-4 h-4" />
             <span>
@@ -1082,7 +1084,7 @@ export function WaiterPadView() {
                 ? `Append to Table ${waiterTable || ''} (Active Bill)`
                 : 'Send Note to Cashier (Paperless)'}
             </span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1439,15 +1441,17 @@ export function WaiterPadView() {
               </div>
 
               {/* Glowing Amber/Orange CTA Button */}
-              <button
+              <Button
+                variant="primary"
+                size="lg"
                 onClick={handleAddCustomizedToCart}
-                className="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 text-black font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 flex items-center justify-between active:scale-98 transition-all cursor-pointer"
+                className="flex-1 justify-between shadow-xl shadow-amber-500/25"
               >
                 <span>Add to Order</span>
                 <span className="font-extrabold">
                   {(getCustomUnitPrice(selectedDetailItem) * customQty).toFixed(2)} ETB
                 </span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -8,6 +8,7 @@ import { TablePlanModal } from '@/components/TablePlanModal';
 import { PaymentModal } from '@/components/PaymentModal';
 import { ReceiptModal } from '@/components/ReceiptModal';
 import { MenuImage } from '@/components/MenuImage';
+import { Button, Badge, Card, Input } from '@/components/ui';
 import {
   Search,
   Plus,
@@ -797,40 +798,35 @@ export function PosView() {
         </div>
 
         <div className="flex gap-2 pt-1">
-          <button
+          <Button
+            variant="destructive"
+            size="lg"
             disabled={cart.length === 0 || loading}
             onClick={() => {
               handlePlaceOrder();
               if (isMobile) setMobileCartOpen(false);
             }}
-            className={`flex-1 py-3 px-3 rounded-2xl font-black text-xs shadow-md flex items-center justify-center gap-1.5 transition cursor-pointer ${
-              cart.length === 0 || loading
-                ? "bg-stone-100 dark:bg-white/10 text-stone-400 dark:text-zinc-500 border border-stone-200 dark:border-white/10 cursor-not-allowed shadow-none"
-                : "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white active:scale-95 shadow-red-600/20"
-            }`}
+            className="flex-1"
           >
             <span>
               {loading ? "Firing..." : appendOrderTarget ? "Append to Bill" : "Fire to Kitchen"}
             </span>
             <ArrowRight className="w-4 h-4 text-white" />
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             disabled={cart.length === 0 && !lastCompletedOrder}
             onClick={() => {
               setPaymentModalOpen(true);
               if (isMobile) setMobileCartOpen(false);
             }}
-            className={`py-3 px-4 rounded-2xl font-black text-xs shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer ${
-              cart.length === 0 && !lastCompletedOrder
-                ? "bg-stone-100 dark:bg-white/10 text-stone-400 dark:text-zinc-500 border border-stone-200 dark:border-white/10 cursor-not-allowed shadow-none"
-                : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 shadow-amber-500/20"
-            }`}
             title="Pay & Settle Tender"
           >
             <CreditCard className="w-4 h-4" />
             <span>Settle Bill</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -899,23 +895,25 @@ export function PosView() {
 
         {/* Right: Quick Tools (Refresh, Tables, Settle Tender) */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="icon-sm"
             onClick={loadData}
             disabled={isRefreshing}
-            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] border border-stone-200/80 dark:border-white/10 rounded-xl text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white transition cursor-pointer"
             title="Refresh Orders & Slips"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setTableModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] border border-stone-200/80 dark:border-white/10 rounded-xl text-xs font-bold text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white transition cursor-pointer"
             title="View Dining Room Floor Plan"
           >
             <LayoutGrid className="w-3.5 h-3.5 text-amber-500" />
             <span className="hidden sm:inline">Floor Plan</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -926,13 +924,14 @@ export function PosView() {
             <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
             <div className="text-xs font-bold">Order {successOrder} Fired Successfully!</div>
           </div>
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => setReceiptModalOpen(true)}
-            className="px-2.5 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-black rounded-xl text-xs font-black hover:brightness-110 transition shadow flex items-center gap-1 cursor-pointer"
           >
             <Receipt className="w-3 h-3" />
             <span>Print</span>
-          </button>
+          </Button>
         </div>
       )}
 
@@ -1181,13 +1180,9 @@ export function PosView() {
                       <div>
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded-lg text-xs font-black uppercase ${
-                              isSlipTakeaway
-                                ? "bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30"
-                                : "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
-                            }`}>
+                            <Badge variant={isSlipTakeaway ? 'purple' : 'success'}>
                               {isSlipTakeaway ? "🛍️ Takeaway" : `🍽️ Table ${slip.table?.tableNumber || "Assigned"}`}
-                            </span>
+                            </Badge>
                             <span className="text-xs font-mono text-stone-500 dark:text-zinc-400 font-bold">
                               {slip.orderNumber}
                             </span>
@@ -1230,30 +1225,35 @@ export function PosView() {
                       </div>
 
                       <div className="flex items-center gap-2 pt-2 border-t border-stone-100 dark:border-white/10">
-                        <button
+                        <Button
+                          variant="primary"
+                          size="sm"
                           onClick={() => confirmWaiterSlipDirectly(slip.id)}
-                          className="flex-1 py-2 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 rounded-xl text-xs font-black transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="flex-1"
                         >
                           <Flame className="w-3.5 h-3.5" />
                           <span>Fire to Kitchen</span>
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           onClick={() => handleReviewWaiterSlip(slip)}
-                          className="py-2 px-3 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-stone-700 dark:text-white rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer border border-stone-200 dark:border-white/10"
                           title="Edit items in slip before firing"
                         >
                           <FileEdit className="w-3.5 h-3.5 text-stone-500 dark:text-zinc-400" />
                           <span>Edit</span>
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => handleRejectWaiterSlip(slip.id)}
-                          className="p-2 text-stone-400 hover:text-[#C11221] hover:bg-red-500/10 rounded-xl transition cursor-pointer"
+                          className="text-stone-400 hover:text-[#C11221]"
                           title="Reject order note"
                         >
                           <X className="w-4 h-4" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   );
@@ -1322,42 +1322,38 @@ export function PosView() {
 
                             {/* Destination */}
                             {isOrderTakeaway ? (
-                              <span className="bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Badge variant="purple">
                                 <ShoppingBag className="w-3 h-3" />
                                 TAKEAWAY ({order.customerName || 'Pickup'})
-                              </span>
+                              </Badge>
                             ) : (
-                              <span className="bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Badge variant="info">
                                 <Utensils className="w-3 h-3" />
                                 Table {order.table?.tableNumber || 'Assigned'}
-                              </span>
+                              </Badge>
                             )}
                           </div>
 
                           <div className="flex items-center gap-1 flex-wrap justify-end">
                             {/* Kitchen Status Badge */}
-                            <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            <Badge
+                              variant={
                                 order.status === 'READY'
-                                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 animate-pulse'
+                                  ? 'success'
                                   : order.status === 'IN_PREPARATION'
-                                  ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
+                                  ? 'info'
                                   : order.status === 'CONFIRMED'
-                                  ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30'
-                                  : 'bg-stone-200 dark:bg-zinc-800 text-stone-600 dark:text-zinc-400'
-                              }`}
+                                  ? 'amber'
+                                  : 'default'
+                              }
                             >
                               {order.status}
-                            </span>
+                            </Badge>
 
                             {/* Payment Badge */}
-                            <span
-                              className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${
-                                isPaid ? 'bg-emerald-600' : 'bg-[#C11221] shadow-xs'
-                              }`}
-                            >
+                            <Badge variant={isPaid ? 'success' : 'destructive'}>
                               {isPaid ? 'PAID' : 'UNPAID'}
-                            </span>
+                            </Badge>
                           </div>
                         </div>
 
@@ -1413,40 +1409,43 @@ export function PosView() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {/* Add Items */}
                           {!isPaid && (
-                            <button
+                            <Button
+                              variant="secondary"
+                              size="sm"
                               onClick={() => handleStartAppendItems(order)}
-                              className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-stone-700 dark:text-white border border-stone-200 dark:border-white/15 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                               title="Add more items to this bill"
                             >
                               <PlusCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                               <span>+ Items</span>
-                            </button>
+                            </Button>
                           )}
 
                           {/* Print Receipt / Bill */}
-                          <button
+                          <Button
+                            variant="secondary"
+                            size="icon-sm"
                             onClick={() => {
                               setLastCompletedOrder(order);
                               setReceiptModalOpen(true);
                             }}
-                            className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-stone-700 dark:text-white border border-stone-200 dark:border-white/15 rounded-xl text-xs transition cursor-pointer"
                             title="Print Bill / Receipt"
                           >
                             <Printer className="w-3.5 h-3.5 text-stone-600 dark:text-zinc-300" />
-                          </button>
+                          </Button>
 
                           {/* Settle Bill Button */}
                           {!isPaid ? (
-                            <button
+                            <Button
+                              variant="primary"
+                              size="sm"
                               onClick={() => {
                                 setOrderToSettle(order);
                                 setPaymentModalOpen(true);
                               }}
-                              className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 rounded-xl text-xs font-black shadow-md shadow-amber-500/25 transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
                             >
                               <CreditCard className="w-3.5 h-3.5" />
                               <span>Settle Bill</span>
-                            </button>
+                            </Button>
                           ) : (
                             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 px-2 py-1">
                               <CheckCircle2 className="w-3.5 h-3.5" />

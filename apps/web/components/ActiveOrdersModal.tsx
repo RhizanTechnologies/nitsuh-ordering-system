@@ -4,17 +4,16 @@ import React, { useState } from 'react';
 import {
   X,
   Search,
-  Receipt,
   CreditCard,
   PlusCircle,
   Clock,
   UserCheck,
   Smartphone,
-  CheckCircle,
-  Flame,
   ShoppingBag,
-  Utensils
+  Utensils,
+  Printer
 } from 'lucide-react';
+import { Button, Badge, Input } from '@/components/ui';
 
 interface ActiveOrdersModalProps {
   isOpen: boolean;
@@ -33,7 +32,6 @@ export function ActiveOrdersModal({
   onSettleOrder,
   onPrintReceipt,
   onAppendItems,
-  onRefreshOrders,
 }: ActiveOrdersModalProps) {
   const [filter, setFilter] = useState<'ALL' | 'DINE_IN' | 'TAKEAWAY' | 'UNPAID' | 'READY'>('ALL');
   const [search, setSearch] = useState('');
@@ -75,81 +73,68 @@ export function ActiveOrdersModal({
               Overview of all active dine-in table bills and takeaway orders with cashier & waiter attribution
             </p>
           </div>
-          <button
+          <Button
+            variant="secondary"
+            size="icon-sm"
             onClick={onClose}
-            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl transition text-stone-500 dark:text-zinc-300 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+            title="Close"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Filter Controls & Search */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 flex-shrink-0">
           {/* Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs font-bold">
-            <button
+            <Button
+              variant={filter === 'ALL' ? 'primary' : 'secondary'}
+              size="sm"
               onClick={() => setFilter('ALL')}
-              className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
-                filter === 'ALL'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-              }`}
             >
               All Active ({orders.length})
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={filter === 'DINE_IN' ? 'primary' : 'secondary'}
+              size="sm"
               onClick={() => setFilter('DINE_IN')}
-              className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap flex items-center gap-1 cursor-pointer ${
-                filter === 'DINE_IN'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-              }`}
             >
               <Utensils className="w-3 h-3" />
               Dine-In ({orders.filter((o) => o.orderType === 'DINE_IN').length})
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={filter === 'TAKEAWAY' ? 'primary' : 'secondary'}
+              size="sm"
               onClick={() => setFilter('TAKEAWAY')}
-              className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap flex items-center gap-1 cursor-pointer ${
-                filter === 'TAKEAWAY'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-              }`}
             >
               <ShoppingBag className="w-3 h-3" />
               Takeaway ({orders.filter((o) => o.orderType === 'TAKEAWAY').length})
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={filter === 'UNPAID' ? 'destructive' : 'secondary'}
+              size="sm"
               onClick={() => setFilter('UNPAID')}
-              className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
-                filter === 'UNPAID'
-                  ? 'bg-[#C11221] text-white font-black shadow-xs'
-                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-              }`}
             >
               Unpaid ({orders.filter((o) => o.paymentStatus !== 'PAID').length})
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={filter === 'READY' ? 'success' : 'secondary'}
+              size="sm"
               onClick={() => setFilter('READY')}
-              className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
-                filter === 'READY'
-                  ? 'bg-emerald-600 text-white font-black shadow-xs'
-                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-              }`}
             >
               Ready ({orders.filter((o) => o.status === 'READY').length})
-            </button>
+            </Button>
           </div>
 
           {/* Search Box */}
           <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 text-stone-400 dark:text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
+            <Input
               type="text"
               placeholder="Search table, cashier, guest..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+              className="pl-9"
             />
           </div>
         </div>
@@ -177,42 +162,36 @@ export function ActiveOrdersModal({
 
                       {/* Destination Badge */}
                       {isTakeaway ? (
-                        <span className="bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <Badge variant="purple">
                           <ShoppingBag className="w-3 h-3" />
                           TAKEAWAY ({order.customerName || 'Pickup'})
-                        </span>
+                        </Badge>
                       ) : (
-                        <span className="bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <Badge variant="info">
                           <Utensils className="w-3 h-3" />
                           Table {order.table?.tableNumber || 'Counter'}
-                        </span>
+                        </Badge>
                       )}
 
                       {/* Kitchen Preparation Status */}
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      <Badge
+                        variant={
                           order.status === 'READY'
-                            ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 animate-pulse'
+                            ? 'success'
                             : order.status === 'IN_PREPARATION'
-                            ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
+                            ? 'info'
                             : order.status === 'CONFIRMED'
-                            ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30'
-                            : 'bg-stone-200 dark:bg-zinc-800 text-stone-600 dark:text-zinc-400'
-                        }`}
+                            ? 'amber'
+                            : 'default'
+                        }
                       >
                         {order.status}
-                      </span>
+                      </Badge>
 
                       {/* Payment Status */}
-                      <span
-                        className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${
-                          isPaid
-                            ? 'bg-emerald-600'
-                            : 'bg-[#C11221] shadow-xs'
-                        }`}
-                      >
+                      <Badge variant={isPaid ? 'success' : 'destructive'}>
                         {isPaid ? 'PAID' : 'UNPAID'}
-                      </span>
+                      </Badge>
                     </div>
 
                     {/* Attribution Line */}
@@ -257,42 +236,45 @@ export function ActiveOrdersModal({
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {/* Add Items Button */}
                       {!isPaid && (
-                        <button
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           onClick={() => {
                             onAppendItems(order);
                             onClose();
                           }}
-                          className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-stone-700 dark:text-white border border-stone-200 dark:border-white/15 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                           title="Add more items to this order"
                         >
                           <PlusCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                          <span>Add Items</span>
-                        </button>
+                          <span>+ Items</span>
+                        </Button>
                       )}
 
+                      {/* Print Receipt / Bill */}
+                      <Button
+                        variant="secondary"
+                        size="icon-sm"
+                        onClick={() => {
+                          onPrintReceipt(order);
+                        }}
+                        title="Print receipt or guest check"
+                      >
+                        <Printer className="w-3.5 h-3.5 text-stone-600 dark:text-zinc-300" />
+                      </Button>
+
                       {/* Settle Bill Button */}
-                      {!isPaid ? (
-                        <button
+                      {!isPaid && (
+                        <Button
+                          variant="primary"
+                          size="sm"
                           onClick={() => {
                             onSettleOrder(order);
                             onClose();
                           }}
-                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 rounded-xl text-xs font-black shadow-md shadow-amber-500/25 transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
                         >
                           <CreditCard className="w-3.5 h-3.5" />
                           <span>Settle Bill</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            onPrintReceipt(order);
-                            onClose();
-                          }}
-                          className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-stone-700 dark:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-stone-200 dark:border-white/10"
-                        >
-                          <Receipt className="w-3.5 h-3.5" />
-                          <span>Receipt</span>
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>

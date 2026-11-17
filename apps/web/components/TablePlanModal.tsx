@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   Check
 } from 'lucide-react';
+import { Button, Badge, Input } from '@/components/ui';
 
 interface TablePlanModalProps {
   isOpen: boolean;
@@ -120,26 +121,26 @@ export function TablePlanModal({
           method: 'PATCH',
           body: JSON.stringify({
             tableNumber: tableNumber.trim(),
-            capacity: parseInt(capacity) || 4,
+            capacity: parseInt(capacity, 10) || 4,
             status,
           }),
         });
-        setSuccessMsg(`Table "${tableNumber}" updated successfully!`);
+        setSuccessMsg(`Table ${tableNumber} updated successfully.`);
       } else {
         await fetchApi('/menu/tables', {
           method: 'POST',
           body: JSON.stringify({
             tableNumber: tableNumber.trim(),
-            capacity: parseInt(capacity) || 4,
+            capacity: parseInt(capacity, 10) || 4,
             status,
           }),
         });
-        setSuccessMsg(`Table "${tableNumber}" created successfully!`);
+        setSuccessMsg(`Table ${tableNumber} created successfully.`);
       }
 
       handleCancelForm();
       await refreshTables();
-      setTimeout(() => setSuccessMsg(null), 3500);
+      setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err: any) {
       setError(err.message || 'Failed to save table.');
     } finally {
@@ -148,19 +149,22 @@ export function TablePlanModal({
   };
 
   const handleDeleteTable = async (t: any) => {
-    if (!confirm(`Are you sure you want to delete Table "${t.tableNumber}"?`)) return;
-    setLoading(true);
-    setError(null);
+    if (t.orders && t.orders.length > 0) {
+      alert(`Cannot delete Table ${t.tableNumber} while it has an active dining bill.`);
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete Table "${t.tableNumber}"?`)) {
+      return;
+    }
 
     try {
       await fetchApi(`/menu/tables/${t.id}`, { method: 'DELETE' });
-      setSuccessMsg(`Table "${t.tableNumber}" deleted.`);
+      setSuccessMsg(`Table ${t.tableNumber} deleted.`);
       await refreshTables();
-      setTimeout(() => setSuccessMsg(null), 3500);
+      setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err: any) {
-      setError(err.message || 'Failed to delete table. Check if active orders exist.');
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Failed to delete table.');
     }
   };
 
@@ -188,52 +192,48 @@ export function TablePlanModal({
                 : 'Select an available table for this dining guest'}
             </p>
           </div>
-          <button
+          <Button
+            variant="secondary"
+            size="icon-sm"
             onClick={onClose}
-            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl transition text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Tab Toggle for Owner/Manager */}
         {isOwnerOrManager && (
           <div className="flex items-center justify-between mb-4 bg-stone-100 dark:bg-white/[0.04] p-1.5 rounded-2xl border border-stone-200 dark:border-white/10">
             <div className="flex items-center gap-1">
-              <button
+              <Button
+                variant={activeTab === 'floor' ? 'primary' : 'ghost'}
+                size="sm"
                 onClick={() => {
                   setActiveTab('floor');
                   handleCancelForm();
                 }}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                  activeTab === 'floor'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                    : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
               >
                 Floor Plan View
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={activeTab === 'manage' ? 'primary' : 'ghost'}
+                size="sm"
                 onClick={() => setActiveTab('manage')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === 'manage'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                    : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
               >
                 <Settings2 className="w-3.5 h-3.5" />
                 <span>Manage Tables ({tablesList.length})</span>
-              </button>
+              </Button>
             </div>
 
             {activeTab === 'manage' && !showAddForm && (
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={handleStartAdd}
-                className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-extrabold rounded-xl text-xs shadow-xs transition active:scale-95 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Table</span>
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -260,13 +260,14 @@ export function TablePlanModal({
           >
             <div className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
               <span>{editingTableId ? 'Edit Dining Table' : 'Add New Dining Table'}</span>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={handleCancelForm}
-                className="text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -274,13 +275,12 @@ export function TablePlanModal({
                 <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Table Number / Zone
                 </label>
-                <input
+                <Input
                   type="text"
                   placeholder="e.g. T05 - Balcony"
                   value={tableNumber}
                   onChange={(e) => setTableNumber(e.target.value)}
                   required
-                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
                 />
               </div>
 
@@ -288,14 +288,13 @@ export function TablePlanModal({
                 <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Seating Capacity
                 </label>
-                <input
+                <Input
                   type="number"
                   min="1"
                   max="50"
                   value={capacity}
                   onChange={(e) => setCapacity(e.target.value)}
                   required
-                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
                 />
               </div>
 
@@ -315,21 +314,23 @@ export function TablePlanModal({
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={handleCancelForm}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white transition cursor-pointer"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
+                variant="primary"
+                size="sm"
                 disabled={loading}
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 rounded-xl text-xs font-extrabold shadow-xs transition disabled:opacity-50 cursor-pointer"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{loading ? 'Saving...' : editingTableId ? 'Update Table' : 'Create Table'}</span>
-              </button>
+              </Button>
             </div>
           </form>
         )}
@@ -338,17 +339,15 @@ export function TablePlanModal({
         <div className="flex items-center justify-between flex-wrap gap-2 mb-3 text-xs font-semibold">
           <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
             {(['ALL', 'AVAILABLE', 'OCCUPIED', 'RESERVED'] as const).map((s) => (
-              <button
+              <Button
                 key={s}
+                variant={statusFilter === s ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
-                  statusFilter === s
-                    ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
+                className="text-[11px]"
               >
                 {s === 'ALL' ? `All (${tablesList.length})` : s}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -359,7 +358,7 @@ export function TablePlanModal({
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-              <span className="text-stone-600 dark:text-zinc-400">Seated</span>
+              <span className="text-stone-600 dark:text-zinc-400">Occupied</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
@@ -368,8 +367,8 @@ export function TablePlanModal({
           </div>
         </div>
 
-        {/* TABLES GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto pr-1 no-scrollbar">
+        {/* Table Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto no-scrollbar pr-1">
           {filteredTables.map((t) => {
             const hasActiveOrder = t.orders && t.orders.length > 0;
             const isSelected = selectedTable === t.tableNumber;
@@ -384,34 +383,35 @@ export function TablePlanModal({
                     onClose();
                   }
                 }}
-                className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between ${
-                  activeTab === 'floor' ? 'cursor-pointer hover:border-amber-500/50' : ''
-                } ${
-                  isSelected && activeTab === 'floor'
-                    ? 'bg-amber-500/20 border-2 border-amber-500 text-stone-900 dark:text-white shadow-lg shadow-amber-500/20'
+                className={`p-3.5 rounded-2xl border transition relative flex flex-col justify-between ${
+                  isSelected
+                    ? 'border-amber-500 ring-2 ring-amber-500/40 bg-amber-500/10'
                     : hasActiveOrder
-                    ? 'bg-amber-500/10 dark:bg-amber-950/25 border-amber-500/40 text-amber-900 dark:text-amber-200'
+                    ? 'bg-amber-950/10 border-amber-500/30 hover:border-amber-500/60'
                     : isReserved
-                    ? 'bg-purple-500/10 dark:bg-purple-950/25 border-purple-500/40 text-purple-900 dark:text-purple-200'
-                    : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.08] text-stone-900 dark:text-white'
-                }`}
+                    ? 'bg-purple-950/10 border-purple-500/30'
+                    : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 hover:border-stone-400 dark:hover:border-white/30'
+                } ${activeTab === 'floor' ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}`}
               >
-                {/* Top Row: Name and Status Badge */}
+                {/* Header */}
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black truncate">{t.tableNumber}</span>
-                  <span
-                    className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
-                      isSelected && activeTab === 'floor'
-                        ? 'bg-amber-500 text-stone-950'
-                        : hasActiveOrder
-                        ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                        : isReserved
-                        ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30'
-                        : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                    }`}
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-black text-sm text-stone-900 dark:text-white">
+                      {t.tableNumber}
+                    </span>
+                    {isSelected && (
+                      <span className="w-4 h-4 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Status Badge */}
+                  <Badge
+                    variant={hasActiveOrder ? 'amber' : isReserved ? 'purple' : 'success'}
                   >
                     {hasActiveOrder ? 'Seated' : isReserved ? 'Reserved' : 'Open'}
-                  </span>
+                  </Badge>
                 </div>
 
                 {/* Capacity */}
@@ -430,27 +430,30 @@ export function TablePlanModal({
                 {/* Owner / Manager Action Bar in Manage Mode */}
                 {isOwnerOrManager && activeTab === 'manage' && (
                   <div className="flex items-center justify-end gap-1 pt-2 border-t border-stone-200 dark:border-white/10 mt-1">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleStartEdit(t);
                       }}
-                      className="p-1.5 text-stone-500 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-200/50 dark:hover:bg-white/[0.06] rounded-lg transition cursor-pointer"
                       title="Edit Table"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       disabled={hasActiveOrder}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteTable(t);
                       }}
-                      className="p-1.5 text-stone-500 dark:text-zinc-400 hover:text-[#C11221] hover:bg-red-500/10 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="text-stone-500 hover:text-[#C11221]"
                       title={hasActiveOrder ? 'Cannot delete table with active order' : 'Delete Table'}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

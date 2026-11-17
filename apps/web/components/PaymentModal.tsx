@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, CreditCard, Banknote, Smartphone, Check, Sparkles } from 'lucide-react';
 import { playPaymentChime } from '@/lib/audio';
+import { Button, Input } from '@/components/ui';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -54,12 +55,13 @@ export function PaymentModal({
             <h3 className="text-base font-black text-stone-900 dark:text-white">Process Customer Tender</h3>
             <p className="text-xs text-stone-500 dark:text-zinc-400">Order Subtotal: {orderTotal.toFixed(2)} ETB</p>
           </div>
-          <button
+          <Button
+            variant="secondary"
+            size="icon-sm"
             onClick={onClose}
-            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl transition text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Big Total Banner */}
@@ -75,7 +77,7 @@ export function PaymentModal({
           )}
         </div>
 
-        {/* Custom Tip Input (No presets) */}
+        {/* Custom Tip Input */}
         <div>
           <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5 flex items-center justify-between">
             <span className="flex items-center gap-1">
@@ -87,23 +89,24 @@ export function PaymentModal({
             )}
           </label>
           <div className="relative">
-            <input
+            <Input
               type="number"
               min="0"
               step="any"
               value={customTip}
               onChange={(e) => setCustomTip(e.target.value)}
               placeholder="Enter custom tip amount (e.g. 25 ETB)..."
-              className="w-full bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-2xl px-4 py-2.5 text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:bg-stone-100 dark:focus:bg-white/[0.08] transition pr-16"
+              className="pr-16"
             />
             {customTip && (
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setCustomTip('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white px-2 py-1 bg-stone-200/80 dark:bg-white/[0.08] hover:bg-stone-300 dark:hover:bg-white/[0.15] rounded-xl transition cursor-pointer"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 px-2"
               >
                 Clear
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -111,7 +114,7 @@ export function PaymentModal({
         {/* Ethiopian Payment Tender */}
         <div>
           <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5">
-            Ethiopian Payment Tender
+            Payment Tender
           </label>
           <div className="grid grid-cols-3 gap-2">
             <button
@@ -166,36 +169,36 @@ export function PaymentModal({
                 </span>
               )}
             </div>
-            <input
+            <Input
               type="number"
               min="0"
               step="any"
               value={cashReceived}
               onChange={(e) => setCashReceived(e.target.value)}
               placeholder={`e.g. ${Math.ceil(totalPayable)} ETB`}
-              className="w-full bg-white dark:bg-black/40 border border-stone-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-600 focus:outline-none focus:border-amber-500"
             />
           </div>
         )}
 
         {/* Submit Actions */}
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200 dark:border-white/10">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="default"
             onClick={onClose}
-            className="px-4 py-2 rounded-2xl text-xs font-bold text-stone-500 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white cursor-pointer"
           >
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="primary"
+            size="default"
             disabled={processing}
             onClick={handlePay}
-            className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs shadow-md shadow-amber-500/25 transition flex items-center gap-2 flex-1 justify-center disabled:opacity-50 cursor-pointer active:scale-98"
+            className="flex-1"
           >
             <Check className="w-4 h-4 stroke-[3]" />
-            <span>{processing ? 'Processing Payment...' : 'Settle Payment & Print Slip'}</span>
-          </button>
+            <span>{processing ? 'Processing...' : 'Settle Payment & Print Slip'}</span>
+          </Button>
         </div>
       </div>
     </div>

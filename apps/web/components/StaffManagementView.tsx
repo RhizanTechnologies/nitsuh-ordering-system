@@ -31,6 +31,7 @@ import {
   X,
 } from 'lucide-react';
 import { StaffAvatarUploader, AVATAR_PRESETS } from './StaffAvatarUploader';
+import { Button, Badge, Input, Card } from '@/components/ui';
 
 interface StaffMember {
   id: string;
@@ -377,20 +378,22 @@ export function StaffManagementView() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <button
+            <Button
+              variant="primary"
+              size="default"
               onClick={handleOpenRegister}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 transition cursor-pointer active:scale-95"
             >
               <UserPlus className="w-4 h-4" />
               <span>+ Register New Staff</span>
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={loadStaff}
               title="Refresh Staff List"
-              className="p-2.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] text-stone-700 dark:text-zinc-300 border border-stone-200 dark:border-white/10 rounded-2xl transition cursor-pointer"
             >
               <RotateCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -450,17 +453,14 @@ export function StaffManagementView() {
             { id: 'MAIN_STOREKEEPER', label: 'Storekeepers' },
             { id: 'MANAGER', label: 'Managers' },
           ].map((tab) => (
-            <button
+            <Button
               key={tab.id}
+              variant={roleFilter === tab.id ? 'primary' : 'secondary'}
+              size="sm"
               onClick={() => setRoleFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
-                roleFilter === tab.id
-                  ? 'bg-amber-500 text-stone-950 shadow-sm'
-                  : 'bg-white dark:bg-[#161311] text-stone-600 dark:text-zinc-400 border border-stone-200 dark:border-white/10 hover:text-stone-900 dark:hover:text-white'
-              }`}
             >
               {tab.label}
-            </button>
+            </Button>
           ))}
 
           <label className="flex items-center gap-1.5 text-xs font-bold text-stone-600 dark:text-zinc-400 ml-2 cursor-pointer flex-shrink-0 select-none">

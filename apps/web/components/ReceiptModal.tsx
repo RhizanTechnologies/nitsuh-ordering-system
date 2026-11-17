@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Printer, X } from 'lucide-react';
+import { Button } from '@/components/ui';
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -31,19 +32,22 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
             Customer Receipt
           </span>
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="primary"
+              size="icon-sm"
               onClick={handlePrint}
-              className="p-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black rounded-xl hover:brightness-110 transition shadow-xs cursor-pointer"
               title="Print Receipt"
             >
               <Printer className="w-4 h-4 stroke-[2.5]" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon-sm"
               onClick={onClose}
-              className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white rounded-xl transition cursor-pointer"
+              title="Close"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -98,102 +102,102 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
             </div>
             {order.waiter?.name && (
               <div className="flex justify-between">
-                <span>Server:</span>
-                <span className="font-semibold text-gray-700">{order.waiter.name}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Items */}
-          <div className="space-y-1.5 border-b border-dashed border-gray-400 pb-2 text-[11px]">
-            <div className="grid grid-cols-12 font-bold pb-1 text-gray-700">
-              <span className="col-span-6">Item</span>
-              <span className="col-span-2 text-center">Qty</span>
-              <span className="col-span-4 text-right">Amount</span>
-            </div>
-
-            {order.items?.map((item: any) => (
-              <div key={item.id} className="grid grid-cols-12">
-                <div className="col-span-6 truncate">
-                  <div>{item.menuItem?.name || item.name}</div>
-                  {Number(item.tip || 0) > 0 && (
-                    <div className="text-[9px] text-amber-900 font-bold">
-                      +Tip: {Number(item.tip).toFixed(2)} ETB
-                    </div>
-                  )}
-                  {item.specialInstructions && (
-                    <div className="text-[9px] text-gray-600 italic">
-                      *{item.specialInstructions}
-                    </div>
-                  )}
-                </div>
-                <div className="col-span-2 text-center">{item.quantity}</div>
-                <div className="col-span-4 text-right font-semibold">
-                  {((Number(item.unitPrice || item.price) + Number(item.tip || 0)) * item.quantity).toFixed(2)} ETB
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Totals */}
-          <div className="space-y-1 text-[11px]">
-            <div className="flex justify-between">
-              <span>Base Subtotal:</span>
-              <span>{subtotal.toFixed(2)} ETB</span>
-            </div>
-            {tip > 0 && (
-              <div className="flex justify-between font-bold text-black">
-                <span>Staff Tip (Gratuity):</span>
-                <span>+{tip.toFixed(2)} ETB</span>
-              </div>
-            )}
-            {discount > 0 && (
-              <div className="flex justify-between text-[#C11221] font-bold">
-                <span>Discount:</span>
-                <span>-{discount.toFixed(2)} ETB</span>
+                <span>Waiter / Server:</span>
+                <span className="font-bold text-gray-800">{order.waiter.name}</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span>Tax (15% VAT):</span>
-              <span>{tax.toFixed(2)} ETB</span>
-            </div>
-            <div className="flex justify-between text-sm font-black border-t border-b border-black py-1 my-1">
-              <span>TOTAL DUE:</span>
-              <span>{total.toFixed(2)} ETB</span>
-            </div>
-            <div className="flex justify-between text-[10px] text-gray-700">
-              <span>Payment Tender:</span>
-              <span className="font-bold uppercase text-[#C11221]">
-                {order.payments?.[0]?.paymentMethod ? `${order.payments[0].paymentMethod.replace('_', ' ')} (PAID)` : 'PAID'}
+              <span>Payment Method:</span>
+              <span className="font-bold uppercase text-emerald-800">
+                {order.paymentMethod || 'CASH'} (PAID)
               </span>
             </div>
           </div>
 
-          {/* Footer Note */}
-          <div className="text-center pt-2 text-[10px] text-gray-600 space-y-1">
-            <div>WiFi: NitsuhCafe_Guest</div>
-            <div className="italic font-medium">Thank you for visiting Nitsuh Foods! Please come again.</div>
-            <div className="tracking-widest text-xs pt-1 font-bold text-gray-400">
-              * * * * * * * * * * *
+          {/* Items Table */}
+          <div className="space-y-1 border-b border-dashed border-gray-400 pb-2">
+            <div className="flex justify-between font-bold text-[11px] pb-1 border-b border-gray-300">
+              <span className="w-1/2">Item Description</span>
+              <span className="w-1/6 text-center">Qty</span>
+              <span className="w-1/3 text-right">Price</span>
             </div>
+            {order.items?.map((item: any, idx: number) => {
+              const name = item.menuItem?.name || item.name || 'Item';
+              const price = Number(item.unitPrice || item.price || 0);
+              const qty = item.quantity || 1;
+              const lineTotal = Number(item.subtotal || price * qty);
+
+              return (
+                <div key={idx} className="space-y-0.5 text-[11px]">
+                  <div className="flex justify-between">
+                    <span className="w-1/2 truncate font-bold">{name}</span>
+                    <span className="w-1/6 text-center font-bold">{qty}</span>
+                    <span className="w-1/3 text-right">{lineTotal.toFixed(2)}</span>
+                  </div>
+                  {item.specialInstructions && (
+                    <div className="text-[10px] text-gray-600 italic pl-2">
+                      &bull; {item.specialInstructions}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Totals Calculation */}
+          <div className="space-y-1 text-[11px] pt-1">
+            <div className="flex justify-between">
+              <span>Base Subtotal:</span>
+              <span>{subtotal.toFixed(2)} ETB</span>
+            </div>
+            {discount > 0 && (
+              <div className="flex justify-between font-bold text-red-600">
+                <span>Promotional Discount:</span>
+                <span>-{discount.toFixed(2)} ETB</span>
+              </div>
+            )}
+            {tip > 0 && (
+              <div className="flex justify-between font-bold">
+                <span>Staff Tip / Gratuity:</span>
+                <span>+{tip.toFixed(2)} ETB</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span>VAT (15% Included):</span>
+              <span>{tax.toFixed(2)} ETB</span>
+            </div>
+            <div className="flex justify-between font-black text-sm pt-1 border-t border-dashed border-gray-400">
+              <span>TOTAL DUE:</span>
+              <span>{total.toFixed(2)} ETB</span>
+            </div>
+          </div>
+
+          {/* Footer Note */}
+          <div className="text-center pt-3 border-t border-dashed border-gray-400 text-[10px] text-gray-600 space-y-1">
+            <p className="font-bold">Thank you for dining with Nitsuh Foods!</p>
+            <p>Please retain this receipt for your records.</p>
+            <p className="text-[9px] text-gray-400 font-sans mt-2">
+              System powered by Nitsuh POS &bull; www.nitsuh.et
+            </p>
           </div>
         </div>
 
-        {/* Modal Action Buttons */}
-        <div className="mt-4 pt-3 border-t border-stone-200 dark:border-white/10 flex gap-2 print:hidden">
-          <button
-            onClick={onClose}
-            className="flex-1 py-2.5 rounded-2xl bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-stone-700 dark:text-zinc-300 font-bold text-xs transition cursor-pointer"
-          >
-            Close
-          </button>
-          <button
+        {/* Action Buttons */}
+        <div className="mt-4 flex gap-2 print:hidden">
+          <Button
+            variant="primary"
+            className="flex-1"
             onClick={handlePrint}
-            className="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
           >
-            <Printer className="w-3.5 h-3.5" />
+            <Printer className="w-4 h-4" />
             <span>Print Receipt</span>
-          </button>
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onClose}
+          >
+            Done
+          </Button>
         </div>
       </div>
     </div>

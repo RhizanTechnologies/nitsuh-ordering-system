@@ -6,6 +6,7 @@ import { fetchApi, getSocket } from '@/lib/api';
 import { ChefHat, Flame, CheckCircle, Clock, Utensils, AlertTriangle, X, Volume2 } from 'lucide-react';
 import { playKitchenChime, playReadyChime } from '@/lib/audio';
 import { calculatePrepTime } from '@/lib/timer-utils';
+import { Button, Badge } from '@/components/ui';
 
 export function KitchenDisplayView() {
   const { currentUser } = useAppStore();
@@ -258,17 +259,11 @@ export function KitchenDisplayView() {
                           <span className={`w-1.5 h-1.5 rounded-full ${prep.delayStatus === 'DELAYED' ? 'bg-rose-500 animate-ping' : prep.delayStatus === 'WARNING' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
                           {prep.formattedTime}
                         </span>
-                        <span
-                          className={`text-[10px] font-black px-2 py-0.5 rounded-lg border ${
-                            order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                              : 'text-amber-300 bg-amber-500/20 border-amber-500/30'
-                          }`}
-                        >
+                        <Badge variant={order.orderType === 'TAKEAWAY' ? 'purple' : 'amber'}>
                           {order.orderType === 'TAKEAWAY'
                             ? `🛍️ TAKEAWAY`
                             : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
-                        </span>
+                        </Badge>
                       </div>
                     </div>
 
@@ -296,13 +291,15 @@ export function KitchenDisplayView() {
                       ))}
                     </div>
 
-                    <button
+                    <Button
+                      variant="primary"
+                      size="default"
                       onClick={() => updateStatus(order.id, 'IN_PREPARATION')}
-                      className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-xl transition shadow-lg shadow-amber-500/25 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                      className="w-full"
                     >
                       <Flame className="w-4 h-4 fill-black" />
                       <span>Accept & Start Prep</span>
-                    </button>
+                    </Button>
                   </div>
                 );
               })
@@ -394,13 +391,15 @@ export function KitchenDisplayView() {
                       ))}
                     </div>
 
-                    <button
+                    <Button
+                      variant="success"
+                      size="default"
                       onClick={() => updateStatus(order.id, 'READY')}
-                      className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black text-xs rounded-xl transition shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                      className="w-full"
                     >
                       <CheckCircle className="w-4 h-4" />
                       <span>Mark Order Ready!</span>
-                    </button>
+                    </Button>
                   </div>
                 );
               })
@@ -442,17 +441,11 @@ export function KitchenDisplayView() {
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                           {prep.formattedTime}
                         </span>
-                        <span
-                          className={`text-[10px] font-black px-2.5 py-0.5 rounded-lg border ${
-                            order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                              : 'text-emerald-300 bg-emerald-500/20 border-emerald-500/30'
-                          }`}
-                        >
+                        <Badge variant={order.orderType === 'TAKEAWAY' ? 'purple' : 'success'}>
                           {order.orderType === 'TAKEAWAY'
                             ? `🛍️ TAKEAWAY`
                             : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
-                        </span>
+                        </Badge>
                       </div>
                     </div>
 
@@ -471,13 +464,15 @@ export function KitchenDisplayView() {
                       ))}
                     </div>
 
-                    <button
+                    <Button
+                      variant="primary"
+                      size="default"
                       onClick={() => updateStatus(order.id, 'SERVED')}
-                      className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl transition shadow-lg flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                      className="w-full"
                     >
                       <Utensils className="w-4 h-4" />
                       <span>Delivered & Served</span>
-                    </button>
+                    </Button>
                   </div>
                 );
               })
