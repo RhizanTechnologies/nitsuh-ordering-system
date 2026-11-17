@@ -28,11 +28,11 @@ export function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Terminal Forgotten PIN Reset Modal State
-  const [isForgotPinOpen, setIsForgotPinOpen] = useState(false);
+  // Password / PIN Reset Request Modal State
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [forgotTargetStaffId, setForgotTargetStaffId] = useState('');
-  const [managerCredential, setManagerCredential] = useState('');
-  const [forgotNewPin, setForgotNewPin] = useState('');
+  const [forgotCustomCode, setForgotCustomCode] = useState('');
+  const [forgotNote, setForgotNote] = useState('');
   const [forgotSubmitting, setForgotSubmitting] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
   const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
@@ -67,8 +67,8 @@ export function LoginScreen() {
     }
   };
 
-  // Filter out OWNER from the PIN dropdown (Owners sign in via Manager / Owner Password tab)
-  const visibleStaffList = staffList.filter((s) => s.role !== 'OWNER');
+  // Filter out OWNER and MANAGER from the PIN dropdown (they sign in via Manager / Owner Password tab)
+  const visibleStaffList = staffList.filter((s) => s.role !== 'OWNER' && s.role !== 'MANAGER');
 
   const loadStaffProfiles = () => {
     setStaffLoading(true);
@@ -78,7 +78,7 @@ export function LoginScreen() {
         if (Array.isArray(data)) {
           setStaffList(data);
           const savedStaffId = typeof window !== 'undefined' ? localStorage.getItem('nitsuh_last_staff_id') : null;
-          if (savedStaffId && data.some((s) => s.id === savedStaffId && s.role !== 'OWNER')) {
+          if (savedStaffId && data.some((s) => s.id === savedStaffId && s.role !== 'OWNER' && s.role !== 'MANAGER')) {
             setSelectedStaffId(savedStaffId);
           }
         }
@@ -222,27 +222,19 @@ export function LoginScreen() {
     }
   };
 
-  const handleOpenForgotPin = () => {
-    setForgotTargetStaffId(selectedStaffId || (staffList[0]?.id || ''));
-    setManagerCredential('');
-    setForgotNewPin(Math.floor(1000 + Math.random() * 9000).toString());
+  const handleOpenForgot = () => {
+    setForgotTargetStaffId(selectedStaffId || (visibleStaffList[0]?.id || ''));
+    setForgotCustomCode('');
+    setForgotNote('');
     setForgotError(null);
     setForgotSuccess(null);
-    setIsForgotPinOpen(true);
+    setIsForgotModalOpen(true);
   };
 
-  const handleTerminalPinResetSubmit = async (e: React.FormEvent) => {
+  const handleForgotSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!forgotTargetStaffId) {
-      setForgotError('Please select which staff member needs a PIN reset');
-      return;
-    }
-    if (!managerCredential.trim()) {
-      setForgotError('Shift Manager PIN or Password is required to authorize this reset');
-      return;
-    }
-    if (!forgotNewPin || !/^\d{4,6}$/.test(forgotNewPin)) {
-      setForgotError('New PIN must be 4 to 6 numeric digits');
+    if (!forgotTargetStaffId && !forgotCustomCode.trim()) {
+      setForgotError('Please select your staff profile or enter your employee code');
       return;
     }
 
@@ -250,24 +242,20 @@ export function LoginScreen() {
     setForgotError(null);
 
     try {
-      const res = await fetchApi('/users/terminal-reset-pin', {
+      const res = await fetchApi('/users/reset-request', {
         method: 'POST',
         body: JSON.stringify({
-          managerCredential: managerCredential.trim(),
-          targetUserId: forgotTargetStaffId,
-          newPin: forgotNewPin.trim(),
+          userId: forgotTargetStaffId || undefined,
+          identifier: !forgotTargetStaffId ? forgotCustomCode.trim() : undefined,
+          note: forgotNote.trim() || undefined,
         }),
       });
 
-      setForgotSuccess(`Success! PIN for ${res.user.name} has been reset to ${res.user.pinCode}.`);
-      setSelectedStaffId(forgotTargetStaffId);
-      setPin(res.user.pinCode);
-
-      setTimeout(() => {
-        setIsForgotPinOpen(false);
-      }, 2000);
+      setForgotSuccess(
+        res.message || 'Reset request logged! Please notify your Shift Manager or Owner.'
+      );
     } catch (err: any) {
-      setForgotError(err.message || 'Authorization failed. Please check manager credentials.');
+      setForgotError(err.message || 'Could not submit reset request. Please contact your manager directly.');
     } finally {
       setForgotSubmitting(false);
     }
@@ -509,15 +497,15 @@ export function LoginScreen() {
               </button>
             </div>
 
-            {/* Forgotten PIN / Shift Manager Override Link */}
+            {/* Forgotten PIN Request Link */}
             <div className="pt-2 text-center w-full">
               <button
                 type="button"
-                onClick={handleOpenForgotPin}
+                onClick={handleOpenForgot}
                 className="text-[11px] font-bold text-stone-500 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-amber-300 transition flex items-center justify-center gap-1 mx-auto cursor-pointer py-1"
               >
                 <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
-                <span>Forgot PIN? Shift Manager Override</span>
+                <span>Forgot PIN? Request Reset from Manager</span>
               </button>
             </div>
           </div>
@@ -565,37 +553,48 @@ export function LoginScreen() {
             >
               {loading ? 'Verifying...' : 'Sign In'}
             </button>
+
+            <div className="pt-1 text-center">
+              <button
+                type="button"
+                onClick={handleOpenForgot}
+                className="text-[11px] font-bold text-stone-500 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-amber-300 transition inline-flex items-center gap-1 cursor-pointer"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
+                <span>Forgot password? Request reset</span>
+              </button>
+            </div>
           </form>
         )}
       </div>
 
-      {/* ================= MODAL: TERMINAL FORGOTTEN PIN RESET ================= */}
-      {isForgotPinOpen && (
+      {/* ================= MODAL: FORGOTTEN PIN / PASSWORD RESET REQUEST ================= */}
+      {isForgotModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                  <ShieldAlert className="w-5 h-5" />
+                  <KeyRound className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-stone-900 dark:text-white">Terminal PIN Recovery</h3>
+                  <h3 className="text-base font-black text-stone-900 dark:text-white">Credential Reset Request</h3>
                   <p className="text-[11px] text-stone-500 dark:text-zinc-400">
-                    Shift Manager / Owner authorization on terminal
+                    Request new PIN or temporary password from Manager
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => setIsForgotPinOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-stone-500 dark:text-zinc-400"
+                onClick={() => setIsForgotModalOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-stone-500 dark:text-zinc-400 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Offline Explanation Alert */}
-            <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300 rounded-2xl text-[11px] leading-relaxed">
-              💡 <strong>Internal Cafe Security:</strong> In offline/local terminal operations without personal email or SMS, any on-duty Shift Manager or Owner can authorize an immediate PIN reset right here.
+            {/* Explanatory banner */}
+            <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-900 dark:text-amber-300 rounded-2xl text-[11px] leading-relaxed">
+              💡 <strong>Manager / Owner Assistance:</strong> When you submit this request, your Shift Manager or Owner can log into <strong>Staff Management</strong> to immediately generate and provide your new PIN or password.
             </div>
 
             {forgotError && (
@@ -604,85 +603,91 @@ export function LoginScreen() {
               </div>
             )}
 
-            {forgotSuccess && (
-              <div className="mt-3 p-2.5 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-2xl">
-                {forgotSuccess}
-              </div>
-            )}
-
-            <form onSubmit={handleTerminalPinResetSubmit} className="space-y-3.5 mt-4">
-              <div>
-                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
-                  1. Staff Member Who Forgot PIN
-                </label>
-                <select
-                  value={forgotTargetStaffId}
-                  onChange={(e) => setForgotTargetStaffId(e.target.value)}
-                  className="w-full bg-stone-50 dark:bg-[#201B17] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
-                >
-                  {staffList.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} — ({s.role}) [{s.employeeCode || 'STAFF'}]
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
-                  2. Shift Manager / Owner Credentials (PIN or Password)
-                </label>
-                <input
-                  type="password"
-                  placeholder="Manager PIN (e.g. 0000) or password"
-                  value={managerCredential}
-                  onChange={(e) => setManagerCredential(e.target.value)}
-                  required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300">
-                    3. New 4-Digit PIN
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setForgotNewPin(Math.floor(1000 + Math.random() * 9000).toString())}
-                    className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    <span>Randomize</span>
-                  </button>
+            {forgotSuccess ? (
+              <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 rounded-2xl space-y-3 text-center">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+                  <Check className="w-5 h-5 stroke-[3]" />
                 </div>
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={forgotNewPin}
-                  onChange={(e) => setForgotNewPin(e.target.value.replace(/\D/g, ''))}
-                  required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-base font-mono font-black text-stone-900 dark:text-white text-center tracking-widest focus:outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
+                <div className="text-xs font-black text-emerald-800 dark:text-emerald-300">
+                  {forgotSuccess}
+                </div>
+                <p className="text-[11px] text-stone-600 dark:text-zinc-400">
+                  Please inform your Shift Manager or Owner. They will generate your new credentials in their admin console.
+                </p>
                 <button
                   type="button"
-                  onClick={() => setIsForgotPinOpen(false)}
-                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] text-stone-700 dark:text-zinc-300 rounded-2xl text-xs font-bold"
+                  onClick={() => setIsForgotModalOpen(false)}
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition cursor-pointer"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={forgotSubmitting}
-                  className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
-                >
-                  {forgotSubmitting ? 'Verifying...' : 'Authorize & Set New PIN'}
+                  Done
                 </button>
               </div>
-            </form>
+            ) : (
+              <form onSubmit={handleForgotSubmit} className="space-y-3.5 mt-4">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                    Select Your Staff Profile
+                  </label>
+                  <select
+                    value={forgotTargetStaffId}
+                    onChange={(e) => setForgotTargetStaffId(e.target.value)}
+                    className="w-full bg-stone-50 dark:bg-[#201B17] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    <option value="">-- Choose Profile from List --</option>
+                    {staffList.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {cleanStaffName(s.name)} ({formatRoleName(s.role)}) [{s.employeeCode || 'STAFF'}]
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {!forgotTargetStaffId && (
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                      Or Enter Employee Code / Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. EMP-003 or your full name"
+                      value={forgotCustomCode}
+                      onChange={(e) => setForgotCustomCode(e.target.value)}
+                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                    Optional Note for Manager
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Forgot PIN after shift change"
+                    value={forgotNote}
+                    onChange={(e) => setForgotNote(e.target.value)}
+                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotModalOpen(false)}
+                    className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] text-stone-700 dark:text-zinc-300 rounded-2xl text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotSubmitting}
+                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
+                  >
+                    {forgotSubmitting ? 'Submitting...' : 'Submit Request to Manager'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

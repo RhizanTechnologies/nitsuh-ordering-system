@@ -115,4 +115,68 @@ export class UsersController {
       body.newPin,
     );
   }
+
+  // Public: Submit PIN / Password reset request from login screen
+  @Post('reset-request')
+  async createResetRequest(
+    @Body() body: { userId?: string; identifier?: string; note?: string },
+  ) {
+    return this.usersService.createResetRequest(body);
+  }
+
+  // Manager & Owner: View all pending and resolved reset requests
+  @UseGuards(AuthGuard('jwt'))
+  @Get('reset-requests')
+  async getResetRequests(@Req() req: any) {
+    if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
+      throw new ForbiddenException('Only Owner and General Manager can view reset requests');
+    }
+    return this.usersService.getResetRequests();
+  }
+
+  // Manager & Owner: Resolve reset request (generate new PIN / password or dismiss)
+  @UseGuards(AuthGuard('jwt'))
+  @Post('resolve-reset-request/:id')
+  async resolveResetRequest(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { action: 'GENERATE_PIN' | 'GENERATE_PASSWORD' | 'DISMISS' },
+  ) {
+    if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
+      throw new ForbiddenException('Only Owner and General Manager can resolve reset requests');
+    }
+    return this.usersService.resolveResetRequest(id, body.action, {
+      id: req.user.id,
+      name: req.user.name,
+    });
+  }
+
+  // Manager & Owner: Instant 1-click PIN generation for any staff member
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/generate-pin')
+  async generatePinForUser(@Req() req: any, @Param('id') id: string) {
+    if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
+      throw new ForbiddenException('Only Owner and General Manager can generate staff PINs');
+    }
+    return this.usersService.generateRandomPinForUser(id, {
+      id: req.user.id,
+      name: req.user.name,
+    });
+  }
+
+  // Authenticated Employee: Change own PIN or password from their user profile
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('profile/change-credentials')
+  async selfChangeCredentials(
+    @Req() req: any,
+    @Body()
+    body: {
+      currentPin?: string;
+      newPin?: string;
+      currentPassword?: string;
+      newPassword?: string;
+    },
+  ) {
+    return this.usersService.selfChangeCredentials(req.user.id, body);
+  }
 }

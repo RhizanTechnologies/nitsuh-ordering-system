@@ -51,12 +51,39 @@ interface StaffMember {
   };
 }
 
+interface ResetRequest {
+  id: string;
+  userId: string;
+  user?: StaffMember;
+  status: 'PENDING' | 'RESOLVED' | 'DISMISSED';
+  requestedAt: string;
+  note?: string;
+  role?: string;
+  employeeCode?: string;
+  employeeName?: string;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  generatedCredential?: string;
+  credentialType?: 'PIN' | 'PASSWORD';
+}
+
 export function StaffManagementView() {
   const { currentUser } = useAppStore();
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  // Reset Requests state
+  const [resetRequests, setResetRequests] = useState<ResetRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [resolvingRequestId, setResolvingRequestId] = useState<string | null>(null);
+  const [generatedCredentialAlert, setGeneratedCredentialAlert] = useState<{
+    userName: string;
+    type: 'PIN' | 'PASSWORD';
+    value: string;
+  } | null>(null);
+  const [copiedAlertCredential, setCopiedAlertCredential] = useState(false);
 
   // Search & Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -112,9 +139,70 @@ export function StaffManagementView() {
     }
   };
 
+  const loadResetRequests = async () => {
+    try {
+      setLoadingRequests(true);
+      const data = await fetchApi('/users/reset-requests');
+      if (Array.isArray(data)) {
+        setResetRequests(data);
+      }
+    } catch (err) {
+      console.error('Failed to load reset requests:', err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
   useEffect(() => {
     loadStaff();
+    loadResetRequests();
   }, []);
+
+  const handleResolveRequest = async (
+    request: ResetRequest,
+    action: 'GENERATE_PIN' | 'GENERATE_PASSWORD' | 'DISMISS',
+  ) => {
+    setResolvingRequestId(request.id);
+    try {
+      const res = await fetchApi(`/users/resolve-reset-request/${request.id}`, {
+        method: 'POST',
+        body: JSON.stringify({ action }),
+      });
+
+      if (res.credential) {
+        setGeneratedCredentialAlert({
+          userName: request.employeeName || request.user?.name || 'Staff Member',
+          type: res.type || (action === 'GENERATE_PASSWORD' ? 'PASSWORD' : 'PIN'),
+          value: res.credential,
+        });
+      }
+
+      triggerToast(res.message || 'Reset request resolved successfully!');
+      loadResetRequests();
+      loadStaff();
+    } catch (err: any) {
+      alert(err.message || 'Failed to resolve request');
+    } finally {
+      setResolvingRequestId(null);
+    }
+  };
+
+  const handleInstantGeneratePin = async (staff: StaffMember) => {
+    try {
+      const res = await fetchApi(`/users/${staff.id}/generate-pin`, {
+        method: 'POST',
+      });
+      setGeneratedCredentialAlert({
+        userName: staff.name,
+        type: 'PIN',
+        value: res.pinCode,
+      });
+      triggerToast(`Generated new PIN ${res.pinCode} for ${staff.name}!`);
+      loadStaff();
+    } catch (err: any) {
+      alert(err.message || 'Failed to generate PIN');
+    }
+  };
 
   const triggerToast = (msg: string) => {
     setSuccessToast(msg);
@@ -431,6 +519,148 @@ export function StaffManagementView() {
         </div>
       </div>
 
+      {/* Generated Credential Banner Alert */}
+      {generatedCredentialAlert && (
+        <div className="bg-emerald-500/10 border-2 border-emerald-500/40 rounded-3xl p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-300">
+                New {generatedCredentialAlert.type} Generated for {generatedCredentialAlert.userName}
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="font-mono text-xl font-black bg-white dark:bg-black/30 px-3 py-1 rounded-xl border border-emerald-500/40 text-stone-900 dark:text-white tracking-widest select-all">
+                  {generatedCredentialAlert.value}
+                </span>
+                <span className="text-[11px] text-stone-600 dark:text-zinc-400">
+                  (Communicate this credential to the employee)
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard.writeText(generatedCredentialAlert.value);
+                setCopiedAlertCredential(true);
+                setTimeout(() => setCopiedAlertCredential(false), 2000);
+              }}
+            >
+              {copiedAlertCredential ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-white" />}
+              <span>{copiedAlertCredential ? 'Copied!' : 'Copy Code'}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setGeneratedCredentialAlert(null)}
+            >
+              Dismiss
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Pending Reset Requests Section */}
+      {resetRequests.filter((r) => r.status === 'PENDING').length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-stone-900 dark:text-white flex items-center gap-2">
+                  PIN & Password Reset Requests
+                  <Badge variant="warning">
+                    {resetRequests.filter((r) => r.status === 'PENDING').length} Pending
+                  </Badge>
+                </h2>
+                <p className="text-[11px] text-stone-600 dark:text-zinc-400">
+                  Employees requesting new credentials from the login screen
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={loadResetRequests}
+            >
+              <RotateCcw className={`w-3.5 h-3.5 ${loadingRequests ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+            {resetRequests
+              .filter((r) => r.status === 'PENDING')
+              .map((req) => {
+                const isManagementRole = req.role === 'OWNER' || req.role === 'MANAGER';
+                return (
+                  <div
+                    key={req.id}
+                    className="bg-white dark:bg-[#1C1815] border border-amber-500/30 rounded-2xl p-4 shadow-xs space-y-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <div className="text-xs font-black text-stone-900 dark:text-white">
+                          {req.employeeName || req.user?.name || 'Staff Member'}
+                        </div>
+                        <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-mono">
+                          {req.employeeCode || req.user?.employeeCode || 'STAFF'} • {req.role || req.user?.role}
+                        </div>
+                      </div>
+                      <Badge variant="warning">Reset Needed</Badge>
+                    </div>
+
+                    <div className="text-[11px] bg-stone-50 dark:bg-white/[0.04] p-2.5 rounded-xl border border-stone-200/80 dark:border-white/10 text-stone-700 dark:text-zinc-300 italic">
+                      "{req.note || 'Forgot credentials / PIN'}"
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1 border-t border-stone-100 dark:border-white/10">
+                      {isManagementRole ? (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          disabled={resolvingRequestId === req.id}
+                          onClick={() => handleResolveRequest(req, 'GENERATE_PASSWORD')}
+                          className="flex-1"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Generate Password</span>
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          disabled={resolvingRequestId === req.id}
+                          onClick={() => handleResolveRequest(req, 'GENERATE_PIN')}
+                          className="flex-1"
+                        >
+                          <KeyRound className="w-3.5 h-3.5" />
+                          <span>Generate New PIN</span>
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={resolvingRequestId === req.id}
+                        onClick={() => handleResolveRequest(req, 'DISMISS')}
+                      >
+                        Dismiss
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
       {/* Search & Role Filters Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
@@ -611,13 +841,22 @@ export function StaffManagementView() {
                 </div>
 
                 {/* Bottom Card Actions */}
-                <div className="mt-4 pt-3 border-t border-stone-200/80 dark:border-white/10 flex items-center justify-between gap-2">
+                <div className="mt-4 pt-3 border-t border-stone-200/80 dark:border-white/10 flex items-center justify-between gap-1.5">
+                  <button
+                    onClick={() => handleInstantGeneratePin(staff)}
+                    title="1-Click Auto-Generate New Unique PIN"
+                    className="py-1.5 px-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <span>Gen PIN</span>
+                  </button>
+
                   <button
                     onClick={() => handleOpenResetPin(staff)}
                     className="flex-1 py-1.5 px-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <KeyRound className="w-3 h-3" />
-                    <span>Reset PIN</span>
+                    <span>Custom PIN</span>
                   </button>
 
                   <button

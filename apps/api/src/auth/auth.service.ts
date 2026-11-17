@@ -72,6 +72,13 @@ export class AuthService {
       );
     }
 
+    // Managers and Owners must log in via Email/Password tab, not PIN dropdown
+    if (user.role === 'OWNER' || user.role === 'MANAGER') {
+      throw new UnauthorizedException(
+        'Managers and Owners must sign in using code/email and password.',
+      );
+    }
+
     const payload = {
       sub: user.id,
       email: user.email,
@@ -94,7 +101,10 @@ export class AuthService {
 
   async getStaffList() {
     return this.prisma.user.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        role: { notIn: ['OWNER', 'MANAGER'] },
+      },
       select: {
         id: true,
         name: true,

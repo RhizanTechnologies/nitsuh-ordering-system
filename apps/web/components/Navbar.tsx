@@ -20,9 +20,11 @@ import {
   Sun,
   Moon,
   Users,
+  KeyRound,
 } from 'lucide-react';
 import { fetchApi, getSocket } from '@/lib/api';
 import { TablePlanModal } from '@/components/TablePlanModal';
+import { ChangeCredentialsModal } from '@/components/ChangeCredentialsModal';
 
 export function Navbar() {
   const router = useRouter();
@@ -42,6 +44,7 @@ export function Navbar() {
   const [unreadAlerts, setUnreadAlerts] = useState(0);
   const [tables, setTables] = useState<any[]>([]);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isChangeCredsOpen, setIsChangeCredsOpen] = useState(false);
 
   const loadTables = () => {
     fetchApi('/menu/tables')
@@ -307,8 +310,8 @@ export function Navbar() {
                       </div>
                     </div>
 
-                    {isOwnerOrManager && (
-                      <div className="py-2 border-b border-stone-200 dark:border-white/10">
+                    <div className="py-2 border-b border-stone-200 dark:border-white/10 space-y-1">
+                      {isOwnerOrManager && (
                         <Link
                           href="/staff"
                           onClick={() => setProfileOpen(false)}
@@ -317,8 +320,19 @@ export function Navbar() {
                           <Users className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                           <span>Staff & Users Console</span>
                         </Link>
-                      </div>
-                    )}
+                      )}
+
+                      <button
+                        onClick={() => {
+                          setProfileOpen(false);
+                          setIsChangeCredsOpen(true);
+                        }}
+                        className="w-full flex items-center gap-2 py-2 px-3 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-xs font-bold text-stone-700 dark:text-zinc-200 transition cursor-pointer text-left"
+                      >
+                        <KeyRound className="w-4 h-4 text-amber-500" />
+                        <span>Change PIN / Password</span>
+                      </button>
+                    </div>
 
                     <div className="pt-3">
                       <button
@@ -428,6 +442,12 @@ export function Navbar() {
         onClose={() => setTableManagerOpen(false)}
         tables={tables}
         onTablesUpdated={setTables}
+      />
+
+      {/* Employee Self-Service Change PIN / Password Modal */}
+      <ChangeCredentialsModal
+        isOpen={isChangeCredsOpen}
+        onClose={() => setIsChangeCredsOpen(false)}
       />
     </>
   );

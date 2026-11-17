@@ -103,6 +103,9 @@ let AuthService = class AuthService {
         if (!user) {
             throw new common_1.UnauthorizedException(userId ? 'Incorrect PIN for the selected employee' : 'Invalid employee PIN');
         }
+        if (user.role === 'OWNER' || user.role === 'MANAGER') {
+            throw new common_1.UnauthorizedException('Managers and Owners must sign in using code/email and password.');
+        }
         const payload = {
             sub: user.id,
             email: user.email,
@@ -124,7 +127,10 @@ let AuthService = class AuthService {
     }
     async getStaffList() {
         return this.prisma.user.findMany({
-            where: { isActive: true },
+            where: {
+                isActive: true,
+                role: { notIn: ['OWNER', 'MANAGER'] },
+            },
             select: {
                 id: true,
                 name: true,

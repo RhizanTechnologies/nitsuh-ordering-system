@@ -22,7 +22,7 @@ export declare class AuthService {
             name: string;
             employeeCode: string;
             email: string;
-            role: import("@prisma/client").$Enums.UserRole;
+            role: "CASHIER" | "WAITER" | "KITCHEN_STAFF" | "MAIN_STOREKEEPER" | "KITCHEN_STOREKEEPER" | "HEAD_CHEF";
             avatarUrl: string;
         };
     }>;

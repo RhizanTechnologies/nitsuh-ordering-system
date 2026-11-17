@@ -13,6 +13,8 @@ export const badgeVariants = cva(
           'bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30',
         amber:
           'bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30',
+        warning:
+          'bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30',
         destructive:
           'bg-[#C11221] text-white border border-red-700/50 shadow-xs',
         danger:

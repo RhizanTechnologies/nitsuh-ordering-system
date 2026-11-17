@@ -392,6 +392,356 @@ export class UsersService {
     };
   }
 
+  // Create reset request (called from Login Screen by employee who forgot PIN/password)
+  async createResetRequest(dto: { userId?: string; identifier?: string; note?: string }) {
+    let user = null;
+    if (dto.userId) {
+      user = await this.prisma.user.findUnique({ where: { id: dto.userId } });
+    } else if (dto.identifier) {
+      const trimmed = dto.identifier.trim();
+      user = await this.prisma.user.findFirst({
+        where: {
+          OR: [
+            { employeeCode: trimmed.toUpperCase() },
+            { name: { equals: trimmed, mode: 'insensitive' } },
+            { email: trimmed.toLowerCase() },
+          ],
+        },
+      });
+    }
+
+    if (!user || !user.isActive) {
+      throw new NotFoundException('Active employee profile not found. Please verify your name or employee code.');
+    }
+
+    // Check if an unresolved request already exists
+    const existing = await this.prisma.auditLog.findFirst({
+      where: {
+        entityName: 'User',
+        entityId: user.id,
+        action: 'CREDENTIAL_RESET_REQUEST',
+        newValue: null,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (existing) {
+      return {
+        success: true,
+        alreadyPending: true,
+        message: `A reset request for ${user.name} is already logged and pending. Please inform your Shift Manager or Owner.`,
+      };
+    }
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'CREDENTIAL_RESET_REQUEST',
+        entityName: 'User',
+        entityId: user.id,
+        oldValue: {
+          status: 'PENDING',
+          requestedAt: new Date().toISOString(),
+          employeeName: user.name,
+          employeeCode: user.employeeCode,
+          role: user.role,
+          note: dto.note?.trim() || 'Forgot credentials / PIN',
+        },
+        newValue: null,
+        reason: `Credential reset requested for ${user.name} (${user.role})`,
+      },
+    });
+
+    return {
+      success: true,
+      message: `Reset request logged for ${user.name}. Your Shift Manager or Owner can generate your new credentials in Staff Management.`,
+    };
+  }
+
+  // Get all reset requests for Manager & Owner
+  async getResetRequests() {
+    const logs = await this.prisma.auditLog.findMany({
+      where: {
+        action: 'CREDENTIAL_RESET_REQUEST',
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 40,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            employeeCode: true,
+            role: true,
+            avatarUrl: true,
+            isActive: true,
+            pinCode: true,
+          },
+        },
+      },
+    });
+
+    return logs.map((log) => {
+      const oldVal = (log.oldValue as any) || {};
+      const newVal = (log.newValue as any) || null;
+      return {
+        id: log.id,
+        userId: log.entityId,
+        user: log.user,
+        status: newVal ? newVal.status || 'RESOLVED' : 'PENDING',
+        requestedAt: oldVal.requestedAt || log.createdAt,
+        note: oldVal.note || log.reason,
+        role: log.user?.role || oldVal.role,
+        employeeCode: log.user?.employeeCode || oldVal.employeeCode,
+        employeeName: log.user?.name || oldVal.employeeName,
+        resolvedAt: newVal?.resolvedAt || null,
+        resolvedBy: newVal?.resolvedBy || null,
+        generatedCredential: newVal?.generatedCredential || null,
+        credentialType: newVal?.credentialType || null,
+      };
+    });
+  }
+
+  // Resolve a reset request by generating a new PIN or password
+  async resolveResetRequest(
+    requestId: string,
+    action: 'GENERATE_PIN' | 'GENERATE_PASSWORD' | 'DISMISS',
+    resolver: { id: string; name: string },
+  ) {
+    const log = await this.prisma.auditLog.findUnique({
+      where: { id: requestId },
+      include: { user: true },
+    });
+
+    if (!log || log.action !== 'CREDENTIAL_RESET_REQUEST') {
+      throw new NotFoundException('Reset request not found');
+    }
+
+    if (action === 'DISMISS') {
+      await this.prisma.auditLog.update({
+        where: { id: requestId },
+        data: {
+          newValue: {
+            status: 'DISMISSED',
+            resolvedAt: new Date().toISOString(),
+            resolvedBy: resolver.name,
+          },
+        },
+      });
+      return { success: true, message: 'Request dismissed' };
+    }
+
+    const targetUser = log.user;
+    if (!targetUser) {
+      throw new NotFoundException('Associated staff member not found');
+    }
+
+    if (action === 'GENERATE_PIN') {
+      // Generate a unique 4-digit PIN
+      let genPin = '';
+      let isUnique = false;
+      let attempts = 0;
+      while (!isUnique && attempts < 30) {
+        genPin = Math.floor(1000 + Math.random() * 9000).toString();
+        const conflict = await this.prisma.user.findFirst({
+          where: { pinCode: genPin, isActive: true, NOT: { id: targetUser.id } },
+        });
+        if (!conflict) isUnique = true;
+        attempts++;
+      }
+
+      await this.prisma.user.update({
+        where: { id: targetUser.id },
+        data: { pinCode: genPin },
+      });
+
+      await this.prisma.auditLog.update({
+        where: { id: requestId },
+        data: {
+          newValue: {
+            status: 'RESOLVED',
+            resolvedAt: new Date().toISOString(),
+            resolvedBy: resolver.name,
+            generatedCredential: genPin,
+            credentialType: 'PIN',
+          },
+        },
+      });
+
+      return {
+        success: true,
+        type: 'PIN',
+        credential: genPin,
+        message: `New PIN for ${targetUser.name} generated: ${genPin}`,
+      };
+    } else {
+      // GENERATE_PASSWORD
+      const randomDigits = Math.floor(1000 + Math.random() * 9000);
+      const generatedPass = `Nitsuh#${randomDigits}`;
+      const passwordHash = await bcrypt.hash(generatedPass, 10);
+
+      await this.prisma.user.update({
+        where: { id: targetUser.id },
+        data: { passwordHash },
+      });
+
+      await this.prisma.auditLog.update({
+        where: { id: requestId },
+        data: {
+          newValue: {
+            status: 'RESOLVED',
+            resolvedAt: new Date().toISOString(),
+            resolvedBy: resolver.name,
+            generatedCredential: generatedPass,
+            credentialType: 'PASSWORD',
+          },
+        },
+      });
+
+      return {
+        success: true,
+        type: 'PASSWORD',
+        credential: generatedPass,
+        message: `New temporary password for ${targetUser.name} generated: ${generatedPass}`,
+      };
+    }
+  }
+
+  // Direct 1-click PIN generation for Manager/Owner in Staff Management
+  async generateRandomPinForUser(userId: string, resolver: { id: string; name: string }) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Staff member not found');
+
+    let genPin = '';
+    let isUnique = false;
+    let attempts = 0;
+    while (!isUnique && attempts < 30) {
+      genPin = Math.floor(1000 + Math.random() * 9000).toString();
+      const conflict = await this.prisma.user.findFirst({
+        where: { pinCode: genPin, isActive: true, NOT: { id: userId } },
+      });
+      if (!conflict) isUnique = true;
+      attempts++;
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { pinCode: genPin },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId: resolver.id,
+        action: 'GENERATE_USER_PIN',
+        entityName: 'User',
+        entityId: userId,
+        reason: `${resolver.name} generated new PIN for ${user.name}`,
+      },
+    }).catch(() => {});
+
+    return {
+      success: true,
+      pinCode: genPin,
+      message: `Generated PIN ${genPin} for ${user.name}`,
+    };
+  }
+
+  // Employee self-service change PIN / password from their own profile
+  async selfChangeCredentials(
+    userId: string,
+    dto: {
+      currentPin?: string;
+      newPin?: string;
+      currentPassword?: string;
+      newPassword?: string;
+    },
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User profile not found');
+
+    const updateData: any = {};
+    const updatedItems: string[] = [];
+
+    // Changing PIN
+    if (dto.newPin) {
+      const trimmedPin = dto.newPin.trim();
+      if (!/^\d{4,6}$/.test(trimmedPin)) {
+        throw new BadRequestException('New PIN must be 4 to 6 numeric digits');
+      }
+
+      // If user has a current PIN and isn't OWNER, check currentPin
+      if (user.role !== UserRole.OWNER) {
+        if (!dto.currentPin || dto.currentPin.trim() !== user.pinCode) {
+          throw new UnauthorizedException('Current PIN is incorrect');
+        }
+      }
+
+      // Check conflict with other users
+      const conflict = await this.prisma.user.findFirst({
+        where: { pinCode: trimmedPin, isActive: true, NOT: { id: userId } },
+      });
+      if (conflict) {
+        throw new BadRequestException('This PIN is already in use by another staff member.');
+      }
+
+      updateData.pinCode = trimmedPin;
+      updatedItems.push('PIN');
+    }
+
+    // Changing Password
+    if (dto.newPassword) {
+      const trimmedPass = dto.newPassword.trim();
+      if (trimmedPass.length < 6) {
+        throw new BadRequestException('New password must be at least 6 characters');
+      }
+
+      if (!dto.currentPassword) {
+        throw new UnauthorizedException('Current password is required');
+      }
+
+      const match = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+      if (!match) {
+        throw new UnauthorizedException('Current password is incorrect');
+      }
+
+      updateData.passwordHash = await bcrypt.hash(trimmedPass, 10);
+      updatedItems.push('Password');
+    }
+
+    if (updatedItems.length === 0) {
+      throw new BadRequestException('No new PIN or password provided');
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        employeeCode: true,
+        email: true,
+        role: true,
+        avatarUrl: true,
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: 'SELF_CHANGE_CREDENTIALS',
+        entityName: 'User',
+        entityId: userId,
+        reason: `Employee changed their own ${updatedItems.join(' & ')}`,
+      },
+    }).catch(() => {});
+
+    return {
+      success: true,
+      message: `${updatedItems.join(' & ')} changed successfully!`,
+      user: updatedUser,
+    };
+  }
+
   // Auto-generate next employee code like EMP-009
   private async generateNextEmployeeCode(): Promise<string> {
     const users = await this.prisma.user.findMany({

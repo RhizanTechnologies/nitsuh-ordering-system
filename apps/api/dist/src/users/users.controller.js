@@ -65,6 +65,36 @@ let UsersController = class UsersController {
     async terminalResetPin(body) {
         return this.usersService.managerOverrideResetPin(body.managerCredential, body.targetUserId, body.newPin);
     }
+    async createResetRequest(body) {
+        return this.usersService.createResetRequest(body);
+    }
+    async getResetRequests(req) {
+        if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
+            throw new common_1.ForbiddenException('Only Owner and General Manager can view reset requests');
+        }
+        return this.usersService.getResetRequests();
+    }
+    async resolveResetRequest(req, id, body) {
+        if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
+            throw new common_1.ForbiddenException('Only Owner and General Manager can resolve reset requests');
+        }
+        return this.usersService.resolveResetRequest(id, body.action, {
+            id: req.user.id,
+            name: req.user.name,
+        });
+    }
+    async generatePinForUser(req, id) {
+        if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
+            throw new common_1.ForbiddenException('Only Owner and General Manager can generate staff PINs');
+        }
+        return this.usersService.generateRandomPinForUser(id, {
+            id: req.user.id,
+            name: req.user.name,
+        });
+    }
+    async selfChangeCredentials(req, body) {
+        return this.usersService.selfChangeCredentials(req.user.id, body);
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
@@ -139,6 +169,49 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "terminalResetPin", null);
+__decorate([
+    (0, common_1.Post)('reset-request'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "createResetRequest", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Get)('reset-requests'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getResetRequests", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Post)('resolve-reset-request/:id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "resolveResetRequest", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Post)(':id/generate-pin'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "generatePinForUser", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Patch)('profile/change-credentials'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "selfChangeCredentials", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])
