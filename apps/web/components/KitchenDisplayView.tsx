@@ -8,6 +8,31 @@ import { playKitchenChime, playReadyChime } from '@/lib/audio';
 import { calculatePrepTime } from '@/lib/timer-utils';
 import { Button, Badge } from '@/components/ui';
 
+// Clean helpers for formatting and high-contrast badges across themes
+const formatOrderNumber = (num: any) => {
+  const str = String(num || '');
+  return str.startsWith('#') ? str : `#${str}`;
+};
+
+const getPrepBadge = (prep: any) => {
+  if (prep.delayStatus === 'DELAYED') {
+    return {
+      dot: 'bg-rose-500 animate-ping',
+      badge: 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-500/40 font-black',
+    };
+  }
+  if (prep.delayStatus === 'WARNING') {
+    return {
+      dot: 'bg-amber-400',
+      badge: 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/40 font-bold',
+    };
+  }
+  return {
+    dot: 'bg-emerald-400',
+    badge: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40 font-bold',
+  };
+};
+
 export function KitchenDisplayView() {
   const { currentUser } = useAppStore();
   const [orders, setOrders] = useState<any[]>([]);
@@ -127,8 +152,8 @@ export function KitchenDisplayView() {
           </div>
         </div>
 
-        {/* Live Counters */}
-        <div className="flex items-center gap-2 sm:gap-4 text-xs font-bold">
+        {/* Live Counters (Hidden on mobile where switcher tabs show counts) */}
+        <div className="hidden sm:flex items-center gap-2 sm:gap-4 text-xs font-bold">
           <div className="flex items-center gap-1 sm:gap-1.5 text-amber-600 dark:text-amber-400">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
             <span>{newOrders.length} New</span>
@@ -231,6 +256,7 @@ export function KitchenDisplayView() {
             ) : (
               newOrders.map((order) => {
                 const prep = calculatePrepTime(order.createdAt);
+                const prepStyle = getPrepBadge(prep);
                 return (
                   <div
                     key={order.id}
@@ -244,46 +270,46 @@ export function KitchenDisplayView() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-base font-black text-stone-900 dark:text-white">
-                        #{order.orderNumber}
+                        {formatOrderNumber(order.orderNumber)}
                       </span>
                       <div className="flex items-center gap-1.5">
                         <span
-                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${
-                            prep.delayStatus === 'DELAYED'
-                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
-                              : prep.delayStatus === 'WARNING'
-                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                              : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                          }`}
+                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${prep.delayStatus === 'DELAYED' ? 'bg-rose-500 animate-ping' : prep.delayStatus === 'WARNING' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${prepStyle.dot}`} />
                           {prep.formattedTime}
                         </span>
-                        <Badge variant={order.orderType === 'TAKEAWAY' ? 'purple' : 'amber'}>
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                            order.orderType === 'TAKEAWAY'
+                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/30'
+                              : 'bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-500/30'
+                          }`}
+                        >
                           {order.orderType === 'TAKEAWAY'
                             ? `🛍️ TAKEAWAY`
                             : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
-                        </Badge>
+                        </span>
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-zinc-400 mb-2">
+                    <div className="text-[11px] text-stone-600 dark:text-zinc-400 mb-2">
                       {order.orderType === 'TAKEAWAY' && order.customerName && (
-                        <span>Customer: <strong className="text-white">{order.customerName}</strong> • </span>
+                        <span>Customer: <strong className="text-stone-900 dark:text-white">{order.customerName}</strong> • </span>
                       )}
-                      <span>Server: <strong className="text-amber-400">{order.waiter?.name || 'Counter'}</strong></span>
+                      <span>Server: <strong className="text-amber-700 dark:text-amber-400 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
                     </div>
 
                     {/* Items list */}
-                    <div className="space-y-1.5 mb-3 border-t border-b border-white/10 py-2">
+                    <div className="space-y-1.5 mb-3 border-t border-b border-stone-200 dark:border-white/10 py-2">
                       {order.items.map((item: any) => (
                         <div key={item.id} className="text-xs">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-black text-amber-400">{item.quantity}x</span>
-                            <span className="text-white font-bold">{item.menuItem.name}</span>
+                            <span className="font-black text-amber-700 dark:text-amber-400">{item.quantity}x</span>
+                            <span className="text-stone-900 dark:text-white font-bold">{item.menuItem.name}</span>
                           </div>
                           {item.specialInstructions && (
-                            <div className="text-[10px] text-amber-300/90 italic pl-5 mt-0.5">
+                            <div className="text-[10px] text-amber-800 dark:text-amber-300/90 italic pl-5 mt-0.5">
                               &ldquo;{item.specialInstructions}&rdquo;
                             </div>
                           )}
@@ -325,6 +351,7 @@ export function KitchenDisplayView() {
             ) : (
               preparingOrders.map((order) => {
                 const prep = calculatePrepTime(order.createdAt);
+                const prepStyle = getPrepBadge(prep);
                 return (
                   <div
                     key={order.id}
@@ -338,26 +365,20 @@ export function KitchenDisplayView() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-base font-black text-stone-900 dark:text-white">
-                        #{order.orderNumber}
+                        {formatOrderNumber(order.orderNumber)}
                       </span>
                       <div className="flex items-center gap-1.5">
                         <span
-                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${
-                            prep.delayStatus === 'DELAYED'
-                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
-                              : prep.delayStatus === 'WARNING'
-                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                              : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                          }`}
+                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${prep.delayStatus === 'DELAYED' ? 'bg-rose-500 animate-ping' : prep.delayStatus === 'WARNING' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${prepStyle.dot}`} />
                           {prep.formattedTime}
                         </span>
                         <span
-                          className={`text-[10px] font-black px-2.5 py-0.5 rounded-lg border ${
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                             order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                              : 'text-orange-300 bg-orange-500/20 border-orange-500/30'
+                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/30'
+                              : 'bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-500/30'
                           }`}
                         >
                           {order.orderType === 'TAKEAWAY'
@@ -367,23 +388,23 @@ export function KitchenDisplayView() {
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-zinc-400 mb-2">
+                    <div className="text-[11px] text-stone-600 dark:text-zinc-400 mb-2">
                       {order.orderType === 'TAKEAWAY' && order.customerName && (
-                        <span>Customer: <strong className="text-white">{order.customerName}</strong> • </span>
+                        <span>Customer: <strong className="text-stone-900 dark:text-white">{order.customerName}</strong> • </span>
                       )}
-                      <span>Server: <strong className="text-amber-400">{order.waiter?.name || 'Counter'}</strong></span>
+                      <span>Server: <strong className="text-amber-700 dark:text-amber-400 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
                     </div>
 
                     {/* Items list */}
-                    <div className="space-y-1.5 mb-3 border-t border-b border-white/10 py-2">
+                    <div className="space-y-1.5 mb-3 border-t border-b border-stone-200 dark:border-white/10 py-2">
                       {order.items.map((item: any) => (
                         <div key={item.id} className="text-xs">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-black text-orange-400">{item.quantity}x</span>
-                            <span className="text-white font-bold">{item.menuItem.name}</span>
+                            <span className="font-black text-orange-600 dark:text-orange-400">{item.quantity}x</span>
+                            <span className="text-stone-900 dark:text-white font-bold">{item.menuItem.name}</span>
                           </div>
                           {item.specialInstructions && (
-                            <div className="text-[10px] text-amber-300/90 italic pl-5 mt-0.5">
+                            <div className="text-[10px] text-amber-800 dark:text-amber-300/90 italic pl-5 mt-0.5">
                               &ldquo;{item.specialInstructions}&rdquo;
                             </div>
                           )}
@@ -425,41 +446,48 @@ export function KitchenDisplayView() {
             ) : (
               readyOrders.map((order) => {
                 const prep = calculatePrepTime(order.createdAt);
+                const prepStyle = getPrepBadge(prep);
                 return (
                   <div
                     key={order.id}
-                    className="bg-white dark:bg-white/[0.05] border border-emerald-500/40 rounded-2xl p-3.5 shadow-xs backdrop-blur-xl animate-fade-in"
+                    className="bg-white dark:bg-white/[0.05] border border-emerald-300 dark:border-emerald-500/40 rounded-2xl p-3.5 shadow-xs backdrop-blur-xl animate-fade-in"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-base font-black text-emerald-700 dark:text-emerald-300">
-                        #{order.orderNumber}
+                        {formatOrderNumber(order.orderNumber)}
                       </span>
                       <div className="flex items-center gap-1.5">
                         <span
-                          className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}
                         >
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          <span className={`w-1.5 h-1.5 rounded-full ${prepStyle.dot}`} />
                           {prep.formattedTime}
                         </span>
-                        <Badge variant={order.orderType === 'TAKEAWAY' ? 'purple' : 'success'}>
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                            order.orderType === 'TAKEAWAY'
+                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/30'
+                              : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30'
+                          }`}
+                        >
                           {order.orderType === 'TAKEAWAY'
                             ? `🛍️ TAKEAWAY`
                             : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
-                        </Badge>
+                        </span>
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-zinc-400 mb-2">
-                      <span>Server: <strong className="text-amber-400">{order.waiter?.name || 'Counter'}</strong></span>
-                      {order.customerName && <span> • Guest: <strong className="text-white">{order.customerName}</strong></span>}
+                    <div className="text-[11px] text-stone-600 dark:text-zinc-400 mb-2">
+                      <span>Server: <strong className="text-amber-700 dark:text-amber-400 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                      {order.customerName && <span> • Guest: <strong className="text-stone-900 dark:text-white">{order.customerName}</strong></span>}
                     </div>
 
                     {/* Items list */}
-                    <div className="space-y-1 mb-3 text-xs text-zinc-200 border-t border-b border-white/10 py-2">
+                    <div className="space-y-1 mb-3 text-xs border-t border-b border-stone-200 dark:border-white/10 py-2">
                       {order.items.map((item: any) => (
                         <div key={item.id} className="flex items-center gap-1.5">
-                          <span className="font-bold text-emerald-400">{item.quantity}x</span>
-                          <span className="font-bold text-white">{item.menuItem.name}</span>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">{item.quantity}x</span>
+                          <span className="font-bold text-stone-900 dark:text-white">{item.menuItem.name}</span>
                         </div>
                       ))}
                     </div>
