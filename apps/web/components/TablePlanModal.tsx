@@ -173,16 +173,16 @@ export function TablePlanModal({
   });
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-[#161311] text-white rounded-[32px] max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-white/15 my-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[32px] max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-stone-200 dark:border-white/15 my-auto">
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10">
           <div>
-            <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-              <LayoutGrid className="w-5 h-5 text-amber-400" />
+            <h3 className="text-base sm:text-lg font-black text-stone-900 dark:text-white flex items-center gap-2">
+              <LayoutGrid className="w-5 h-5 text-amber-500" />
               <span>Dining Tables & Floor Plan</span>
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-stone-500 dark:text-zinc-400">
               {isOwnerOrManager
                 ? 'Configure dining tables, seat capacities, and room availability'
                 : 'Select an available table for this dining guest'}
@@ -190,7 +190,7 @@ export function TablePlanModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white/[0.08] hover:bg-white/[0.15] rounded-xl transition text-zinc-400 hover:text-white cursor-pointer"
+            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl transition text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -198,7 +198,7 @@ export function TablePlanModal({
 
         {/* Tab Toggle for Owner/Manager */}
         {isOwnerOrManager && (
-          <div className="flex items-center justify-between mb-4 bg-white/[0.04] p-1.5 rounded-2xl border border-white/10">
+          <div className="flex items-center justify-between mb-4 bg-stone-100 dark:bg-white/[0.04] p-1.5 rounded-2xl border border-stone-200 dark:border-white/10">
             <div className="flex items-center gap-1">
               <button
                 onClick={() => {
@@ -207,8 +207,8 @@ export function TablePlanModal({
                 }}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                   activeTab === 'floor'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black shadow-md'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                    : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
                 }`}
               >
                 Floor Plan View
@@ -217,8 +217,8 @@ export function TablePlanModal({
                 onClick={() => setActiveTab('manage')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'manage'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black shadow-md'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                    : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
                 }`}
               >
                 <Settings2 className="w-3.5 h-3.5" />
@@ -229,7 +229,7 @@ export function TablePlanModal({
             {activeTab === 'manage' && !showAddForm && (
               <button
                 onClick={handleStartAdd}
-                className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-extrabold rounded-xl text-xs shadow-md transition active:scale-95 cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-extrabold rounded-xl text-xs shadow-xs transition active:scale-95 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Table</span>
@@ -256,14 +256,14 @@ export function TablePlanModal({
         {(showAddForm || editingTableId) && (
           <form
             onSubmit={handleSaveTable}
-            className="mb-5 p-4 bg-white/[0.04] border border-white/10 rounded-2xl space-y-3"
+            className="mb-5 p-4 bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-2xl space-y-3"
           >
-            <div className="text-xs font-bold text-white uppercase tracking-wider flex items-center justify-between">
+            <div className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
               <span>{editingTableId ? 'Edit Dining Table' : 'Add New Dining Table'}</span>
               <button
                 type="button"
                 onClick={handleCancelForm}
-                className="text-zinc-400 hover:text-white"
+                className="text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -271,7 +271,7 @@ export function TablePlanModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Table Number / Zone
                 </label>
                 <input
@@ -280,12 +280,12 @@ export function TablePlanModal({
                   value={tableNumber}
                   onChange={(e) => setTableNumber(e.target.value)}
                   required
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Seating Capacity
                 </label>
                 <input
@@ -295,21 +295,21 @@ export function TablePlanModal({
                   value={capacity}
                   onChange={(e) => setCapacity(e.target.value)}
                   required
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Initial Status
                 </label>
                 <select
                   value={status}
                   onChange={(e: any) => setStatus(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50"
+                  className="w-full bg-white dark:bg-[#161311] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500/50"
                 >
-                  <option value="AVAILABLE" className="bg-[#161311] text-white">Available</option>
-                  <option value="RESERVED" className="bg-[#161311] text-white">Reserved</option>
+                  <option value="AVAILABLE" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Available</option>
+                  <option value="RESERVED" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Reserved</option>
                 </select>
               </div>
             </div>
@@ -318,14 +318,14 @@ export function TablePlanModal({
               <button
                 type="button"
                 onClick={handleCancelForm}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black rounded-xl text-xs font-extrabold shadow-md transition disabled:opacity-50 cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 rounded-xl text-xs font-extrabold shadow-xs transition disabled:opacity-50 cursor-pointer"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{loading ? 'Saving...' : editingTableId ? 'Update Table' : 'Create Table'}</span>
@@ -343,8 +343,8 @@ export function TablePlanModal({
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
                   statusFilter === s
-                    ? 'bg-amber-500 text-black font-black shadow-md'
-                    : 'bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white'
+                    ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
                 }`}
               >
                 {s === 'ALL' ? `All (${tablesList.length})` : s}
@@ -355,15 +355,15 @@ export function TablePlanModal({
           <div className="hidden sm:flex items-center gap-3 text-[11px]">
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="text-zinc-400">Open</span>
+              <span className="text-stone-600 dark:text-zinc-400">Open</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-              <span className="text-zinc-400">Seated</span>
+              <span className="text-stone-600 dark:text-zinc-400">Seated</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-              <span className="text-zinc-400">Reserved</span>
+              <span className="text-stone-600 dark:text-zinc-400">Reserved</span>
             </div>
           </div>
         </div>
@@ -388,12 +388,12 @@ export function TablePlanModal({
                   activeTab === 'floor' ? 'cursor-pointer hover:border-amber-500/50' : ''
                 } ${
                   isSelected && activeTab === 'floor'
-                    ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-2 border-amber-500 text-white shadow-lg shadow-amber-500/20'
+                    ? 'bg-amber-500/20 border-2 border-amber-500 text-stone-900 dark:text-white shadow-lg shadow-amber-500/20'
                     : hasActiveOrder
-                    ? 'bg-amber-950/25 border-amber-500/40 text-amber-200'
+                    ? 'bg-amber-500/10 dark:bg-amber-950/25 border-amber-500/40 text-amber-900 dark:text-amber-200'
                     : isReserved
-                    ? 'bg-purple-950/25 border-purple-500/40 text-purple-200'
-                    : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.08] text-white'
+                    ? 'bg-purple-500/10 dark:bg-purple-950/25 border-purple-500/40 text-purple-900 dark:text-purple-200'
+                    : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.08] text-stone-900 dark:text-white'
                 }`}
               >
                 {/* Top Row: Name and Status Badge */}
@@ -402,12 +402,12 @@ export function TablePlanModal({
                   <span
                     className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
                       isSelected && activeTab === 'floor'
-                        ? 'bg-amber-500 text-black'
+                        ? 'bg-amber-500 text-stone-950'
                         : hasActiveOrder
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
                         : isReserved
-                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30'
+                        : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                     }`}
                   >
                     {hasActiveOrder ? 'Seated' : isReserved ? 'Reserved' : 'Open'}
@@ -415,27 +415,27 @@ export function TablePlanModal({
                 </div>
 
                 {/* Capacity */}
-                <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-2">
-                  <Users className="w-3.5 h-3.5 text-zinc-400" />
+                <div className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-zinc-400 mb-2">
+                  <Users className="w-3.5 h-3.5 text-stone-500 dark:text-zinc-400" />
                   <span>Capacity: {t.capacity} seats</span>
                 </div>
 
                 {/* Active Order Summary if Seated */}
                 {hasActiveOrder && (
-                  <div className="text-[11px] font-bold border-t border-white/10 pt-1.5 mb-2 text-amber-300">
+                  <div className="text-[11px] font-bold border-t border-amber-500/20 dark:border-white/10 pt-1.5 mb-2 text-amber-700 dark:text-amber-300">
                     Active: {t.orders[0].orderNumber} ({Number(t.orders[0].totalAmount).toFixed(2)} ETB)
                   </div>
                 )}
 
                 {/* Owner / Manager Action Bar in Manage Mode */}
                 {isOwnerOrManager && activeTab === 'manage' && (
-                  <div className="flex items-center justify-end gap-1 pt-2 border-t border-white/10 mt-1">
+                  <div className="flex items-center justify-end gap-1 pt-2 border-t border-stone-200 dark:border-white/10 mt-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleStartEdit(t);
                       }}
-                      className="p-1.5 text-zinc-400 hover:text-amber-400 hover:bg-white/[0.06] rounded-lg transition cursor-pointer"
+                      className="p-1.5 text-stone-500 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-200/50 dark:hover:bg-white/[0.06] rounded-lg transition cursor-pointer"
                       title="Edit Table"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -446,7 +446,7 @@ export function TablePlanModal({
                         e.stopPropagation();
                         handleDeleteTable(t);
                       }}
-                      className="p-1.5 text-zinc-400 hover:text-[#C11221] hover:bg-red-500/10 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="p-1.5 text-stone-500 dark:text-zinc-400 hover:text-[#C11221] hover:bg-red-500/10 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                       title={hasActiveOrder ? 'Cannot delete table with active order' : 'Delete Table'}
                     >
                       <Trash2 className="w-3.5 h-3.5" />

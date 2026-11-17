@@ -107,26 +107,26 @@ export function PurchaseOrderModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="bg-[#161311] border border-white/15 rounded-3xl max-w-2xl w-full p-6 shadow-2xl text-white space-y-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-2xl w-full p-6 shadow-2xl text-stone-900 dark:text-white space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-zinc-950 font-black flex items-center justify-center shadow-lg shadow-amber-500/20">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-stone-950 font-black flex items-center justify-center shadow-xs">
               <Truck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white font-heading">
+              <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">
                 Record Supplier Bulk Delivery (Main Store)
               </h3>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-stone-500 dark:text-zinc-400">
                 Receives bulk ingredients and recalculates unit cost (ETB/g, ETB/ml) via Weighted Average Cost.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white/5 hover:bg-white/10 rounded-xl transition text-zinc-400 hover:text-white"
+            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl transition text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -135,17 +135,17 @@ export function PurchaseOrderModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
                 Supplier
               </label>
               <select
                 value={selectedSupplierId}
                 onChange={(e) => setSelectedSupplierId(e.target.value)}
                 required
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500"
+                className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
               >
                 {suppliers.map((s) => (
-                  <option key={s.id} value={s.id} className="bg-[#1C1815] text-white">
+                  <option key={s.id} value={s.id} className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">
                     {s.name}
                   </option>
                 ))}
@@ -153,7 +153,7 @@ export function PurchaseOrderModal({
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
                 Vendor Invoice #
               </label>
               <input
@@ -161,14 +161,14 @@ export function PurchaseOrderModal({
                 placeholder="e.g. INV-2026-9921"
                 value={invoiceNumber}
                 onChange={(e) => setInvoiceNumber(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-3 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
               />
             </div>
           </div>
 
           {/* Add Ingredient Line */}
           <div>
-            <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
               Delivered Stock Items
             </label>
             <select
@@ -178,13 +178,13 @@ export function PurchaseOrderModal({
                   e.target.value = '';
                 }
               }}
-              className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500"
+              className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
             >
-              <option value="" className="bg-[#1C1815] text-zinc-400">+ Select ingredient from database...</option>
+              <option value="" className="bg-white dark:bg-[#1C1815] text-stone-500 dark:text-zinc-400">+ Select ingredient from database...</option>
               {ingredients
                 .filter((i) => !items.some((it) => it.ingredientId === i.id))
                 .map((ing) => (
-                  <option key={ing.id} value={ing.id} className="bg-[#1C1815] text-white">
+                  <option key={ing.id} value={ing.id} className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">
                     {ing.name} (Current: {Number(ing.currentCostPerBaseUnit).toFixed(4)} ETB / {ing.baseUnit?.symbol})
                   </option>
                 ))}
@@ -194,7 +194,7 @@ export function PurchaseOrderModal({
           {/* Delivered Stock Items (Card Format) */}
           <div className="space-y-2.5 max-h-[260px] overflow-y-auto no-scrollbar">
             {items.length === 0 ? (
-              <div className="py-8 text-center text-xs text-zinc-500 bg-white/[0.02] border border-white/5 rounded-2xl">
+              <div className="py-8 text-center text-xs text-stone-500 dark:text-zinc-500 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/5 rounded-2xl">
                 No items added yet. Select an ingredient above to restock.
               </div>
             ) : (
@@ -203,18 +203,18 @@ export function PurchaseOrderModal({
                 return (
                   <div
                     key={i.ingredientId}
-                    className="p-3 bg-white/[0.03] border border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
+                    className="p-3 bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-xs sm:text-sm text-white truncate">{i.name}</div>
-                      <div className="text-[10px] text-zinc-400 mt-0.5">
-                        New Cost: <span className="text-amber-400 font-bold">{unitCost.toFixed(4)} ETB / {i.symbol}</span>
+                      <div className="font-bold text-xs sm:text-sm text-stone-900 dark:text-white truncate">{i.name}</div>
+                      <div className="text-[10px] text-stone-500 dark:text-zinc-400 mt-0.5">
+                        New Cost: <span className="text-amber-600 dark:text-amber-400 font-bold">{unitCost.toFixed(4)} ETB / {i.symbol}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/10 rounded-xl px-2 py-1">
-                        <span className="text-[10px] font-bold text-zinc-400">Qty:</span>
+                      <div className="flex items-center gap-1.5 bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-xl px-2 py-1">
+                        <span className="text-[10px] font-bold text-stone-500 dark:text-zinc-400">Qty:</span>
                         <input
                           type="number"
                           step="any"
@@ -222,13 +222,13 @@ export function PurchaseOrderModal({
                           onChange={(e) =>
                             handleUpdateItem(i.ingredientId, 'quantity', parseFloat(e.target.value) || 0)
                           }
-                          className="w-20 bg-transparent text-xs font-bold text-white focus:outline-none text-right"
+                          className="w-20 bg-transparent text-xs font-bold text-stone-900 dark:text-white focus:outline-none text-right"
                         />
-                        <span className="text-[10px] text-zinc-400 font-semibold">{i.symbol}</span>
+                        <span className="text-[10px] text-stone-500 dark:text-zinc-400 font-semibold">{i.symbol}</span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/10 rounded-xl px-2 py-1">
-                        <span className="text-[10px] font-bold text-zinc-400">Total:</span>
+                      <div className="flex items-center gap-1.5 bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-xl px-2 py-1">
+                        <span className="text-[10px] font-bold text-stone-500 dark:text-zinc-400">Total:</span>
                         <input
                           type="number"
                           step="any"
@@ -236,15 +236,15 @@ export function PurchaseOrderModal({
                           onChange={(e) =>
                             handleUpdateItem(i.ingredientId, 'totalCost', parseFloat(e.target.value) || 0)
                           }
-                          className="w-20 bg-transparent text-xs font-bold text-amber-400 focus:outline-none text-right"
+                          className="w-20 bg-transparent text-xs font-bold text-amber-600 dark:text-amber-400 focus:outline-none text-right"
                         />
-                        <span className="text-[10px] text-zinc-400 font-semibold">ETB</span>
+                        <span className="text-[10px] text-stone-500 dark:text-zinc-400 font-semibold">ETB</span>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => handleRemove(i.ingredientId)}
-                        className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition cursor-pointer"
+                        className="p-1.5 text-stone-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-xl transition cursor-pointer"
                         title="Remove item"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -256,23 +256,23 @@ export function PurchaseOrderModal({
             )}
           </div>
 
-          <div className="flex justify-between items-center bg-white/[0.04] border border-white/10 p-3 rounded-2xl text-xs font-bold">
-            <span className="text-zinc-400">Total Purchase Value:</span>
-            <span className="text-base text-amber-400 font-extrabold">{grandTotal.toFixed(2)} ETB</span>
+          <div className="flex justify-between items-center bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 p-3 rounded-2xl text-xs font-bold">
+            <span className="text-stone-600 dark:text-zinc-400">Total Purchase Value:</span>
+            <span className="text-base text-amber-600 dark:text-amber-400 font-extrabold">{grandTotal.toFixed(2)} ETB</span>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-2xl text-xs font-bold text-zinc-400 hover:text-white transition"
+              className="px-4 py-2 rounded-2xl text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || items.length === 0}
-              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold text-xs shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>{submitting ? 'Committing to Store...' : 'Commit Purchase to Main Store'}</span>

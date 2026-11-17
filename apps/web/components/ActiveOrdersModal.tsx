@@ -62,22 +62,22 @@ export function ActiveOrdersModal({
   });
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-[#161311] text-white rounded-[32px] max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-white/15 my-auto flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[32px] max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-stone-200 dark:border-white/15 my-auto flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
           <div>
-            <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-amber-400" />
+            <h3 className="text-base sm:text-lg font-black text-stone-900 dark:text-white flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-amber-500" />
               <span>Cashier Orders & Live Active Tickets</span>
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-stone-500 dark:text-zinc-400">
               Overview of all active dine-in table bills and takeaway orders with cashier & waiter attribution
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white/[0.08] hover:bg-white/[0.15] rounded-xl transition text-zinc-300 hover:text-white cursor-pointer"
+            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl transition text-stone-500 dark:text-zinc-300 hover:text-stone-900 dark:hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -91,8 +91,8 @@ export function ActiveOrdersModal({
               onClick={() => setFilter('ALL')}
               className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
                 filter === 'ALL'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               All Active ({orders.length})
@@ -101,8 +101,8 @@ export function ActiveOrdersModal({
               onClick={() => setFilter('DINE_IN')}
               className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap flex items-center gap-1 cursor-pointer ${
                 filter === 'DINE_IN'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               <Utensils className="w-3 h-3" />
@@ -112,8 +112,8 @@ export function ActiveOrdersModal({
               onClick={() => setFilter('TAKEAWAY')}
               className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap flex items-center gap-1 cursor-pointer ${
                 filter === 'TAKEAWAY'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               <ShoppingBag className="w-3 h-3" />
@@ -123,8 +123,8 @@ export function ActiveOrdersModal({
               onClick={() => setFilter('UNPAID')}
               className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
                 filter === 'UNPAID'
-                  ? 'bg-[#C11221] text-white font-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white'
+                  ? 'bg-[#C11221] text-white font-black shadow-xs'
+                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               Unpaid ({orders.filter((o) => o.paymentStatus !== 'PAID').length})
@@ -133,8 +133,8 @@ export function ActiveOrdersModal({
               onClick={() => setFilter('READY')}
               className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
                 filter === 'READY'
-                  ? 'bg-emerald-600 text-white font-black shadow-md'
-                  : 'bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white'
+                  ? 'bg-emerald-600 text-white font-black shadow-xs'
+                  : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               Ready ({orders.filter((o) => o.status === 'READY').length})
@@ -143,13 +143,13 @@ export function ActiveOrdersModal({
 
           {/* Search Box */}
           <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-stone-400 dark:text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search table, cashier, guest..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+              className="w-full bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
             />
           </div>
         </div>
@@ -157,7 +157,7 @@ export function ActiveOrdersModal({
         {/* Orders Cards Grid */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar">
           {filteredOrders.length === 0 ? (
-            <div className="py-16 text-center text-xs text-zinc-500">
+            <div className="py-16 text-center text-xs text-stone-400 dark:text-zinc-500">
               No orders found matching the filter criteria.
             </div>
           ) : (
@@ -168,21 +168,21 @@ export function ActiveOrdersModal({
               return (
                 <div
                   key={order.id}
-                  className="bg-white/[0.04] border border-white/10 rounded-2xl p-4 shadow-lg hover:border-amber-500/40 transition flex flex-col md:flex-row md:items-center justify-between gap-4 backdrop-blur-xl"
+                  className="bg-stone-50/70 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-2xl p-4 shadow-xs hover:border-amber-500/40 transition flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
                   {/* Left: Metadata & Attribution */}
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-black text-white">#{order.orderNumber}</span>
+                      <span className="text-sm font-black text-stone-900 dark:text-white">#{order.orderNumber}</span>
 
                       {/* Destination Badge */}
                       {isTakeaway ? (
-                        <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
                           <ShoppingBag className="w-3 h-3" />
                           TAKEAWAY ({order.customerName || 'Pickup'})
                         </span>
                       ) : (
-                        <span className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
                           <Utensils className="w-3 h-3" />
                           Table {order.table?.tableNumber || 'Counter'}
                         </span>
@@ -192,12 +192,12 @@ export function ActiveOrdersModal({
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           order.status === 'READY'
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse'
+                            ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 animate-pulse'
                             : order.status === 'IN_PREPARATION'
-                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                            ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
                             : order.status === 'CONFIRMED'
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                            : 'bg-zinc-800 text-zinc-400'
+                            ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30'
+                            : 'bg-stone-200 dark:bg-zinc-800 text-stone-600 dark:text-zinc-400'
                         }`}
                       >
                         {order.status}
@@ -205,10 +205,10 @@ export function ActiveOrdersModal({
 
                       {/* Payment Status */}
                       <span
-                        className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                        className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${
                           isPaid
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-[#C11221] text-white shadow-sm'
+                            ? 'bg-emerald-600'
+                            : 'bg-[#C11221] shadow-xs'
                         }`}
                       >
                         {isPaid ? 'PAID' : 'UNPAID'}
@@ -216,56 +216,56 @@ export function ActiveOrdersModal({
                     </div>
 
                     {/* Attribution Line */}
-                    <div className="flex items-center gap-3 text-[11px] text-zinc-400 flex-wrap">
-                      <div className="flex items-center gap-1 font-semibold text-zinc-300">
-                        <UserCheck className="w-3.5 h-3.5 text-amber-400" />
+                    <div className="flex items-center gap-3 text-[11px] text-stone-500 dark:text-zinc-400 flex-wrap">
+                      <div className="flex items-center gap-1 font-semibold text-stone-700 dark:text-zinc-300">
+                        <UserCheck className="w-3.5 h-3.5 text-amber-500" />
                         <span>Cashier:</span>
-                        <span className="font-bold text-amber-400">
+                        <span className="font-bold text-amber-700 dark:text-amber-400">
                           {order.cashier?.name || 'Assigned Station'}
                         </span>
                       </div>
 
                       {order.waiter && (
-                        <div className="flex items-center gap-1 text-zinc-300">
-                          <Smartphone className="w-3.5 h-3.5 text-amber-400" />
+                        <div className="flex items-center gap-1 text-stone-700 dark:text-zinc-300">
+                          <Smartphone className="w-3.5 h-3.5 text-amber-500" />
                           <span>Server:</span>
                           <span className="font-semibold">{order.waiter.name}</span>
                         </div>
                       )}
 
-                      <div className="flex items-center gap-1 text-zinc-500">
+                      <div className="flex items-center gap-1 text-stone-400 dark:text-zinc-500">
                         <Clock className="w-3 h-3" />
                         <span>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                     </div>
 
                     {/* Items Summary Line */}
-                    <div className="text-xs text-zinc-300 font-medium truncate pt-1">
+                    <div className="text-xs text-stone-600 dark:text-zinc-300 font-medium truncate pt-1">
                       {order.items?.map((itm: any) => `${itm.quantity}x ${itm.menuItem?.name || itm.name}`).join(', ')}
                     </div>
                   </div>
 
                   {/* Right: Financial Amount & Actions */}
-                  <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-white/10">
+                  <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-stone-200 dark:border-white/10">
                     <div className="text-left md:text-right">
-                      <div className="text-[10px] text-zinc-400 font-bold uppercase">Total Bill (15% VAT)</div>
-                      <div className="text-base font-black text-amber-400">
+                      <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase">Total Bill (15% VAT)</div>
+                      <div className="text-base font-black text-amber-700 dark:text-amber-400">
                         {Number(order.totalAmount).toFixed(2)} ETB
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      {/* Add Items Button (for open dine-in table orders) */}
+                      {/* Add Items Button */}
                       {!isPaid && (
                         <button
                           onClick={() => {
                             onAppendItems(order);
                             onClose();
                           }}
-                          className="px-2.5 py-1.5 bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-stone-700 dark:text-white border border-stone-200 dark:border-white/15 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                           title="Add more items to this order"
                         >
-                          <PlusCircle className="w-3.5 h-3.5 text-amber-400" />
+                          <PlusCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                           <span>Add Items</span>
                         </button>
                       )}
@@ -277,7 +277,7 @@ export function ActiveOrdersModal({
                             onSettleOrder(order);
                             onClose();
                           }}
-                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black rounded-xl text-xs font-black shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 rounded-xl text-xs font-black shadow-md shadow-amber-500/25 transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
                         >
                           <CreditCard className="w-3.5 h-3.5" />
                           <span>Settle Bill</span>
@@ -288,7 +288,7 @@ export function ActiveOrdersModal({
                             onPrintReceipt(order);
                             onClose();
                           }}
-                          className="px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.15] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-white/10"
+                          className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-stone-700 dark:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-stone-200 dark:border-white/10"
                         >
                           <Receipt className="w-3.5 h-3.5" />
                           <span>Receipt</span>

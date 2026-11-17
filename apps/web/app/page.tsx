@@ -39,9 +39,9 @@ export default function RootPage() {
   }, [currentUser, login, router]);
 
   return (
-    <div className="min-h-screen bg-[#0D0B0A] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white flex flex-col items-center justify-center p-4 transition-colors">
       <Loader2 className="w-8 h-8 text-amber-500 animate-spin mb-2" />
-      <p className="text-xs font-bold text-zinc-300 uppercase tracking-widest font-heading">
+      <p className="text-xs font-bold text-stone-600 dark:text-zinc-300 uppercase tracking-widest font-heading">
         Loading Nitsuh Station...
       </p>
     </div>

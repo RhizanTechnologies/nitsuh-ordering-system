@@ -179,43 +179,43 @@ export function RecipeEditorModal({
     );
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-[#161311] text-white rounded-[32px] max-w-2xl sm:max-w-3xl w-full p-4 sm:p-6 shadow-2xl border border-white/15 space-y-4 max-h-[92vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[32px] max-w-2xl sm:max-w-3xl w-full p-4 sm:p-6 shadow-2xl border border-stone-200 dark:border-white/15 space-y-4 max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header with Dish Switcher */}
-        <div className="flex items-start justify-between pb-3 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-start justify-between pb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-[#C11221] p-0.5 shadow-md flex-shrink-0">
-              <div className="w-full h-full rounded-[14px] bg-[#161311] flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-[#C11221] p-0.5 shadow-xs flex-shrink-0">
+              <div className="w-full h-full rounded-[14px] bg-stone-50 dark:bg-[#161311] flex items-center justify-center text-amber-500 dark:text-amber-400">
                 <ChefHat className="w-5 h-5" />
               </div>
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-black text-white">Recipe Studio:</h3>
+                <h3 className="text-base font-black text-stone-900 dark:text-white">Recipe Studio:</h3>
                 {allMenuItems.length > 1 ? (
                   <select
                     value={activeItem.id}
                     onChange={(e) => handleSwitchDish(e.target.value)}
-                    className="bg-black/50 border border-amber-500/40 rounded-xl px-2.5 py-1 text-xs font-black text-amber-400 focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="bg-stone-100 dark:bg-black/50 border border-stone-300 dark:border-amber-500/40 rounded-xl px-2.5 py-1 text-xs font-black text-stone-900 dark:text-amber-400 focus:outline-none focus:border-amber-500 cursor-pointer"
                   >
                     {allMenuItems.map((item) => (
-                      <option key={item.id} value={item.id} className="bg-[#161311] text-white">
+                      <option key={item.id} value={item.id} className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">
                         {item.name} ({Number(item.price).toFixed(2)} ETB) {item.recipe?.ingredients?.length ? '✓' : '(No Recipe)'}
                       </option>
                     ))}
                   </select>
                 ) : (
-                  <span className="text-base font-black text-amber-400 truncate">{activeItem.name}</span>
+                  <span className="text-base font-black text-amber-600 dark:text-amber-400 truncate">{activeItem.name}</span>
                 )}
               </div>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-stone-500 dark:text-zinc-400 mt-0.5">
                 Define exact ingredient grams/ml to automate kitchen inventory deductions & calculate net food margins.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white/[0.08] hover:bg-white/[0.15] rounded-xl transition text-zinc-400 hover:text-white cursor-pointer flex-shrink-0 ml-2"
+            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl transition text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer flex-shrink-0 ml-2"
           >
             <X className="w-4 h-4" />
           </button>
@@ -318,11 +318,11 @@ export function RecipeEditorModal({
                   handleAddIngredient(val);
                 }
               }}
-              className="w-full min-w-0 max-w-full bg-[#1e1a17] border border-white/10 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer truncate"
+              className="w-full min-w-0 max-w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer truncate"
             >
-              <option value="">+ Add an ingredient from inventory...</option>
+              <option value="" className="bg-white dark:bg-[#1e1a17] text-stone-500 dark:text-zinc-400">+ Add an ingredient from inventory...</option>
               {availableIngredients.map((ing) => (
-                <option key={ing.id} value={ing.id}>
+                <option key={ing.id} value={ing.id} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
                   {ing.name} ({ing.category || 'General'}) • {Number(ing.currentCostPerBaseUnit).toFixed(4)} ETB / {ing.baseUnit?.symbol || 'g'}
                 </option>
               ))}
@@ -333,10 +333,10 @@ export function RecipeEditorModal({
         {/* Recipe Ingredient Requirements List */}
         <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 no-scrollbar min-h-0">
           {recipeLines.length === 0 ? (
-            <div className="py-12 text-center text-xs text-zinc-400 bg-white/[0.02] border border-white/5 rounded-3xl p-6">
+            <div className="py-12 text-center text-xs text-stone-500 dark:text-zinc-400 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/5 rounded-3xl p-6">
               <ChefHat className="w-8 h-8 text-amber-500/40 mx-auto mb-2" />
-              <div className="font-bold text-white text-sm mb-1">No ingredients in this recipe yet</div>
-              <p className="max-w-sm mx-auto text-zinc-500">
+              <div className="font-bold text-stone-900 dark:text-white text-sm mb-1">No ingredients in this recipe yet</div>
+              <p className="max-w-sm mx-auto text-stone-500 dark:text-zinc-500">
                 Select ingredients from the dropdown above to define how many grams/ml are used per portion of {activeItem.name}.
               </p>
             </div>
@@ -348,12 +348,12 @@ export function RecipeEditorModal({
               return (
                 <div
                   key={line.ingredientId}
-                  className="p-3.5 bg-white/[0.03] border border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
+                  className="p-3.5 bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-bold text-xs sm:text-sm text-white truncate">{line.name}</div>
-                    <div className="text-[10px] text-zinc-400 mt-0.5">
-                      Cost: <span className="text-zinc-300 font-semibold">{line.unitCost.toFixed(4)} ETB / {line.symbol}</span>
+                    <div className="font-bold text-xs sm:text-sm text-stone-900 dark:text-white truncate">{line.name}</div>
+                    <div className="text-[10px] text-stone-500 dark:text-zinc-400 mt-0.5">
+                      Cost: <span className="text-stone-700 dark:text-zinc-300 font-semibold">{line.unitCost.toFixed(4)} ETB / {line.symbol}</span>
                     </div>
                   </div>
 
@@ -366,7 +366,7 @@ export function RecipeEditorModal({
                             key={delta}
                             type="button"
                             onClick={() => handleIncrementQty(line.ingredientId, delta)}
-                            className="px-1.5 py-0.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-[10px] font-bold text-zinc-300 cursor-pointer"
+                            className="px-1.5 py-0.5 rounded-lg bg-stone-200 hover:bg-stone-300 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-[10px] font-bold text-stone-700 dark:text-zinc-300 cursor-pointer"
                           >
                             +{delta}
                           </button>
@@ -375,8 +375,8 @@ export function RecipeEditorModal({
                     )}
 
                     {/* Quantity Input */}
-                    <div className="flex items-center gap-1.5 bg-black/40 border border-white/10 rounded-xl px-2.5 py-1.5">
-                      <span className="text-[10px] font-bold text-zinc-400">Qty:</span>
+                    <div className="flex items-center gap-1.5 bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-2.5 py-1.5">
+                      <span className="text-[10px] font-bold text-stone-500 dark:text-zinc-400">Qty:</span>
                       <input
                         type="number"
                         step="any"
@@ -385,15 +385,15 @@ export function RecipeEditorModal({
                         onChange={(e) =>
                           handleUpdateQty(line.ingredientId, parseFloat(e.target.value) || 0)
                         }
-                        className="w-20 bg-transparent text-xs font-black text-amber-400 focus:outline-none text-right"
+                        className="w-20 bg-transparent text-xs font-black text-amber-600 dark:text-amber-400 focus:outline-none text-right"
                       />
-                      <span className="text-zinc-400 font-bold text-xs">{line.symbol}</span>
+                      <span className="text-stone-500 dark:text-zinc-400 font-bold text-xs">{line.symbol}</span>
                     </div>
 
                     {/* Line Cost */}
                     <div className="text-right min-w-[75px]">
-                      <div className="text-[9px] text-zinc-400 font-bold uppercase">Portion Cost</div>
-                      <div className="text-xs font-black text-emerald-400">
+                      <div className="text-[9px] text-stone-500 dark:text-zinc-400 font-bold uppercase">Portion Cost</div>
+                      <div className="text-xs font-black text-emerald-600 dark:text-emerald-400">
                         {lineCost.toFixed(4)} ETB
                       </div>
                     </div>
@@ -402,7 +402,7 @@ export function RecipeEditorModal({
                     <button
                       type="button"
                       onClick={() => handleRemoveLine(line.ingredientId)}
-                      className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
+                      className="p-1.5 text-stone-400 dark:text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
                       title="Remove ingredient from recipe"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -415,9 +415,9 @@ export function RecipeEditorModal({
         </div>
 
         {/* Modal Actions */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-white/10 flex-shrink-0">
-          <div className="text-xs text-zinc-400 text-center sm:text-left">
-            Total Recipe Cost: <strong className="text-white font-bold">{portionCost.toFixed(4)} ETB</strong> / portion
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-stone-200 dark:border-white/10 flex-shrink-0">
+          <div className="text-xs text-stone-500 dark:text-zinc-400 text-center sm:text-left">
+            Total Recipe Cost: <strong className="text-stone-900 dark:text-white font-bold">{portionCost.toFixed(4)} ETB</strong> / portion
           </div>
 
           <div className="flex items-center justify-end gap-2">
@@ -425,7 +425,7 @@ export function RecipeEditorModal({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white cursor-pointer transition hover:bg-white/5"
+              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer transition hover:bg-stone-100 dark:hover:bg-white/5"
             >
               Cancel
             </button>
@@ -433,7 +433,7 @@ export function RecipeEditorModal({
               type="button"
               disabled={saving || recipeLines.length === 0}
               onClick={handleSave}
-              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black text-xs shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer active:scale-95"
+              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs shadow-xs transition flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer active:scale-95"
             >
               <Check className="w-4 h-4 stroke-[3]" />
               <span>{saving ? 'Saving...' : 'Save Recipe & Recalculate'}</span>

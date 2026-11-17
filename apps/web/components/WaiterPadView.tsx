@@ -1116,12 +1116,12 @@ export function WaiterPadView() {
       </div>
 
       {/* MOBILE FLOATING DOCK (matching reference image) */}
-      <div className="md:hidden fixed bottom-3 left-4 right-4 z-40 bg-[#161311]/90 backdrop-blur-2xl border border-white/15 rounded-3xl p-2 px-5 shadow-2xl flex items-center justify-between">
+      <div className="md:hidden fixed bottom-3 left-4 right-4 z-40 bg-white/95 dark:bg-[#161311]/90 backdrop-blur-2xl border border-stone-200/90 dark:border-white/15 rounded-3xl p-2 px-5 shadow-2xl flex items-center justify-between transition-colors">
         {/* Home */}
         <button
           onClick={() => setActiveTab('menu')}
           className={`flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition cursor-pointer ${
-            activeTab === 'menu' ? 'text-amber-400 font-black' : 'text-zinc-500 hover:text-zinc-300'
+            activeTab === 'menu' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-stone-500 dark:text-zinc-500 hover:text-stone-800 dark:hover:text-zinc-300'
           }`}
         >
           <Utensils className="w-5 h-5" />
@@ -1131,7 +1131,7 @@ export function WaiterPadView() {
         {/* Tables */}
         <button
           onClick={() => setTableModalOpen(true)}
-          className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
+          className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-stone-500 dark:text-zinc-500 hover:text-stone-800 dark:hover:text-zinc-300 transition cursor-pointer"
         >
           <LayoutGrid className="w-5 h-5" />
           <span className="text-[10px] font-bold">Tables</span>
@@ -1140,10 +1140,10 @@ export function WaiterPadView() {
         {/* Orders / Cart Button */}
         <button
           onClick={() => setShowMobileDrawer(true)}
-          className="relative flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-zinc-500 hover:text-amber-400 transition cursor-pointer"
+          className="relative flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-stone-500 dark:text-zinc-500 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
         >
           <div className="relative">
-            <ShoppingBag className="w-5 h-5 text-zinc-300" />
+            <ShoppingBag className="w-5 h-5 text-stone-600 dark:text-zinc-300" />
             {totalWaiterItems > 0 && (
               <span className="absolute -top-1.5 -right-2 bg-[#C11221] text-white text-[9px] w-4 h-4 rounded-full font-black flex items-center justify-center shadow-lg border border-white/20">
                 {totalWaiterItems}
@@ -1157,7 +1157,7 @@ export function WaiterPadView() {
         <button
           onClick={() => setActiveTab('tables')}
           className={`relative flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition cursor-pointer ${
-            activeTab === 'tables' ? 'text-amber-400 font-black' : 'text-zinc-500 hover:text-zinc-300'
+            activeTab === 'tables' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-stone-500 dark:text-zinc-500 hover:text-stone-800 dark:hover:text-zinc-300'
           }`}
         >
           <Clock className="w-5 h-5" />
@@ -1174,16 +1174,16 @@ export function WaiterPadView() {
 
       {/* MOBILE FULL-SCREEN SLIP REVIEW DRAWER */}
       {showMobileDrawer && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex flex-col justify-end md:hidden animate-in fade-in duration-200">
-          <div className="bg-[#161311] border-t border-white/15 rounded-t-[32px] max-h-[85vh] flex flex-col p-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex flex-col justify-end md:hidden animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#161311] border-t border-stone-200 dark:border-white/15 rounded-t-[32px] max-h-[85vh] flex flex-col p-4 shadow-2xl text-stone-900 dark:text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
               <div>
-                <span className="text-xs text-zinc-400 font-medium">Review Order Note</span>
-                <h3 className="text-sm font-black text-white">{destinationLabel}</h3>
+                <span className="text-xs text-stone-500 dark:text-zinc-400 font-medium">Review Order Note</span>
+                <h3 className="text-sm font-black text-stone-900 dark:text-white">{destinationLabel}</h3>
               </div>
               <button
                 onClick={() => setShowMobileDrawer(false)}
-                className="p-1.5 bg-white/[0.08] rounded-full text-zinc-400 hover:text-white"
+                className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-full text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1196,7 +1196,7 @@ export function WaiterPadView() {
                 placeholder="Special notes (e.g. Less sugar, extra hot)..."
                 value={waiterSpecialNotes}
                 onChange={(e) => setWaiterSpecialNotes(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-3.5 py-2 text-xs font-medium text-white placeholder-zinc-500 focus:outline-none"
+                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
               />
             </div>
 
@@ -1205,34 +1205,34 @@ export function WaiterPadView() {
               {waiterCart.map((item) => (
                 <div
                   key={item.menuItemId}
-                  className="bg-white/[0.04] border border-white/10 p-2.5 rounded-2xl flex items-center justify-between"
+                  className="bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 p-2.5 rounded-2xl flex items-center justify-between"
                 >
                   <div className="min-w-0 pr-2">
-                    <div className="text-xs font-bold text-white truncate">{item.name}</div>
-                    <div className="text-[10px] text-zinc-400 font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
+                    <div className="text-xs font-bold text-stone-900 dark:text-white truncate">{item.name}</div>
+                    <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
                       <span>{item.price.toFixed(2)} ETB × {item.quantity}</span>
                       {item.tip && item.tip > 0 && (
-                        <span className="bg-amber-500/20 text-amber-300 px-1 py-0.2 rounded font-bold text-[9px]">
+                        <span className="bg-amber-500/20 text-amber-700 dark:text-amber-300 px-1 py-0.2 rounded font-bold text-[9px]">
                           Tip: +{item.tip.toFixed(2)} ETB
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-xs font-black text-amber-400">
+                    <span className="text-xs font-black text-amber-600 dark:text-amber-400">
                       {((item.price + (item.tip || 0)) * item.quantity).toFixed(2)} ETB
                     </span>
-                    <div className="flex items-center gap-1 bg-white/[0.08] border border-white/10 rounded-xl px-1.5 py-0.5">
+                    <div className="flex items-center gap-1 bg-white dark:bg-white/[0.08] border border-stone-200 dark:border-white/10 rounded-xl px-1.5 py-0.5">
                       <button
                         onClick={() => updateWaiterQuantity(item.menuItemId, -1)}
-                        className="text-zinc-400 hover:text-white"
+                        className="text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
                       >
                         <Minus className="w-2.5 h-2.5" />
                       </button>
-                      <span className="text-xs font-black px-1 text-white">{item.quantity}</span>
+                      <span className="text-xs font-black px-1 text-stone-900 dark:text-white">{item.quantity}</span>
                       <button
                         onClick={() => updateWaiterQuantity(item.menuItemId, 1)}
-                        className="text-zinc-400 hover:text-white"
+                        className="text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
                       >
                         <Plus className="w-2.5 h-2.5" />
                       </button>
@@ -1243,24 +1243,24 @@ export function WaiterPadView() {
             </div>
 
             {/* Total and Action */}
-            <div className="pt-3 border-t border-white/10 mt-2 space-y-3">
-              <div className="space-y-1 text-xs text-zinc-400">
+            <div className="pt-3 border-t border-stone-200 dark:border-white/10 mt-2 space-y-3">
+              <div className="space-y-1 text-xs text-stone-500 dark:text-zinc-400">
                 <div className="flex justify-between items-center">
                   <span>Subtotal ({totalWaiterItems} items)</span>
-                  <span className="font-bold text-white">{totalWaiterBase.toFixed(2)} ETB</span>
+                  <span className="font-bold text-stone-900 dark:text-white">{totalWaiterBase.toFixed(2)} ETB</span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-white/10 font-black text-sm text-white">
+                <div className="flex justify-between items-center pt-1 border-t border-stone-200 dark:border-white/10 font-black text-sm text-stone-900 dark:text-white">
                   <span>Total Bill</span>
-                  <span className="text-base text-amber-400">{totalWaiterSum.toFixed(2)} ETB</span>
+                  <span className="text-base text-amber-600 dark:text-amber-400">{totalWaiterSum.toFixed(2)} ETB</span>
                 </div>
               </div>
 
               <button
                 disabled={waiterCart.length === 0 || sending || isCurrentTableOccupied}
                 onClick={handleSendToCashier}
-                className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] text-black rounded-2xl text-xs font-black shadow-lg flex items-center justify-center gap-2 disabled:opacity-40"
+                className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] text-stone-950 rounded-2xl text-xs font-black shadow-xs flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-4 h-4 text-stone-950" />
                 <span>
                   {isCurrentTableOccupied
                     ? 'Table Occupied (Settle Bill First)'

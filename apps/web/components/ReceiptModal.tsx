@@ -23,24 +23,24 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
   const total = Number(order.totalAmount || 0);
 
   return (
-    <div className="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-[#161311] text-white rounded-[32px] max-w-sm w-full p-5 shadow-2xl relative border border-white/15">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[32px] max-w-sm w-full p-5 shadow-2xl relative border border-stone-200 dark:border-white/15">
         {/* Modal Controls */}
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10 print:hidden">
-          <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-200 dark:border-white/10 print:hidden">
+          <span className="text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">
             Customer Receipt
           </span>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="p-2 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black rounded-xl hover:brightness-110 transition shadow-md cursor-pointer"
+              className="p-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black rounded-xl hover:brightness-110 transition shadow-xs cursor-pointer"
               title="Print Receipt"
             >
               <Printer className="w-4 h-4 stroke-[2.5]" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 bg-white/[0.08] text-zinc-400 hover:text-white rounded-xl transition cursor-pointer"
+              className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white rounded-xl transition cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -180,16 +180,16 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
         </div>
 
         {/* Modal Action Buttons */}
-        <div className="mt-4 pt-3 border-t border-white/10 flex gap-2 print:hidden">
+        <div className="mt-4 pt-3 border-t border-stone-200 dark:border-white/10 flex gap-2 print:hidden">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-2xl bg-white/[0.08] hover:bg-white/[0.15] text-zinc-300 font-bold text-xs transition cursor-pointer"
+            className="flex-1 py-2.5 rounded-2xl bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-stone-700 dark:text-zinc-300 font-bold text-xs transition cursor-pointer"
           >
             Close
           </button>
           <button
             onClick={handlePrint}
-            className="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+            className="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
           >
             <Printer className="w-3.5 h-3.5" />
             <span>Print Receipt</span>

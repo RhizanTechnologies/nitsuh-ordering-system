@@ -103,23 +103,23 @@ export function KitchenDisplayView() {
   }, [newOrders.length, preparingOrders.length, readyOrders.length]);
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0D0B0A] text-white relative">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white relative transition-colors">
       {/* Background ambient lighting */}
       <div className="absolute top-0 left-1/3 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Clean Top KDS Bar - Minimal & High Contrast */}
-      <div className="bg-[#12100E]/95 backdrop-blur-xl border-b border-white/10 px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between flex-shrink-0 relative z-10">
+      <div className="bg-white/95 dark:bg-[#12100E]/95 backdrop-blur-xl border-b border-stone-200 dark:border-white/10 px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between flex-shrink-0 relative z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-[#C11221] p-0.5 shadow-md flex-shrink-0">
-            <div className="w-full h-full rounded-[10px] bg-[#161311] flex items-center justify-center text-amber-400">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-[#C11221] p-0.5 shadow-xs flex-shrink-0">
+            <div className="w-full h-full rounded-[10px] bg-stone-50 dark:bg-[#161311] flex items-center justify-center text-amber-500 dark:text-amber-400">
               <ChefHat className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </div>
           </div>
           <div>
-            <h2 className="text-xs sm:text-sm font-black tracking-tight text-white flex items-center gap-2">
+            <h2 className="text-xs sm:text-sm font-black tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
               <span>Kitchen Display (KDS)</span>
-              <span className="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded-full font-bold">
+              <span className="text-[9px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded-full font-bold">
                 LIVE
               </span>
             </h2>
@@ -128,15 +128,15 @@ export function KitchenDisplayView() {
 
         {/* Live Counters */}
         <div className="flex items-center gap-2 sm:gap-4 text-xs font-bold">
-          <div className="flex items-center gap-1 sm:gap-1.5 text-amber-400">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-amber-600 dark:text-amber-400">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
             <span>{newOrders.length} New</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 text-orange-400">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-orange-600 dark:text-orange-400">
             <Flame className="w-3.5 h-3.5" />
             <span>{preparingOrders.length} Cooking</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 text-emerald-400">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-emerald-600 dark:text-emerald-400">
             <CheckCircle className="w-3.5 h-3.5" />
             <span>{readyOrders.length} Ready</span>
           </div>
@@ -213,9 +213,9 @@ export function KitchenDisplayView() {
       {/* Kanban Board: 3 Columns on Tablet/Desktop, 1 Responsive Active Column on Mobile */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-5 overflow-y-auto relative z-10 no-scrollbar">
         {/* Column 1: New Confirmed Orders */}
-        <div className={`${mobileTab === 'NEW' ? 'flex' : 'hidden md:flex'} flex-col bg-white/[0.03] border border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xl min-h-[300px]`}>
-          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-white/10 flex-shrink-0">
-            <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+        <div className={`${mobileTab === 'NEW' ? 'flex' : 'hidden md:flex'} flex-col bg-white/70 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xs min-h-[300px]`}>
+          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
+            <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               <span>1. New Tickets ({newOrders.length})</span>
             </span>
@@ -233,16 +233,16 @@ export function KitchenDisplayView() {
                 return (
                   <div
                     key={order.id}
-                    className={`bg-white/[0.05] border rounded-2xl p-3.5 shadow-xl backdrop-blur-xl transition ${
+                    className={`bg-white dark:bg-white/[0.05] border rounded-2xl p-3.5 shadow-xs backdrop-blur-xl transition ${
                       prep.delayStatus === 'DELAYED'
                         ? 'border-red-500 ring-2 ring-red-500/20'
                         : prep.delayStatus === 'WARNING'
                         ? 'border-amber-500/80'
-                        : 'border-white/10 hover:border-amber-500/40'
+                        : 'border-stone-200 dark:border-white/10 hover:border-amber-500/40'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-black text-white">
+                      <span className="text-base font-black text-stone-900 dark:text-white">
                         #{order.orderNumber}
                       </span>
                       <div className="flex items-center gap-1.5">
@@ -311,9 +311,9 @@ export function KitchenDisplayView() {
         </div>
 
         {/* Column 2: In Preparation */}
-        <div className={`${mobileTab === 'PREPARING' ? 'flex' : 'hidden md:flex'} flex-col bg-white/[0.03] border border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xl min-h-[300px]`}>
-          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-white/10 flex-shrink-0">
-            <span className="text-xs font-black uppercase tracking-wider text-orange-400 flex items-center gap-2">
+        <div className={`${mobileTab === 'PREPARING' ? 'flex' : 'hidden md:flex'} flex-col bg-white/70 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xs min-h-[300px]`}>
+          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
+            <span className="text-xs font-black uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
               <span>2. Cooking / Brewing ({preparingOrders.length})</span>
             </span>
@@ -321,8 +321,8 @@ export function KitchenDisplayView() {
 
           <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
             {preparingOrders.length === 0 ? (
-              <div className="h-32 flex flex-col items-center justify-center text-xs text-zinc-500">
-                <Flame className="w-6 h-6 mb-1 text-zinc-600 stroke-1" />
+              <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400 dark:text-zinc-500">
+                <Flame className="w-6 h-6 mb-1 text-stone-400 dark:text-zinc-600 stroke-1" />
                 <span>Kitchen is all clear</span>
               </div>
             ) : (
@@ -331,16 +331,16 @@ export function KitchenDisplayView() {
                 return (
                   <div
                     key={order.id}
-                    className={`bg-white/[0.05] border rounded-2xl p-3.5 shadow-xl backdrop-blur-xl transition ${
+                    className={`bg-white dark:bg-white/[0.05] border rounded-2xl p-3.5 shadow-xs backdrop-blur-xl transition ${
                       prep.delayStatus === 'DELAYED'
                         ? 'border-red-500 ring-2 ring-red-500/20'
                         : prep.delayStatus === 'WARNING'
                         ? 'border-amber-500/80'
-                        : 'border-white/10 hover:border-orange-500/40'
+                        : 'border-stone-200 dark:border-white/10 hover:border-orange-500/40'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-black text-white">
+                      <span className="text-base font-black text-stone-900 dark:text-white">
                         #{order.orderNumber}
                       </span>
                       <div className="flex items-center gap-1.5">
@@ -409,9 +409,9 @@ export function KitchenDisplayView() {
         </div>
 
         {/* Column 3: Ready for Serving */}
-        <div className={`${mobileTab === 'READY' ? 'flex' : 'hidden md:flex'} flex-col bg-white/[0.03] border border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xl min-h-[300px]`}>
-          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-white/10 flex-shrink-0">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+        <div className={`${mobileTab === 'READY' ? 'flex' : 'hidden md:flex'} flex-col bg-white/70 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xs min-h-[300px]`}>
+          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>3. Ready for Service ({readyOrders.length})</span>
             </span>
@@ -419,8 +419,8 @@ export function KitchenDisplayView() {
 
           <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
             {readyOrders.length === 0 ? (
-              <div className="h-32 flex flex-col items-center justify-center text-xs text-zinc-500">
-                <CheckCircle className="w-6 h-6 mb-1 text-zinc-600 stroke-1" />
+              <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400 dark:text-zinc-500">
+                <CheckCircle className="w-6 h-6 mb-1 text-stone-400 dark:text-zinc-600 stroke-1" />
                 <span>No orders waiting for pickup</span>
               </div>
             ) : (
@@ -429,10 +429,10 @@ export function KitchenDisplayView() {
                 return (
                   <div
                     key={order.id}
-                    className="bg-white/[0.05] border border-emerald-500/40 rounded-2xl p-3.5 shadow-xl backdrop-blur-xl animate-fade-in"
+                    className="bg-white dark:bg-white/[0.05] border border-emerald-500/40 rounded-2xl p-3.5 shadow-xs backdrop-blur-xl animate-fade-in"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-black text-emerald-300">
+                      <span className="text-base font-black text-emerald-700 dark:text-emerald-300">
                         #{order.orderNumber}
                       </span>
                       <div className="flex items-center gap-1.5">

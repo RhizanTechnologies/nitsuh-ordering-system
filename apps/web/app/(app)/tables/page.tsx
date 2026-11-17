@@ -160,14 +160,14 @@ export default function TablesPage() {
   });
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-7xl mx-auto w-full text-white no-scrollbar">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-7xl mx-auto w-full text-stone-900 dark:text-white no-scrollbar">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-            <LayoutGrid className="w-6 h-6 text-amber-400" />
+          <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white flex items-center gap-2">
+            <LayoutGrid className="w-6 h-6 text-amber-500" />
             <span>Dining Tables & Floor Plan</span>
           </h1>
-          <p className="text-xs text-zinc-400 mt-1">
+          <p className="text-xs text-stone-500 dark:text-zinc-400 mt-1">
             Real-time table status monitoring and floor configuration (Add, Edit, Remove tables)
           </p>
         </div>
@@ -175,7 +175,7 @@ export default function TablesPage() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={loadTables}
-            className="p-2.5 rounded-2xl border border-white/10 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 transition cursor-pointer"
+            className="p-2.5 rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-white/[0.05] hover:bg-stone-50 dark:hover:bg-white/[0.1] text-stone-600 dark:text-zinc-300 transition cursor-pointer shadow-xs"
             title="Refresh tables"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -184,7 +184,7 @@ export default function TablesPage() {
           {isOwnerOrManager && (
             <button
               onClick={handleStartAdd}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-black rounded-2xl text-xs font-black transition shadow-lg shadow-amber-500/25 cursor-pointer"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 rounded-2xl text-xs font-black transition shadow-xs cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span>Add New Table</span>
@@ -209,15 +209,15 @@ export default function TablesPage() {
 
       {/* Add / Edit Form Card */}
       {(showAddForm || editingTableId) && (
-        <div className="mb-6 p-5 bg-white/[0.04] rounded-3xl border border-white/15 shadow-2xl backdrop-blur-xl">
-          <h3 className="text-sm font-black text-white mb-3 flex items-center gap-2">
-            {showAddForm ? <Plus className="w-4 h-4 text-amber-400" /> : <Edit3 className="w-4 h-4 text-amber-400" />}
+        <div className="mb-6 p-5 bg-white dark:bg-white/[0.04] rounded-3xl border border-stone-200 dark:border-white/15 shadow-xl backdrop-blur-xl">
+          <h3 className="text-sm font-black text-stone-900 dark:text-white mb-3 flex items-center gap-2">
+            {showAddForm ? <Plus className="w-4 h-4 text-amber-500" /> : <Edit3 className="w-4 h-4 text-amber-500" />}
             <span>{showAddForm ? 'Add New Dining Table' : 'Edit Table Details'}</span>
           </h3>
 
           <form onSubmit={showAddForm ? handleSaveAdd : handleSaveEdit} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                 Table Name / Number *
               </label>
               <input
@@ -225,39 +225,39 @@ export default function TablesPage() {
                 value={tableNumber}
                 onChange={(e) => setTableNumber(e.target.value)}
                 placeholder="e.g. T07 - Balcony"
-                className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 focus:outline-none focus:border-amber-500/50 bg-white/[0.05] text-white placeholder-zinc-500"
+                className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 dark:border-white/10 focus:outline-none focus:border-amber-500/50 bg-stone-50 dark:bg-white/[0.05] text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                 Guest Capacity
               </label>
               <select
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 focus:outline-none focus:border-amber-500/50 bg-[#161311] text-white"
+                className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 dark:border-white/10 focus:outline-none focus:border-amber-500/50 bg-stone-50 dark:bg-[#161311] text-stone-900 dark:text-white cursor-pointer"
               >
-                <option value="2">2 Guests (Couples)</option>
-                <option value="4">4 Guests (Standard)</option>
-                <option value="6">6 Guests (Family)</option>
-                <option value="8">8 Guests (Large Group)</option>
-                <option value="12">12+ Guests (VIP Hall)</option>
+                <option value="2" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">2 Guests (Couples)</option>
+                <option value="4" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">4 Guests (Standard)</option>
+                <option value="6" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">6 Guests (Family)</option>
+                <option value="8" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">8 Guests (Large Group)</option>
+                <option value="12" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">12+ Guests (VIP Hall)</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                 Initial Status
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 focus:outline-none focus:border-amber-500/50 bg-[#161311] text-white"
+                className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 dark:border-white/10 focus:outline-none focus:border-amber-500/50 bg-stone-50 dark:bg-[#161311] text-stone-900 dark:text-white cursor-pointer"
               >
-                <option value="AVAILABLE">🟢 Available (Clean)</option>
-                <option value="RESERVED">🟡 Reserved</option>
+                <option value="AVAILABLE" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">🟢 Available (Clean)</option>
+                <option value="RESERVED" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">🟡 Reserved</option>
               </select>
             </div>
 
@@ -265,7 +265,7 @@ export default function TablesPage() {
               <button
                 type="submit"
                 disabled={formLoading}
-                className="flex-1 py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black rounded-xl text-xs font-black transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 rounded-xl text-xs font-black transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{formLoading ? 'Saving...' : showAddForm ? 'Create Table' : 'Save Changes'}</span>
@@ -276,7 +276,7 @@ export default function TablesPage() {
                   setShowAddForm(false);
                   setEditingTableId(null);
                 }}
-                className="py-2 px-3 bg-white/[0.08] hover:bg-white/[0.12] text-zinc-300 rounded-xl text-xs font-bold transition cursor-pointer"
+                className="py-2 px-3 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.12] text-stone-700 dark:text-zinc-300 rounded-xl text-xs font-bold transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -293,8 +293,8 @@ export default function TablesPage() {
             onClick={() => setStatusFilter(filter)}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
               statusFilter === filter
-                ? 'bg-amber-500 text-black font-black shadow-md'
-                : 'bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white'
+                ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
             }`}
           >
             {filter === 'ALL' && `All Tables (${tablesList.length})`}
@@ -314,32 +314,32 @@ export default function TablesPage() {
           return (
             <div
               key={t.id}
-              className={`p-4 rounded-3xl border transition-all shadow-xl backdrop-blur-xl relative flex flex-col justify-between ${
+              className={`p-4 rounded-3xl border transition-all shadow-md relative flex flex-col justify-between ${
                 isOccupied
-                  ? 'bg-rose-950/25 border-rose-500/40 text-rose-200'
+                  ? 'bg-rose-500/10 dark:bg-rose-950/25 border-rose-500/40 text-rose-900 dark:text-rose-200'
                   : isReserved
-                  ? 'bg-purple-950/25 border-purple-500/40 text-purple-200'
-                  : 'bg-white/[0.04] border-white/10 hover:border-amber-500/40 text-white'
+                  ? 'bg-purple-500/10 dark:bg-purple-950/25 border-purple-500/40 text-purple-900 dark:text-purple-200'
+                  : 'bg-white dark:bg-white/[0.04] border-stone-200 dark:border-white/10 hover:border-amber-500/40 text-stone-900 dark:text-white'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-black text-white">{t.tableNumber}</span>
+                  <span className="text-sm font-black text-stone-900 dark:text-white">{t.tableNumber}</span>
                   <span
                     className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase border ${
                       isOccupied
-                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                        ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/30'
                         : isReserved
-                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                        : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                        ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/30'
+                        : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                     }`}
                   >
                     {t.status}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-3">
-                  <Users className="w-3.5 h-3.5 text-zinc-500" />
+                <div className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-zinc-400 mb-3">
+                  <Users className="w-3.5 h-3.5 text-stone-400 dark:text-zinc-500" />
                   <span>{t.capacity} Guests Capacity</span>
                 </div>
 
@@ -348,22 +348,22 @@ export default function TablesPage() {
                   if (!activeOrder) return null;
                   const prep = calculatePrepTime(activeOrder.createdAt);
                   return (
-                    <div className="bg-black/40 rounded-2xl p-2.5 mb-3 border border-rose-500/30 text-xs space-y-1.5">
+                    <div className="bg-white/80 dark:bg-black/40 rounded-2xl p-2.5 mb-3 border border-rose-500/30 text-xs space-y-1.5 shadow-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-black text-white">{activeOrder.orderNumber}</span>
+                        <span className="font-black text-stone-900 dark:text-white">{activeOrder.orderNumber}</span>
                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${prep.badgeClass}`}>
                           {prep.formattedTime}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-[11px] text-zinc-300">
-                        <span>Server: <strong className="text-amber-400">{activeOrder.waiter?.name || 'Staff'}</strong></span>
-                        <span className="font-extrabold text-amber-400 font-mono">
+                      <div className="flex items-center justify-between text-[11px] text-stone-600 dark:text-zinc-300">
+                        <span>Server: <strong className="text-amber-600 dark:text-amber-400">{activeOrder.waiter?.name || 'Staff'}</strong></span>
+                        <span className="font-extrabold text-amber-600 dark:text-amber-400 font-mono">
                           {Number(activeOrder.totalAmount || 0).toFixed(2)} ETB
                         </span>
                       </div>
                       <Link
                         href="/pos"
-                        className="mt-1 w-full py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-black font-extrabold text-[11px] rounded-xl flex items-center justify-center gap-1 transition shadow-md"
+                        className="mt-1 w-full py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-stone-950 font-extrabold text-[11px] rounded-xl flex items-center justify-center gap-1 transition shadow-xs"
                       >
                         <span>Settle in POS</span>
                         <ArrowRight className="w-3 h-3" />
@@ -374,17 +374,17 @@ export default function TablesPage() {
               </div>
 
               {isOwnerOrManager && (
-                <div className="flex items-center justify-end gap-1 pt-3 border-t border-white/10">
+                <div className="flex items-center justify-end gap-1 pt-3 border-t border-stone-200 dark:border-white/10">
                   <button
                     onClick={() => handleStartEdit(t)}
-                    className="p-1.5 text-zinc-400 hover:text-amber-400 hover:bg-white/[0.08] rounded-lg transition cursor-pointer"
+                    className="p-1.5 text-stone-500 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-white/[0.08] rounded-lg transition cursor-pointer"
                     title="Edit table"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDelete(t.id, t.tableNumber)}
-                    className="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
+                    className="p-1.5 text-stone-500 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
                     title="Delete table"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

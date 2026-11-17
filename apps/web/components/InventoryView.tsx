@@ -362,28 +362,28 @@ export function InventoryView() {
   ) || [];
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#0D0B0A] text-white">
+    <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white transition-colors">
       {/* Top Inventory Header */}
-      <div className="bg-[#12100E]/95 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 flex-shrink-0">
+      <div className="bg-white/95 dark:bg-[#12100E]/95 backdrop-blur-xl border-b border-stone-200 dark:border-white/10 px-4 sm:px-6 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-zinc-950 font-black flex items-center justify-center shadow-lg shadow-amber-500/20 flex-shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-stone-950 font-black flex items-center justify-center shadow-xs flex-shrink-0">
             <Boxes className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-extrabold text-white font-heading tracking-wide">
+            <h2 className="text-base font-extrabold text-stone-900 dark:text-white font-heading tracking-wide">
               {isHeadChefOnly ? 'Kitchen Pantry Stock & Requisitions' : 'Dual-Store Inventory & Recipe Engine'}
             </h2>
           </div>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/10 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('balances')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
               activeTab === 'balances'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
             }`}
           >
             Store Balances
@@ -393,13 +393,13 @@ export function InventoryView() {
             onClick={() => setActiveTab('catalog')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'catalog'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
             }`}
           >
             <Boxes className="w-3.5 h-3.5" />
             <span>Stock Catalog (CRUD)</span>
-            <span className="bg-white/10 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+            <span className="bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
               {rawIngredients.length}
             </span>
           </button>
@@ -408,8 +408,8 @@ export function InventoryView() {
             onClick={() => setActiveTab('transfers')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'transfers'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
             }`}
           >
             <ArrowRightLeft className="w-3.5 h-3.5" />
@@ -426,8 +426,8 @@ export function InventoryView() {
               onClick={() => setActiveTab('recipes')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'recipes'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                  : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
               }`}
             >
               <ChefHat className="w-3.5 h-3.5" />
@@ -440,8 +440,8 @@ export function InventoryView() {
               onClick={() => setActiveTab('purchases')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'purchases'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                  : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
               }`}
             >
               <Truck className="w-3.5 h-3.5" />

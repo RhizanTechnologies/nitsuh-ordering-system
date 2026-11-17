@@ -930,21 +930,21 @@ export function ProductManagementView() {
 
       {/* CREATE / EDIT ADD-ON MODAL */}
       {addonModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="bg-[#161311] border border-white/15 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-stone-900 dark:text-white">
+            <div className="flex items-center justify-between border-b border-stone-200 dark:border-white/10 pb-3">
               <div>
-                <h3 className="font-extrabold text-sm sm:text-base text-white flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-amber-400" />
+                <h3 className="font-extrabold text-sm sm:text-base text-stone-900 dark:text-white flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-amber-500" />
                   <span>{isEditingAddon ? 'Edit Kitchen Add-on' : 'Create Real Kitchen Add-on'}</span>
                 </h3>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
+                <p className="text-[11px] text-stone-500 dark:text-zinc-400 mt-0.5">
                   Set extra selling price and link to real stock ingredient for automatic Kitchen Store deductions.
                 </p>
               </div>
               <button
                 onClick={() => setAddonModalOpen(false)}
-                className="p-1.5 text-zinc-400 hover:text-white rounded-xl bg-white/[0.05] cursor-pointer"
+                className="p-1.5 text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -953,7 +953,7 @@ export function ProductManagementView() {
             <form onSubmit={handleSaveAddon} className="space-y-4">
               {/* Add-on Name */}
               <div>
-                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Add-on Name *
                 </label>
                 <input
@@ -962,13 +962,13 @@ export function ProductManagementView() {
                   placeholder="e.g. Extra Mozzarella Cheese, Extra Beef Patty (100g)"
                   value={formAddonName}
                   onChange={(e) => setFormAddonName(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none"
+                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
                 />
               </div>
 
               {/* Selling Price */}
               <div>
-                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Extra Selling Price (ETB charged to guest) *
                 </label>
                 <input
@@ -979,13 +979,13 @@ export function ProductManagementView() {
                   placeholder="e.g. 35.00"
                   value={formAddonPrice}
                   onChange={(e) => setFormAddonPrice(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-black text-amber-400 placeholder-zinc-500 focus:outline-none"
+                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-black text-amber-600 dark:text-amber-400 placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
                 />
               </div>
 
               {/* Scope Selector */}
               <div>
-                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Applicable Products Scope
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -1000,8 +1000,8 @@ export function ProductManagementView() {
                       onClick={() => setFormAddonTargetType(s.id as any)}
                       className={`py-2 px-3 rounded-xl text-xs font-bold transition border cursor-pointer ${
                         formAddonTargetType === s.id
-                          ? 'bg-amber-500 text-black border-amber-400 font-black shadow'
-                          : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-white'
+                          ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-xs'
+                          : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
                       }`}
                     >
                       {s.label}
@@ -1013,16 +1013,16 @@ export function ProductManagementView() {
               {/* Category Dropdown if CATEGORY */}
               {formAddonTargetType === 'CATEGORY' && (
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                     Select Target Category
                   </label>
                   <select
                     value={formAddonCategoryId}
                     onChange={(e) => setFormAddonCategoryId(e.target.value)}
-                    className="w-full bg-[#1e1a17] border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                   >
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
+                      <option key={c.id} value={c.id} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
                         {c.name}
                       </option>
                     ))}
@@ -1033,16 +1033,16 @@ export function ProductManagementView() {
               {/* Item Dropdown if ITEM */}
               {formAddonTargetType === 'ITEM' && (
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                     Select Target Product
                   </label>
                   <select
                     value={formAddonItemId}
                     onChange={(e) => setFormAddonItemId(e.target.value)}
-                    className="w-full bg-[#1e1a17] border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                   >
                     {items.map((i) => (
-                      <option key={i.id} value={i.id}>
+                      <option key={i.id} value={i.id} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
                         {i.name} ({Number(i.price).toFixed(2)} ETB)
                       </option>
                     ))}
@@ -1051,18 +1051,18 @@ export function ProductManagementView() {
               )}
 
               {/* Linked Ingredient Selector */}
-              <div className="pt-2 border-t border-white/10">
-                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+              <div className="pt-2 border-t border-stone-200 dark:border-white/10">
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                   Linked Inventory Ingredient (for stock deduction)
                 </label>
                 <select
                   value={formAddonIngredientId}
                   onChange={(e) => setFormAddonIngredientId(e.target.value)}
-                  className="w-full bg-[#1e1a17] border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  className="w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                 >
-                  <option value="">No stock deduction (price bump only)</option>
+                  <option value="" className="bg-white dark:bg-[#1e1a17] text-stone-500 dark:text-zinc-400">No stock deduction (price bump only)</option>
                   {ingredientsPool.map((ing) => (
-                    <option key={ing.id} value={ing.id}>
+                    <option key={ing.id} value={ing.id} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
                       {ing.name} ({ing.category}) • Cost: {Number(ing.currentCostPerBaseUnit).toFixed(4)} ETB / {ing.baseUnit?.symbol || 'g'}
                     </option>
                   ))}
@@ -1072,7 +1072,7 @@ export function ProductManagementView() {
               {/* Portion Deduction Quantity */}
               {formAddonIngredientId && (
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                     Portion Deduction Quantity ({selectedIngredient?.baseUnit?.symbol || 'g'}) *
                   </label>
                   <div className="flex items-center gap-2">
@@ -1084,9 +1084,9 @@ export function ProductManagementView() {
                       placeholder="e.g. 40"
                       value={formAddonQty}
                       onChange={(e) => setFormAddonQty(e.target.value)}
-                      className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none"
+                      className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
                     />
-                    <span className="text-xs font-bold text-amber-400 bg-white/10 px-3 py-2 rounded-xl">
+                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-stone-100 dark:bg-white/10 px-3 py-2 rounded-xl">
                       {selectedIngredient?.baseUnit?.symbol || 'g'}
                     </span>
                   </div>
@@ -1094,50 +1094,50 @@ export function ProductManagementView() {
               )}
 
               {/* Live Financial Calculation Card */}
-              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3.5 space-y-2 text-xs">
-                <div className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+              <div className="bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl p-3.5 space-y-2 text-xs">
+                <div className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
                   Live Cost & Margin Analysis
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-black/30 p-2 rounded-xl border border-white/5">
-                    <div className="text-[9px] text-zinc-400 uppercase font-bold">Selling Price</div>
-                    <div className="text-xs font-black text-white mt-0.5">
+                  <div className="bg-white dark:bg-black/30 p-2 rounded-xl border border-stone-200 dark:border-white/5">
+                    <div className="text-[9px] text-stone-500 dark:text-zinc-400 uppercase font-bold">Selling Price</div>
+                    <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
                       {addonPriceNum.toFixed(2)} ETB
                     </div>
                   </div>
-                  <div className="bg-black/30 p-2 rounded-xl border border-white/5">
-                    <div className="text-[9px] text-zinc-400 uppercase font-bold">Stock Cost</div>
-                    <div className="text-xs font-black text-rose-400 mt-0.5">
+                  <div className="bg-white dark:bg-black/30 p-2 rounded-xl border border-stone-200 dark:border-white/5">
+                    <div className="text-[9px] text-stone-500 dark:text-zinc-400 uppercase font-bold">Stock Cost</div>
+                    <div className="text-xs font-black text-rose-500 dark:text-rose-400 mt-0.5">
                       {addonEstimatedCost.toFixed(2)} ETB
                     </div>
                   </div>
-                  <div className="bg-black/30 p-2 rounded-xl border border-white/5">
-                    <div className="text-[9px] text-zinc-400 uppercase font-bold">Gross Margin</div>
-                    <div className={`text-xs font-black mt-0.5 ${addonMarginPercent >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  <div className="bg-white dark:bg-black/30 p-2 rounded-xl border border-stone-200 dark:border-white/5">
+                    <div className="text-[9px] text-stone-500 dark:text-zinc-400 uppercase font-bold">Gross Margin</div>
+                    <div className={`text-xs font-black mt-0.5 ${addonMarginPercent >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
                       {addonMarginPercent.toFixed(1)}%
                     </div>
                   </div>
                 </div>
                 {formAddonIngredientId && selectedIngredient && (
-                  <p className="text-[10px] text-zinc-400 italic text-center pt-1">
+                  <p className="text-[10px] text-stone-500 dark:text-zinc-400 italic text-center pt-1">
                     Every order with this add-on will deduct exactly {addonQtyNum} {selectedIngredient.baseUnit?.symbol || 'g'} of {selectedIngredient.name} from Kitchen Store.
                   </p>
                 )}
               </div>
 
               {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setAddonModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingAddon}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs shadow-lg shadow-amber-500/25 transition disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs shadow-xs transition disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   {savingAddon ? 'Saving...' : isEditingAddon ? 'Update Add-on' : 'Create Add-on'}
                 </button>
@@ -1161,15 +1161,15 @@ export function ProductManagementView() {
 
       {/* ADD / EDIT PRODUCT MODAL */}
       {productModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#161311] text-white rounded-[32px] max-w-lg w-full p-6 shadow-2xl border border-white/15 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="text-base font-black text-white">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[32px] max-w-lg w-full p-6 shadow-2xl border border-stone-200 dark:border-white/15 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
+              <h3 className="text-base font-black text-stone-900 dark:text-white">
                 {isEditing ? `Edit Product: ${formName}` : 'Add New Menu Product'}
               </h3>
               <button
                 onClick={() => setProductModalOpen(false)}
-                className="p-2 bg-white/[0.08] hover:bg-white/[0.15] rounded-xl text-zinc-400 hover:text-white transition cursor-pointer"
+                className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1177,27 +1177,27 @@ export function ProductManagementView() {
 
             <form onSubmit={handleSaveProduct} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-zinc-300 mb-1">Product Name (English / Amharic)</label>
+                <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Product Name (English / Amharic)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Special Club Sandwich / ስፔሻል ክለብ ሳንድዊች"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none"
+                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-zinc-300 mb-1">Category</label>
+                  <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Category</label>
                   <select
                     value={formCatId}
                     onChange={(e) => setFormCatId(e.target.value)}
-                    className="w-full bg-[#161311] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:outline-none"
+                    className="w-full bg-white dark:bg-[#161311] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none cursor-pointer"
                   >
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-[#161311] text-white">
+                      <option key={c.id} value={c.id} className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">
                         {c.name}
                       </option>
                     ))}
@@ -1205,7 +1205,7 @@ export function ProductManagementView() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-zinc-300 mb-1">Selling Price (ETB)</label>
+                  <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Selling Price (ETB)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -1214,60 +1214,60 @@ export function ProductManagementView() {
                     placeholder="e.g. 750"
                     value={formPrice}
                     onChange={(e) => setFormPrice(e.target.value)}
-                    className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-black text-amber-400 focus:outline-none"
+                    className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-black text-amber-600 dark:text-amber-400 placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-zinc-300 mb-1">Preparation Station</label>
+                  <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Preparation Station</label>
                   <select
                     value={formPrepSection}
                     onChange={(e) => setFormPrepSection(e.target.value)}
-                    className="w-full bg-[#161311] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:outline-none"
+                    className="w-full bg-white dark:bg-[#161311] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none cursor-pointer"
                   >
-                    <option value="HOT_KITCHEN">Hot Kitchen (Burgers, Pastas, Eggs)</option>
-                    <option value="COLD_KITCHEN">Cold Kitchen (Salads, Wraps)</option>
-                    <option value="BAR_COFFEE">Bar & Coffee (Juices, Hot/Cold Drinks)</option>
-                    <option value="BAKERY">Bakery (Desserts, Tortas per Kg)</option>
+                    <option value="HOT_KITCHEN" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Hot Kitchen (Burgers, Pastas, Eggs)</option>
+                    <option value="COLD_KITCHEN" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Cold Kitchen (Salads, Wraps)</option>
+                    <option value="BAR_COFFEE" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Bar & Coffee (Juices, Hot/Cold Drinks)</option>
+                    <option value="BAKERY" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Bakery (Desserts, Tortas per Kg)</option>
                   </select>
                 </div>
 
                 <div className="flex flex-col justify-end">
-                  <label className="flex items-center gap-2 p-2.5 bg-white/[0.04] rounded-xl border border-white/10 cursor-pointer">
+                  <label className="flex items-center gap-2 p-2.5 bg-stone-50 dark:bg-white/[0.04] rounded-xl border border-stone-200 dark:border-white/10 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formIsDirect}
                       onChange={(e) => setFormIsDirect(e.target.checked)}
-                      className="rounded text-amber-500 focus:ring-amber-500 bg-black/40 border-white/20"
+                      className="rounded text-amber-500 focus:ring-amber-500 bg-white dark:bg-black/40 border-stone-300 dark:border-white/20"
                     />
-                    <span className="font-bold text-zinc-300 text-xs">Direct Retail (Soda/Water)</span>
+                    <span className="font-bold text-stone-750 dark:text-zinc-300 text-xs">Direct Retail (Soda/Water)</span>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-zinc-300 mb-1">Ingredients / Description</label>
+                <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Ingredients / Description</label>
                 <textarea
                   rows={2}
                   placeholder="e.g. Double Beef, Double Cheese, Egg, House Mayo, tomato, onion, lettuce & Fries"
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl p-3 text-xs font-medium text-white placeholder-zinc-500 focus:outline-none"
+                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl p-3 text-xs font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
                 />
               </div>
 
               {/* Product Photo Upload Section */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block font-bold text-zinc-300 text-xs uppercase tracking-wider">
+                  <label className="block font-bold text-stone-700 dark:text-zinc-300 text-xs uppercase tracking-wider">
                     Product Photo (Upload File)
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowUrlFallback(!showUrlFallback)}
-                    className="text-[10px] font-semibold text-zinc-500 hover:text-amber-400 transition"
+                    className="text-[10px] font-semibold text-stone-500 dark:text-zinc-500 hover:text-amber-500 dark:hover:text-amber-400 transition cursor-pointer"
                   >
                     {showUrlFallback ? 'Hide URL link' : 'Or paste web link'}
                   </button>
@@ -1275,8 +1275,8 @@ export function ProductManagementView() {
 
                 {formImageUrl ? (
                   /* Image Preview Card */
-                  <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-black/40 p-3 flex items-center gap-4 group">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-black/60 border border-white/10 flex-shrink-0 relative">
+                  <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-white/15 bg-stone-50 dark:bg-black/40 p-3 flex items-center gap-4 group">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-stone-100 dark:bg-black/60 border border-stone-200 dark:border-white/10 flex-shrink-0 relative">
                       <img
                         src={formImageUrl}
                         alt="Product Preview"
@@ -1285,20 +1285,20 @@ export function ProductManagementView() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Check className="w-4 h-4 text-emerald-400" />
+                      <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5">
+                        <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                         <span>Photo Uploaded & Ready</span>
                       </div>
                       {imageSizeInfo && (
-                        <div className="text-[10px] text-zinc-400 mt-0.5 font-mono">{imageSizeInfo}</div>
+                        <div className="text-[10px] text-stone-500 dark:text-zinc-400 mt-0.5 font-mono">{imageSizeInfo}</div>
                       )}
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1 bg-stone-200 hover:bg-stone-300 dark:bg-white/10 dark:hover:bg-white/20 text-stone-900 dark:text-white rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
                         >
-                          <UploadCloud className="w-3.5 h-3.5 text-amber-400" />
+                          <UploadCloud className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                           Change Photo
                         </button>
                         <button
@@ -1307,9 +1307,9 @@ export function ProductManagementView() {
                             setFormImageUrl('');
                             setImageSizeInfo(null);
                           }}
-                          className="px-3 py-1 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1 bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-300 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
                         >
-                          <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                          <Trash2 className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
                           Remove
                         </button>
                       </div>
@@ -1321,20 +1321,20 @@ export function ProductManagementView() {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-white/20 hover:border-amber-500/50 bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center gap-2 group"
+                    className="border-2 border-dashed border-stone-300 dark:border-white/20 hover:border-amber-500/50 bg-stone-50/50 hover:bg-stone-100/50 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] rounded-2xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center gap-2 group"
                   >
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
                       {uploadingImage ? (
-                        <RefreshCw className="w-6 h-6 animate-spin text-amber-400" />
+                        <RefreshCw className="w-6 h-6 animate-spin text-amber-500 dark:text-amber-400" />
                       ) : (
                         <UploadCloud className="w-6 h-6" />
                       )}
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-white">
+                      <div className="text-xs font-bold text-stone-900 dark:text-white">
                         {uploadingImage ? 'Optimizing & Processing Photo...' : 'Click to Upload Product Photo'}
                       </div>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                      <p className="text-[11px] text-stone-500 dark:text-zinc-400 mt-0.5">
                         Choose photo file from your device (PNG, JPG, WebP) or drag here
                       </p>
                     </div>
@@ -1344,7 +1344,7 @@ export function ProductManagementView() {
                 {/* Optional Web URL Link Fallback (collapsed by default) */}
                 {showUrlFallback && (
                   <div className="pt-2 animate-in fade-in duration-150">
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">
+                    <label className="block text-[10px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
                       Web Image URL (Optional Fallback)
                     </label>
                     <input
@@ -1352,7 +1352,7 @@ export function ProductManagementView() {
                       placeholder="https://images.unsplash.com/..."
                       value={formImageUrl}
                       onChange={(e) => setFormImageUrl(e.target.value)}
-                      className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-medium text-white placeholder-zinc-500 focus:outline-none"
+                      className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
                     />
                   </div>
                 )}
@@ -1367,18 +1367,18 @@ export function ProductManagementView() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setProductModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingProduct}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs shadow-lg shadow-amber-500/25 transition disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs shadow-xs transition disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   {savingProduct ? 'Saving...' : isEditing ? 'Update Product' : 'Add Product'}
                 </button>

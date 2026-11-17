@@ -22,6 +22,18 @@ module.exports = {
         mono: ['"SF Mono"', 'ui-monospace', 'Menlo', 'monospace'],
       },
       colors: {
+        canvas: 'var(--bg-canvas)',
+        surface: 'var(--bg-surface)',
+        'surface-elevated': 'var(--bg-surface-elevated)',
+        'surface-subtle': 'var(--bg-canvas-subtle)',
+        card: 'var(--bg-card)',
+        'card-hover': 'var(--bg-card-hover)',
+        'muted-surface': 'var(--bg-muted)',
+        'subtle-border': 'var(--border-subtle)',
+        'strong-border': 'var(--border-strong)',
+        'primary-text': 'var(--text-primary)',
+        'secondary-text': 'var(--text-secondary)',
+        'muted-text': 'var(--text-muted)',
         cream: {
           50: '#FDFCF9',
           100: '#F8F6F0',

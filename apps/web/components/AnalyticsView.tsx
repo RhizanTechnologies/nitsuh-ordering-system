@@ -91,8 +91,8 @@ export function AnalyticsView() {
 
   if (!data) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#0D0B0A] text-white">
-        <div className="text-xs font-bold text-amber-400 animate-pulse">
+      <div className="flex-1 flex items-center justify-center bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white transition-colors">
+        <div className="text-xs font-bold text-amber-500 animate-pulse">
           Loading executive analytics & net profit...
         </div>
       </div>
@@ -102,19 +102,19 @@ export function AnalyticsView() {
   const { kpis, stockValuation, topDishes, weeklyTrend, recentTransactions, settings } = data;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#0D0B0A] text-white relative no-scrollbar">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white relative no-scrollbar transition-colors">
       {/* Background ambient lighting */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Header Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-white/10 relative z-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-stone-200 dark:border-white/10 relative z-10">
         <div>
           <div className="text-xs font-extrabold text-[#C11221] uppercase tracking-wider flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
             <span>{settings?.cafeName || 'Nitsuh Foods & Cafe'} • Executive Control</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white mt-0.5">
             {activeOwnerTab === 'analytics' ? 'Operations & Net Profit Dashboard' : 'Menu Products & Ingredient Management'}
           </h1>
         </div>

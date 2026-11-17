@@ -54,9 +54,9 @@ export default function ProtectedAppLayout({
 
   if (!hydrated || !currentUser) {
     return (
-      <div className="min-h-screen bg-[#0D0B0A] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white flex flex-col items-center justify-center p-4 transition-colors">
         <Loader2 className="w-8 h-8 text-amber-500 animate-spin mb-3" />
-        <p className="text-xs font-semibold text-zinc-400 tracking-wider font-heading">
+        <p className="text-xs font-semibold text-stone-600 dark:text-zinc-400 tracking-wider font-heading">
           Verifying station credentials...
         </p>
       </div>
@@ -66,25 +66,25 @@ export default function ProtectedAppLayout({
   // 3. Render Access Denied Guard if user tries to manually browse to unauthorized page
   if (!isAllowed) {
     return (
-      <main className="min-h-screen flex flex-col bg-[#0D0B0A] text-white">
+      <main className="min-h-screen flex flex-col bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white transition-colors">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto">
-          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-4 shadow-lg shadow-rose-950/40">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 dark:text-rose-400 mb-4 shadow-lg shadow-rose-950/20">
             <ShieldAlert className="w-8 h-8" />
           </div>
-          <h2 className="text-lg font-extrabold text-white mb-2 font-heading">Station Access Restricted</h2>
-          <p className="text-xs text-zinc-400 leading-relaxed mb-4">
-            Your assigned role <span className="font-bold text-amber-400">({currentUser.role})</span> does not have authorization to view <span className="font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10 text-white">{pathname}</span>.
+          <h2 className="text-lg font-extrabold text-stone-900 dark:text-white mb-2 font-heading">Station Access Restricted</h2>
+          <p className="text-xs text-stone-600 dark:text-zinc-400 leading-relaxed mb-4">
+            Your assigned role <span className="font-bold text-amber-600 dark:text-amber-400">({currentUser.role})</span> does not have authorization to view <span className="font-mono bg-stone-100 dark:bg-white/5 px-2 py-0.5 rounded border border-stone-200 dark:border-white/10 text-stone-900 dark:text-white">{pathname}</span>.
           </p>
-          <div className="text-[11px] text-zinc-500 mb-6 italic">
+          <div className="text-[11px] text-stone-500 dark:text-zinc-500 mb-6 italic">
             Redirecting to your assigned terminal station in a moment...
           </div>
           <button
             onClick={() => router.replace(fallbackRoute)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-zinc-950 font-extrabold rounded-2xl text-xs transition shadow-lg shadow-amber-500/20 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 font-extrabold rounded-2xl text-xs transition shadow-xs cursor-pointer"
           >
             <span>Return to Your Station ({fallbackRoute})</span>
-            <ArrowRight className="w-4 h-4 text-zinc-950" />
+            <ArrowRight className="w-4 h-4 text-stone-950" />
           </button>
         </div>
       </main>
