@@ -62,7 +62,7 @@ export function PosView() {
   const [posTab, setPosTab] = useState<'orders' | 'menu'>('orders');
 
   // Orders View Filters & Search
-  const [orderFilter, setOrderFilter] = useState<'ALL' | 'SLIPS' | 'UNPAID' | 'PREPARING' | 'READY' | 'DINE_IN' | 'TAKEAWAY'>('ALL');
+  const [orderFilter, setOrderFilter] = useState<'ALL' | 'SLIPS' | 'UNPAID' | 'PREPARING' | 'READY' | 'SERVED' | 'DINE_IN' | 'TAKEAWAY'>('ALL');
   const [orderSearch, setOrderSearch] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -90,7 +90,7 @@ export function PosView() {
   const [appendOrderTarget, setAppendOrderTarget] = useState<any | null>(null);
   const [editingSlipTarget, setEditingSlipTarget] = useState<any | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
-  const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'day_before' | '3_days'>('today');
+  const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'day_before' | '3_days' | 'all'>('today');
 
   const loadActiveOrders = () => {
     return fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY,SERVED,COMPLETED&limit=250')
@@ -143,11 +143,26 @@ export function PosView() {
       loadActiveOrders();
     });
 
+    socket.on('kitchen:order_status', () => {
+      loadActiveOrders();
+    });
+
+    socket.on('kitchen:order_ready', () => {
+      loadActiveOrders();
+    });
+
+    socket.on('order:status_changed', () => {
+      loadActiveOrders();
+    });
+
     return () => {
       socket.off('waiter:new_order_note');
       socket.off('tables:updated');
       socket.off('order:confirmed');
       socket.off('order:updated');
+      socket.off('kitchen:order_status');
+      socket.off('kitchen:order_ready');
+      socket.off('order:status_changed');
     };
   }, []);
 
@@ -253,18 +268,22 @@ export function PosView() {
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }, []);
 
-  // Breakdown counts for the past 3 days
+  // Breakdown counts for the past 3 days and all-time
   const dayCounts = useMemo(() => {
     let today = 0;
     let yesterday = 0;
     let day_before = 0;
+    let all = 0;
     let todayUnpaid = 0;
     let yesterdayUnpaid = 0;
     let dayBeforeUnpaid = 0;
+    let allUnpaid = 0;
 
     for (const o of activeOrders) {
       const key = getOrderDayKey(o.createdAt);
-      const isUnpaid = o.paymentStatus !== 'PAID';
+      const isUnpaid = o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED';
+      all++;
+      if (isUnpaid) allUnpaid++;
       if (key === 'today') {
         today++;
         if (isUnpaid) todayUnpaid++;
@@ -282,10 +301,11 @@ export function PosView() {
       yesterday: { total: yesterday, unpaid: yesterdayUnpaid },
       day_before: { total: day_before, unpaid: dayBeforeUnpaid },
       threeDays: today + yesterday + day_before,
+      all: { total: all, unpaid: allUnpaid },
     };
   }, [activeOrders]);
 
-  // Orders filtered by the selected date bucket (today by default, yesterday, day before, or 3-day range)
+  // Orders filtered by the selected date bucket (today by default, yesterday, day before, 3-day range, or all days)
   const dayFilteredOrders = useMemo(() => {
     return activeOrders.filter((o) => {
       const key = getOrderDayKey(o.createdAt);
@@ -293,15 +313,20 @@ export function PosView() {
       if (dateFilter === 'yesterday') return key === 'yesterday';
       if (dateFilter === 'day_before') return key === 'day_before';
       if (dateFilter === '3_days') return ['today', 'yesterday', 'day_before'].includes(key);
+      if (dateFilter === 'all') return true;
       return false;
     });
   }, [activeOrders, dateFilter]);
 
   // Statistics calculation for Cashier Command Center (scoped to selected date bucket)
-  const unpaidOrders = useMemo(() => dayFilteredOrders.filter((o) => o.paymentStatus !== 'PAID'), [dayFilteredOrders]);
+  const unpaidOrders = useMemo(
+    () => dayFilteredOrders.filter((o) => o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED'),
+    [dayFilteredOrders]
+  );
   const unpaidTotalAmount = useMemo(() => unpaidOrders.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0), [unpaidOrders]);
   const inPrepCount = useMemo(() => dayFilteredOrders.filter((o) => ['CONFIRMED', 'IN_PREPARATION'].includes(o.status)).length, [dayFilteredOrders]);
   const readyCount = useMemo(() => dayFilteredOrders.filter((o) => o.status === 'READY').length, [dayFilteredOrders]);
+  const servedCount = useMemo(() => dayFilteredOrders.filter((o) => o.status === 'SERVED').length, [dayFilteredOrders]);
 
   // Filtered & Sorted Orders for the Cashier main page
   // Requirement: UNPAID and SERVED orders MUST appear FIRST!
@@ -311,9 +336,13 @@ export function PosView() {
       if (orderFilter === 'SLIPS') return false;
       if (orderFilter === 'DINE_IN' && o.orderType !== 'DINE_IN') return false;
       if (orderFilter === 'TAKEAWAY' && o.orderType !== 'TAKEAWAY') return false;
-      if (orderFilter === 'UNPAID' && o.paymentStatus === 'PAID') return false;
+      // UNPAID filter: strictly only show unpaid bills (never completed/paid bills)
+      if (orderFilter === 'UNPAID') {
+        if (o.paymentStatus === 'PAID' || o.status === 'COMPLETED') return false;
+      }
       if (orderFilter === 'PREPARING' && !['CONFIRMED', 'IN_PREPARATION'].includes(o.status)) return false;
       if (orderFilter === 'READY' && o.status !== 'READY') return false;
+      if (orderFilter === 'SERVED' && o.status !== 'SERVED') return false;
 
       // Search filter
       if (orderSearch.trim()) {
@@ -341,7 +370,7 @@ export function PosView() {
     // 6. PAID & COMPLETED
     return matches.sort((a, b) => {
       const getPriority = (o: any) => {
-        const isUnpaid = o.paymentStatus !== 'PAID';
+        const isUnpaid = o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED';
         const isServed = o.status === 'SERVED';
         const isReady = o.status === 'READY';
         const isInPrep = ['CONFIRMED', 'IN_PREPARATION'].includes(o.status);
@@ -363,18 +392,22 @@ export function PosView() {
     });
   }, [dayFilteredOrders, orderFilter, orderSearch]);
 
-  // Filtered Incoming Slips (filtered by day & search)
-  const filteredSlips = useMemo(() => {
-    if (orderFilter !== 'ALL' && orderFilter !== 'SLIPS') return [];
-    const daySlips = incomingSlips.filter((s) => {
+  // Waiter Slips scoped to selected day
+  const daySlips = useMemo(() => {
+    return incomingSlips.filter((s) => {
       const key = getOrderDayKey(s.createdAt);
       if (dateFilter === 'today') return key === 'today';
       if (dateFilter === 'yesterday') return key === 'yesterday';
       if (dateFilter === 'day_before') return key === 'day_before';
       if (dateFilter === '3_days') return ['today', 'yesterday', 'day_before'].includes(key);
+      if (dateFilter === 'all') return true;
       return false;
     });
+  }, [incomingSlips, dateFilter]);
 
+  // Filtered Incoming Slips (filtered by day & search)
+  const filteredSlips = useMemo(() => {
+    if (orderFilter !== 'ALL' && orderFilter !== 'SLIPS') return [];
     if (!orderSearch.trim()) return daySlips;
     const q = orderSearch.toLowerCase();
     return daySlips.filter((s) => {
@@ -387,7 +420,7 @@ export function PosView() {
       );
       return numMatch || tableMatch || custMatch || waiterMatch || itemsMatch;
     });
-  }, [incomingSlips, orderFilter, orderSearch, dateFilter]);
+  }, [daySlips, orderFilter, orderSearch]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalTip = cart.reduce((sum, item) => sum + (item.tip || 0) * item.quantity, 0);
@@ -1179,7 +1212,7 @@ export function PosView() {
       {posTab === 'orders' && (
         <div className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-24 lg:pb-6 relative z-10 no-scrollbar bg-[#F8F9FA]">
           {/* Compact Clickable Stat Cards (Function as interactive filters) */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5 mb-3 flex-shrink-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5 mb-3 flex-shrink-0">
             {/* 1. All Orders */}
             <div
               onClick={() => setOrderFilter('ALL')}
@@ -1200,7 +1233,7 @@ export function PosView() {
                 </div>
               </div>
               <div className="text-base sm:text-xl font-black text-stone-900">
-                {incomingSlips.length + activeOrders.length}
+                {daySlips.length + dayFilteredOrders.length}
               </div>
             </div>
 
@@ -1218,14 +1251,14 @@ export function PosView() {
                   Pending Firing
                 </span>
                 <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
-                  incomingSlips.length > 0 ? 'bg-amber-500/20 text-amber-700' : 'bg-stone-100 text-stone-500'
+                  daySlips.length > 0 ? 'bg-amber-500/20 text-amber-700' : 'bg-stone-100 text-stone-500'
                 }`}>
                   <Flame className="w-3 h-3" />
                 </div>
               </div>
               <div className="text-base sm:text-xl font-black text-stone-900 flex items-center gap-1.5">
-                <span>{incomingSlips.length}</span>
-                {incomingSlips.length > 0 && (
+                <span>{daySlips.length}</span>
+                {daySlips.length > 0 && (
                   <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#C11221] text-white font-bold">
                     Action Required
                   </span>
@@ -1246,7 +1279,9 @@ export function PosView() {
                 <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
                   Unpaid Bills
                 </span>
-                <div className="w-5 h-5 rounded-md bg-rose-500/15 text-rose-600 flex items-center justify-center">
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  orderFilter === 'UNPAID' ? 'bg-rose-600 text-white' : 'bg-rose-500/15 text-rose-600'
+                }`}>
                   <CreditCard className="w-3 h-3" />
                 </div>
               </div>
@@ -1271,7 +1306,9 @@ export function PosView() {
                 <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
                   In Kitchen
                 </span>
-                <div className="w-5 h-5 rounded-md bg-blue-500/15 text-blue-600 flex items-center justify-center">
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  orderFilter === 'PREPARING' ? 'bg-blue-600 text-white' : 'bg-blue-500/15 text-blue-600'
+                }`}>
                   <Clock className="w-3 h-3" />
                 </div>
               </div>
@@ -1293,12 +1330,38 @@ export function PosView() {
                 <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
                   Ready to Serve
                 </span>
-                <div className="w-5 h-5 rounded-md bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  orderFilter === 'READY' ? 'bg-emerald-600 text-white' : 'bg-emerald-500/15 text-emerald-600'
+                }`}>
                   <CheckCircle className="w-3 h-3" />
                 </div>
               </div>
               <div className="text-base sm:text-xl font-black text-emerald-600">
                 {readyCount}
+              </div>
+            </div>
+
+            {/* 6. Served Orders */}
+            <div
+              onClick={() => setOrderFilter(orderFilter === 'SERVED' ? 'ALL' : 'SERVED')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
+                orderFilter === 'SERVED'
+                  ? 'bg-purple-50 border-purple-500 ring-2 ring-purple-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-purple-500/40'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
+                  Served
+                </span>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  orderFilter === 'SERVED' ? 'bg-purple-600 text-white' : 'bg-purple-500/15 text-purple-700'
+                }`}>
+                  <Utensils className="w-3 h-3" />
+                </div>
+              </div>
+              <div className="text-base sm:text-xl font-black text-purple-700">
+                {servedCount}
               </div>
             </div>
           </div>
@@ -1315,12 +1378,12 @@ export function PosView() {
                   onClick={() => setOrderFilter('ALL')}
                   className="text-[10px] font-bold text-emerald-700 hover:underline bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 cursor-pointer"
                 >
-                  Clear Filter ✕
+                  Clear Filter ({orderFilter === 'SERVED' ? 'Served' : orderFilter === 'UNPAID' ? 'Unpaid' : orderFilter === 'PREPARING' ? 'Kitchen' : orderFilter === 'READY' ? 'Ready' : orderFilter}) ✕
                 </button>
               )}
             </div>
 
-            {/* Day Filter Segmented Controls (Today by default, Yesterday, 2 Days Ago, 3-Day View) */}
+            {/* Day Filter Segmented Controls (Today by default, Yesterday, 2 Days Ago, 3-Day View, All Days) */}
             <div className="flex items-center bg-stone-100 p-0.5 sm:p-1 rounded-xl border border-stone-200/80 gap-1 overflow-x-auto no-scrollbar">
               <button
                 type="button"
@@ -1399,6 +1462,27 @@ export function PosView() {
                 }`}>
                   {dayCounts.threeDays}
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDateFilter('all')}
+                className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                  dateFilter === 'all'
+                    ? 'bg-emerald-600 text-white shadow-xs font-black'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
+                }`}
+                title="View all orders across all recorded days"
+              >
+                <span>All Days</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                  dateFilter === 'all' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
+                }`}>
+                  {dayCounts.all.total}
+                </span>
+                {dayCounts.all.unpaid > 0 && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title={`${dayCounts.all.unpaid} total unpaid bills`} />
+                )}
               </button>
             </div>
 
@@ -1610,6 +1694,8 @@ export function PosView() {
                               variant={
                                 order.status === 'READY'
                                   ? 'success'
+                                  : order.status === 'SERVED'
+                                  ? 'purple'
                                   : order.status === 'IN_PREPARATION'
                                   ? 'info'
                                   : order.status === 'CONFIRMED'
