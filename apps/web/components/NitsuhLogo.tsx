@@ -21,7 +21,7 @@ export function NitsuhLogo({
       <div className={`flex flex-col items-center text-center ${className}`}>
         {/* Clean Circular Brand Emblem */}
         <div className="relative mb-3 flex items-center justify-center">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-amber-400 via-amber-500 to-orange-500 p-2 shadow-lg ring-4 ring-amber-500/20 flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-105">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-600 p-2 shadow-md ring-4 ring-emerald-500/20 flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-105">
             <img
               src="/nitsuh-logo.png"
               alt="Nitsuh Foods"
@@ -36,7 +36,7 @@ export function NitsuhLogo({
             <span className="font-heading font-black text-2xl sm:text-3xl tracking-tight text-stone-900">
               NITSUH
             </span>
-            <span className="text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/15 text-[#B83E18] border border-rose-500/30">
+            <span className="text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-500/30">
               FOODS
             </span>
           </div>
@@ -57,9 +57,9 @@ export function NitsuhLogo({
       className={`group flex items-center gap-2.5 transition select-none ${className}`}
       title="Nitsuh Foods"
     >
-      {/* Circular Emblem matching Reference (Yellow/Amber circle with logo) */}
+      {/* Circular Emblem matching Reference (Green circle with logo) */}
       <div className="relative flex-shrink-0">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-amber-400 via-amber-500 to-orange-500 p-1 shadow-xs ring-1 ring-amber-400/40 flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-600 p-1 shadow-xs ring-1 ring-emerald-500/40 flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
           <img
             src="/nitsuh-logo.png"
             alt="Nitsuh Foods"
@@ -71,10 +71,10 @@ export function NitsuhLogo({
       {/* Typographic Identity: Brand Name + Tag Badge + Subtitle */}
       <div className="flex flex-col text-left">
         <div className="flex items-center gap-1.5 leading-none">
-          <span className="font-heading font-black text-sm sm:text-base tracking-tight text-stone-900 group-hover:text-amber-600 transition">
+          <span className="font-heading font-black text-sm sm:text-base tracking-tight text-stone-900 group-hover:text-emerald-700 transition">
             NITSUH
           </span>
-          <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full bg-rose-500/15 text-[#B83E18] border border-rose-500/30">
+          <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-500/30">
             FOODS
           </span>
         </div>

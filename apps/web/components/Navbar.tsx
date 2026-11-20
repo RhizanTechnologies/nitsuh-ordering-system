@@ -82,14 +82,14 @@ export function Navbar() {
   const navLinkClass = (path: string) => `
     flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer font-sans ${
       pathname === path
-        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs ring-1 ring-amber-400/50'
+        ? 'bg-emerald-600 text-white font-black shadow-xs'
         : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 font-semibold'
     }
   `;
 
   return (
     <>
-      <header className="bg-[#FAF7F2]/95 backdrop-blur-xl border-b border-stone-200/80 px-3.5 sm:px-6 py-2.5 sticky top-0 z-40 text-stone-900 shadow-xs font-sans">
+      <header className="bg-white border-b border-stone-200/90 px-3.5 sm:px-6 py-2.5 sticky top-0 z-40 text-stone-900 shadow-2xs font-sans">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Brand Identity */}
           <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export function Navbar() {
           <div className="hidden md:flex items-center">
             {/* HEAD CHEF & KITCHEN KEEPER DUAL ACCESS */}
             {(role === 'HEAD_CHEF' || role === 'KITCHEN_STOREKEEPER') && (
-              <nav className="flex items-center gap-1 bg-stone-200/60 border border-stone-300/60 p-1 rounded-full">
+              <nav className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-full">
                 <Link href="/kds" className={navLinkClass('/kds')}>
                   <ChefHat className="w-3.5 h-3.5" />
                   <span>Kitchen Display</span>
@@ -124,7 +124,7 @@ export function Navbar() {
 
             {/* OWNER & MANAGER DESKTOP MANAGEMENT TABS */}
             {isOwnerOrManager && (
-              <nav className="flex items-center gap-1 bg-stone-200/60 border border-stone-300/60 p-1 rounded-full">
+              <nav className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-full">
                 {role === 'OWNER' && (
                   <Link href="/dashboard" className={navLinkClass('/dashboard')}>
                     <BarChart3 className="w-3.5 h-3.5" />
@@ -176,17 +176,17 @@ export function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-stone-100 hover:bg-stone-200/70 border border-stone-200/80 rounded-full shadow-xs transition cursor-pointer text-stone-900 font-sans"
+                className="flex items-center gap-2 px-3 py-1.5 bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-full shadow-xs transition cursor-pointer text-stone-900 font-sans"
                 title="View active session"
               >
                 {currentUser.avatarUrl ? (
                   <img
                     src={currentUser.avatarUrl}
                     alt={currentUser.name}
-                    className="w-6 h-6 rounded-full object-cover ring-1 ring-amber-500/50 flex-shrink-0"
+                    className="w-6 h-6 rounded-full object-cover ring-1 ring-emerald-500/40 flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-900 font-bold flex items-center justify-center text-[10px] ring-1 ring-amber-500/50 flex-shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-800 font-bold flex items-center justify-center text-[10px] ring-1 ring-emerald-500/40 flex-shrink-0">
                     {currentUser.name?.slice(0, 2).toUpperCase() || 'ST'}
                   </div>
                 )}
