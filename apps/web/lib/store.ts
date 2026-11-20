@@ -1,31 +1,17 @@
 import { create } from 'zustand';
 
-export type ThemeMode = 'dark' | 'light';
+export type ThemeMode = 'light';
 
-export const getInitialTheme = (): ThemeMode => {
-  if (typeof window === 'undefined') return 'dark';
-  try {
-    const saved = localStorage.getItem('cafe_theme') as ThemeMode;
-    if (saved === 'light' || saved === 'dark') return saved;
-    const attr = document.documentElement.getAttribute('data-theme') as ThemeMode;
-    if (attr === 'light' || attr === 'dark') return attr;
-  } catch (e) {}
-  return 'dark';
-};
+export const getInitialTheme = (): ThemeMode => 'light';
 
-export const applyTheme = (theme: ThemeMode) => {
+export const applyTheme = (_theme?: any) => {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem('cafe_theme', theme);
+    localStorage.removeItem('cafe_theme');
     const root = document.documentElement;
-    root.setAttribute('data-theme', theme);
-    if (theme === 'light') {
-      root.classList.remove('theme-dark', 'dark');
-      root.classList.add('theme-light', 'light');
-    } else {
-      root.classList.remove('theme-light', 'light');
-      root.classList.add('theme-dark', 'dark');
-    }
+    root.setAttribute('data-theme', 'light');
+    root.classList.remove('theme-dark', 'dark');
+    root.classList.add('theme-light', 'light');
   } catch (e) {}
 };
 
@@ -143,21 +129,15 @@ export const useAppStore = create<AppState>((set) => ({
   waiterSpecialNotes: '',
   waiterSlipsCount: 0,
   tableManagerOpen: false,
-  theme: getInitialTheme(),
+  theme: 'light',
   setTableManagerOpen: (open) => set({ tableManagerOpen: open }),
-  setTheme: (theme) => {
-    applyTheme(theme);
-    set({ theme });
+  setTheme: () => {
+    applyTheme('light');
+    set({ theme: 'light' });
   },
   toggleTheme: () => {
-    set((state) => {
-      const current = typeof document !== 'undefined'
-        ? (document.documentElement.getAttribute('data-theme') as ThemeMode) || state.theme
-        : state.theme;
-      const nextTheme = current === 'dark' ? 'light' : 'dark';
-      applyTheme(nextTheme);
-      return { theme: nextTheme };
-    });
+    applyTheme('light');
+    set({ theme: 'light' });
   },
 
   login: (token, user) => {

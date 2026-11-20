@@ -17,8 +17,6 @@ import {
   MonitorCheck,
   LayoutGrid,
   ChevronDown,
-  Sun,
-  Moon,
   Users,
   KeyRound,
   Utensils,
@@ -38,8 +36,6 @@ export function Navbar() {
     setWaiterSlipsCount,
     tableManagerOpen,
     setTableManagerOpen,
-    theme,
-    toggleTheme,
   } = useAppStore();
 
   const [unreadAlerts, setUnreadAlerts] = useState(0);
@@ -54,12 +50,6 @@ export function Navbar() {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const activeTheme = (document.documentElement.getAttribute('data-theme') || localStorage.getItem('cafe_theme') || 'dark') as 'dark' | 'light';
-      if (activeTheme && activeTheme !== theme) {
-        useAppStore.getState().setTheme(activeTheme);
-      }
-    }
     loadTables();
 
     const socket = getSocket();
@@ -272,17 +262,8 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Right: Round Theme Switcher & Profile Pill */}
+          {/* Right: Profile Pill */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* Circular Theme Toggle Button matching reference */}
-            <button
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-full bg-white dark:bg-[#1C1815] hover:bg-stone-50 dark:hover:bg-white/[0.08] border border-stone-200/90 dark:border-white/10 shadow-xs flex items-center justify-center text-amber-500 dark:text-amber-400 hover:scale-105 active:scale-95 transition cursor-pointer"
-              title={theme === 'dark' ? 'Switch to Warm Bistro (Light)' : 'Switch to Midnight Obsidian (Dark)'}
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-stone-600" />}
-            </button>
-
             {/* User Profile Pill matching reference */}
             <div className="relative">
               <button

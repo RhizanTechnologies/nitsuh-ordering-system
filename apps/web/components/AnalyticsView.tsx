@@ -39,25 +39,16 @@ import { ProductManagementView } from '@/components/ProductManagementView';
 import { useAppStore } from '@/lib/store';
 
 export function AnalyticsView() {
-  const { currentUser, theme } = useAppStore();
+  const { currentUser } = useAppStore();
   const [data, setData] = useState<any | null>(null);
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year'>('day');
   const [activeOwnerTab, setActiveOwnerTab] = useState<'analytics' | 'products'>('analytics');
-  const [mountedTheme, setMountedTheme] = useState(theme);
 
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      const active = (document.documentElement.getAttribute('data-theme') || theme) as 'dark' | 'light';
-      setMountedTheme(active);
-    }
-  }, [theme]);
-
-  const isDark = mountedTheme !== 'light';
-  const chartGridStroke = isDark ? 'rgba(255,255,255,0.08)' : '#E5DFD5';
-  const chartAxisStroke = isDark ? '#A1A1AA' : '#3C3029';
-  const chartTooltipBg = isDark ? '#161311' : '#FFFFFF';
-  const chartTooltipText = isDark ? '#FFFFFF' : '#1C1512';
-  const chartTooltipBorder = isDark ? 'rgba(255,255,255,0.15)' : '#D6CCC0';
+  const chartGridStroke = '#E5DFD5';
+  const chartAxisStroke = '#3C3029';
+  const chartTooltipBg = '#FFFFFF';
+  const chartTooltipText = '#1C1512';
+  const chartTooltipBorder = '#D6CCC0';
 
   useEffect(() => {
     const roleParam = currentUser?.role ? `&role=${currentUser.role}` : '';

@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="light" className="light theme-light" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -25,13 +25,10 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var saved = localStorage.getItem('cafe_theme') || 'dark';
-                  document.documentElement.setAttribute('data-theme', saved);
-                  if (saved === 'light') {
-                    document.documentElement.classList.add('theme-light', 'light');
-                  } else {
-                    document.documentElement.classList.add('theme-dark', 'dark');
-                  }
+                  localStorage.removeItem('cafe_theme');
+                  document.documentElement.setAttribute('data-theme', 'light');
+                  document.documentElement.classList.remove('theme-dark', 'dark');
+                  document.documentElement.classList.add('theme-light', 'light');
                 } catch (e) {}
               })();
             `,

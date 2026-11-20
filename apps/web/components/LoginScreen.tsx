@@ -6,11 +6,11 @@ import { useAppStore } from '@/lib/store';
 import { getDefaultRouteForRole } from '@/lib/route-guard';
 import { fetchApi } from '@/lib/api';
 import { NitsuhLogo } from '@/components/NitsuhLogo';
-import { Lock, KeyRound, ArrowRight, UserCircle, Check, Sun, Moon, HelpCircle, Sparkles, X, ShieldAlert, ChevronDown } from 'lucide-react';
+import { Lock, KeyRound, ArrowRight, UserCircle, Check, HelpCircle, Sparkles, X, ShieldAlert, ChevronDown } from 'lucide-react';
 
 export function LoginScreen() {
   const router = useRouter();
-  const { login, theme, toggleTheme } = useAppStore();
+  const { login } = useAppStore();
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -262,29 +262,7 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F5EE] dark:bg-[#0D0B0A] text-stone-900 dark:text-white flex flex-col items-center justify-center p-4 relative overflow-hidden transition-colors duration-300">
-      {/* Theme Quick Switcher in Top Right */}
-      <div className="absolute top-4 right-4 z-20">
-        <button
-          onClick={toggleTheme}
-          type="button"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 dark:bg-white/[0.08] backdrop-blur-md border border-stone-200 dark:border-white/15 shadow-sm hover:shadow transition-all text-xs font-bold text-stone-700 dark:text-zinc-200 cursor-pointer"
-          title="Toggle Light / Dark Mode"
-        >
-          {theme === 'dark' ? (
-            <>
-              <Sun className="w-3.5 h-3.5 text-amber-400" />
-              <span>Light UI</span>
-            </>
-          ) : (
-            <>
-              <Moon className="w-3.5 h-3.5 text-stone-700" />
-              <span>Dark UI</span>
-            </>
-          )}
-        </button>
-      </div>
-
+    <div className="min-h-screen bg-[#F8F5EE] text-stone-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background ambient lighting glows */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C11221]/10 dark:bg-[#C11221]/15 rounded-full blur-3xl pointer-events-none" />
