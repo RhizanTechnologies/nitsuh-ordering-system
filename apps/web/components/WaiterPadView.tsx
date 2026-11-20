@@ -813,47 +813,55 @@ export function WaiterPadView() {
                               : 'bg-white border-stone-200'
                           }`}
                         >
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-black text-stone-900">#{order.orderNumber}</span>
-                                <Badge
-                                  variant={
-                                    isReady
-                                      ? 'success'
-                                      : isDelayed
-                                      ? 'destructive'
-                                      : isDraft
-                                      ? 'amber'
-                                      : 'default'
-                                  }
-                                >
-                                  {statusLabel}
-                                </Badge>
+                          {/* Card Header: Separated into clean non-colliding rows */}
+                          <div className="pb-3 border-b border-stone-200/70 space-y-2">
+                            {/* Row 1: Order Number + Table and Live Timer */}
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-base font-black text-stone-900 tracking-tight flex-shrink-0">
+                                  {order.orderNumber?.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`}
+                                </span>
+                                <span className="text-xs font-bold text-stone-700 truncate">
+                                  {order.orderType === 'TAKEAWAY'
+                                    ? `🛍️ Takeaway (${order.customerName || 'Guest'})`
+                                    : `🍽️ Table ${order.table?.tableNumber || 'Guest'}`}
+                                </span>
                               </div>
-                              <div className="text-xs font-bold text-stone-700 mt-0.5">
-                                {order.orderType === 'TAKEAWAY'
-                                  ? `🛍️ Takeaway (${order.customerName})`
-                                  : `🍽️ Table ${order.table?.tableNumber || 'Guest'}`}
+
+                              {/* Live Timer Pill */}
+                              <div
+                                className={`px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border flex-shrink-0 whitespace-nowrap ${
+                                  isReady
+                                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                                    : isDelayed
+                                    ? 'bg-rose-100 text-rose-900 border-rose-400 animate-pulse'
+                                    : isWarning
+                                    ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                    : isDraft
+                                    ? 'bg-amber-50 text-amber-800 border-amber-300'
+                                    : 'bg-stone-100 text-stone-800 border-stone-200'
+                                }`}
+                              >
+                                <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span>{isDraft ? `Sent ${prep.formattedTime} ago` : `${prep.formattedTime} prep`}</span>
                               </div>
                             </div>
 
-                            {/* Live Timer Pill */}
-                            <div
-                              className={`px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border ${
-                                isReady
-                                  ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
-                                  : isDelayed
-                                  ? 'bg-rose-100 text-rose-900 border-rose-400 animate-pulse'
-                                  : isWarning
-                                  ? 'bg-amber-100 text-amber-900 border-amber-300'
-                                  : isDraft
-                                  ? 'bg-amber-50 text-amber-800 border-amber-300'
-                                  : 'bg-stone-100 text-stone-800 border-stone-200'
-                              }`}
-                            >
-                              <Clock className="w-3.5 h-3.5" />
-                              <span>{isDraft ? `Sent ${prep.formattedTime} ago` : `${prep.formattedTime} prep`}</span>
+                            {/* Row 2: Status Badge with ample room */}
+                            <div className="flex items-center">
+                              <Badge
+                                variant={
+                                  isReady
+                                    ? 'success'
+                                    : isDelayed
+                                    ? 'destructive'
+                                    : isDraft
+                                    ? 'amber'
+                                    : 'default'
+                                }
+                              >
+                                {statusLabel}
+                              </Badge>
                             </div>
                           </div>
 

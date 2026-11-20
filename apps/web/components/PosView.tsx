@@ -877,7 +877,11 @@ export function PosView() {
               }`}
             >
               <Utensils className="w-3.5 h-3.5" />
-              <span>{appendOrderTarget ? `Append #${appendOrderTarget.orderNumber}` : '+ New Order'}</span>
+              <span>
+                {appendOrderTarget
+                  ? `Append ${appendOrderTarget.orderNumber?.startsWith('#') ? appendOrderTarget.orderNumber : `#${appendOrderTarget.orderNumber}`}`
+                  : '+ New Order'}
+              </span>
               {cart.length > 0 && (
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
                   posTab === 'menu' ? 'bg-black/20 text-stone-950' : 'bg-amber-600 text-white'
@@ -1313,7 +1317,7 @@ export function PosView() {
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="text-sm font-black text-stone-900 dark:text-white">
-                              #{order.orderNumber}
+                              {order.orderNumber?.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`}
                             </span>
 
                             {/* Destination */}
@@ -1479,7 +1483,12 @@ export function PosView() {
               {appendOrderTarget && (
                 <div className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Appending to #{appendOrderTarget.orderNumber}</span>
+                  <span>
+                    Appending to{' '}
+                    {appendOrderTarget.orderNumber?.startsWith('#')
+                      ? appendOrderTarget.orderNumber
+                      : `#${appendOrderTarget.orderNumber}`}
+                  </span>
                   <button
                     onClick={() => setAppendOrderTarget(null)}
                     className="ml-1 text-red-600 hover:underline"
