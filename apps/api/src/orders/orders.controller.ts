@@ -11,9 +11,11 @@ export class OrdersController {
     @Query('statuses') statuses?: string,
     @Query('tableId') tableId?: string,
     @Query('waiterId') waiterId?: string,
+    @Query('limit') limit?: string,
   ) {
     const statusArray = statuses ? (statuses.split(',') as OrderStatus[]) : undefined;
-    return this.ordersService.getOrders({ statuses: statusArray, tableId, waiterId });
+    const parsedLimit = limit ? parseInt(limit, 10) : undefined;
+    return this.ordersService.getOrders({ statuses: statusArray, tableId, waiterId, limit: parsedLimit });
   }
 
   @Get('waiter-slips')

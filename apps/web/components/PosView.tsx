@@ -35,7 +35,8 @@ import {
   AlertCircle,
   Smartphone,
   Check,
-  CheckCircle
+  CheckCircle,
+  Calendar
 } from 'lucide-react';
 
 export function PosView() {
@@ -89,9 +90,10 @@ export function PosView() {
   const [appendOrderTarget, setAppendOrderTarget] = useState<any | null>(null);
   const [editingSlipTarget, setEditingSlipTarget] = useState<any | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'day_before' | '3_days'>('today');
 
   const loadActiveOrders = () => {
-    return fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY,SERVED,COMPLETED')
+    return fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY,SERVED,COMPLETED&limit=250')
       .then(setActiveOrders)
       .catch(() => {});
   };
@@ -214,15 +216,97 @@ export function PosView() {
     });
   }, [allItems, groupFilter, selectedCategory, searchQuery]);
 
-  // Statistics calculation for Cashier Command Center
-  const unpaidOrders = useMemo(() => activeOrders.filter((o) => o.paymentStatus !== 'PAID'), [activeOrders]);
-  const unpaidTotalAmount = useMemo(() => unpaidOrders.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0), [unpaidOrders]);
-  const inPrepCount = useMemo(() => activeOrders.filter((o) => ['CONFIRMED', 'IN_PREPARATION'].includes(o.status)).length, [activeOrders]);
-  const readyCount = useMemo(() => activeOrders.filter((o) => o.status === 'READY').length, [activeOrders]);
+  // Helper to determine day bucket ('today' | 'yesterday' | 'day_before' | 'older')
+  const getOrderDayKey = (dateStr: string | Date): 'today' | 'yesterday' | 'day_before' | 'older' => {
+    if (!dateStr) return 'older';
+    const d = new Date(dateStr);
+    const now = new Date();
 
-  // Filtered Orders for the Cashier main page
-  const filteredOrders = useMemo(() => {
+    const toYMD = (date: Date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    const target = toYMD(d);
+    const today = toYMD(now);
+
+    const yDate = new Date(now);
+    yDate.setDate(now.getDate() - 1);
+    const yesterday = toYMD(yDate);
+
+    const dbDate = new Date(now);
+    dbDate.setDate(now.getDate() - 2);
+    const dayBefore = toYMD(dbDate);
+
+    if (target === today) return 'today';
+    if (target === yesterday) return 'yesterday';
+    if (target === dayBefore) return 'day_before';
+    return 'older';
+  };
+
+  // Label for Day Before Yesterday (e.g. "Wed, Nov 18")
+  const dayBeforeDateLabel = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }, []);
+
+  // Breakdown counts for the past 3 days
+  const dayCounts = useMemo(() => {
+    let today = 0;
+    let yesterday = 0;
+    let day_before = 0;
+    let todayUnpaid = 0;
+    let yesterdayUnpaid = 0;
+    let dayBeforeUnpaid = 0;
+
+    for (const o of activeOrders) {
+      const key = getOrderDayKey(o.createdAt);
+      const isUnpaid = o.paymentStatus !== 'PAID';
+      if (key === 'today') {
+        today++;
+        if (isUnpaid) todayUnpaid++;
+      } else if (key === 'yesterday') {
+        yesterday++;
+        if (isUnpaid) yesterdayUnpaid++;
+      } else if (key === 'day_before') {
+        day_before++;
+        if (isUnpaid) dayBeforeUnpaid++;
+      }
+    }
+
+    return {
+      today: { total: today, unpaid: todayUnpaid },
+      yesterday: { total: yesterday, unpaid: yesterdayUnpaid },
+      day_before: { total: day_before, unpaid: dayBeforeUnpaid },
+      threeDays: today + yesterday + day_before,
+    };
+  }, [activeOrders]);
+
+  // Orders filtered by the selected date bucket (today by default, yesterday, day before, or 3-day range)
+  const dayFilteredOrders = useMemo(() => {
     return activeOrders.filter((o) => {
+      const key = getOrderDayKey(o.createdAt);
+      if (dateFilter === 'today') return key === 'today';
+      if (dateFilter === 'yesterday') return key === 'yesterday';
+      if (dateFilter === 'day_before') return key === 'day_before';
+      if (dateFilter === '3_days') return ['today', 'yesterday', 'day_before'].includes(key);
+      return false;
+    });
+  }, [activeOrders, dateFilter]);
+
+  // Statistics calculation for Cashier Command Center (scoped to selected date bucket)
+  const unpaidOrders = useMemo(() => dayFilteredOrders.filter((o) => o.paymentStatus !== 'PAID'), [dayFilteredOrders]);
+  const unpaidTotalAmount = useMemo(() => unpaidOrders.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0), [unpaidOrders]);
+  const inPrepCount = useMemo(() => dayFilteredOrders.filter((o) => ['CONFIRMED', 'IN_PREPARATION'].includes(o.status)).length, [dayFilteredOrders]);
+  const readyCount = useMemo(() => dayFilteredOrders.filter((o) => o.status === 'READY').length, [dayFilteredOrders]);
+
+  // Filtered & Sorted Orders for the Cashier main page
+  // Requirement: UNPAID and SERVED orders MUST appear FIRST!
+  const filteredOrders = useMemo(() => {
+    const matches = dayFilteredOrders.filter((o) => {
       // Status filter
       if (orderFilter === 'SLIPS') return false;
       if (orderFilter === 'DINE_IN' && o.orderType !== 'DINE_IN') return false;
@@ -247,14 +331,53 @@ export function PosView() {
 
       return true;
     });
-  }, [activeOrders, orderFilter, orderSearch]);
 
-  // Filtered Incoming Slips
+    // Priority sorting:
+    // 1. UNPAID + SERVED (Customers have received food and are ready to settle bill)
+    // 2. UNPAID + READY (Food plated, ready to be served/paid)
+    // 3. UNPAID + IN_PREPARATION / CONFIRMED (Cooking in kitchen)
+    // 4. Other UNPAID
+    // 5. PAID & active
+    // 6. PAID & COMPLETED
+    return matches.sort((a, b) => {
+      const getPriority = (o: any) => {
+        const isUnpaid = o.paymentStatus !== 'PAID';
+        const isServed = o.status === 'SERVED';
+        const isReady = o.status === 'READY';
+        const isInPrep = ['CONFIRMED', 'IN_PREPARATION'].includes(o.status);
+
+        if (isUnpaid && isServed) return 1;
+        if (isUnpaid && isReady) return 2;
+        if (isUnpaid && isInPrep) return 3;
+        if (isUnpaid) return 4;
+        if (o.status !== 'COMPLETED') return 5;
+        return 6;
+      };
+
+      const pA = getPriority(a);
+      const pB = getPriority(b);
+      if (pA !== pB) return pA - pB;
+
+      // Same priority: newest first
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [dayFilteredOrders, orderFilter, orderSearch]);
+
+  // Filtered Incoming Slips (filtered by day & search)
   const filteredSlips = useMemo(() => {
     if (orderFilter !== 'ALL' && orderFilter !== 'SLIPS') return [];
-    if (!orderSearch.trim()) return incomingSlips;
+    const daySlips = incomingSlips.filter((s) => {
+      const key = getOrderDayKey(s.createdAt);
+      if (dateFilter === 'today') return key === 'today';
+      if (dateFilter === 'yesterday') return key === 'yesterday';
+      if (dateFilter === 'day_before') return key === 'day_before';
+      if (dateFilter === '3_days') return ['today', 'yesterday', 'day_before'].includes(key);
+      return false;
+    });
+
+    if (!orderSearch.trim()) return daySlips;
     const q = orderSearch.toLowerCase();
-    return incomingSlips.filter((s) => {
+    return daySlips.filter((s) => {
       const numMatch = s.orderNumber?.toLowerCase().includes(q);
       const tableMatch = s.table?.tableNumber?.toLowerCase().includes(q);
       const custMatch = s.customerName?.toLowerCase().includes(q);
@@ -264,7 +387,7 @@ export function PosView() {
       );
       return numMatch || tableMatch || custMatch || waiterMatch || itemsMatch;
     });
-  }, [incomingSlips, orderFilter, orderSearch]);
+  }, [incomingSlips, orderFilter, orderSearch, dateFilter]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalTip = cart.reduce((sum, item) => sum + (item.tip || 0) * item.quantity, 0);
@@ -274,15 +397,24 @@ export function PosView() {
   const total = taxableAmount + totalTip + tax;
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Time formatter
+  // Time formatter (day-aware)
   const formatTime = (dateStr: string) => {
     if (!dateStr) return '';
     try {
       const date = new Date(dateStr);
-      const diffMins = Math.floor((Date.now() - date.getTime()) / 60000);
-      if (diffMins < 1) return 'Just now';
-      if (diffMins < 60) return `${diffMins}m ago`;
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dayKey = getOrderDayKey(date);
+      const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (dayKey === 'today') {
+        const diffMins = Math.floor((Date.now() - date.getTime()) / 60000);
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        return timeStr;
+      }
+      if (dayKey === 'yesterday') {
+        return `Yesterday, ${timeStr}`;
+      }
+      return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${timeStr}`;
     } catch {
       return '';
     }
@@ -1134,12 +1266,12 @@ export function PosView() {
             </div>
           </div>
 
-          {/* Search & Active Header Bar (Replacing duplicate filter buttons) */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 bg-white border border-stone-200/90 rounded-2xl p-2.5 px-3.5 shadow-2xs">
-            <div className="flex items-center gap-2">
+          {/* Search, Day Range & Active Header Bar */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 mb-3 bg-white border border-stone-200/90 rounded-2xl p-2.5 px-3.5 shadow-2xs">
+            <div className="flex items-center gap-2 flex-wrap">
               <Receipt className="w-4 h-4 text-emerald-600" />
-              <h2 className="text-xs sm:text-sm font-black text-stone-900 uppercase tracking-tight">
-                Active Bills & Tickets ({filteredOrders.length})
+              <h2 className="text-xs sm:text-sm font-black text-stone-900 uppercase tracking-tight whitespace-nowrap">
+                Active Bills ({filteredOrders.length})
               </h2>
               {orderFilter !== 'ALL' && (
                 <button
@@ -1151,12 +1283,94 @@ export function PosView() {
               )}
             </div>
 
+            {/* Day Filter Segmented Controls (Today by default, Yesterday, 2 Days Ago, 3-Day View) */}
+            <div className="flex items-center bg-stone-100 p-0.5 sm:p-1 rounded-xl border border-stone-200/80 gap-1 overflow-x-auto no-scrollbar">
+              <button
+                type="button"
+                onClick={() => setDateFilter('today')}
+                className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  dateFilter === 'today'
+                    ? 'bg-emerald-600 text-white shadow-xs font-black'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
+                }`}
+              >
+                <Calendar className="w-3 h-3" />
+                <span>Today</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                  dateFilter === 'today' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
+                }`}>
+                  {dayCounts.today.total}
+                </span>
+                {dayCounts.today.unpaid > 0 && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title={`${dayCounts.today.unpaid} unpaid bills today`} />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDateFilter('yesterday')}
+                className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  dateFilter === 'yesterday'
+                    ? 'bg-emerald-600 text-white shadow-xs font-black'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
+                }`}
+              >
+                <span>Yesterday</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                  dateFilter === 'yesterday' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
+                }`}>
+                  {dayCounts.yesterday.total}
+                </span>
+                {dayCounts.yesterday.unpaid > 0 && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title={`${dayCounts.yesterday.unpaid} unpaid bills from yesterday`} />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDateFilter('day_before')}
+                className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  dateFilter === 'day_before'
+                    ? 'bg-emerald-600 text-white shadow-xs font-black'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
+                }`}
+              >
+                <span>{dayBeforeDateLabel}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                  dateFilter === 'day_before' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
+                }`}>
+                  {dayCounts.day_before.total}
+                </span>
+                {dayCounts.day_before.unpaid > 0 && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title={`${dayCounts.day_before.unpaid} unpaid bills`} />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDateFilter('3_days')}
+                className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                  dateFilter === '3_days'
+                    ? 'bg-emerald-600 text-white shadow-xs font-black'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
+                }`}
+                title="View all orders across the 3-day window"
+              >
+                <span>Past 3 Days</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                  dateFilter === '3_days' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
+                }`}>
+                  {dayCounts.threeDays}
+                </span>
+              </button>
+            </div>
+
             {/* Quick Search Input */}
-            <div className="relative w-full sm:w-72 flex-shrink-0">
+            <div className="relative w-full lg:w-64 flex-shrink-0">
               <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search table, order #, guest, waiter..."
+                placeholder="Search table, order #, guest..."
                 value={orderSearch}
                 onChange={(e) => setOrderSearch(e.target.value)}
                 className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-9 pr-8 py-1.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500"
