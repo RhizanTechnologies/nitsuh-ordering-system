@@ -543,32 +543,32 @@ export function InventoryView() {
           <div className="space-y-6">
             {/* Low-stock Warning System */}
             {(kitchenLowStockItems.length > 0 || mainLowStockItems.length > 0 || alerts.length > 0) && (
-              <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-3xl space-y-3 shadow-lg shadow-amber-950/20">
+              <div className="bg-amber-50/90 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 p-4 rounded-3xl space-y-3 shadow-sm shadow-amber-950/5 dark:shadow-amber-950/20">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+                    <div className="p-2 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
                       <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-black text-white">
+                      <h4 className="text-xs font-black text-stone-900 dark:text-white">
                         {isHeadChefOnly
                           ? 'Kitchen Low-Stock Alert'
                           : isMainStorekeeper && !isOwnerOrManager
                           ? 'Main Warehouse Low-Stock Alert'
                           : 'Store Low-Stock Alert System'}
                       </h4>
-                      <div className="text-xs text-amber-200">
+                      <div className="text-xs text-stone-700 dark:text-amber-200 font-medium">
                         {isHeadChefOnly ? (
                           <span>
-                            <strong className="text-amber-400">{kitchenLowStockItems.length}</strong> ingredient(s) are running below the kitchen alert cutoff!
+                            <strong className="text-amber-800 dark:text-amber-400 font-black">{kitchenLowStockItems.length}</strong> ingredient(s) are running below the kitchen alert cutoff!
                           </span>
                         ) : isMainStorekeeper && !isOwnerOrManager ? (
                           <span>
-                            <strong className="text-amber-400">{mainLowStockItems.length}</strong> bulk item(s) are running below warehouse alert cutoff!
+                            <strong className="text-amber-800 dark:text-amber-400 font-black">{mainLowStockItems.length}</strong> bulk item(s) are running below warehouse alert cutoff!
                           </span>
                         ) : (
                           <span>
-                            Kitchen Floor: <strong className="text-amber-400">{kitchenLowStockItems.length} low</strong> • Main Warehouse: <strong className="text-amber-400">{mainLowStockItems.length} low</strong>
+                            Kitchen Floor: <strong className="text-amber-800 dark:text-amber-400 font-black">{kitchenLowStockItems.length} low</strong> • Main Warehouse: <strong className="text-amber-800 dark:text-amber-400 font-black">{mainLowStockItems.length} low</strong>
                           </span>
                         )}
                       </div>
@@ -579,7 +579,7 @@ export function InventoryView() {
                     {isOwnerOrManager && (
                       <button
                         onClick={handleOpenCreateStockItem}
-                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold rounded-xl text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5"
                       >
                         <Plus className="w-3.5 h-3.5 stroke-[3]" />
                         <span>New Stock Item</span>
@@ -588,7 +588,7 @@ export function InventoryView() {
                     {isOwnerOrManager && (
                       <button
                         onClick={handleOpenThresholdModal}
-                        className="px-3.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5"
+                        className="px-3.5 py-1.5 bg-white dark:bg-amber-500/20 hover:bg-stone-100 dark:hover:bg-amber-500/30 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs"
                       >
                         <Sliders className="w-3.5 h-3.5" />
                         <span>Set Alert Cutoffs</span>
@@ -597,7 +597,7 @@ export function InventoryView() {
                     {!isHeadChefOnly && (
                       <button
                         onClick={() => setPurchaseModalOpen(true)}
-                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs shadow-md transition cursor-pointer"
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold rounded-xl text-xs shadow-xs transition cursor-pointer"
                       >
                         Receive Bulk PO
                       </button>
@@ -605,9 +605,9 @@ export function InventoryView() {
                     {!isHeadChefOnly && (
                       <button
                         onClick={() => setSendDirectModalOpen(true)}
-                        className="px-3.5 py-1.5 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition border border-white/10 cursor-pointer flex items-center gap-1.5"
+                        className="px-3.5 py-1.5 bg-white dark:bg-white/10 hover:bg-stone-100 dark:hover:bg-white/15 text-stone-800 dark:text-white font-bold rounded-xl text-xs transition border border-stone-300 dark:border-white/10 cursor-pointer flex items-center gap-1.5 shadow-xs"
                       >
-                        <Send className="w-3 h-3 text-amber-400" />
+                        <Send className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                         <span>Deliver to Kitchen</span>
                       </button>
                     )}
@@ -615,30 +615,30 @@ export function InventoryView() {
                 </div>
 
                 {/* Details chip list of low items */}
-                <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-white/10">
+                <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-amber-200 dark:border-white/10">
                   {isHeadChefOnly
                     ? kitchenLowStockItems.map((b: any) => (
                         <span
                           key={b.ingredient.id}
-                          className="bg-black/30 border border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-zinc-300 flex items-center gap-1.5"
+                          className="bg-white dark:bg-black/30 border border-stone-200 dark:border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-stone-700 dark:text-zinc-300 flex items-center gap-1.5 shadow-xs"
                         >
-                          <span className="font-bold text-white">{b.ingredient.name}:</span>
-                          <span className="text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
-                          <span className="text-zinc-500">(Cutoff: {b.ingredient.reorderThresholdKitchen} {b.ingredient.baseUnit?.symbol})</span>
+                          <span className="font-bold text-stone-900 dark:text-white">{b.ingredient.name}:</span>
+                          <span className="text-amber-800 dark:text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
+                          <span className="text-stone-500 dark:text-zinc-500">(Cutoff: {b.ingredient.reorderThresholdKitchen} {b.ingredient.baseUnit?.symbol})</span>
                         </span>
                       ))
                     : (isMainStorekeeper && !isOwnerOrManager ? mainLowStockItems : [...kitchenLowStockItems.map((k: any) => ({ ...k, storeLabel: 'Kitchen' })), ...mainLowStockItems.map((m: any) => ({ ...m, storeLabel: 'Main' }))]).map((b: any, idx: number) => (
                         <span
                           key={`${b.ingredient.id}-${idx}`}
-                          className="bg-black/30 border border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-zinc-300 flex items-center gap-1.5"
+                          className="bg-white dark:bg-black/30 border border-stone-200 dark:border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-stone-700 dark:text-zinc-300 flex items-center gap-1.5 shadow-xs"
                         >
                           {b.storeLabel && (
-                            <span className={`px-1 py-0.2 rounded text-[9px] font-black ${b.storeLabel === 'Kitchen' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                            <span className={`px-1 py-0.2 rounded text-[9px] font-black ${b.storeLabel === 'Kitchen' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-800 dark:text-orange-400' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400'}`}>
                               {b.storeLabel}
                             </span>
                           )}
-                          <span className="font-bold text-white">{b.ingredient.name}:</span>
-                          <span className="text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
+                          <span className="font-bold text-stone-900 dark:text-white">{b.ingredient.name}:</span>
+                          <span className="text-amber-800 dark:text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
                         </span>
                       ))}
                 </div>
@@ -647,20 +647,20 @@ export function InventoryView() {
 
             {/* PENDING KITCHEN CONFIRMATION BANNER (For Head Chef) */}
             {isKitchenChef && pendingKitchenReceipts.length > 0 && (
-              <div className="bg-gradient-to-r from-amber-950/40 via-zinc-900/90 to-amber-950/40 border border-amber-500/40 p-4 rounded-3xl shadow-2xl backdrop-blur-xl animate-in fade-in">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+              <div className="bg-amber-50 dark:bg-gradient-to-r dark:from-amber-950/40 dark:via-zinc-900/90 dark:to-amber-950/40 border border-amber-300 dark:border-amber-500/40 p-4 rounded-3xl shadow-md backdrop-blur-xl animate-in fade-in">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-amber-200 dark:border-white/10">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500 text-black flex items-center justify-center font-black animate-bounce shadow-lg shadow-amber-500/30">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-black animate-bounce shadow-md shadow-amber-500/30">
                       <PackageCheck className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-white flex items-center gap-2">
+                      <h3 className="text-sm font-black text-stone-900 dark:text-white flex items-center gap-2">
                         <span>Incoming Deliveries from Main Storekeeper</span>
                         <span className="bg-[#C11221] text-white text-[10px] px-2 py-0.5 rounded-full font-black">
                           {pendingKitchenReceipts.length} Pending Confirmation
                         </span>
                       </h3>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[11px] text-stone-600 dark:text-zinc-400">
                         Main store stock has already been deducted. Cook head chef confirmation adds stock to the Kitchen.
                       </p>
                     </div>
@@ -671,19 +671,19 @@ export function InventoryView() {
                   {pendingKitchenReceipts.map((t) => (
                     <div
                       key={t.id}
-                      className="p-3.5 bg-white/[0.04] border border-white/10 rounded-2xl flex flex-col justify-between gap-3"
+                      className="p-3.5 bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-2xl flex flex-col justify-between gap-3 shadow-xs"
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs font-black text-white">{t.transferNumber}</span>
-                          <span className="text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full animate-pulse">
+                          <span className="text-xs font-black text-stone-900 dark:text-white">{t.transferNumber}</span>
+                          <span className="text-[10px] font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 px-2 py-0.5 rounded-full animate-pulse">
                             In-Transit
                           </span>
                         </div>
-                        <div className="text-xs text-zinc-300 font-semibold mb-1">
+                        <div className="text-xs text-stone-900 dark:text-zinc-300 font-semibold mb-1">
                           {t.items.map((i: any) => `${i.ingredient?.name}: ${i.dispatchedQty || i.requestedQty} ${i.unit?.symbol || i.ingredient?.baseUnit?.symbol}`).join(', ')}
                         </div>
-                        <div className="text-[10px] text-zinc-400">
+                        <div className="text-[10px] text-stone-500 dark:text-zinc-400">
                           Dispatched by {t.approvedBy?.name || 'Main Storekeeper'} • Notes: {t.notes || 'Direct dispatch'}
                         </div>
                       </div>
@@ -691,14 +691,14 @@ export function InventoryView() {
                       <div className="flex items-center gap-2 pt-1">
                         <button
                           onClick={() => handleConfirmKitchenReceipt(t.id)}
-                          className="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                          className="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
                         >
                           <Check className="w-3.5 h-3.5 stroke-[3]" />
                           <span>Accept & Add to Kitchen</span>
                         </button>
                         <button
                           onClick={() => handleRejectKitchenReceipt(t.id)}
-                          className="py-2 px-3 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs rounded-xl transition active:scale-95 cursor-pointer flex items-center gap-1"
+                          className="py-2 px-3 bg-rose-50 dark:bg-rose-500/20 hover:bg-rose-100 dark:hover:bg-rose-500/30 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-xs rounded-xl transition active:scale-95 cursor-pointer flex items-center gap-1"
                           title="Reject delivery and return to Main Store"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -923,7 +923,7 @@ export function InventoryView() {
                               {isOwnerOrManager && (
                                 <button
                                   onClick={() => handleOpenEditStockItem(b.ingredient)}
-                                  className="p-1.5 bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white rounded-xl transition cursor-pointer"
+                                  className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/20 text-stone-700 dark:text-zinc-300 rounded-xl transition cursor-pointer"
                                   title="Edit stock item configuration"
                                 >
                                   <Edit3 className="w-3.5 h-3.5" />
@@ -931,17 +931,17 @@ export function InventoryView() {
                               )}
                               <button
                                 onClick={() => handleOpenAdjust(b.ingredient, 'KITCHEN_STORE', 'ADD')}
-                                className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer"
+                                className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer"
                                 title="Add/replenish kitchen stock"
                               >
-                                <Plus className="w-3.5 h-3.5" />
+                                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                               </button>
                               <button
                                 onClick={() => handleOpenAdjust(b.ingredient, 'KITCHEN_STORE', 'REMOVE')}
-                                className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer"
+                                className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer"
                                 title="Deduct kitchen stock (prep spillage/count correction)"
                               >
-                                <Minus className="w-3.5 h-3.5" />
+                                <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
                               </button>
                             </div>
                           )}
@@ -984,21 +984,21 @@ export function InventoryView() {
           return (
             <div className="space-y-6">
               {/* Header & Controls */}
-              <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+              <div className="bg-white dark:bg-white/[0.03] backdrop-blur-md border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
                   <div>
-                    <h3 className="text-sm font-black text-white flex items-center gap-2 font-heading">
-                      <Boxes className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-sm font-black text-stone-900 dark:text-white flex items-center gap-2 font-heading">
+                      <Boxes className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       <span>Stock Items Catalog (Raw Materials & Supplies)</span>
                     </h3>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-stone-600 dark:text-zinc-400">
                       Create, view, update unit costs and remove inventory stock items across Main Warehouse and Kitchen
                     </p>
                   </div>
                   {isOwnerOrManager && (
                     <button
                       onClick={handleOpenCreateStockItem}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
                     >
                       <Plus className="w-4 h-4 stroke-[3]" />
                       <span>New Stock Item</span>
@@ -1008,52 +1008,52 @@ export function InventoryView() {
 
                 {/* KPI Overview Strip */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-3.5 bg-white/[0.02] border border-white/5 rounded-2xl">
-                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Stock Items</div>
-                    <div className="text-xl font-black text-white mt-1">{rawIngredients.length}</div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">Active ingredients</div>
+                  <div className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 rounded-2xl">
+                    <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Total Stock Items</div>
+                    <div className="text-xl font-black text-stone-900 dark:text-white mt-1">{rawIngredients.length}</div>
+                    <div className="text-[10px] text-stone-500 dark:text-zinc-500 mt-0.5">Active ingredients</div>
                   </div>
-                  <div className="p-3.5 bg-white/[0.02] border border-white/5 rounded-2xl">
-                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Catalog Categories</div>
-                    <div className="text-xl font-black text-amber-400 mt-1">{categories.length - 1}</div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">Product classifications</div>
+                  <div className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 rounded-2xl">
+                    <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Catalog Categories</div>
+                    <div className="text-xl font-black text-amber-800 dark:text-amber-400 mt-1">{categories.length - 1}</div>
+                    <div className="text-[10px] text-stone-500 dark:text-zinc-500 mt-0.5">Product classifications</div>
                   </div>
-                  <div className="p-3.5 bg-white/[0.02] border border-white/5 rounded-2xl">
-                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Asset Worth</div>
-                    <div className="text-xl font-black text-emerald-400 mt-1">{totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs">ETB</span></div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">Dual store valuation</div>
+                  <div className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 rounded-2xl">
+                    <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Total Asset Worth</div>
+                    <div className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs">ETB</span></div>
+                    <div className="text-[10px] text-stone-500 dark:text-zinc-500 mt-0.5">Dual store valuation</div>
                   </div>
-                  <div className="p-3.5 bg-white/[0.02] border border-white/5 rounded-2xl">
-                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Low-Stock Warnings</div>
-                    <div className={`text-xl font-black mt-1 ${lowStockCount > 0 ? 'text-rose-400' : 'text-zinc-400'}`}>
+                  <div className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 rounded-2xl">
+                    <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Low-Stock Warnings</div>
+                    <div className={`text-xl font-black mt-1 ${lowStockCount > 0 ? 'text-rose-700 dark:text-rose-400' : 'text-stone-700 dark:text-zinc-400'}`}>
                       {lowStockCount}
                     </div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">Below alert cutoffs</div>
+                    <div className="text-[10px] text-stone-500 dark:text-zinc-500 mt-0.5">Below alert cutoffs</div>
                   </div>
                 </div>
 
                 {/* Search & Category Filter Toolbar */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                   <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-400" />
                     <input
                       type="text"
                       placeholder="Search stock items by name, SKU, or category..."
                       value={catalogSearch}
                       onChange={(e) => setCatalogSearch(e.target.value)}
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
                     />
                   </div>
                   <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-                    <Filter className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
+                    <Filter className="w-3.5 h-3.5 text-stone-400 dark:text-zinc-400 flex-shrink-0" />
                     {categories.map((cat) => (
                       <button
                         key={cat}
                         onClick={() => setCatalogCategory(cat)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                           catalogCategory === cat
-                            ? 'bg-amber-500 text-zinc-950 font-black shadow-sm'
-                            : 'bg-white/[0.05] text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-white/5'
+                            ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                            : 'bg-stone-100 dark:bg-white/[0.05] text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-200/60 dark:hover:bg-white/[0.08] border border-stone-200 dark:border-white/5'
                         }`}
                       >
                         {cat}
@@ -1066,18 +1066,18 @@ export function InventoryView() {
               {/* Stock Items Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filtered.length === 0 ? (
-                  <div className="col-span-full py-12 px-6 text-center bg-white/[0.02] border border-white/10 rounded-3xl">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center mb-3">
+                  <div className="col-span-full py-12 px-6 text-center bg-white dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 rounded-3xl">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-500 mx-auto flex items-center justify-center mb-3">
                       <Boxes className="w-6 h-6" />
                     </div>
-                    <h4 className="text-sm font-bold text-white mb-1">No stock items match your criteria</h4>
-                    <p className="text-xs text-zinc-400 max-w-sm mx-auto mb-4">
+                    <h4 className="text-sm font-bold text-stone-900 dark:text-white mb-1">No stock items match your criteria</h4>
+                    <p className="text-xs text-stone-500 dark:text-zinc-400 max-w-sm mx-auto mb-4">
                       Try adjusting your search terms or create a new stock item.
                     </p>
                     {isOwnerOrManager && (
                       <button
                         onClick={handleOpenCreateStockItem}
-                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-bold rounded-xl text-xs transition"
+                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-bold rounded-xl text-xs transition"
                       >
                         + Create Stock Item
                       </button>
@@ -1100,20 +1100,20 @@ export function InventoryView() {
                     return (
                       <div
                         key={item.id}
-                        className="bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-amber-500/30 rounded-3xl p-5 shadow-xl flex flex-col justify-between gap-4 transition"
+                        className="bg-white dark:bg-white/[0.03] backdrop-blur-md border border-stone-200 dark:border-white/10 hover:border-amber-500/40 rounded-3xl p-5 shadow-xs flex flex-col justify-between gap-4 transition"
                       >
                         <div>
                           {/* Card Top: Title, SKU, Category Badge */}
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div className="min-w-0">
-                              <h4 className="text-sm font-black text-white truncate" title={item.name}>
+                              <h4 className="text-sm font-black text-stone-900 dark:text-white truncate" title={item.name}>
                                 {item.name}
                               </h4>
                               <div className="flex items-center gap-2 mt-1">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/[0.06] text-zinc-400 font-mono">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-zinc-400 font-mono">
                                   {item.sku || 'NO-SKU'}
                                 </span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">
                                   {item.category || 'General'}
                                 </span>
                               </div>
@@ -1124,14 +1124,14 @@ export function InventoryView() {
                               <div className="flex items-center gap-1 flex-shrink-0">
                                 <button
                                   onClick={() => handleOpenEditStockItem(item)}
-                                  className="p-1.5 bg-white/[0.08] hover:bg-white/[0.15] text-zinc-300 hover:text-white rounded-xl transition cursor-pointer"
+                                  className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white rounded-xl transition cursor-pointer"
                                   title="Edit stock item"
                                 >
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleConfirmDeleteStockItem(item)}
-                                  className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer"
+                                  className="p-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 rounded-xl transition cursor-pointer"
                                   title="Delete or archive stock item"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1141,50 +1141,50 @@ export function InventoryView() {
                           </div>
 
                           {/* Unit Cost Valuation Badge */}
-                          <div className="flex items-center justify-between p-2.5 bg-black/30 rounded-2xl border border-white/5 my-3">
-                            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-                              <Scale className="w-3.5 h-3.5 text-amber-400" />
-                              <span>Base Unit: <strong className="text-white">{item.baseUnit?.name || unitSym} ({unitSym})</strong></span>
+                          <div className="flex items-center justify-between p-2.5 bg-stone-50 dark:bg-black/30 rounded-2xl border border-stone-200 dark:border-white/5 my-3">
+                            <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-zinc-400">
+                              <Scale className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                              <span>Base Unit: <strong className="text-stone-900 dark:text-white">{item.baseUnit?.name || unitSym} ({unitSym})</strong></span>
                             </div>
                             <div className="text-right">
-                              <div className="text-xs font-black text-amber-400">
+                              <div className="text-xs font-black text-amber-800 dark:text-amber-400">
                                 {unitCost.toFixed(4)} ETB
                               </div>
-                              <div className="text-[9px] text-zinc-500">per {unitSym}</div>
+                              <div className="text-[9px] text-stone-500 dark:text-zinc-500">per {unitSym}</div>
                             </div>
                           </div>
 
                           {/* Dual Store Balance Split */}
                           <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className={`p-2.5 rounded-2xl border ${isMainLow ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/[0.02] border-white/5'}`}>
-                              <div className="text-[10px] text-zinc-400 uppercase font-bold flex items-center justify-between">
+                            <div className={`p-2.5 rounded-2xl border ${isMainLow ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30' : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5'}`}>
+                              <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold flex items-center justify-between">
                                 <span>Main Store</span>
-                                {isMainLow && <span className="text-amber-400 font-black">Low</span>}
+                                {isMainLow && <span className="text-amber-800 dark:text-amber-400 font-black">Low</span>}
                               </div>
-                              <div className="text-sm font-black text-white mt-0.5">
-                                {Number(mainBalance).toLocaleString()} <span className="text-[10px] text-zinc-400">{unitSym}</span>
+                              <div className="text-sm font-black text-stone-900 dark:text-white mt-0.5">
+                                {Number(mainBalance).toLocaleString()} <span className="text-[10px] text-stone-500 dark:text-zinc-400">{unitSym}</span>
                               </div>
-                              <div className="text-[9px] text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdMain}</div>
+                              <div className="text-[9px] text-stone-500 dark:text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdMain}</div>
                             </div>
 
-                            <div className={`p-2.5 rounded-2xl border ${isKitchenLow ? 'bg-rose-500/10 border-rose-500/30' : 'bg-white/[0.02] border-white/5'}`}>
-                              <div className="text-[10px] text-zinc-400 uppercase font-bold flex items-center justify-between">
+                            <div className={`p-2.5 rounded-2xl border ${isKitchenLow ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-300 dark:border-rose-500/30' : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5'}`}>
+                              <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold flex items-center justify-between">
                                 <span>Kitchen Store</span>
-                                {isKitchenLow && <span className="text-rose-400 font-black">Low</span>}
+                                {isKitchenLow && <span className="text-rose-700 dark:text-rose-400 font-black">Low</span>}
                               </div>
-                              <div className="text-sm font-black text-white mt-0.5">
-                                {Number(kitchenBalance).toLocaleString()} <span className="text-[10px] text-zinc-400">{unitSym}</span>
+                              <div className="text-sm font-black text-stone-900 dark:text-white mt-0.5">
+                                {Number(kitchenBalance).toLocaleString()} <span className="text-[10px] text-stone-500 dark:text-zinc-400">{unitSym}</span>
                               </div>
-                              <div className="text-[9px] text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdKitchen}</div>
+                              <div className="text-[9px] text-stone-500 dark:text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdKitchen}</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Card Bottom: Total Assets & Quick Adjust */}
-                        <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                        <div className="pt-3 border-t border-stone-200 dark:border-white/10 flex items-center justify-between">
                           <div>
-                            <div className="text-[10px] text-zinc-400 uppercase font-bold">Total Valued Assets</div>
-                            <div className="text-xs font-black text-emerald-400">
+                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold">Total Valued Assets</div>
+                            <div className="text-xs font-black text-emerald-700 dark:text-emerald-400">
                               {totalWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB
                             </div>
                           </div>
@@ -1193,9 +1193,9 @@ export function InventoryView() {
                           {isMainStorekeeper && (
                             <button
                               onClick={() => handleOpenAdjust(item, 'MAIN_STORE', 'ADD')}
-                              className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5"
+                              className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/15 text-stone-800 dark:text-white font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 border border-stone-300 dark:border-white/10"
                             >
-                              <Plus className="w-3.5 h-3.5 text-amber-400" />
+                              <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                               <span>Adjust Stock</span>
                             </button>
                           )}
@@ -1211,11 +1211,11 @@ export function InventoryView() {
 
         {/* TAB 3: STOCK TRANSFERS */}
         {activeTab === 'transfers' && (
-          <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 gap-3">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 gap-3">
               <div>
-                <h3 className="text-sm font-bold text-white font-heading">Stock Transfers Between Stores</h3>
-                <p className="text-xs text-zinc-400">
+                <h3 className="text-sm font-bold text-stone-900 dark:text-white font-heading">Stock Transfers Between Stores</h3>
+                <p className="text-xs text-stone-600 dark:text-zinc-400">
                   Main Storekeeper sends stock ➔ In-Transit buffer ➔ Cook Head Chef confirms receipt into Kitchen Store
                 </p>
               </div>
@@ -1223,9 +1223,9 @@ export function InventoryView() {
                 {isMainStorekeeper && (
                   <button
                     onClick={() => setSendDirectModalOpen(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-2xl text-xs transition shadow-lg shadow-amber-500/20 flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold rounded-2xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Send className="w-3.5 h-3.5 text-zinc-950" />
+                    <Send className="w-3.5 h-3.5 text-stone-950" />
                     <span>Direct Send to Kitchen</span>
                   </button>
                 )}
@@ -1234,32 +1234,32 @@ export function InventoryView() {
 
             <div className="space-y-3">
               {transfers.length === 0 ? (
-                <div className="text-center py-12 text-zinc-500 text-xs">No transfer records found</div>
+                <div className="text-center py-12 text-stone-500 dark:text-zinc-500 text-xs">No transfer records found</div>
               ) : (
                 transfers.map((t) => (
                   <div
                     key={t.id}
-                    className="p-4 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition"
+                    className="p-4 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/5 hover:border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition shadow-xs"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-white">{t.transferNumber}</span>
+                        <span className="text-xs font-bold text-stone-900 dark:text-white">{t.transferNumber}</span>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                             t.status === 'RECEIVED'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30'
                               : t.status === 'DISPATCHED'
-                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'
-                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                              ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 animate-pulse'
+                              : 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-500/30'
                           }`}
                         >
                           {t.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <div className="text-xs text-zinc-300 font-semibold">
+                      <div className="text-xs text-stone-800 dark:text-zinc-300 font-semibold">
                         {t.items.map((i: any) => `${i.ingredient?.name}: ${i.dispatchedQty || i.requestedQty} ${i.unit?.symbol || i.ingredient?.baseUnit?.symbol}`).join(', ')}
                       </div>
-                      <div className="text-[10px] text-zinc-400 mt-1">
+                      <div className="text-[10px] text-stone-500 dark:text-zinc-400 mt-1">
                         Dispatched by: {t.approvedBy?.name || t.requestedBy?.name} • Notes: {t.notes || 'None'}
                       </div>
                     </div>
@@ -1268,7 +1268,7 @@ export function InventoryView() {
                       {t.status === 'REQUESTED' && isMainStorekeeper && (
                         <button
                           onClick={() => handleDispatch(t.id)}
-                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-xl text-xs transition shadow-md cursor-pointer"
+                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold rounded-xl text-xs transition shadow-xs cursor-pointer"
                         >
                           Approve & Dispatch
                         </button>
@@ -1284,7 +1284,7 @@ export function InventoryView() {
                           </button>
                           <button
                             onClick={() => handleRejectKitchenReceipt(t.id)}
-                            className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1"
+                            className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1"
                             title="Reject delivery"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -1320,24 +1320,24 @@ export function InventoryView() {
           return (
             <div className="space-y-4">
               {/* Recipe Studio Top Banner with Quick Actions */}
-              <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-base font-black text-white flex items-center gap-2 font-heading">
-                    <ChefHat className="w-5 h-5 text-amber-400" />
+                  <h3 className="text-base font-black text-stone-900 dark:text-white flex items-center gap-2 font-heading">
+                    <ChefHat className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                     <span>Culinary Recipe Studio & Costing Engine</span>
                   </h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">
+                  <p className="text-xs text-stone-600 dark:text-zinc-400 mt-0.5">
                     Define exact raw ingredient portions (grams/ml/pcs) to automate Kitchen Store inventory deductions and calculate real portion food costs.
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 px-3 py-1.5 rounded-2xl text-xs">
-                    <span className="text-zinc-400">Configured:</span>
-                    <strong className="text-emerald-400 font-bold">{itemsWithRecipe.length}</strong>
-                    <span className="text-zinc-600">|</span>
-                    <span className="text-zinc-400">Needs Recipe:</span>
-                    <strong className="text-amber-400 font-bold">{itemsWithoutRecipe.length}</strong>
+                  <div className="flex items-center gap-2 bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 px-3 py-1.5 rounded-2xl text-xs">
+                    <span className="text-stone-600 dark:text-zinc-400">Configured:</span>
+                    <strong className="text-emerald-700 dark:text-emerald-400 font-bold">{itemsWithRecipe.length}</strong>
+                    <span className="text-stone-300 dark:text-zinc-600">|</span>
+                    <span className="text-stone-600 dark:text-zinc-400">Needs Recipe:</span>
+                    <strong className="text-amber-800 dark:text-amber-400 font-bold">{itemsWithoutRecipe.length}</strong>
                   </div>
 
                   {isOwnerOrManager && (
@@ -1348,7 +1348,7 @@ export function InventoryView() {
                         }
                         setRecipeModalOpen(true);
                       }}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-2xl text-xs shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
                     >
                       <Plus className="w-4 h-4 stroke-[3]" />
                       <span>+ Add / Build Recipe</span>
@@ -1360,22 +1360,22 @@ export function InventoryView() {
               {/* Main Grid: Left Dish Picker & Right Recipe Canvas */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left: Dish Selector with Search & Filter Tabs */}
-                <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl space-y-3">
+                <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-heading">
+                    <h3 className="text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider font-heading">
                       Select Dish ({filteredDishes.length})
                     </h3>
                   </div>
 
                   {/* Search Input */}
                   <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-400" />
                     <input
                       type="text"
                       placeholder="Search dishes to configure..."
                       value={recipeDishSearch}
                       onChange={(e) => setRecipeDishSearch(e.target.value)}
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
                     />
                   </div>
 
@@ -1385,8 +1385,8 @@ export function InventoryView() {
                       onClick={() => setRecipeDishFilter('ALL')}
                       className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
                         recipeDishFilter === 'ALL'
-                          ? 'bg-amber-500 text-zinc-950 font-black'
-                          : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                          ? 'bg-amber-500 text-stone-950 font-black'
+                          : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                       }`}
                     >
                       All ({menuItems.length})
@@ -1395,8 +1395,8 @@ export function InventoryView() {
                       onClick={() => setRecipeDishFilter('MISSING')}
                       className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
                         recipeDishFilter === 'MISSING'
-                          ? 'bg-amber-500 text-zinc-950 font-black'
-                          : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                          ? 'bg-amber-500 text-stone-950 font-black'
+                          : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                       }`}
                     >
                       Needs Recipe ({itemsWithoutRecipe.length})
@@ -1405,8 +1405,8 @@ export function InventoryView() {
                       onClick={() => setRecipeDishFilter('CONFIGURED')}
                       className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
                         recipeDishFilter === 'CONFIGURED'
-                          ? 'bg-amber-500 text-zinc-950 font-black'
-                          : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                          ? 'bg-amber-500 text-stone-950 font-black'
+                          : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                       }`}
                     >
                       Configured ({itemsWithRecipe.length})
@@ -1416,7 +1416,7 @@ export function InventoryView() {
                   {/* Dish Buttons List */}
                   <div className="space-y-1.5 max-h-[480px] overflow-y-auto pr-1 no-scrollbar">
                     {filteredDishes.length === 0 ? (
-                      <div className="text-center py-8 text-xs text-zinc-500">
+                      <div className="text-center py-8 text-xs text-stone-500 dark:text-zinc-500">
                         No dishes match your filter
                       </div>
                     ) : (
@@ -1430,22 +1430,22 @@ export function InventoryView() {
                             onClick={() => setSelectedRecipeItem(item)}
                             className={`w-full p-2.5 rounded-2xl text-left flex items-center justify-between transition cursor-pointer ${
                               isSelected
-                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black shadow-lg shadow-amber-500/20'
-                                : 'bg-white/[0.02] hover:bg-white/[0.05] text-white border border-white/5'
+                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                                : 'bg-stone-50 dark:bg-white/[0.02] hover:bg-stone-100 dark:hover:bg-white/[0.05] text-stone-900 dark:text-white border border-stone-200 dark:border-white/5'
                             }`}
                           >
                             <div className="min-w-0 flex-1 mr-2">
                               <div className="text-xs font-bold truncate">{item.name}</div>
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className={`text-[9px] ${isSelected ? 'text-zinc-900 font-semibold' : 'text-zinc-400'}`}>
+                                <span className={`text-[9px] ${isSelected ? 'text-stone-950 font-semibold' : 'text-stone-500 dark:text-zinc-400'}`}>
                                   {item.category?.name || 'Dish'}
                                 </span>
                                 {hasRecipe ? (
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-zinc-950/20 text-zinc-950' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'}`}>
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-stone-950/20 text-stone-950' : 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30'}`}>
                                     ✓ {item.recipe.ingredients.length} items
                                   </span>
                                 ) : (
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-zinc-950/20 text-zinc-950' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}`}>
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-stone-950/20 text-stone-950' : 'bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30'}`}>
                                     + Add Recipe
                                   </span>
                                 )}
@@ -1460,32 +1460,32 @@ export function InventoryView() {
                 </div>
 
                 {/* Right 2 cols: Exact Recipe Gram Breakdown (Card Format) */}
-                <div className="lg:col-span-2 bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                <div className="lg:col-span-2 bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
                   {selectedRecipeItem ? (
                     <div>
-                      <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 gap-3 flex-wrap">
+                      <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-200 dark:border-white/10 gap-3 flex-wrap">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-black text-white font-heading">{selectedRecipeItem.name}</h3>
+                            <h3 className="text-lg font-black text-stone-900 dark:text-white font-heading">{selectedRecipeItem.name}</h3>
                             {selectedRecipeItem.recipe?.ingredients?.length > 0 ? (
-                              <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-full">
                                 Recipe Configured
                               </span>
                             ) : (
-                              <span className="text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-bold bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 px-2 py-0.5 rounded-full">
                                 No Recipe Set
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-zinc-400 mt-0.5">
+                          <p className="text-xs text-stone-600 dark:text-zinc-400 mt-0.5">
                             Gram-Level Production Costing & Margin Analysis
                           </p>
                         </div>
 
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <div className="text-xs text-zinc-400 uppercase font-semibold">Selling Price</div>
-                            <div className="text-xl font-extrabold text-amber-400">
+                            <div className="text-xs text-stone-500 dark:text-zinc-400 uppercase font-semibold">Selling Price</div>
+                            <div className="text-xl font-extrabold text-amber-800 dark:text-amber-400">
                               {Number(selectedRecipeItem.price).toFixed(2)} ETB
                             </div>
                           </div>
@@ -1493,7 +1493,7 @@ export function InventoryView() {
                           {isOwnerOrManager && (
                             <button
                               onClick={() => setRecipeModalOpen(true)}
-                              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
                             >
                               <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
                               <span>{selectedRecipeItem.recipe?.ingredients?.length > 0 ? 'Edit Recipe Grams' : '+ Add Recipe Now'}</span>
@@ -1504,37 +1504,37 @@ export function InventoryView() {
 
                       {/* Margin Banner - Only Owner sees Gross Profit and Margin % Analysis */}
                       {isOwner ? (
-                        <div className="grid grid-cols-3 gap-3 mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl">
+                        <div className="grid grid-cols-3 gap-3 mb-6 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 p-4 rounded-2xl">
                           <div>
-                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Portion Food Cost</div>
+                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Portion Food Cost</div>
                             <div className="text-base font-extrabold text-[#C11221]">
                               {selectedRecipeItem.costPerPortion?.toFixed(4) || '0.00'} ETB
                             </div>
                           </div>
                           <div>
-                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Gross Margin</div>
-                            <div className="text-base font-extrabold text-amber-400">
+                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Gross Margin</div>
+                            <div className="text-base font-extrabold text-amber-800 dark:text-amber-400">
                               {selectedRecipeItem.grossProfitEstimate?.toFixed(2) || '0.00'} ETB
                             </div>
                           </div>
                           <div>
-                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
-                            <div className="text-base font-extrabold text-emerald-400">
+                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
+                            <div className="text-base font-extrabold text-emerald-700 dark:text-emerald-400">
                               {selectedRecipeItem.marginPercent?.toFixed(1) || 0}%
                             </div>
                           </div>
                         </div>
                       ) : (
-                        <div className="mb-6 bg-white/[0.02] border border-white/10 p-4 rounded-2xl flex items-center justify-between">
+                        <div className="mb-6 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 p-4 rounded-2xl flex items-center justify-between">
                           <div>
-                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Standard Production Yield</div>
-                            <div className="text-sm font-extrabold text-white mt-0.5">
+                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Standard Production Yield</div>
+                            <div className="text-sm font-extrabold text-stone-900 dark:text-white mt-0.5">
                               {selectedRecipeItem.recipe?.yieldPortions || 1} Portion(s) per recipe batch
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Kitchen Section</div>
-                            <div className="text-xs font-bold text-amber-400 uppercase mt-0.5">
+                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Kitchen Section</div>
+                            <div className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase mt-0.5">
                               {selectedRecipeItem.prepSection?.replace('_', ' ') || 'HOT KITCHEN'}
                             </div>
                           </div>
@@ -1544,13 +1544,13 @@ export function InventoryView() {
                       {/* Ingredients Requirements (Card Format) */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-heading">
+                          <h4 className="text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider font-heading">
                             Production Ingredient Requirements ({selectedRecipeItem.recipe?.ingredients?.length || 0} items)
                           </h4>
                           {isOwnerOrManager && selectedRecipeItem.recipe?.ingredients?.length > 0 && (
                             <button
                               onClick={() => setRecipeModalOpen(true)}
-                              className="text-[11px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
+                              className="text-[11px] font-bold text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 flex items-center gap-1 cursor-pointer"
                             >
                               <Plus className="w-3 h-3" />
                               <span>Add More Ingredients</span>
@@ -1559,7 +1559,7 @@ export function InventoryView() {
                         </div>
 
                         {selectedRecipeItem.isDirectSale ? (
-                          <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-300">
+                          <div className="p-5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl text-xs text-amber-900 dark:text-amber-300">
                             This item is a <strong>direct retail sale</strong> (bottled drink). Deducts directly from stock upon sale.
                           </div>
                         ) : selectedRecipeItem.recipe?.ingredients?.length > 0 ? (
@@ -1570,20 +1570,20 @@ export function InventoryView() {
                               return (
                                 <div
                                   key={ri.id}
-                                  className="p-3 bg-white/[0.02] border border-white/5 hover:border-white/15 rounded-2xl flex items-center justify-between gap-3"
+                                  className="p-3 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/5 hover:border-amber-500/30 rounded-2xl flex items-center justify-between gap-3 shadow-xs"
                                 >
                                   <div className="min-w-0 flex-1">
-                                    <div className="font-bold text-xs text-white truncate">{ri.ingredient?.name}</div>
-                                    <div className="text-[10px] text-zinc-400 mt-0.5">
+                                    <div className="font-bold text-xs text-stone-900 dark:text-white truncate">{ri.ingredient?.name}</div>
+                                    <div className="text-[10px] text-stone-500 dark:text-zinc-400 mt-0.5">
                                       {unitCost.toFixed(4)} ETB / {ri.unit?.symbol || ri.ingredient?.baseUnit?.symbol}
                                     </div>
                                   </div>
 
                                   <div className="text-right">
-                                    <div className="text-xs font-black text-amber-400">
+                                    <div className="text-xs font-black text-amber-800 dark:text-amber-400">
                                       {Number(ri.quantity)} {ri.unit?.symbol || ri.ingredient?.baseUnit?.symbol}
                                     </div>
-                                    <div className="text-[10px] font-bold text-zinc-300">
+                                    <div className="text-[10px] font-bold text-stone-700 dark:text-zinc-300">
                                       {lineCost.toFixed(4)} ETB
                                     </div>
                                   </div>
@@ -1592,20 +1592,20 @@ export function InventoryView() {
                             })}
                           </div>
                         ) : (
-                          <div className="p-8 bg-white/[0.02] rounded-3xl text-center space-y-3 border border-dashed border-white/10">
-                            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto">
+                          <div className="p-8 bg-stone-50 dark:bg-white/[0.02] rounded-3xl text-center space-y-3 border border-dashed border-stone-300 dark:border-white/10">
+                            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
                               <ChefHat className="w-6 h-6" />
                             </div>
                             <div>
-                              <h4 className="text-sm font-bold text-white">No recipe configured yet for {selectedRecipeItem.name}</h4>
-                              <p className="text-xs text-zinc-400 max-w-sm mx-auto mt-1">
+                              <h4 className="text-sm font-bold text-stone-900 dark:text-white">No recipe configured yet for {selectedRecipeItem.name}</h4>
+                              <p className="text-xs text-stone-600 dark:text-zinc-400 max-w-sm mx-auto mt-1">
                                 Add raw ingredient requirements (e.g. pasta, meat, sauce, oil) so kitchen store auto-deducts upon preparation and real food costs are tracked.
                               </p>
                             </div>
                             {isOwnerOrManager && (
                               <button
                                 onClick={() => setRecipeModalOpen(true)}
-                                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-black rounded-2xl text-xs transition shadow-lg shadow-amber-500/25 cursor-pointer inline-flex items-center gap-1.5"
+                                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-2xl text-xs transition shadow-xs cursor-pointer inline-flex items-center gap-1.5"
                               >
                                 <Plus className="w-4 h-4 stroke-[3]" />
                                 <span>+ Add Recipe for {selectedRecipeItem.name}</span>
@@ -1616,7 +1616,7 @@ export function InventoryView() {
                       </div>
                     </div>
                   ) : (
-                    <div className="py-20 text-center text-xs text-zinc-500">
+                    <div className="py-20 text-center text-xs text-stone-500 dark:text-zinc-500">
                       Select a dish from the left list to view or add its recipe.
                     </div>
                   )}
@@ -1678,32 +1678,32 @@ export function InventoryView() {
 
         {/* TAB 5: KITCHEN WASTAGE LOGGER */}
         {activeTab === 'wastage' && (
-          <div className="max-w-xl mx-auto bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl">
-            <h3 className="text-base font-bold text-white font-heading mb-1">Record Kitchen Wastage & Spoilage</h3>
-            <p className="text-xs text-zinc-400 mb-6">
+          <div className="max-w-xl mx-auto bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs">
+            <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading mb-1">Record Kitchen Wastage & Spoilage</h3>
+            <p className="text-xs text-stone-600 dark:text-zinc-400 mb-6">
               Track burnt dishes, spilled ingredients, or damaged stock. Deducts from Kitchen Store and records financial loss.
             </p>
 
             {wasteSuccess && (
-              <div className="mb-4 bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-2xl text-xs font-bold text-emerald-400">
+              <div className="mb-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 p-3 rounded-2xl text-xs font-bold text-emerald-800 dark:text-emerald-400">
                 Wastage recorded successfully in the ledger!
               </div>
             )}
 
             <form onSubmit={handleRecordWastage} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Kitchen Ingredient
                 </label>
                 <select
                   value={wasteIngredientId}
                   onChange={(e) => setWasteIngredientId(e.target.value)}
                   required
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
                 >
-                  <option value="" className="bg-[#1C1815] text-zinc-400">Select ingredient...</option>
+                  <option value="" className="bg-white dark:bg-[#1C1815] text-stone-500 dark:text-zinc-400">Select ingredient...</option>
                   {kitchenStoreLoc?.balances?.map((b: any) => (
-                    <option key={b.ingredient.id} value={b.ingredient.id} className="bg-[#1C1815] text-white">
+                    <option key={b.ingredient.id} value={b.ingredient.id} className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white font-bold">
                       {b.ingredient.name} (Available: {b.quantity} {b.ingredient.baseUnit.symbol})
                     </option>
                   ))}
@@ -1711,7 +1711,7 @@ export function InventoryView() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Quantity to Waste (in grams / ml / pcs)
                 </label>
                 <input
@@ -1721,12 +1721,12 @@ export function InventoryView() {
                   value={wasteQuantity}
                   onChange={(e) => setWasteQuantity(e.target.value)}
                   required
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Reason for Wastage
                 </label>
                 <select
@@ -1761,7 +1761,7 @@ export function InventoryView() {
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#C11221] hover:bg-[#A30F1C] text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-red-950/40 transition cursor-pointer"
+                className="w-full py-3 bg-[#C11221] hover:bg-[#A30F1C] text-white font-extrabold text-xs rounded-2xl shadow-xs transition cursor-pointer"
               >
                 Commit Wastage to Ledger
               </button>
@@ -1790,15 +1790,15 @@ export function InventoryView() {
           });
 
           return (
-            <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl space-y-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+            <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
                 <div>
-                  <h3 className="text-base font-bold text-white font-heading">Immutable Inventory Transaction Ledger</h3>
-                  <p className="text-xs text-zinc-400">
+                  <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Immutable Inventory Transaction Ledger</h3>
+                  <p className="text-xs text-stone-600 dark:text-zinc-400">
                     Double-entry audit log of all receipts, direct transfers, kitchen consumption, adjustments & wastage.
                   </p>
                 </div>
-                <span className="text-xs font-bold text-amber-400">{filteredLedger.length} of {ledger.length} entries</span>
+                <span className="text-xs font-bold text-amber-800 dark:text-amber-400">{filteredLedger.length} of {ledger.length} entries</span>
               </div>
 
               {/* Filter Strip: Type buttons & Search Input */}
@@ -1817,8 +1817,8 @@ export function InventoryView() {
                       onClick={() => setLedgerTypeFilter(f.id)}
                       className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition cursor-pointer text-xs ${
                         ledgerTypeFilter === f.id
-                          ? 'bg-amber-500 text-black font-black shadow-md'
-                          : 'bg-white/[0.04] border border-white/10 text-zinc-400 hover:text-white'
+                          ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                          : 'bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                       }`}
                     >
                       {f.label}
@@ -1827,13 +1827,13 @@ export function InventoryView() {
                 </div>
 
                 <div className="relative min-w-[200px]">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-500" />
                   <input
                     type="text"
                     placeholder="Search ingredient, #order..."
                     value={ledgerSearch}
                     onChange={(e) => setLedgerSearch(e.target.value)}
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-stone-50 dark:bg-white/[0.04] border border-stone-300 dark:border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
@@ -1843,49 +1843,49 @@ export function InventoryView() {
                 {filteredLedger.map((row) => (
                   <div
                     key={row.id}
-                    className="p-3.5 bg-white/[0.02] border border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col justify-between gap-2.5 transition backdrop-blur-md"
+                    className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col justify-between gap-2.5 transition shadow-xs"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <span
                           className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
                             row.transactionType === 'PRODUCTION_CONSUMPTION'
-                              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30'
                               : row.transactionType === 'WASTAGE'
-                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                              ? 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30'
                               : row.transactionType === 'TRANSFER_RECEIVE'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30'
                               : row.transactionType === 'TRANSFER_DISPATCH'
-                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30'
                               : row.transactionType === 'PURCHASE_RECEIPT'
-                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                              : 'bg-zinc-800 text-zinc-300 border border-white/10'
+                              ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30'
+                              : 'bg-stone-200 dark:bg-zinc-800 text-stone-700 dark:text-zinc-300 border border-stone-300 dark:border-white/10'
                           }`}
                         >
                           {row.transactionType.replace(/_/g, ' ')}
                         </span>
-                        <span className="text-[10px] text-zinc-500">
+                        <span className="text-[10px] text-stone-500 dark:text-zinc-500">
                           {new Date(row.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
 
-                      <div className="font-bold text-xs text-white truncate">{row.ingredient?.name}</div>
+                      <div className="font-bold text-xs text-stone-900 dark:text-white truncate">{row.ingredient?.name}</div>
 
-                      <div className="text-[11px] text-zinc-400 mt-1 flex items-center justify-between">
+                      <div className="text-[11px] text-stone-600 dark:text-zinc-400 mt-1 flex items-center justify-between">
                         <span>Quantity:</span>
-                        <span className="font-bold text-amber-400">
+                        <span className="font-bold text-amber-800 dark:text-amber-400">
                           {Number(row.quantity).toLocaleString()} {row.ingredient?.baseUnit?.symbol}
                         </span>
                       </div>
 
-                      <div className="text-[10px] text-zinc-500 truncate mt-1">
+                      <div className="text-[10px] text-stone-500 dark:text-zinc-500 truncate mt-1">
                         Reason: {row.reason || row.referenceId || 'N/A'}
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px]">
-                      <span className="text-zinc-400">By {row.user?.name || 'Staff'}</span>
-                      <span className="font-black text-white">
+                    <div className="pt-2 border-t border-stone-200 dark:border-white/5 flex items-center justify-between text-[11px]">
+                      <span className="text-stone-500 dark:text-zinc-400">By {row.user?.name || 'Staff'}</span>
+                      <span className="font-black text-stone-900 dark:text-white">
                         {Number(row.totalCost).toFixed(2)} ETB
                       </span>
                     </div>
@@ -1900,44 +1900,44 @@ export function InventoryView() {
       {/* QUICK STOCK ADJUSTMENT MODAL (Add or Remove stock directly) */}
       {adjustModalOpen && adjustIngredient && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-white space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-stone-900 dark:text-white space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
               <div className="flex items-center gap-2">
-                <div className={`p-2 rounded-xl ${adjustMode === 'ADD' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                <div className={`p-2 rounded-xl ${adjustMode === 'ADD' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-rose-500/20 text-rose-700 dark:text-rose-400'}`}>
                   {adjustMode === 'ADD' ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white font-heading">
+                  <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">
                     {adjustMode === 'ADD' ? 'Add Stock Amount' : 'Remove Stock Amount'}
                   </h3>
-                  <div className="text-xs text-zinc-400">
+                  <div className="text-xs text-stone-500 dark:text-zinc-400">
                     {adjustLocationType === 'MAIN_STORE' ? 'Main Store (Bulk)' : 'Kitchen Store (Production floor)'}
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setAdjustModalOpen(false)}
-                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-zinc-400 hover:text-white"
+                className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleCommitAdjust} className="space-y-4">
-              <div className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl flex items-center justify-between text-xs">
+              <div className="p-3 bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl flex items-center justify-between text-xs">
                 <div>
-                  <div className="font-bold text-white">{adjustIngredient.name}</div>
-                  <div className="text-[10px] text-zinc-400">Unit: {adjustIngredient.baseUnit?.symbol}</div>
+                  <div className="font-bold text-stone-900 dark:text-white">{adjustIngredient.name}</div>
+                  <div className="text-[10px] text-stone-500 dark:text-zinc-400">Unit: {adjustIngredient.baseUnit?.symbol}</div>
                 </div>
                 <div className="text-right">
-                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${adjustMode === 'ADD' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${adjustMode === 'ADD' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300'}`}>
                     {adjustMode}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Quantity to {adjustMode === 'ADD' ? 'Add' : 'Remove'} ({adjustIngredient.baseUnit?.symbol})
                 </label>
                 <input
@@ -1948,12 +1948,12 @@ export function InventoryView() {
                   onChange={(e) => setAdjustQuantity(e.target.value)}
                   required
                   autoFocus
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Reason for Adjustment
                 </label>
                 <input
@@ -1961,15 +1961,15 @@ export function InventoryView() {
                   placeholder="e.g. Physical inventory count correction"
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setAdjustModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white"
+                  className="px-4 py-2 text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1993,22 +1993,22 @@ export function InventoryView() {
       {/* DIRECT BATCH SEND TO KITCHEN MODAL (Main Storekeeper dispatches multiple items in 1 batch) */}
       {sendDirectModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-2xl shadow-2xl text-white space-y-4 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-2xl shadow-2xl text-stone-900 dark:text-white space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400">
+                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
                   <Send className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white font-heading">Deliver Batch of Stock to Kitchen</h3>
-                  <div className="text-xs text-zinc-400">
+                  <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Deliver Batch of Stock to Kitchen</h3>
+                  <div className="text-xs text-stone-500 dark:text-zinc-400">
                     Select stock items, type delivery quantities, and send the full batch to the Kitchen in one click
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setSendDirectModalOpen(false)}
-                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-zinc-400 hover:text-white cursor-pointer"
+                className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -2016,13 +2016,13 @@ export function InventoryView() {
 
             {/* Quick Search & Filter */}
             <div className="relative flex-shrink-0">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-400" />
               <input
                 type="text"
                 placeholder="Search main store stock (e.g. Flour, Milk, Beef, Sugar)..."
                 value={sendSearch}
                 onChange={(e) => setSendSearch(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
               />
             </div>
 
@@ -2044,19 +2044,19 @@ export function InventoryView() {
                       key={b.ingredient.id}
                       className={`p-3 rounded-2xl border transition flex items-center justify-between gap-3 ${
                         hasQty
-                          ? 'bg-amber-500/10 border-amber-500/50 shadow-md shadow-amber-500/10'
-                          : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.05]'
+                          ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/50 shadow-xs'
+                          : 'bg-stone-50 dark:bg-white/[0.03] border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.05]'
                       }`}
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-white truncate">{b.ingredient.name}</span>
-                          <span className="text-[10px] bg-white/10 text-zinc-400 px-1.5 py-0.2 rounded-full font-medium">
+                          <span className="text-xs font-bold text-stone-900 dark:text-white truncate">{b.ingredient.name}</span>
+                          <span className="text-[10px] bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400 px-1.5 py-0.2 rounded-full font-medium">
                             {b.ingredient.category}
                           </span>
                         </div>
-                        <div className="text-[11px] text-zinc-400 mt-0.5">
-                          Available in Main: <span className="text-amber-400 font-bold">{b.quantity} {unitSymbol}</span>
+                        <div className="text-[11px] text-stone-500 dark:text-zinc-400 mt-0.5">
+                          Available in Main: <span className="text-amber-700 dark:text-amber-400 font-bold">{b.quantity} {unitSymbol}</span>
                         </div>
                       </div>
 
@@ -2075,11 +2075,11 @@ export function InventoryView() {
                                 [b.ingredient.id]: e.target.value,
                               }))
                             }
-                            className={`w-32 bg-black/40 border rounded-xl px-3 py-1.5 text-xs font-bold text-white text-right focus:outline-none transition ${
-                              hasQty ? 'border-amber-500 text-amber-300' : 'border-white/10 focus:border-amber-500'
+                            className={`w-32 bg-white dark:bg-black/40 border rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 dark:text-white text-right focus:outline-none transition ${
+                              hasQty ? 'border-amber-500 text-amber-800 dark:text-amber-300' : 'border-stone-300 dark:border-white/10 focus:border-amber-500'
                             }`}
                           />
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 pointer-events-none">
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-stone-400 dark:text-zinc-500 pointer-events-none">
                             {unitSymbol}
                           </span>
                         </div>
@@ -2093,7 +2093,7 @@ export function InventoryView() {
                                 return next;
                               })
                             }
-                            className="p-1 text-zinc-500 hover:text-rose-400 text-xs font-black cursor-pointer"
+                            className="p-1 text-stone-400 dark:text-zinc-500 hover:text-rose-500 dark:hover:text-rose-400 text-xs font-black cursor-pointer"
                             title="Clear"
                           >
                             ×
@@ -2106,10 +2106,10 @@ export function InventoryView() {
             </div>
 
             {/* Bottom Form Actions */}
-            <form onSubmit={handleSendBatchToKitchen} className="space-y-3 pt-3 border-t border-white/10 flex-shrink-0">
+            <form onSubmit={handleSendBatchToKitchen} className="space-y-3 pt-3 border-t border-stone-200 dark:border-white/10 flex-shrink-0">
               <div className="flex items-center justify-between text-xs">
-                <div className="text-zinc-400 flex items-center gap-1.5">
-                  <span className="font-bold text-white">
+                <div className="text-stone-500 dark:text-zinc-400 flex items-center gap-1.5">
+                  <span className="font-bold text-stone-900 dark:text-white">
                     {
                       Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length
                     }{' '}
@@ -2121,7 +2121,7 @@ export function InventoryView() {
                   <button
                     type="button"
                     onClick={() => setBatchQuantities({})}
-                    className="text-[11px] text-rose-400 hover:underline cursor-pointer font-bold"
+                    className="text-[11px] text-rose-500 dark:text-rose-400 hover:underline cursor-pointer font-bold"
                   >
                     Clear All
                   </button>
@@ -2133,14 +2133,14 @@ export function InventoryView() {
                 placeholder="Delivery Notes / Instructions (e.g. Morning kitchen prep batch)..."
                 value={sendNotes}
                 onChange={(e) => setSendNotes(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
               />
 
               <div className="flex items-center justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setSendDirectModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -2150,7 +2150,7 @@ export function InventoryView() {
                     sendSubmitting ||
                     Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length === 0
                   }
-                  className="px-5 py-2.5 bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 text-black font-black rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                  className="px-5 py-2.5 bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 text-stone-950 font-black rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                 >
                   <Send className="w-3.5 h-3.5 stroke-[3]" />
                   <span>
@@ -2170,35 +2170,35 @@ export function InventoryView() {
       {/* THRESHOLD CUTOFF SETTINGS MODAL (Owner sets alert levels for Kitchen & Main Store) */}
       {thresholdModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-2xl shadow-2xl text-white space-y-4 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-2xl shadow-2xl text-stone-900 dark:text-white space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400">
+                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
                   <Sliders className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white font-heading">Configure Low-Stock Alert Cutoffs</h3>
-                  <div className="text-xs text-zinc-400">
+                  <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Configure Low-Stock Alert Cutoffs</h3>
+                  <div className="text-xs text-stone-500 dark:text-zinc-400">
                     Owner Settings: Set custom minimum thresholds to alert Head Chef and Main Storekeeper when stock drops
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setThresholdModalOpen(false)}
-                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-zinc-400 hover:text-white cursor-pointer"
+                className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="relative flex-shrink-0">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-400" />
               <input
                 type="text"
                 placeholder="Search ingredients to set alert cutoffs..."
                 value={thresholdSearch}
                 onChange={(e) => setThresholdSearch(e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
               />
             </div>
 
@@ -2227,16 +2227,16 @@ export function InventoryView() {
                   return (
                     <div
                       key={ing.id}
-                      className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-white/[0.05] transition"
+                      className="p-3 bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-stone-100 dark:hover:bg-white/[0.05] transition shadow-xs"
                     >
                       <div className="min-w-0">
-                        <div className="text-xs font-bold text-white">{ing.name}</div>
-                        <div className="text-[10px] text-zinc-400">{ing.category} • Base Unit: {unitSymbol}</div>
+                        <div className="text-xs font-bold text-stone-900 dark:text-white">{ing.name}</div>
+                        <div className="text-[10px] text-stone-500 dark:text-zinc-400">{ing.category} • Base Unit: {unitSymbol}</div>
                       </div>
 
                       <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                         <div className="flex flex-col">
-                          <label className="text-[9px] text-zinc-400 uppercase font-bold">Kitchen Alert (&le;)</label>
+                          <label className="text-[9px] text-stone-600 dark:text-zinc-400 uppercase font-bold">Kitchen Alert (&le;)</label>
                           <div className="flex items-center gap-1">
                             <input
                               type="number"
@@ -2248,14 +2248,14 @@ export function InventoryView() {
                                   [ing.id]: { ...state, kitchen: e.target.value },
                                 }))
                               }
-                              className="w-20 bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-500"
+                              className="w-20 bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-800 dark:text-amber-400 focus:outline-none focus:border-amber-500"
                             />
-                            <span className="text-[10px] text-zinc-500">{unitSymbol}</span>
+                            <span className="text-[10px] text-stone-500 dark:text-zinc-500">{unitSymbol}</span>
                           </div>
                         </div>
 
                         <div className="flex flex-col">
-                          <label className="text-[9px] text-zinc-400 uppercase font-bold">Main Alert (&le;)</label>
+                          <label className="text-[9px] text-stone-600 dark:text-zinc-400 uppercase font-bold">Main Alert (&le;)</label>
                           <div className="flex items-center gap-1">
                             <input
                               type="number"
@@ -2267,9 +2267,9 @@ export function InventoryView() {
                                   [ing.id]: { ...state, main: e.target.value },
                                 }))
                               }
-                              className="w-20 bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-500"
+                              className="w-20 bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-800 dark:text-amber-400 focus:outline-none focus:border-amber-500"
                             />
-                            <span className="text-[10px] text-zinc-500">{unitSymbol}</span>
+                            <span className="text-[10px] text-stone-500 dark:text-zinc-500">{unitSymbol}</span>
                           </div>
                         </div>
 
@@ -2277,7 +2277,7 @@ export function InventoryView() {
                           type="button"
                           disabled={isSaving}
                           onClick={() => handleSaveThreshold(ing.id)}
-                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-black font-black text-xs rounded-xl shadow transition self-end sm:self-center cursor-pointer disabled:opacity-50"
+                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-stone-950 font-black text-xs rounded-xl shadow-xs transition self-end sm:self-center cursor-pointer disabled:opacity-50"
                         >
                           {isSaving ? '...' : 'Save'}
                         </button>
@@ -2287,11 +2287,11 @@ export function InventoryView() {
                 })}
             </div>
 
-            <div className="flex items-center justify-end pt-3 border-t border-white/10 flex-shrink-0">
+            <div className="flex items-center justify-end pt-3 border-t border-stone-200 dark:border-white/10 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setThresholdModalOpen(false)}
-                className="px-5 py-2 bg-white/10 hover:bg-white/15 text-white font-bold rounded-2xl text-xs transition cursor-pointer"
+                className="px-5 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/15 text-stone-800 dark:text-white font-bold rounded-2xl text-xs transition cursor-pointer"
               >
                 Done
               </button>
@@ -2329,28 +2329,28 @@ export function InventoryView() {
       {/* DELETE / ARCHIVE STOCK ITEM CONFIRMATION DIALOG */}
       {deleteConfirmItem && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-[#161311] border border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-white space-y-4">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-stone-900 dark:text-white space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Delete Stock Item?</h3>
-                <div className="text-xs text-zinc-400">{deleteConfirmItem.name}</div>
+                <h3 className="text-base font-black text-stone-900 dark:text-white">Delete Stock Item?</h3>
+                <div className="text-xs text-stone-500 dark:text-zinc-400">{deleteConfirmItem.name}</div>
               </div>
             </div>
 
-            <p className="text-xs text-zinc-300 leading-relaxed">
-              Are you sure you want to remove <strong className="text-white">{deleteConfirmItem.name}</strong> ({deleteConfirmItem.sku || 'No SKU'})?
-              If this stock item is linked to existing dishes or recipes, it will be safely <strong className="text-amber-400">archived</strong> to preserve your cost histories and order records.
+            <p className="text-xs text-stone-600 dark:text-zinc-300 leading-relaxed">
+              Are you sure you want to remove <strong className="text-stone-900 dark:text-white">{deleteConfirmItem.name}</strong> ({deleteConfirmItem.sku || 'No SKU'})?
+              If this stock item is linked to existing dishes or recipes, it will be safely <strong className="text-amber-700 dark:text-amber-400">archived</strong> to preserve your cost histories and order records.
             </p>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setDeleteConfirmItem(null)}
                 disabled={deletingItem}
-                className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/15 text-stone-700 dark:text-white font-bold rounded-xl text-xs transition cursor-pointer"
               >
                 Cancel
               </button>
