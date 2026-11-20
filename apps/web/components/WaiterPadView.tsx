@@ -484,46 +484,120 @@ export function WaiterPadView() {
               - On Tracker tab: Back to Food Menu Button + Active counter
           */}
           {activeTab === 'menu' ? (
-            <div className="flex items-center gap-2.5 sm:gap-3 mb-3.5 flex-shrink-0">
-              <div className="flex-1 relative flex items-center">
-                <Search className="w-4 h-4 text-stone-400 absolute left-3.5 pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search food, drinks..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-white hover:border-stone-300 focus:border-emerald-500 border border-stone-200/90 rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition shadow-2xs font-sans"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch('')}
-                    className="absolute right-3 p-0.5 text-stone-400 hover:text-stone-900"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+            <div className="space-y-2.5 mb-3.5 flex-shrink-0">
+              {/* Row 1: Search Input + Live Status Toggle */}
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="flex-1 relative flex items-center">
+                  <Search className="w-4 h-4 text-stone-400 absolute left-3.5 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search food, drinks..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-white hover:border-stone-300 focus:border-emerald-500 border border-stone-200/90 rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition shadow-2xs font-sans"
+                  />
+                  {search && (
+                    <button
+                      onClick={() => setSearch('')}
+                      className="absolute right-3 p-0.5 text-stone-400 hover:text-stone-900"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Live Kitchen Preparation Status Toggle Button */}
+                <button
+                  onClick={() => setActiveTab('tables')}
+                  className="px-3 sm:px-3.5 py-2.5 rounded-2xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold font-sans flex-shrink-0 bg-white border-stone-200 text-stone-700 hover:bg-stone-50 hover:text-stone-900 shadow-2xs active:scale-95"
+                  title="Open Live Kitchen Preparation Monitor"
+                >
+                  <Clock className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Live Status</span>
+                  {inFlightOrders.length > 0 && (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                        delayedOrders.length > 0
+                          ? 'bg-[#C11221] text-white animate-pulse'
+                          : 'bg-emerald-100 text-emerald-800'
+                      }`}
+                    >
+                      {inFlightOrders.length}
+                    </span>
+                  )}
+                </button>
               </div>
 
-              {/* Live Kitchen Preparation Status Toggle Button */}
-              <button
-                onClick={() => setActiveTab('tables')}
-                className="px-3 sm:px-3.5 py-2.5 rounded-2xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold font-sans flex-shrink-0 bg-white border-stone-200 text-stone-700 hover:bg-stone-50 hover:text-stone-900 shadow-2xs active:scale-95"
-                title="Open Live Kitchen Preparation Monitor"
-              >
-                <Clock className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                <span className="whitespace-nowrap">Live Status</span>
-                {inFlightOrders.length > 0 && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                      delayedOrders.length > 0
-                        ? 'bg-[#C11221] text-white animate-pulse'
-                        : 'bg-emerald-100 text-emerald-800'
+              {/* Row 2: Table Selection & Order Type Bar (Immediately accessible for waiters on mobile & desktop) */}
+              <div className="flex flex-wrap items-center justify-between gap-2 bg-white border border-stone-200/90 rounded-2xl p-1.5 shadow-2xs">
+                {/* Order Type Toggle: Dine In vs Takeaway */}
+                <div className="flex p-0.5 bg-stone-100 rounded-xl border border-stone-200/80">
+                  <button
+                    onClick={() => setOrderType('DINE_IN')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                      orderType === 'DINE_IN'
+                        ? 'bg-emerald-600 text-white shadow-xs font-black'
+                        : 'text-stone-600 hover:text-stone-900'
                     }`}
                   >
-                    {inFlightOrders.length}
-                  </span>
+                    <Utensils className="w-3.5 h-3.5" />
+                    <span>Dine In</span>
+                  </button>
+                  <button
+                    onClick={() => setOrderType('TAKEAWAY')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                      orderType === 'TAKEAWAY'
+                        ? 'bg-emerald-600 text-white shadow-xs font-black'
+                        : 'text-stone-600 hover:text-stone-900'
+                    }`}
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>Take Away</span>
+                  </button>
+                </div>
+
+                {/* Table Picker Dropdown & Floor Plan Modal Button */}
+                {orderType === 'DINE_IN' ? (
+                  <div className="flex items-center gap-1.5 flex-1 min-w-[200px] justify-end">
+                    <div className="relative flex-1 min-w-[130px] max-w-[240px]">
+                      <select
+                        value={waiterTable}
+                        onChange={(e) => setWaiterTable(e.target.value)}
+                        className="w-full appearance-none bg-stone-50 hover:bg-stone-100/80 border border-stone-200 hover:border-emerald-500 rounded-xl px-2.5 py-1.5 pr-7 text-xs font-black text-stone-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer transition shadow-2xs"
+                      >
+                        {tables.map((t) => {
+                          const isOccupied = t.status === 'OCCUPIED';
+                          return (
+                            <option key={t.id} value={t.tableNumber}>
+                              Table {t.tableNumber} ({t.capacity} seats){isOccupied ? ' • Seated' : ' • Open'}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <ChevronDown className="w-3.5 h-3.5 text-stone-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+
+                    <button
+                      onClick={() => setTableModalOpen(true)}
+                      className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer flex-shrink-0 shadow-2xs active:scale-95"
+                      title="Open Interactive Floor Plan"
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="hidden xs:inline">Floor Plan</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex-1 min-w-[160px] max-w-xs">
+                    <input
+                      type="text"
+                      placeholder="Takeaway guest name..."
+                      value={takeawayCustomer}
+                      onChange={(e) => setTakeawayCustomer(e.target.value)}
+                      className="w-full bg-stone-50 hover:bg-white border border-stone-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 shadow-2xs"
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
             </div>
           ) : (
             <div className="flex items-center justify-between gap-2.5 sm:gap-3 mb-3.5 flex-shrink-0">
@@ -1133,10 +1207,10 @@ export function WaiterPadView() {
       </div>
 
       {/* MOBILE / TABLET FLOATING DOCK (Visible on < lg screens) */}
-      <div className="lg:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 z-40 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-2 px-4 sm:px-8 shadow-xl flex items-center justify-around">
+      <div className="lg:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 z-40 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-2 px-3 sm:px-8 shadow-xl flex items-center justify-around">
         <button
           onClick={() => setActiveTab('menu')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 sm:px-5 rounded-xl transition cursor-pointer ${
+          className={`flex flex-col items-center gap-1 py-1 px-2.5 sm:px-4 rounded-xl transition cursor-pointer ${
             activeTab === 'menu' ? 'text-emerald-600 font-black' : 'text-stone-500'
           }`}
         >
@@ -1144,9 +1218,21 @@ export function WaiterPadView() {
           <span className="text-[10px] font-bold">Menu</span>
         </button>
 
+        {/* Quick Table / Floor Plan Selector in Mobile Dock */}
+        <button
+          onClick={() => setTableModalOpen(true)}
+          className="flex flex-col items-center gap-1 py-1 px-2.5 sm:px-4 rounded-xl text-stone-600 hover:text-emerald-600 transition cursor-pointer"
+          title="Change Table or View Floor Plan"
+        >
+          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+          <span className="text-[10px] font-black text-stone-900">
+            {orderType === 'DINE_IN' ? `Table ${waiterTable || '—'}` : 'Takeaway'}
+          </span>
+        </button>
+
         <button
           onClick={() => setShowMobileDrawer(true)}
-          className="relative flex flex-col items-center gap-1 py-1 px-3 sm:px-5 rounded-xl text-stone-500 hover:text-emerald-600 transition cursor-pointer"
+          className="relative flex flex-col items-center gap-1 py-1 px-2.5 sm:px-4 rounded-xl text-stone-500 hover:text-emerald-600 transition cursor-pointer"
         >
           <div className="relative">
             <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-stone-600" />
@@ -1161,7 +1247,7 @@ export function WaiterPadView() {
 
         <button
           onClick={() => setActiveTab('tables')}
-          className={`relative flex flex-col items-center gap-1 py-1 px-3 sm:px-5 rounded-xl transition cursor-pointer ${
+          className={`relative flex flex-col items-center gap-1 py-1 px-2.5 sm:px-4 rounded-xl transition cursor-pointer ${
             activeTab === 'tables' ? 'text-emerald-600 font-black' : 'text-stone-500'
           }`}
         >
@@ -1192,6 +1278,71 @@ export function WaiterPadView() {
               >
                 <X className="w-4 h-4" />
               </button>
+            </div>
+
+            {/* Table Selection inside Review Drawer */}
+            <div className="py-2.5 border-b border-stone-200 space-y-2">
+              <div className="flex p-0.5 bg-stone-100 rounded-xl border border-stone-200/80">
+                <button
+                  onClick={() => setOrderType('DINE_IN')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                    orderType === 'DINE_IN'
+                      ? 'bg-emerald-600 text-white shadow-xs font-black'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  <Utensils className="w-3.5 h-3.5" />
+                  <span>Dine In</span>
+                </button>
+                <button
+                  onClick={() => setOrderType('TAKEAWAY')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                    orderType === 'TAKEAWAY'
+                      ? 'bg-emerald-600 text-white shadow-xs font-black'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>Take Away</span>
+                </button>
+              </div>
+
+              {orderType === 'DINE_IN' ? (
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <select
+                      value={waiterTable}
+                      onChange={(e) => setWaiterTable(e.target.value)}
+                      className="w-full appearance-none bg-stone-50 border border-stone-300 hover:border-emerald-500 rounded-xl px-3 py-2 pr-8 text-xs font-bold text-stone-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                    >
+                      {tables.map((t) => {
+                        const isOccupied = t.status === 'OCCUPIED';
+                        return (
+                          <option key={t.id} value={t.tableNumber}>
+                            Table {t.tableNumber} ({t.capacity} seats){isOccupied ? ' • Seated' : ' • Open'}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                  <button
+                    onClick={() => setTableModalOpen(true)}
+                    className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Floor Plan</span>
+                  </button>
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="Takeaway customer name..."
+                  value={takeawayCustomer}
+                  onChange={(e) => setTakeawayCustomer(e.target.value)}
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2 text-xs font-medium text-stone-900 placeholder-stone-400 focus:outline-none"
+                />
+              )}
             </div>
 
             <div className="py-2.5">
