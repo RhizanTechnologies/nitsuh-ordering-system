@@ -8,9 +8,9 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black shadow-xs active:scale-95 border border-amber-400/40',
+          'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs active:scale-95 border border-emerald-500/40',
         primary:
-          'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black shadow-xs active:scale-95 border border-amber-400/40',
+          'bg-emerald-600 hover:bg-emerald-500 text-white font-black shadow-xs active:scale-95 border border-emerald-500/40',
         destructive:
           'bg-[#C11221] hover:bg-[#a50f1c] text-white font-bold shadow-xs active:scale-95 border border-red-700/50',
         secondary:

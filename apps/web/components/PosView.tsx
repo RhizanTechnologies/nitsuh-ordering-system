@@ -571,19 +571,19 @@ export function PosView() {
 
       {/* Append Items Active Banner */}
       {appendOrderTarget && (
-        <div className="mx-3.5 sm:mx-4 mt-3 p-2.5 sm:p-3 bg-amber-500/15 border border-amber-500/40 rounded-2xl flex items-center justify-between text-xs flex-shrink-0">
+        <div className="mx-3.5 sm:mx-4 mt-3 p-2.5 sm:p-3 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-between text-xs flex-shrink-0">
           <div>
-            <div className="font-black text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-              <RotateCcw className="w-3.5 h-3.5 text-amber-500" />
-              <span>Appending to {appendOrderTarget.orderNumber}</span>
+            <div className="font-black text-emerald-800 flex items-center gap-1.5">
+              <RotateCcw className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Appending to {appendOrderTarget.orderNumber?.startsWith('#') ? appendOrderTarget.orderNumber : `#${appendOrderTarget.orderNumber}`}</span>
             </div>
-            <div className="text-[10px] text-stone-500 dark:text-zinc-400">
+            <div className="text-[10px] text-stone-500">
               {appendOrderTarget.orderType === "TAKEAWAY" ? "Takeaway Order" : `Table ${appendOrderTarget.table?.tableNumber}`}
             </div>
           </div>
           <button
             onClick={() => setAppendOrderTarget(null)}
-            className="text-[10px] font-bold text-amber-700 dark:text-amber-400 hover:text-stone-900 dark:hover:text-white bg-amber-500/20 px-2 py-0.5 rounded-lg cursor-pointer"
+            className="text-[10px] font-bold text-emerald-800 hover:text-stone-900 bg-emerald-100 px-2 py-0.5 rounded-lg cursor-pointer"
           >
             Cancel
           </button>
@@ -592,13 +592,13 @@ export function PosView() {
 
       {/* Order Type Toggle: Dine In vs Take Away */}
       <div className="px-3.5 sm:px-4 pt-3 flex-shrink-0">
-        <div className="grid grid-cols-2 bg-stone-100 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 p-1 rounded-2xl gap-1">
+        <div className="grid grid-cols-2 bg-stone-100 border border-stone-200/90 p-1 rounded-2xl gap-1">
           <button
             onClick={() => setOrderType('DINE_IN')}
             className={`py-1.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
               orderType === "DINE_IN"
-                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs"
-                : "text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white"
+                ? "bg-emerald-600 text-white shadow-xs"
+                : "text-stone-600 hover:text-stone-950"
             }`}
           >
             <Utensils className="w-3.5 h-3.5" />
@@ -608,8 +608,8 @@ export function PosView() {
             onClick={() => setOrderType('TAKEAWAY')}
             className={`py-1.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
               orderType === "TAKEAWAY"
-                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs"
-                : "text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white"
+                ? "bg-emerald-600 text-white shadow-xs"
+                : "text-stone-600 hover:text-stone-950"
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
@@ -748,7 +748,7 @@ export function PosView() {
       <div className="p-3.5 sm:p-4 border-t border-stone-200/90 dark:border-white/10 bg-stone-50/70 dark:bg-white/[0.02] space-y-2.5 sm:space-y-3 flex-shrink-0">
         {/* Quick Discount Controls */}
         <div className="flex items-center justify-between text-xs">
-          <span className="text-stone-500 dark:text-zinc-400 font-bold">% Discount:</span>
+          <span className="text-stone-500 font-bold">% Discount:</span>
           <div className="flex gap-1">
             {[0, 5, 10, 15].map((d) => (
               <button
@@ -756,8 +756,8 @@ export function PosView() {
                 onClick={() => setDiscountPercent(d)}
                 className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
                   discountPercent === d
-                    ? "bg-amber-500 text-stone-950 border-amber-400 font-black shadow-xs"
-                    : "bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-zinc-400 border-stone-200/90 dark:border-white/10 hover:text-stone-950 dark:hover:text-white"
+                    ? "bg-emerald-600 text-white border-emerald-500 font-black shadow-xs"
+                    : "bg-stone-100 text-stone-600 border-stone-200/90 hover:text-stone-950"
                 }`}
               >
                 {d === 0 ? "None" : `${d}%`}
@@ -829,35 +829,31 @@ export function PosView() {
   );
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white relative transition-colors">
-      {/* Background ambient lighting glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/5 dark:bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#F8F9FA] text-stone-900 relative transition-colors font-sans">
       {/* ================= CASHIER TOP CONTROL BAR ================= */}
-      <div className="bg-white/95 dark:bg-[#161311]/95 backdrop-blur-xl border-b border-stone-200/90 dark:border-white/10 px-3.5 sm:px-6 py-2.5 z-20 flex items-center justify-between gap-2 sm:gap-4 flex-shrink-0">
+      <div className="bg-white border-b border-stone-200/90 px-3.5 sm:px-6 py-2.5 z-20 flex items-center justify-between gap-2 sm:gap-4 flex-shrink-0">
         {/* Left: Station Identity & Switcher */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-stone-500 dark:text-zinc-400">
-            <UserCheck className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-stone-500">
+            <UserCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             <span className="truncate">Cashier Terminal</span>
           </div>
 
           {/* Primary View Switcher: Orders vs New Order */}
-          <div className="flex items-center bg-stone-100 dark:bg-white/[0.06] p-1 rounded-2xl border border-stone-200/80 dark:border-white/10 shadow-xs">
+          <div className="flex items-center bg-stone-100 p-1 rounded-2xl border border-stone-200/80 shadow-2xs">
             <button
               onClick={() => setPosTab('orders')}
               className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
                 posTab === 'orders'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs'
-                  : 'text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-stone-600 hover:text-stone-950'
               }`}
             >
               <Receipt className="w-3.5 h-3.5" />
               <span>Orders & Billing</span>
               {(incomingSlips.length > 0 || unpaidOrders.length > 0) && (
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  posTab === 'orders' ? 'bg-black/20 text-stone-950' : 'bg-[#C11221] text-white'
+                  posTab === 'orders' ? 'bg-emerald-800 text-white' : 'bg-[#C11221] text-white'
                 }`}>
                   {incomingSlips.length + unpaidOrders.length}
                 </span>
@@ -872,8 +868,8 @@ export function PosView() {
               }}
               className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
                 posTab === 'menu'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs'
-                  : 'text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-stone-600 hover:text-stone-950'
               }`}
             >
               <Utensils className="w-3.5 h-3.5" />
@@ -884,7 +880,7 @@ export function PosView() {
               </span>
               {cart.length > 0 && (
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  posTab === 'menu' ? 'bg-black/20 text-stone-950' : 'bg-amber-600 text-white'
+                  posTab === 'menu' ? 'bg-emerald-800 text-white' : 'bg-emerald-600 text-white'
                 }`}>
                   {totalCartItems}
                 </span>
@@ -893,7 +889,7 @@ export function PosView() {
           </div>
         </div>
 
-        {/* Right: Quick Tools (Refresh, Tables, Settle Tender) */}
+        {/* Right: Quick Tools (Refresh only — Floor Plan button removed since it is on the bottom bar) */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           <Button
             variant="secondary"
@@ -902,17 +898,7 @@ export function PosView() {
             disabled={isRefreshing}
             title="Refresh Orders & Slips"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
-          </Button>
-
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setTableModalOpen(true)}
-            title="View Dining Room Floor Plan"
-          >
-            <LayoutGrid className="w-3.5 h-3.5 text-amber-500" />
-            <span className="hidden sm:inline">Floor Plan</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-emerald-600' : 'text-stone-600'}`} />
           </Button>
         </div>
       </div>
@@ -939,205 +925,163 @@ export function PosView() {
       {/* VIEW 1: ORDERS & BILLING COMMAND CENTER (DEFAULT / MAIN)  */}
       {/* ========================================================= */}
       {posTab === 'orders' && (
-        <div className="flex-1 min-h-0 flex flex-col p-3.5 sm:p-6 overflow-y-auto pb-24 lg:pb-6 relative z-10 no-scrollbar">
-          {/* Summary Stat Cards Row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 mb-4 flex-shrink-0">
-            {/* 1. Pending Slips */}
+        <div className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-24 lg:pb-6 relative z-10 no-scrollbar bg-[#F8F9FA]">
+          {/* Compact Clickable Stat Cards (Function as interactive filters) */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5 mb-3 flex-shrink-0">
+            {/* 1. All Orders */}
             <div
-              onClick={() => setOrderFilter('SLIPS')}
-              className={`p-3 sm:p-3.5 rounded-2xl border transition cursor-pointer shadow-xs ${
-                orderFilter === 'SLIPS'
-                  ? 'bg-amber-500/20 border-amber-500 ring-2 ring-amber-500/30'
-                  : 'bg-white dark:bg-[#161311] border-stone-200/90 dark:border-white/10 hover:border-amber-500/40'
+              onClick={() => setOrderFilter('ALL')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
+                orderFilter === 'ALL'
+                  ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-emerald-500/40'
               }`}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] sm:text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase">
-                  Pending Firing
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
+                  All Orders
                 </span>
-                <div className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                  <Flame className="w-3.5 h-3.5" />
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  orderFilter === 'ALL' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-600'
+                }`}>
+                  <Receipt className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-lg sm:text-2xl font-black text-stone-900 dark:text-white flex items-center gap-1.5">
+              <div className="text-base sm:text-xl font-black text-stone-900">
+                {incomingSlips.length + activeOrders.length}
+              </div>
+            </div>
+
+            {/* 2. Pending Slips */}
+            <div
+              onClick={() => setOrderFilter(orderFilter === 'SLIPS' ? 'ALL' : 'SLIPS')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
+                orderFilter === 'SLIPS'
+                  ? 'bg-amber-50 border-amber-500 ring-2 ring-amber-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-amber-500/40'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
+                  Pending Firing
+                </span>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  incomingSlips.length > 0 ? 'bg-amber-500/20 text-amber-700' : 'bg-stone-100 text-stone-500'
+                }`}>
+                  <Flame className="w-3 h-3" />
+                </div>
+              </div>
+              <div className="text-base sm:text-xl font-black text-stone-900 flex items-center gap-1.5">
                 <span>{incomingSlips.length}</span>
                 {incomingSlips.length > 0 && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#C11221] text-white font-bold">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#C11221] text-white font-bold">
                     Action Required
                   </span>
                 )}
               </div>
             </div>
 
-            {/* 2. Unpaid Bills */}
+            {/* 3. Unpaid Bills */}
             <div
-              onClick={() => setOrderFilter('UNPAID')}
-              className={`p-3 sm:p-3.5 rounded-2xl border transition cursor-pointer shadow-xs ${
+              onClick={() => setOrderFilter(orderFilter === 'UNPAID' ? 'ALL' : 'UNPAID')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
                 orderFilter === 'UNPAID'
-                  ? 'bg-red-500/15 border-red-500 ring-2 ring-red-500/30'
-                  : 'bg-white dark:bg-[#161311] border-stone-200/90 dark:border-white/10 hover:border-red-500/40'
+                  ? 'bg-rose-50 border-rose-500 ring-2 ring-rose-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-rose-500/40'
               }`}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] sm:text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
                   Unpaid Bills
                 </span>
-                <div className="w-6 h-6 rounded-lg bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center">
-                  <CreditCard className="w-3.5 h-3.5" />
+                <div className="w-5 h-5 rounded-md bg-rose-500/15 text-rose-600 flex items-center justify-center">
+                  <CreditCard className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-lg sm:text-2xl font-black text-red-600 dark:text-rose-400">
+              <div className="text-base sm:text-xl font-black text-rose-600">
                 {unpaidOrders.length}
               </div>
-              <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold truncate">
-                {unpaidTotalAmount.toFixed(2)} ETB Due
+              <div className="text-[10px] text-stone-500 font-bold truncate">
+                {unpaidTotalAmount.toFixed(2)} ETB
               </div>
             </div>
 
-            {/* 3. In Kitchen Prep */}
+            {/* 4. In Kitchen Prep */}
             <div
-              onClick={() => setOrderFilter('PREPARING')}
-              className={`p-3 sm:p-3.5 rounded-2xl border transition cursor-pointer shadow-xs ${
+              onClick={() => setOrderFilter(orderFilter === 'PREPARING' ? 'ALL' : 'PREPARING')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
                 orderFilter === 'PREPARING'
-                  ? 'bg-blue-500/15 border-blue-500 ring-2 ring-blue-500/30'
-                  : 'bg-white dark:bg-[#161311] border-stone-200/90 dark:border-white/10 hover:border-blue-500/40'
+                  ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-blue-500/40'
               }`}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] sm:text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase">
-                  Cooking in Kitchen
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
+                  In Kitchen
                 </span>
-                <div className="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                  <Clock className="w-3.5 h-3.5" />
+                <div className="w-5 h-5 rounded-md bg-blue-500/15 text-blue-600 flex items-center justify-center">
+                  <Clock className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-lg sm:text-2xl font-black text-stone-900 dark:text-white">
+              <div className="text-base sm:text-xl font-black text-stone-900">
                 {inPrepCount}
               </div>
             </div>
 
-            {/* 4. Ready for Service */}
+            {/* 5. Ready to Serve */}
             <div
-              onClick={() => setOrderFilter('READY')}
-              className={`p-3 sm:p-3.5 rounded-2xl border transition cursor-pointer shadow-xs ${
+              onClick={() => setOrderFilter(orderFilter === 'READY' ? 'ALL' : 'READY')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
                 orderFilter === 'READY'
-                  ? 'bg-emerald-500/15 border-emerald-500 ring-2 ring-emerald-500/30'
-                  : 'bg-white dark:bg-[#161311] border-stone-200/90 dark:border-white/10 hover:border-emerald-500/40'
+                  ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-emerald-500/40'
               }`}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] sm:text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
                   Ready to Serve
                 </span>
-                <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                  <CheckCircle className="w-3.5 h-3.5" />
+                <div className="w-5 h-5 rounded-md bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
+                  <CheckCircle className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
+              <div className="text-base sm:text-xl font-black text-emerald-600">
                 {readyCount}
               </div>
             </div>
           </div>
 
-          {/* Search & Filter Toolbar */}
-          <div className="bg-white/90 dark:bg-[#161311]/90 backdrop-blur-xl border border-stone-200/90 dark:border-white/10 rounded-2xl sm:rounded-3xl p-2.5 mb-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 no-scrollbar text-xs font-bold flex-1">
-              <button
-                onClick={() => setOrderFilter('ALL')}
-                className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
-                  orderFilter === 'ALL'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
-              >
-                All Orders ({incomingSlips.length + activeOrders.length})
-              </button>
-
-              <button
-                onClick={() => setOrderFilter('SLIPS')}
-                className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap flex items-center gap-1 cursor-pointer ${
-                  orderFilter === 'SLIPS'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
-              >
-                <Flame className="w-3 h-3 text-amber-500" />
-                Pending Firing ({incomingSlips.length})
-              </button>
-
-              <button
-                onClick={() => setOrderFilter('UNPAID')}
-                className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
-                  orderFilter === 'UNPAID'
-                    ? 'bg-[#C11221] text-white font-black shadow-xs'
-                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
-              >
-                Unpaid Bills ({unpaidOrders.length})
-              </button>
-
-              <button
-                onClick={() => setOrderFilter('PREPARING')}
-                className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
-                  orderFilter === 'PREPARING'
-                    ? 'bg-blue-600 text-white font-black shadow-xs'
-                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
-              >
-                In Kitchen ({inPrepCount})
-              </button>
-
-              <button
-                onClick={() => setOrderFilter('READY')}
-                className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap cursor-pointer ${
-                  orderFilter === 'READY'
-                    ? 'bg-emerald-600 text-white font-black shadow-xs'
-                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
-              >
-                Ready ({readyCount})
-              </button>
-
-              <button
-                onClick={() => setOrderFilter('DINE_IN')}
-                className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap flex items-center gap-1 cursor-pointer ${
-                  orderFilter === 'DINE_IN'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
-              >
-                <Utensils className="w-3 h-3" />
-                Dine-In
-              </button>
-
-              <button
-                onClick={() => setOrderFilter('TAKEAWAY')}
-                className={`px-3 py-1.5 rounded-xl transition whitespace-nowrap flex items-center gap-1 cursor-pointer ${
-                  orderFilter === 'TAKEAWAY'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                    : 'bg-stone-100 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
-                }`}
-              >
-                <ShoppingBag className="w-3 h-3" />
-                Takeaway
-              </button>
+          {/* Search & Active Header Bar (Replacing duplicate filter buttons) */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 bg-white border border-stone-200/90 rounded-2xl p-2.5 px-3.5 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Receipt className="w-4 h-4 text-emerald-600" />
+              <h2 className="text-xs sm:text-sm font-black text-stone-900 uppercase tracking-tight">
+                Active Bills & Tickets ({filteredOrders.length})
+              </h2>
+              {orderFilter !== 'ALL' && (
+                <button
+                  onClick={() => setOrderFilter('ALL')}
+                  className="text-[10px] font-bold text-emerald-700 hover:underline bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 cursor-pointer"
+                >
+                  Clear Filter ✕
+                </button>
+              )}
             </div>
 
             {/* Quick Search Input */}
-            <div className="relative w-full md:w-72 flex-shrink-0">
-              <Search className="w-3.5 h-3.5 text-stone-400 dark:text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="relative w-full sm:w-72 flex-shrink-0">
+              <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search table, order #, guest, waiter..."
                 value={orderSearch}
                 onChange={(e) => setOrderSearch(e.target.value)}
-                className="w-full bg-stone-100 dark:bg-white/[0.05] border border-stone-200/90 dark:border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-9 pr-8 py-1.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500"
               />
               {orderSearch && (
                 <button
                   onClick={() => setOrderSearch('')}
-                  className="p-1 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white transition absolute right-2 top-1/2 -translate-y-1/2"
+                  className="p-1 text-stone-400 hover:text-stone-900 transition absolute right-2 top-1/2 -translate-y-1/2"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -1147,27 +1091,27 @@ export function PosView() {
 
           {/* INCOMING WAITER SLIPS SECTION: Cashier Reviews & Fires to Kitchen */}
           {filteredSlips.length > 0 && (
-            <div className="mb-6 bg-amber-950/20 border-2 border-amber-500/50 rounded-3xl p-4 sm:p-5 shadow-2xl backdrop-blur-xl animate-in fade-in">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-amber-500/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center shadow-lg shadow-amber-500/30 animate-bounce flex-shrink-0">
-                    <BellRing className="w-5 h-5 font-bold" />
+            <div className="mb-4 bg-emerald-50/70 border border-emerald-300 rounded-2xl p-3.5 sm:p-4 shadow-xs animate-in fade-in">
+              <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-emerald-200/80">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs flex-shrink-0">
+                    <BellRing className="w-4 h-4 font-bold" />
                   </div>
                   <div>
-                    <h3 className="text-sm sm:text-base font-black text-stone-900 dark:text-white flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-2">
                       <span>Incoming Waiter Notes</span>
                       <span className="bg-[#C11221] text-white text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-black">
                         {filteredSlips.length} Pending Firing
                       </span>
                     </h3>
-                    <p className="text-xs text-stone-500 dark:text-zinc-400">
+                    <p className="text-[11px] text-stone-500">
                       Floor notes taken by waiters — review, edit or send straight to kitchen KDS
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {filteredSlips.map((slip) => {
                   const isSlipTakeaway = slip.orderType === "TAKEAWAY";
                   const totalItems = slip.items?.reduce((s: number, i: any) => s + i.quantity, 0) || 0;
@@ -1175,7 +1119,7 @@ export function PosView() {
                   return (
                     <div
                       key={slip.id}
-                      className="bg-white dark:bg-[#161311] border border-amber-500/40 rounded-2xl p-4 shadow-xl flex flex-col justify-between gap-3 hover:border-amber-500 transition"
+                      className="bg-white border border-stone-200/90 rounded-2xl p-3.5 shadow-xs flex flex-col justify-between gap-2.5 hover:border-emerald-500/50 transition"
                     >
                       <div>
                         <div className="flex items-start justify-between gap-2 mb-2">
@@ -1183,40 +1127,40 @@ export function PosView() {
                             <Badge variant={isSlipTakeaway ? 'purple' : 'success'}>
                               {isSlipTakeaway ? "🛍️ Takeaway" : `🍽️ Table ${slip.table?.tableNumber || "Assigned"}`}
                             </Badge>
-                            <span className="text-xs font-mono text-stone-500 dark:text-zinc-400 font-bold">
-                              {slip.orderNumber}
+                            <span className="text-xs font-mono text-stone-500 font-bold">
+                              {slip.orderNumber?.startsWith('#') ? slip.orderNumber : `#${slip.orderNumber}`}
                             </span>
                           </div>
 
                           <div className="text-right">
-                            <div className="text-sm font-black text-amber-700 dark:text-amber-400">
+                            <div className="text-sm font-black text-emerald-700">
                               {Number(slip.totalAmount || 0).toFixed(2)} ETB
                             </div>
-                            <span className="text-[10px] text-stone-400 dark:text-zinc-500 font-bold">
+                            <span className="text-[10px] text-stone-400 font-bold">
                               {formatTime(slip.createdAt)}
                             </span>
                           </div>
                         </div>
 
-                        <div className="text-xs text-stone-500 dark:text-zinc-400 mb-2 flex items-center gap-1.5 flex-wrap">
-                          <span>Server: <strong className="text-amber-700 dark:text-amber-400">{slip.waiter?.name || "Waiter"}</strong></span>
+                        <div className="text-xs text-stone-500 mb-2 flex items-center gap-1.5 flex-wrap">
+                          <span>Server: <strong className="text-stone-800">{slip.waiter?.name || "Waiter"}</strong></span>
                           {slip.customerName && <span>• Guest: <strong>{slip.customerName}</strong></span>}
                           <span>• {totalItems} items</span>
                         </div>
 
-                        <div className="bg-stone-50 dark:bg-white/[0.04] rounded-xl p-2.5 space-y-1.5 text-xs text-stone-700 dark:text-zinc-300 border border-stone-200/80 dark:border-white/10 max-h-36 overflow-y-auto no-scrollbar">
+                        <div className="bg-stone-50 rounded-xl p-2.5 space-y-1.5 text-xs text-stone-700 border border-stone-200/80 max-h-36 overflow-y-auto no-scrollbar">
                           {slip.items?.map((item: any) => (
                             <div key={item.id} className="flex items-start justify-between text-xs gap-2">
                               <div>
-                                <span className="font-black text-amber-700 dark:text-amber-400 mr-1.5">{item.quantity}x</span>
-                                <span className="font-medium text-stone-900 dark:text-white">{item.menuItem?.name}</span>
+                                <span className="font-black text-emerald-800 mr-1.5">{item.quantity}x</span>
+                                <span className="font-medium text-stone-900">{item.menuItem?.name}</span>
                                 {item.specialInstructions && (
-                                  <div className="text-[10px] text-amber-600 dark:text-amber-400 italic">
+                                  <div className="text-[10px] text-emerald-700 italic">
                                     &quot;{item.specialInstructions}&quot;
                                   </div>
                                 )}
                               </div>
-                              <span className="text-stone-500 dark:text-zinc-400 font-mono text-[11px] whitespace-nowrap">
+                              <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
                                 {Number(item.subtotal || item.unitPrice * item.quantity).toFixed(2)} ETB
                               </span>
                             </div>
@@ -1224,7 +1168,7 @@ export function PosView() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 pt-2 border-t border-stone-100 dark:border-white/10">
+                      <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
                         <Button
                           variant="primary"
                           size="sm"
@@ -1241,7 +1185,7 @@ export function PosView() {
                           onClick={() => handleReviewWaiterSlip(slip)}
                           title="Edit items in slip before firing"
                         >
-                          <FileEdit className="w-3.5 h-3.5 text-stone-500 dark:text-zinc-400" />
+                          <FileEdit className="w-3.5 h-3.5 text-stone-500" />
                           <span>Edit</span>
                         </Button>
 
@@ -1278,17 +1222,17 @@ export function PosView() {
                   setAppendOrderTarget(null);
                   setPosTab('menu');
                 }}
-                className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1"
+                className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
               >
                 <span>+ Punch New Counter Order</span>
               </button>
             </div>
 
             {filteredOrders.length === 0 ? (
-              <div className="bg-white dark:bg-[#161311] border border-stone-200/90 dark:border-white/10 rounded-3xl p-12 text-center text-stone-400 dark:text-zinc-500 shadow-xs">
-                <Receipt className="w-12 h-12 mx-auto mb-3 stroke-1 text-stone-300 dark:text-zinc-600" />
-                <p className="text-sm font-bold text-stone-700 dark:text-zinc-300">No orders matching this filter</p>
-                <p className="text-xs mt-1 text-stone-500 dark:text-zinc-500">
+              <div className="bg-white border border-stone-200/90 rounded-3xl p-12 text-center text-stone-400 shadow-xs">
+                <Receipt className="w-12 h-12 mx-auto mb-3 stroke-1 text-stone-300" />
+                <p className="text-sm font-bold text-stone-700">No orders matching this filter</p>
+                <p className="text-xs mt-1 text-stone-500">
                   Try changing your status filter or tap &quot;+ New Order&quot; to ring up a guest.
                 </p>
                 <button
@@ -1296,7 +1240,7 @@ export function PosView() {
                     setAppendOrderTarget(null);
                     setPosTab('menu');
                   }}
-                  className="mt-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs rounded-xl shadow-xs transition"
+                  className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-xs transition"
                 >
                   + Create New Order
                 </button>
@@ -1310,13 +1254,13 @@ export function PosView() {
                   return (
                     <div
                       key={order.id}
-                      className="bg-white dark:bg-[#161311] border border-stone-200/90 dark:border-white/10 rounded-2xl p-4 shadow-xs hover:border-amber-500/40 transition flex flex-col justify-between gap-3"
+                      className="bg-white border border-stone-200/90 rounded-2xl p-4 shadow-xs hover:border-emerald-500/40 transition flex flex-col justify-between gap-3"
                     >
                       {/* Top Metadata */}
                       <div>
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-sm font-black text-stone-900 dark:text-white">
+                            <span className="text-sm font-black text-stone-900">
                               {order.orderNumber?.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`}
                             </span>
 
@@ -1358,38 +1302,38 @@ export function PosView() {
                         </div>
 
                         {/* Attribution line */}
-                        <div className="flex items-center gap-2.5 text-[11px] text-stone-500 dark:text-zinc-400 flex-wrap mb-2.5">
-                          <div className="flex items-center gap-1 text-stone-700 dark:text-zinc-300">
-                            <UserCheck className="w-3 h-3 text-amber-500" />
+                        <div className="flex items-center gap-2.5 text-[11px] text-stone-500 flex-wrap mb-2.5">
+                          <div className="flex items-center gap-1 text-stone-700">
+                            <UserCheck className="w-3 h-3 text-emerald-600" />
                             <span>Cashier:</span>
-                            <span className="font-bold text-amber-700 dark:text-amber-400">
+                            <span className="font-bold text-stone-900">
                               {order.cashier?.name || 'Counter'}
                             </span>
                           </div>
 
                           {order.waiter && (
-                            <div className="flex items-center gap-1 text-stone-700 dark:text-zinc-300">
-                              <Smartphone className="w-3 h-3 text-amber-500" />
+                            <div className="flex items-center gap-1 text-stone-700">
+                              <Smartphone className="w-3 h-3 text-emerald-600" />
                               <span>Server:</span>
                               <span className="font-semibold">{order.waiter.name}</span>
                             </div>
                           )}
 
-                          <div className="flex items-center gap-1 text-stone-400 dark:text-zinc-500 ml-auto">
+                          <div className="flex items-center gap-1 text-stone-400 ml-auto">
                             <Clock className="w-3 h-3" />
                             <span>{formatTime(order.createdAt)}</span>
                           </div>
                         </div>
 
                         {/* Items breakdown list */}
-                        <div className="bg-stone-50 dark:bg-white/[0.04] rounded-xl p-2.5 space-y-1 text-xs border border-stone-200/80 dark:border-white/10 max-h-32 overflow-y-auto no-scrollbar">
+                        <div className="bg-stone-50 rounded-xl p-2.5 space-y-1 text-xs border border-stone-200/80 max-h-32 overflow-y-auto no-scrollbar">
                           {order.items?.map((itm: any) => (
                             <div key={itm.id} className="flex items-center justify-between text-xs">
                               <span className="truncate pr-2">
-                                <strong className="text-amber-700 dark:text-amber-400 mr-1.5">{itm.quantity}x</strong>
-                                <span className="text-stone-900 dark:text-white">{itm.menuItem?.name || itm.name}</span>
+                                <strong className="text-emerald-800 mr-1.5">{itm.quantity}x</strong>
+                                <span className="text-stone-900">{itm.menuItem?.name || itm.name}</span>
                               </span>
-                              <span className="text-stone-500 dark:text-zinc-400 font-mono text-[11px] whitespace-nowrap">
+                              <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
                                 {Number(itm.subtotal || (itm.unitPrice || itm.price) * itm.quantity).toFixed(2)} ETB
                               </span>
                             </div>
@@ -1398,10 +1342,10 @@ export function PosView() {
                       </div>
 
                       {/* Financial Total & Action Buttons */}
-                      <div className="pt-2.5 border-t border-stone-100 dark:border-white/10 flex items-center justify-between gap-2 flex-wrap">
+                      <div className="pt-2.5 border-t border-stone-100 flex items-center justify-between gap-2 flex-wrap">
                         <div>
-                          <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase">Total Bill (15% VAT)</div>
-                          <div className="text-base font-black text-amber-700 dark:text-amber-400">
+                          <div className="text-[10px] text-stone-500 font-bold uppercase">Total Bill (15% VAT)</div>
+                          <div className="text-base font-black text-emerald-700">
                             {Number(order.totalAmount).toFixed(2)} ETB
                           </div>
                         </div>
@@ -1415,7 +1359,7 @@ export function PosView() {
                               onClick={() => handleStartAppendItems(order)}
                               title="Add more items to this bill"
                             >
-                              <PlusCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                              <PlusCircle className="w-3.5 h-3.5 text-emerald-600" />
                               <span>+ Items</span>
                             </Button>
                           )}
@@ -1430,7 +1374,7 @@ export function PosView() {
                             }}
                             title="Print Bill / Receipt"
                           >
-                            <Printer className="w-3.5 h-3.5 text-stone-600 dark:text-zinc-300" />
+                            <Printer className="w-3.5 h-3.5 text-stone-600" />
                           </Button>
 
                           {/* Settle Bill Button */}
@@ -1447,7 +1391,7 @@ export function PosView() {
                               <span>Settle Bill</span>
                             </Button>
                           ) : (
-                            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 px-2 py-1">
+                            <span className="text-xs font-bold text-emerald-600 flex items-center gap-1 px-2 py-1">
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               <span>Settled</span>
                             </span>
@@ -1505,14 +1449,14 @@ export function PosView() {
                 {/* Fulfillment Mode (Dine-In vs Takeaway) & Table Picker */}
                 <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
                   {/* Segmented Mode Switcher */}
-                  <div className="flex items-center bg-stone-100 dark:bg-white/[0.06] p-0.5 rounded-xl border border-stone-200/80 dark:border-white/10 flex-shrink-0">
+                  <div className="flex items-center bg-stone-100 p-0.5 rounded-xl border border-stone-200/80 flex-shrink-0">
                     <button
                       type="button"
                       onClick={() => setOrderType('DINE_IN')}
                       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-black transition cursor-pointer ${
                         orderType === 'DINE_IN'
-                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs'
-                          : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
                       }`}
                       title="Dine-In Table Order"
                     >
@@ -1525,8 +1469,8 @@ export function PosView() {
                       onClick={() => setOrderType('TAKEAWAY')}
                       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-black transition cursor-pointer ${
                         orderType === 'TAKEAWAY'
-                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 shadow-xs'
-                          : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
                       }`}
                       title="Takeaway Order"
                     >
@@ -1540,10 +1484,10 @@ export function PosView() {
                     <button
                       type="button"
                       onClick={() => setTableModalOpen(true)}
-                      className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-amber-900 dark:text-amber-300 transition cursor-pointer"
+                      className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-emerald-900 transition cursor-pointer"
                       title="Open Dining Tables & Floor Plan"
                     >
-                      <LayoutGrid className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      <LayoutGrid className="w-3.5 h-3.5 text-emerald-600" />
                       <span>{selectedTable ? `Table ${selectedTable}` : 'Choose Table'}</span>
                     </button>
                   ) : (
@@ -1553,27 +1497,27 @@ export function PosView() {
                       placeholder="Customer name..."
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className="flex-1 sm:w-36 bg-stone-100 dark:bg-white/[0.06] border border-stone-200/80 dark:border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      className="flex-1 sm:w-36 bg-stone-100 border border-stone-200/80 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     />
                   )}
                 </div>
 
                 {/* Search Input */}
                 <div className="flex items-center gap-2 flex-1 sm:max-w-md min-w-0">
-                  <div className="flex items-center bg-stone-100 dark:bg-white/[0.05] border border-stone-200/80 dark:border-white/10 focus-within:border-amber-500 rounded-xl px-3 py-1.5 flex-1 min-w-0 transition relative">
-                    <Search className="w-3.5 h-3.5 text-stone-400 dark:text-zinc-400 mr-2 flex-shrink-0" />
+                  <div className="flex items-center bg-stone-100 border border-stone-200/80 focus-within:border-emerald-500 rounded-xl px-3 py-1.5 flex-1 min-w-0 transition relative">
+                    <Search className="w-3.5 h-3.5 text-stone-400 mr-2 flex-shrink-0" />
                     <input
                       type="text"
                       placeholder="Search dishes, burgers, pizza..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-transparent text-xs font-semibold text-stone-900 dark:text-white focus:outline-none placeholder-stone-400 dark:placeholder-zinc-500 pr-5"
+                      className="w-full bg-transparent text-xs font-semibold text-stone-900 focus:outline-none placeholder-stone-400 pr-5"
                     />
                     {searchQuery && (
                       <button
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="p-0.5 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white transition absolute right-2"
+                        className="p-0.5 text-stone-400 hover:text-stone-900 transition absolute right-2"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -1593,14 +1537,14 @@ export function PosView() {
                 }}
                 className={`flex-shrink-0 px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-black transition cursor-pointer border ${
                   groupFilter === 'ALL' && !selectedCategory
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-xs ring-1 ring-amber-400'
-                    : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.08]'
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs ring-1 ring-emerald-400'
+                    : 'bg-white border-stone-200/90 text-stone-700 hover:text-stone-950 hover:bg-stone-50'
                 }`}
               >
                 <span>🍽️</span>
                 <span>All Items</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  groupFilter === 'ALL' && !selectedCategory ? 'bg-black/20 text-stone-950' : 'bg-stone-100 dark:bg-white/10 text-stone-600 dark:text-zinc-400'
+                  groupFilter === 'ALL' && !selectedCategory ? 'bg-emerald-800 text-white' : 'bg-stone-100 text-stone-600'
                 }`}>
                   {allItems.length}
                 </span>
@@ -1631,15 +1575,15 @@ export function PosView() {
                     }}
                     className={`flex-shrink-0 px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-bold transition cursor-pointer border ${
                       isActive
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 border-amber-400 shadow-xs ring-1 ring-amber-400 font-black'
-                        : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.08]'
+                        ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs ring-1 ring-emerald-400 font-black'
+                        : 'bg-white border-stone-200/90 text-stone-700 hover:text-stone-950 hover:bg-stone-50'
                     }`}
                   >
                     <span className="text-sm">{cat.emoji}</span>
                     <span>{cat.label}</span>
                     {count > 0 && (
                       <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                        isActive ? 'bg-black/20 text-stone-950 font-black' : 'bg-stone-100 dark:bg-white/10 text-stone-600 dark:text-zinc-400'
+                        isActive ? 'bg-emerald-800 text-white font-black' : 'bg-stone-100 text-stone-600'
                       }`}>
                         {count}
                       </span>
@@ -1686,7 +1630,7 @@ export function PosView() {
 
                       {/* Selection Overlay */}
                       {isSelected && (
-                        <div className="absolute bottom-2 right-2 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full shadow-lg border border-amber-300/40 flex items-center gap-1">
+                        <div className="absolute bottom-2 right-2 z-10 bg-emerald-600 text-white font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full shadow-xs border border-emerald-400/40 flex items-center gap-1">
                           <span>x{qty} in order</span>
                         </div>
                       )}
@@ -1696,7 +1640,7 @@ export function PosView() {
                     <div className="flex flex-col flex-1 justify-between">
                       <div>
                         <h3
-                          className="text-xs sm:text-base font-black text-stone-900 dark:text-white truncate group-hover:text-[#B83E18] dark:group-hover:text-amber-400 transition"
+                          className="text-xs sm:text-base font-black text-stone-900 truncate group-hover:text-emerald-700 transition"
                           title={item.name}
                         >
                           {item.name}
@@ -1704,10 +1648,10 @@ export function PosView() {
                       </div>
 
                       {/* Price & Action Row */}
-                      <div className="flex items-end justify-between gap-2 mt-3 pt-2.5 border-t border-stone-100 dark:border-white/5">
+                      <div className="flex items-end justify-between gap-2 mt-3 pt-2.5 border-t border-stone-100">
                         <div>
-                          <div className="text-xs sm:text-base font-black text-[#B83E18] dark:text-amber-400 tracking-tight leading-none">
-                            {Number(item.price).toLocaleString()} <span className="text-[10px] sm:text-xs font-bold text-stone-500 dark:text-zinc-400">ETB</span>
+                          <div className="text-xs sm:text-base font-black text-emerald-700 tracking-tight leading-none">
+                            {Number(item.price).toLocaleString()} <span className="text-[10px] sm:text-xs font-bold text-stone-500">ETB</span>
                           </div>
                           <span className="text-[9px] text-stone-400 dark:text-zinc-500 font-bold uppercase tracking-wider block mt-1">
                             VAT Inc.
@@ -1789,21 +1733,21 @@ export function PosView() {
         <div className="lg:hidden fixed bottom-16 left-3 right-3 z-30 animate-in slide-in-from-bottom duration-300">
           <div
             onClick={() => setMobileCartOpen(true)}
-            className="bg-white/95 dark:bg-[#161311]/95 backdrop-blur-xl border border-stone-200/90 dark:border-amber-500/50 p-2.5 sm:p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer hover:border-amber-400 transition text-stone-900 dark:text-white"
+            className="bg-white/95 backdrop-blur-xl border border-stone-200/90 p-2.5 sm:p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer hover:border-emerald-400 transition text-stone-900"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 flex items-center justify-center font-black shadow-md shadow-amber-500/30 flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-md flex-shrink-0">
                 <ShoppingBag className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5 truncate">
+                <div className="text-xs font-bold text-stone-900 flex items-center gap-1.5 truncate">
                   <span>{totalCartItems} {totalCartItems === 1 ? 'item' : 'items'} in Slip</span>
                   <span className="text-[10px] bg-[#C11221] text-white px-1.5 py-0.2 rounded-full font-black flex-shrink-0">
                     {isTakeaway ? 'Takeaway' : `Table ${selectedTable}`}
                   </span>
                 </div>
-                <div className="text-sm font-black text-amber-700 dark:text-amber-400">
-                  {total.toFixed(2)} ETB <span className="text-[10px] text-stone-500 dark:text-zinc-400 font-normal">(incl. VAT)</span>
+                <div className="text-sm font-black text-emerald-700">
+                  {total.toFixed(2)} ETB <span className="text-[10px] text-stone-500 font-normal">(incl. VAT)</span>
                 </div>
               </div>
             </div>
@@ -1813,7 +1757,7 @@ export function PosView() {
                 e.stopPropagation();
                 setMobileCartOpen(true);
               }}
-              className="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs rounded-xl shadow-md flex items-center gap-1 active:scale-95 transition flex-shrink-0"
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-md flex items-center gap-1 active:scale-95 transition flex-shrink-0"
             >
               <span>View Slip</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -1823,12 +1767,12 @@ export function PosView() {
       )}
 
       {/* MOBILE BOTTOM NAVIGATION DOCK (<lg) */}
-      <div className="lg:hidden fixed bottom-2 left-3 right-3 z-30 bg-white/95 dark:bg-[#161311]/90 backdrop-blur-2xl border border-stone-200/90 dark:border-white/15 rounded-3xl p-1.5 px-4 shadow-xl flex items-center justify-around text-stone-900 dark:text-white">
+      <div className="lg:hidden fixed bottom-2 left-3 right-3 z-30 bg-white/95 backdrop-blur-2xl border border-stone-200/90 rounded-3xl p-1.5 px-4 shadow-xl flex items-center justify-around text-stone-900">
         {/* Orders & Bills (Main Cashier function) */}
         <button
           onClick={() => setPosTab('orders')}
           className={`relative flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl transition cursor-pointer ${
-            posTab === 'orders' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-stone-500 dark:text-zinc-500 hover:text-stone-900 dark:hover:text-zinc-300'
+            posTab === 'orders' ? 'text-emerald-600 font-black' : 'text-stone-500 hover:text-stone-900'
           }`}
         >
           <Receipt className="w-5 h-5" />
@@ -1847,13 +1791,13 @@ export function PosView() {
             setPosTab('menu');
           }}
           className={`relative flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl transition cursor-pointer ${
-            posTab === 'menu' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-stone-500 dark:text-zinc-500 hover:text-stone-900 dark:hover:text-zinc-300'
+            posTab === 'menu' ? 'text-emerald-600 font-black' : 'text-stone-500 hover:text-stone-900'
           }`}
         >
           <div className="relative">
             <Utensils className="w-5 h-5" />
             {totalCartItems > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-amber-500 text-stone-950 text-[9px] w-4 h-4 rounded-full font-black flex items-center justify-center shadow-lg border border-white/20">
+              <span className="absolute -top-1.5 -right-2 bg-emerald-600 text-white text-[9px] w-4 h-4 rounded-full font-black flex items-center justify-center shadow-lg border border-white/20">
                 {totalCartItems}
               </span>
             )}
@@ -1864,7 +1808,7 @@ export function PosView() {
         {/* Floor Plan Tables */}
         <button
           onClick={() => setTableModalOpen(true)}
-          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl text-stone-500 dark:text-zinc-500 hover:text-stone-900 dark:hover:text-zinc-300 transition cursor-pointer"
+          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl text-stone-500 hover:text-emerald-600 transition cursor-pointer"
         >
           <LayoutGrid className="w-5 h-5" />
           <span className="text-[10px] font-bold">Tables</span>

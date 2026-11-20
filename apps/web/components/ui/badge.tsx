@@ -10,7 +10,7 @@ export const badgeVariants = cva(
         default:
           'bg-stone-200/80 dark:bg-white/10 text-stone-800 dark:text-zinc-200 border border-stone-300/80 dark:border-white/15',
         primary:
-          'bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30',
+          'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30',
         amber:
           'bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30',
         warning:
