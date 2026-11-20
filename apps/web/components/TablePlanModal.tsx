@@ -183,8 +183,8 @@ export function TablePlanModal({
         <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10">
           <div>
             <h3 className="text-base sm:text-lg font-black text-stone-900 dark:text-white flex items-center gap-2">
-              <LayoutGrid className="w-5 h-5 text-amber-500" />
-              <span>Dining Tables & Floor Plan</span>
+              <LayoutGrid className="w-5 h-5 text-emerald-600" />
+              <span>Dining Tables &amp; Floor Plan</span>
             </h3>
             <p className="text-xs text-stone-500 dark:text-zinc-400">
               {isOwnerOrManager
@@ -341,7 +341,7 @@ export function TablePlanModal({
             {(['ALL', 'AVAILABLE', 'OCCUPIED', 'RESERVED'] as const).map((s) => (
               <Button
                 key={s}
-                variant={statusFilter === s ? 'primary' : 'secondary'}
+                variant={statusFilter === s ? 'success' : 'secondary'}
                 size="sm"
                 onClick={() => setStatusFilter(s)}
                 className="text-[11px]"
@@ -368,7 +368,7 @@ export function TablePlanModal({
         </div>
 
         {/* Table Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto no-scrollbar pr-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto no-scrollbar pr-1 pt-1">
           {filteredTables.map((t) => {
             const hasActiveOrder = t.orders && t.orders.length > 0;
             const isSelected = selectedTable === t.tableNumber;
@@ -385,30 +385,33 @@ export function TablePlanModal({
                 }}
                 className={`p-3.5 rounded-2xl border transition relative flex flex-col justify-between ${
                   isSelected
-                    ? 'border-amber-500 ring-2 ring-amber-500/40 bg-amber-500/10'
+                    ? 'border-emerald-600 ring-2 ring-emerald-500/30 bg-emerald-50/50'
                     : hasActiveOrder
-                    ? 'bg-amber-950/10 border-amber-500/30 hover:border-amber-500/60'
+                    ? 'bg-amber-50/40 border-amber-300/80 hover:border-amber-500'
                     : isReserved
-                    ? 'bg-purple-950/10 border-purple-500/30'
+                    ? 'bg-purple-50/40 border-purple-300'
                     : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 hover:border-stone-400 dark:hover:border-white/30'
                 } ${activeTab === 'floor' ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}`}
               >
-                {/* Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-black text-sm text-stone-900 dark:text-white">
+                {/* Floating Corner Selection Badge (Separated from header content) */}
+                {isSelected && (
+                  <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-emerald-600 text-white shadow-xs flex items-center justify-center ring-2 ring-white z-10">
+                    <Check className="w-3 h-3 stroke-[3]" />
+                  </div>
+                )}
+
+                {/* Header: Table Title & Status Badge cleanly spaced */}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-heading font-black text-sm text-stone-900 dark:text-white block leading-tight truncate">
                       {t.tableNumber}
                     </span>
-                    {isSelected && (
-                      <span className="w-4 h-4 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center">
-                        <Check className="w-2.5 h-2.5 stroke-[3]" />
-                      </span>
-                    )}
                   </div>
 
                   {/* Status Badge */}
                   <Badge
                     variant={hasActiveOrder ? 'amber' : isReserved ? 'purple' : 'success'}
+                    className="flex-shrink-0"
                   >
                     {hasActiveOrder ? 'Seated' : isReserved ? 'Reserved' : 'Open'}
                   </Badge>
