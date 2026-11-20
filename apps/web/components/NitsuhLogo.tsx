@@ -33,15 +33,15 @@ export function NitsuhLogo({
         {/* Brand Typographic Lockup */}
         <div className="flex flex-col items-center">
           <div className="flex items-center gap-2 leading-none">
-            <span className="font-heading font-black text-2xl sm:text-3xl tracking-tight text-stone-900 dark:text-white">
+            <span className="font-heading font-black text-2xl sm:text-3xl tracking-tight text-stone-900">
               NITSUH
             </span>
-            <span className="text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/15 text-[#B83E18] dark:text-rose-400 border border-rose-500/30">
+            <span className="text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/15 text-[#B83E18] border border-rose-500/30">
               FOODS
             </span>
           </div>
           {shouldShowSubtitle && (
-            <p className="text-xs sm:text-sm text-stone-500 dark:text-zinc-400 font-medium mt-1 tracking-tight">
+            <p className="text-xs sm:text-sm text-stone-500 font-medium mt-1 tracking-tight">
               Real Taste &amp; Savoury Bites
             </p>
           )}
@@ -71,15 +71,15 @@ export function NitsuhLogo({
       {/* Typographic Identity: Brand Name + Tag Badge + Subtitle */}
       <div className="flex flex-col text-left">
         <div className="flex items-center gap-1.5 leading-none">
-          <span className="font-heading font-black text-sm sm:text-base tracking-tight text-stone-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">
+          <span className="font-heading font-black text-sm sm:text-base tracking-tight text-stone-900 group-hover:text-amber-600 transition">
             NITSUH
           </span>
-          <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full bg-rose-500/15 text-[#B83E18] dark:text-rose-400 border border-rose-500/30">
+          <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full bg-rose-500/15 text-[#B83E18] border border-rose-500/30">
             FOODS
           </span>
         </div>
-        <span className="text-[10px] sm:text-[11px] text-stone-500 dark:text-zinc-400 font-medium leading-none mt-1">
-          Real Taste & Savoury Bites
+        <span className="text-[10px] sm:text-[11px] text-stone-500 font-medium leading-none mt-1">
+          Real Taste &amp; Savoury Bites
         </span>
       </div>
     </Link>

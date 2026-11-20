@@ -455,7 +455,7 @@ export function WaiterPadView() {
             placeholder="Search food, drinks..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#F4F5F7] border border-transparent hover:border-stone-300 focus:border-emerald-500 rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition"
+            className="w-full bg-[#F4F5F7] hover:bg-stone-100/80 focus:bg-white border border-stone-200/80 hover:border-stone-300 focus:border-emerald-500 rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition font-sans"
           />
           {search && (
             <button
@@ -471,14 +471,14 @@ export function WaiterPadView() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => setActiveTab(activeTab === 'menu' ? 'tables' : 'menu')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold font-sans ${
               activeTab === 'tables'
                 ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
-                : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50'
+                : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-100 hover:text-stone-900'
             }`}
             title="Toggle Live Kitchen Preparation Monitor"
           >
-            <Clock className={`w-3.5 h-3.5 ${activeTab === 'tables' ? 'text-white' : 'text-emerald-600'}`} />
+            <Clock className={`w-3.5 h-3.5 ${activeTab === 'tables' ? 'text-white' : 'text-amber-600'}`} />
             <span className="hidden sm:inline">{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
             {inFlightOrders.length > 0 && (
               <span
@@ -499,9 +499,9 @@ export function WaiterPadView() {
 
       {/* MAIN LAYOUT */}
       <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
-        {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Visible on Tablet & Desktop: md+) */}
+        {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Always on left on all devices) */}
         {activeTab === 'menu' && (
-          <aside className="hidden md:flex flex-col w-20 lg:w-24 bg-white border-r border-stone-200/90 py-3 space-y-1 overflow-y-auto no-scrollbar flex-shrink-0 z-10">
+          <aside className="w-16 sm:w-20 md:w-24 bg-white border-r border-stone-200/90 py-2 sm:py-3 space-y-1 overflow-y-auto no-scrollbar flex-shrink-0 z-10 flex flex-col">
             {categoryCards.map((cat) => {
               const isActive = groupFilter === cat.id;
               const Icon = cat.icon;
@@ -513,7 +513,7 @@ export function WaiterPadView() {
                     setGroupFilter(cat.id as any);
                     setSelectedCategory('');
                   }}
-                  className={`relative flex flex-col items-center justify-center py-3 px-1 rounded-xl transition text-center gap-1 group cursor-pointer ${
+                  className={`relative flex flex-col items-center justify-center py-2 sm:py-2.5 px-1 rounded-xl transition text-center gap-1 group cursor-pointer ${
                     isActive
                       ? 'bg-emerald-50/70 text-emerald-800 font-black'
                       : 'text-stone-500 hover:text-stone-900 hover:bg-stone-50'
@@ -521,18 +521,18 @@ export function WaiterPadView() {
                 >
                   {/* ClaPos Green Indicator Bar on Left Edge */}
                   {isActive && (
-                    <span className="absolute left-0 top-2 bottom-2 w-1 bg-emerald-500 rounded-r-full" />
+                    <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-emerald-500 rounded-r-full" />
                   )}
                   <div
-                    className={`w-9 h-9 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center transition ${
+                    className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition ${
                       isActive
                         ? 'bg-emerald-500/15 text-emerald-600'
                         : 'bg-stone-100 text-stone-600 group-hover:bg-stone-200'
                     }`}
                   >
-                    <Icon className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
-                  <span className="text-[10px] lg:text-[11px] leading-tight truncate max-w-full px-1">
+                  <span className="text-[9px] sm:text-[10px] md:text-[11px] leading-tight truncate max-w-full px-0.5">
                     {cat.label}
                   </span>
                 </button>
@@ -543,33 +543,6 @@ export function WaiterPadView() {
 
         {/* COLUMN 2: CENTER PRODUCT FOOD CARDS GRID */}
         <main className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-24 lg:pb-6 no-scrollbar">
-          {/* Mobile Horizontal Category Bar (Phone Only: < md) */}
-          {activeTab === 'menu' && (
-            <div className="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 mb-3 flex-shrink-0">
-              {categoryCards.map((cat) => {
-                const isActive = groupFilter === cat.id;
-                const Icon = cat.icon;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => {
-                      setGroupFilter(cat.id as any);
-                      setSelectedCategory('');
-                    }}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 border cursor-pointer ${
-                      isActive
-                        ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs font-black'
-                        : 'bg-white border-stone-200 text-stone-600 hover:text-stone-900'
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
           {/* Success Notification Alert */}
           {sentOrderNumber && (
             <div className="mb-4 bg-emerald-950/90 border border-emerald-500/50 p-3.5 rounded-2xl flex items-center gap-3 text-white shadow-xl animate-in fade-in">
@@ -626,12 +599,12 @@ export function WaiterPadView() {
                 </div>
               )}
 
-              {/* RESPONSIVE FOOD GRID:
+              {/* RESPONSIVE FOOD GRID (Shadcn-Style Food Cards):
                   - Smaller phone (< 640px): 1 card per row (grid-cols-1)
-                  - Tablet (640px - 1024px): 3 cards per row (sm:grid-cols-2 md:grid-cols-3)
-                  - Desktop (1024px+): 3 to 5 cards per row (lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5)
+                  - Tablet / iPad: 3 cards per row (sm:grid-cols-2 md:grid-cols-3)
+                  - Desktop: 3 to 4 cards per row (lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5)
               */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 sm:gap-4">
                 {filteredItems.map((item) => {
                   const inCart = waiterCart.find((c) => c.menuItemId === item.id);
                   const qty = inCart ? inCart.quantity : 0;
@@ -652,103 +625,120 @@ export function WaiterPadView() {
                           });
                         }
                       }}
-                      className={`group relative bg-white rounded-2xl p-3 border transition-all duration-200 cursor-pointer flex flex-row sm:flex-col justify-between items-center sm:items-stretch gap-3 hover:shadow-md ${
+                      className={`group relative bg-white rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden hover:shadow-md ${
                         isSelected
-                          ? 'border-emerald-500 ring-2 ring-emerald-500/20'
-                          : 'border-stone-200/90 hover:border-emerald-500/40'
+                          ? 'border-emerald-500 ring-2 ring-emerald-500/25 shadow-sm'
+                          : 'border-stone-200/90 hover:border-emerald-500/50'
                       }`}
                     >
-                      {/* Product Image:
-                          - On small phone: w-20 h-20 thumbnail on left
-                          - On tablet/desktop: full-width aspect-square container
-                      */}
-                      <div className="relative w-20 h-20 sm:w-full sm:aspect-square rounded-xl overflow-hidden bg-stone-50 flex-shrink-0 flex items-center justify-center p-1.5 border border-stone-100">
+                      {/* Full Culinary Image Header (Edge-to-Edge Shadcn Style, No Awkward Cropping) */}
+                      <div className="relative w-full aspect-[4/3] bg-stone-100 overflow-hidden flex-shrink-0">
                         <MenuImage
                           src={item.imageUrl}
                           alt={item.name}
                           categoryName={item.category?.name}
                           prepSection={item.prepSection}
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
 
-                        {/* Selected Indicator Pill */}
+                        {/* Selected Count Badge Overlay */}
                         {isSelected && (
-                          <div className="absolute top-1.5 right-1.5 z-10 bg-emerald-600 text-white font-black text-[10px] px-1.5 py-0.2 rounded-full shadow-xs">
-                            x{qty}
+                          <div className="absolute top-2 right-2 z-10 bg-emerald-600 text-white font-black text-xs px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                            <span>x{qty}</span>
+                          </div>
+                        )}
+
+                        {/* Station Tag */}
+                        {item.prepSection && (
+                          <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-xs text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                            {item.prepSection}
                           </div>
                         )}
                       </div>
 
-                      {/* Product Name, Category & Price */}
-                      <div className="flex flex-col flex-1 min-w-0 justify-between h-full w-full">
+                      {/* Card Content: Category Tag, Dish Title */}
+                      <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
                         <div>
-                          <h4
-                            className="text-xs sm:text-sm font-bold text-stone-900 truncate group-hover:text-emerald-700 transition"
+                          <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
+                            {item.category?.name || 'Dish'}
+                          </span>
+                          <h3
+                            className="font-heading font-black text-sm sm:text-base text-stone-900 leading-snug mt-0.5 group-hover:text-emerald-700 transition line-clamp-1"
                             title={item.name}
                           >
                             {item.name}
-                          </h4>
-                          <span className="text-[10px] text-stone-500 line-clamp-1 mt-0.5 sm:hidden">
-                            {item.category?.name || 'Dish'}
-                          </span>
+                          </h3>
                         </div>
 
-                        <div className="flex items-center justify-between gap-1 mt-1 sm:mt-2 sm:pt-2 sm:border-t sm:border-stone-100">
-                          <div className="text-xs sm:text-sm font-black text-stone-900">
-                            {Number(item.price).toFixed(2)} <span className="text-[10px] font-bold text-stone-500">ETB</span>
+                        {/* Card Footer: Price & Add / Stepper */}
+                        <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-stone-100">
+                          <div>
+                            <div className="text-sm sm:text-base font-black text-stone-900 tracking-tight">
+                              {Number(item.price).toFixed(2)}{' '}
+                              <span className="text-[10px] font-bold text-stone-500">ETB</span>
+                            </div>
                           </div>
 
-                          {/* Quick Stepper or Add Button */}
+                          {/* Stepper or Quick Add Button */}
                           {qty > 0 ? (
                             <div
                               onClick={(e) => e.stopPropagation()}
-                              className="flex items-center gap-1 bg-emerald-600 text-white p-0.5 rounded-lg shadow-xs"
+                              className="flex items-center gap-1 bg-emerald-600 text-white p-1 rounded-xl shadow-xs"
                             >
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   updateWaiterQuantity(item.id, -1);
                                 }}
-                                className="w-5 h-5 rounded flex items-center justify-center hover:bg-black/20 text-white cursor-pointer"
+                                className="w-6 h-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 flex items-center justify-center cursor-pointer transition active:scale-90"
+                                title="Decrease quantity"
                               >
-                                <Minus className="w-3 h-3 stroke-[3]" />
+                                <Minus className="w-3.5 h-3.5 stroke-[3]" />
                               </button>
-                              <span className="text-xs font-black px-1 min-w-[14px] text-center">
+                              <span className="text-xs font-black px-1.5 min-w-[18px] text-center">
                                 {qty}
                               </span>
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   updateWaiterQuantity(item.id, 1);
                                 }}
-                                className="w-5 h-5 rounded flex items-center justify-center hover:bg-black/20 text-white cursor-pointer"
+                                className="w-6 h-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 flex items-center justify-center cursor-pointer transition active:scale-90"
+                                title="Increase quantity"
                               >
-                                <Plus className="w-3 h-3 stroke-[3]" />
+                                <Plus className="w-3.5 h-3.5 stroke-[3]" />
                               </button>
                             </div>
                           ) : (
                             <button
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                addToWaiterCart({
-                                  id: item.id,
-                                  name: item.name,
-                                  price: Number(item.price),
-                                  imageUrl: item.imageUrl,
-                                });
+                                if (item.applicableAddons && item.applicableAddons.length > 0) {
+                                  openItemCustomizer(item);
+                                } else {
+                                  addToWaiterCart({
+                                    id: item.id,
+                                    name: item.name,
+                                    price: Number(item.price),
+                                    imageUrl: item.imageUrl,
+                                  });
+                                }
                               }}
-                              className="w-7 h-7 sm:w-6 sm:h-6 rounded-lg bg-emerald-50 sm:bg-stone-100 hover:bg-emerald-600 hover:text-white text-emerald-700 sm:text-stone-700 flex items-center justify-center transition cursor-pointer"
-                              title="Add to order"
+                              className="h-8 px-3 rounded-xl bg-stone-100 hover:bg-emerald-600 text-stone-700 hover:text-white font-bold text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer group-hover:bg-emerald-600 group-hover:text-white active:scale-95"
                             >
                               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <span>Add</span>
                             </button>
                           )}
                         </div>
                       </div>
 
-                      {/* Green Indicator Line on Bottom */}
+                      {/* Active Bottom Green Accent Bar (ClaPos style when in order) */}
                       {isSelected && (
-                        <div className="absolute bottom-0 left-3 right-3 h-0.5 bg-emerald-500 rounded-full" />
+                        <div className="h-1 w-full bg-emerald-500" />
                       )}
                     </div>
                   );
