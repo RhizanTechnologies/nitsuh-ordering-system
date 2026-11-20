@@ -556,34 +556,28 @@ export function WaiterPadView() {
                   </button>
                 </div>
 
-                {/* Table Picker Dropdown & Floor Plan Modal Button */}
+                {/* Table Floor Plan Selection */}
                 {orderType === 'DINE_IN' ? (
-                  <div className="flex items-center gap-1.5 flex-1 min-w-[200px] justify-end">
-                    <div className="relative flex-1 min-w-[130px] max-w-[240px]">
-                      <select
-                        value={waiterTable}
-                        onChange={(e) => setWaiterTable(e.target.value)}
-                        className="w-full appearance-none bg-stone-50 hover:bg-stone-100/80 border border-stone-200 hover:border-emerald-500 rounded-xl px-2.5 py-1.5 pr-7 text-xs font-black text-stone-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer transition shadow-2xs"
-                      >
-                        {tables.map((t) => {
-                          const isOccupied = t.status === 'OCCUPIED';
-                          return (
-                            <option key={t.id} value={t.tableNumber}>
-                              Table {t.tableNumber} ({t.capacity} seats){isOccupied ? ' • Seated' : ' • Open'}
-                            </option>
-                          );
-                        })}
-                      </select>
-                      <ChevronDown className="w-3.5 h-3.5 text-stone-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-
+                  <div className="flex items-center justify-end">
                     <button
+                      type="button"
                       onClick={() => setTableModalOpen(true)}
-                      className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer flex-shrink-0 shadow-2xs active:scale-95"
-                      title="Open Interactive Floor Plan"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-emerald-50/70 border border-stone-200 hover:border-emerald-500/60 rounded-xl text-xs font-black text-stone-900 transition shadow-2xs cursor-pointer group active:scale-95"
+                      title="Choose table from visual Floor Plan"
                     >
-                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="hidden xs:inline">Floor Plan</span>
+                      <LayoutGrid className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform" />
+                      <span>{waiterTable ? `Table ${waiterTable}` : 'Select Table'}</span>
+                      {selectedTableObj && (
+                        <span
+                          className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                            isCurrentTableOccupied
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-emerald-100 text-emerald-800'
+                          }`}
+                        >
+                          {isCurrentTableOccupied ? 'Seated' : 'Open'}
+                        </span>
+                      )}
                     </button>
                   </div>
                 ) : (
@@ -1002,39 +996,41 @@ export function WaiterPadView() {
               </button>
             </div>
 
+            {/* Dining Table Selection (Opens Floor Plan Modal) */}
             {orderType === 'DINE_IN' ? (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] font-bold text-stone-600 uppercase">
                   <span>Dining Table</span>
-                  <button
-                    onClick={() => setTableModalOpen(true)}
-                    className="text-emerald-700 hover:underline flex items-center gap-1 font-bold cursor-pointer"
-                  >
-                    <MapPin className="w-3 h-3" />
+                  <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+                    <LayoutGrid className="w-3 h-3" />
                     <span>Floor Plan</span>
-                  </button>
+                  </span>
                 </div>
-                <div className="relative">
-                  <select
-                    value={waiterTable}
-                    onChange={(e) => setWaiterTable(e.target.value)}
-                    className="w-full appearance-none bg-stone-50 border border-stone-300 hover:border-emerald-500 rounded-xl px-3 py-2 pr-8 text-xs font-bold text-stone-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
-                  >
-                    {tables.map((t) => {
-                      const isOccupied = t.status === 'OCCUPIED';
-                      return (
-                        <option
-                          key={t.id}
-                          value={t.tableNumber}
-                          className="bg-white text-stone-900"
-                        >
-                          Table {t.tableNumber} ({t.capacity} seats){isOccupied ? ' • Seated' : ' • Open'}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <ChevronDown className="w-4 h-4 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setTableModalOpen(true)}
+                  className="w-full text-left bg-stone-50 hover:bg-emerald-50/60 border border-stone-300 hover:border-emerald-500 rounded-xl p-2.5 transition shadow-2xs group cursor-pointer flex items-center justify-between gap-2 active:scale-[0.99]"
+                  title="Choose table from visual Floor Plan"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100/70 text-emerald-700 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition">
+                      <LayoutGrid className="w-4 h-4" />
+                    </div>
+                    <div className="truncate">
+                      <div className="text-xs font-black text-stone-900 truncate">
+                        {waiterTable ? `Table ${waiterTable}` : 'Select Dining Table'}
+                      </div>
+                      <div className="text-[10px] text-stone-500 font-semibold truncate">
+                        {selectedTableObj
+                          ? `${selectedTableObj.capacity} seats • ${isCurrentTableOccupied ? 'Active Bill (Seated)' : 'Available (Open)'}`
+                          : 'Tap to choose from floor plan'}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-stone-700 group-hover:border-emerald-500 group-hover:text-emerald-700 transition flex-shrink-0 shadow-2xs">
+                    Change
+                  </span>
+                </button>
               </div>
             ) : (
               <div className="space-y-1.5">
@@ -1308,32 +1304,31 @@ export function WaiterPadView() {
               </div>
 
               {orderType === 'DINE_IN' ? (
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <select
-                      value={waiterTable}
-                      onChange={(e) => setWaiterTable(e.target.value)}
-                      className="w-full appearance-none bg-stone-50 border border-stone-300 hover:border-emerald-500 rounded-xl px-3 py-2 pr-8 text-xs font-bold text-stone-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
-                    >
-                      {tables.map((t) => {
-                        const isOccupied = t.status === 'OCCUPIED';
-                        return (
-                          <option key={t.id} value={t.tableNumber}>
-                            Table {t.tableNumber} ({t.capacity} seats){isOccupied ? ' • Seated' : ' • Open'}
-                          </option>
-                        );
-                      })}
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <button
+                  type="button"
+                  onClick={() => setTableModalOpen(true)}
+                  className="w-full text-left bg-stone-50 hover:bg-emerald-50/60 border border-stone-300 hover:border-emerald-500 rounded-xl p-3 transition shadow-2xs group cursor-pointer flex items-center justify-between gap-2 active:scale-[0.99]"
+                  title="Choose table from visual Floor Plan"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100/70 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                      <LayoutGrid className="w-4 h-4" />
+                    </div>
+                    <div className="truncate">
+                      <div className="text-xs font-black text-stone-900 truncate">
+                        {waiterTable ? `Table ${waiterTable}` : 'Select Dining Table'}
+                      </div>
+                      <div className="text-[10px] text-stone-500 font-semibold truncate">
+                        {selectedTableObj
+                          ? `${selectedTableObj.capacity} seats • ${isCurrentTableOccupied ? 'Active Bill (Seated)' : 'Available (Open)'}`
+                          : 'Tap to choose from floor plan'}
+                      </div>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setTableModalOpen(true)}
-                    className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0"
-                  >
-                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Floor Plan</span>
-                  </button>
-                </div>
+                  <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-emerald-600 text-white transition flex-shrink-0 shadow-2xs">
+                    Change Table
+                  </span>
+                </button>
               ) : (
                 <input
                   type="text"

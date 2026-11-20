@@ -643,26 +643,18 @@ export function PosView() {
               <span className="truncate">Counter</span>
             </div>
           ) : (
-            <div className="flex gap-1.5">
-              <select
-                value={selectedTable}
-                onChange={(e) => handleSelectTable(e.target.value)}
-                className="w-full bg-stone-100 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-xl px-2 sm:px-2.5 py-1.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500/50 truncate cursor-pointer"
-              >
-                {tables.map((t) => (
-                  <option key={t.id} value={t.tableNumber} className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white font-bold">
-                    {t.tableNumber}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={() => setTableModalOpen(true)}
-                title="View Floor Plan"
-                className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] border border-stone-200/90 dark:border-white/10 rounded-xl text-amber-700 dark:text-amber-400 cursor-pointer flex-shrink-0"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setTableModalOpen(true)}
+              className="w-full bg-stone-100 dark:bg-white/[0.04] hover:bg-stone-200/70 border border-stone-200/90 dark:border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-900 dark:text-white flex items-center justify-between gap-1.5 cursor-pointer transition shadow-2xs group"
+              title="Select Dining Table from Floor Plan"
+            >
+              <div className="flex items-center gap-1.5 truncate">
+                <LayoutGrid className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                <span className="truncate">{selectedTable ? `Table ${selectedTable}` : 'Select Table'}</span>
+              </div>
+              <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-white dark:bg-white/10 text-stone-700 dark:text-stone-300">Plan</span>
+            </button>
           )}
         </div>
       </div>
@@ -1534,43 +1526,17 @@ export function PosView() {
                     </button>
                   </div>
 
-                  {/* Dine-In: Fast Table Dropdown */}
+                  {/* Dine-In: Floor Plan Table Choice */}
                   {orderType === 'DINE_IN' ? (
-                    <div className="flex items-center gap-1 flex-1 sm:flex-initial min-w-0">
-                      <div className="relative flex-1 sm:flex-initial min-w-0">
-                        <select
-                          value={selectedTable}
-                          onChange={(e) => handleSelectTable(e.target.value)}
-                          className="w-full sm:w-auto appearance-none bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl pl-2.5 pr-7 py-1.5 text-xs font-extrabold text-amber-900 dark:text-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer transition truncate"
-                          title="Select Table"
-                        >
-                          {tables.length === 0 && (
-                            <option value={selectedTable} className="bg-white dark:bg-[#1A1614] text-stone-900 dark:text-white font-bold">
-                              {selectedTable}
-                            </option>
-                          )}
-                          {tables.map((t) => (
-                            <option
-                              key={t.id}
-                              value={t.tableNumber}
-                              className="bg-white dark:bg-[#1A1614] text-stone-900 dark:text-white font-bold"
-                            >
-                              {t.tableNumber} {t.status === 'OCCUPIED' ? '• (Occupied)' : ''}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setTableModalOpen(true)}
-                        className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] border border-stone-200/80 dark:border-white/10 rounded-xl text-stone-600 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer flex-shrink-0"
-                        title="Open Table Floor Plan"
-                      >
-                        <LayoutGrid className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTableModalOpen(true)}
+                      className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-amber-900 dark:text-amber-300 transition cursor-pointer"
+                      title="Open Dining Tables & Floor Plan"
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      <span>{selectedTable ? `Table ${selectedTable}` : 'Choose Table'}</span>
+                    </button>
                   ) : (
                     /* Takeaway: Quick Customer Name */
                     <input
