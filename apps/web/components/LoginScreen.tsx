@@ -102,23 +102,23 @@ export function LoginScreen() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'OWNER':
-        return { label: 'Owner / Executive', color: 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-500/40' };
+        return { label: 'Owner / Executive', color: 'bg-rose-50 text-rose-700 border-rose-200' };
       case 'MANAGER':
-        return { label: 'General Manager', color: 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/40' };
+        return { label: 'General Manager', color: 'bg-purple-50 text-purple-700 border-purple-200' };
       case 'CASHIER':
-        return { label: 'Cashier / POS', color: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40' };
+        return { label: 'Cashier / POS', color: 'bg-emerald-50 text-emerald-800 border-emerald-200' };
       case 'WAITER':
-        return { label: 'Service Waiter', color: 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-500/40' };
+        return { label: 'Service Waiter', color: 'bg-blue-50 text-blue-700 border-blue-200' };
       case 'KITCHEN_STAFF':
-        return { label: 'Kitchen Cook', color: 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/40' };
+        return { label: 'Kitchen Cook', color: 'bg-amber-50 text-amber-800 border-amber-200' };
       case 'HEAD_CHEF':
-        return { label: 'Head Chef', color: 'bg-orange-100 dark:bg-orange-500/20 text-orange-800 dark:text-orange-300 border-orange-300 dark:border-orange-500/40' };
+        return { label: 'Head Chef', color: 'bg-orange-50 text-orange-800 border-orange-200' };
       case 'MAIN_STOREKEEPER':
-        return { label: 'Main Storekeeper', color: 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border-cyan-300 dark:border-cyan-500/40' };
+        return { label: 'Main Storekeeper', color: 'bg-cyan-50 text-cyan-800 border-cyan-200' };
       case 'KITCHEN_STOREKEEPER':
-        return { label: 'Kitchen Storekeeper', color: 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/40' };
+        return { label: 'Kitchen Storekeeper', color: 'bg-amber-50 text-amber-800 border-amber-200' };
       default:
-        return { label: role, color: 'bg-stone-100 dark:bg-white/10 text-stone-800 dark:text-white border-stone-300 dark:border-white/20' };
+        return { label: role, color: 'bg-stone-50 text-stone-700 border-stone-200' };
     }
   };
 
@@ -262,56 +262,59 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F5EE] text-stone-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background ambient lighting glows */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C11221]/10 dark:bg-[#C11221]/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#F8F9FA] text-stone-900 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
+      {/* Subtle ambient lighting accent */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-white dark:bg-[#161311]/95 backdrop-blur-2xl rounded-[36px] shadow-2xl border border-stone-200/90 dark:border-white/15 overflow-hidden relative z-10 transition-colors duration-300">
-        {/* Header Branding: Nitsuh Clean Brand Logo & Emblem */}
-        <div className="bg-gradient-to-b from-amber-500/10 via-stone-50/50 to-transparent dark:from-amber-500/10 dark:via-white/[0.02] dark:to-transparent p-6 text-center relative border-b border-stone-200/80 dark:border-white/10">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-stone-200/50 border border-stone-200/80 overflow-hidden relative z-10 transition-all">
+        {/* Header Branding: Clean Circular Nitsuh Brand Emblem & Identity */}
+        <div className="p-6 pb-4 text-center border-b border-stone-100 bg-gradient-to-b from-stone-50/60 to-white">
           <NitsuhLogo variant="login" />
         </div>
 
-        {/* Tab switch (PIN / Email) */}
-        <div className="flex border-b border-stone-200 dark:border-white/10 bg-stone-100/70 dark:bg-white/[0.02]">
-          <button
-            onClick={() => {
-              setActiveTab('pin');
-              setError(null);
-            }}
-            className={`flex-1 py-3 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-              activeTab === 'pin'
-                ? 'border-b-2 border-amber-500 text-stone-950 dark:text-amber-300 bg-white dark:bg-white/[0.04] shadow-xs'
-                : 'text-stone-500 dark:text-zinc-500 hover:text-stone-900 dark:hover:text-white'
-            }`}
-          >
-            <KeyRound className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span>Staff Profile & PIN</span>
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('password');
-              setError(null);
-            }}
-            className={`flex-1 py-3 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-              activeTab === 'password'
-                ? 'border-b-2 border-amber-500 text-stone-950 dark:text-amber-300 bg-white dark:bg-white/[0.04] shadow-xs'
-                : 'text-stone-500 dark:text-zinc-500 hover:text-stone-900 dark:hover:text-white'
-            }`}
-          >
-            <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span>Manager / Owner Password</span>
-          </button>
+        {/* Modern Segmented Tab Switch (Staff PIN vs Manager Password) */}
+        <div className="px-6 pt-5">
+          <div className="bg-stone-100/80 p-1 rounded-2xl flex gap-1 border border-stone-200/70">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('pin');
+                setError(null);
+              }}
+              className={`flex-1 py-2.5 px-3 text-xs font-bold transition flex items-center justify-center gap-1.5 rounded-xl cursor-pointer ${
+                activeTab === 'pin'
+                  ? 'bg-white text-stone-900 shadow-xs font-black'
+                  : 'text-stone-500 hover:text-stone-800'
+              }`}
+            >
+              <KeyRound className={`w-3.5 h-3.5 ${activeTab === 'pin' ? 'text-emerald-600' : 'text-stone-400'}`} />
+              <span>Staff Profile & PIN</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('password');
+                setError(null);
+              }}
+              className={`flex-1 py-2.5 px-3 text-xs font-bold transition flex items-center justify-center gap-1.5 rounded-xl cursor-pointer ${
+                activeTab === 'password'
+                  ? 'bg-white text-stone-900 shadow-xs font-black'
+                  : 'text-stone-500 hover:text-stone-800'
+              }`}
+            >
+              <Lock className={`w-3.5 h-3.5 ${activeTab === 'password' ? 'text-emerald-600' : 'text-stone-400'}`} />
+              <span>Manager / Owner</span>
+            </button>
+          </div>
         </div>
 
         {/* PIN LOGIN TAB */}
         {activeTab === 'pin' ? (
-          <div className="p-5 sm:p-6 flex flex-col items-center space-y-3.5">
-            {/* Step 1: Employee Name Modern Dropdown */}
+          <div className="p-5 sm:p-6 flex flex-col items-center space-y-4">
+            {/* Step 1: Employee Name Dropdown */}
             <div className="w-full relative" ref={dropdownRef}>
-              <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1.5 text-center">
-                1. Select Your Staff Name
+              <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 text-center">
+                1. Select Your Staff Profile
               </label>
 
               {/* Modern Trigger Button */}
@@ -319,7 +322,7 @@ export function LoginScreen() {
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 disabled={staffLoading}
-                className="w-full flex items-center justify-between gap-3 bg-stone-50 dark:bg-[#1A1614] border border-stone-300 dark:border-amber-500/40 rounded-2xl px-4 py-3 text-left transition shadow-xs hover:border-amber-500/60 focus:outline-none focus:ring-2 focus:ring-amber-500/30 cursor-pointer"
+                className="w-full flex items-center justify-between gap-3 bg-stone-50 hover:bg-stone-100/70 border border-stone-200 hover:border-emerald-500/60 rounded-2xl px-3.5 py-3 text-left transition shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
               >
                 {selectedStaff ? (
                   <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -327,14 +330,14 @@ export function LoginScreen() {
                       <img
                         src={selectedStaff.avatarUrl}
                         alt={selectedStaff.name}
-                        className="w-7 h-7 rounded-xl object-cover border border-amber-500/40 flex-shrink-0"
+                        className="w-8 h-8 rounded-xl object-cover border border-stone-200 flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-black text-xs flex-shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-500/20 flex items-center justify-center font-black text-xs flex-shrink-0">
                         {cleanStaffName(selectedStaff.name).charAt(0)}
                       </div>
                     )}
-                    <span className="text-xs sm:text-sm font-black text-stone-900 dark:text-white truncate">
+                    <span className="text-xs sm:text-sm font-black text-stone-900 truncate">
                       {cleanStaffName(selectedStaff.name)}
                     </span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ml-auto flex-shrink-0 ${getRoleBadge(selectedStaff.role).color}`}>
@@ -342,19 +345,19 @@ export function LoginScreen() {
                     </span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-stone-500 dark:text-zinc-400 text-xs font-semibold py-0.5">
-                    <UserCircle className="w-5 h-5 text-stone-400 dark:text-zinc-500 flex-shrink-0" />
+                  <div className="flex items-center gap-2 text-stone-500 text-xs font-semibold py-0.5">
+                    <UserCircle className="w-5 h-5 text-stone-400 flex-shrink-0" />
                     <span>{staffLoading ? 'Loading staff profiles...' : 'Choose your profile / name...'}</span>
                   </div>
                 )}
-                <ChevronDown className={`w-4 h-4 text-stone-500 dark:text-zinc-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-stone-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Modern Floating Menu */}
               {isDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#1C1815] border border-stone-200 dark:border-white/15 rounded-2xl shadow-2xl overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-150 max-h-56 overflow-y-auto no-scrollbar">
+                <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white border border-stone-200 rounded-2xl shadow-xl overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-150 max-h-56 overflow-y-auto no-scrollbar">
                   {visibleStaffList.length === 0 ? (
-                    <div className="px-4 py-4 text-xs text-stone-500 dark:text-zinc-400 text-center flex flex-col items-center gap-2">
+                    <div className="px-4 py-4 text-xs text-stone-500 text-center flex flex-col items-center gap-2">
                       <span>{staffLoading ? 'Loading staff profiles...' : staffError ? staffError : 'No staff profiles found'}</span>
                       {!staffLoading && (
                         <button
@@ -363,7 +366,7 @@ export function LoginScreen() {
                             e.stopPropagation();
                             loadStaffProfiles();
                           }}
-                          className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg text-[11px] transition"
+                          className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-[11px] transition cursor-pointer"
                         >
                           Retry
                         </button>
@@ -388,13 +391,13 @@ export function LoginScreen() {
                           }}
                           className={`w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-left transition cursor-pointer ${
                             isSelected
-                              ? 'bg-amber-500/15 dark:bg-amber-500/20 text-stone-950 dark:text-white'
-                              : 'hover:bg-stone-100 dark:hover:bg-white/[0.06] text-stone-800 dark:text-zinc-200'
+                              ? 'bg-emerald-50/70 text-emerald-900 font-bold'
+                              : 'hover:bg-stone-50 text-stone-800'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 ${
-                              isSelected ? 'bg-amber-500 text-stone-950 font-black' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-300'
+                              isSelected ? 'bg-emerald-600 text-white font-black' : 'bg-stone-100 text-stone-600'
                             }`}>
                               {cleanStaffName(staff.name).charAt(0)}
                             </div>
@@ -407,7 +410,7 @@ export function LoginScreen() {
                               {formatRoleName(staff.role)}
                             </span>
                             {isSelected && (
-                              <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                              <Check className="w-4 h-4 text-emerald-600" />
                             )}
                           </div>
                         </button>
@@ -419,8 +422,8 @@ export function LoginScreen() {
             </div>
 
             {/* Step 2: PIN Dots Display */}
-            <div className="text-center pt-1">
-              <div className="text-[10px] font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider">
+            <div className="text-center pt-0.5">
+              <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
                 {selectedStaff ? `2. Enter PIN for ${selectedStaff.name.split(' ')[0]}` : '2. Enter 4-Digit PIN'}
               </div>
               <div className="flex items-center justify-center gap-3 mt-2">
@@ -429,8 +432,8 @@ export function LoginScreen() {
                     key={idx}
                     className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
                       pin.length > idx
-                        ? 'bg-amber-500 border-amber-400 scale-110 shadow-md shadow-amber-500/40'
-                        : 'border-stone-300 dark:border-white/20 bg-stone-200/80 dark:bg-white/[0.05]'
+                        ? 'bg-emerald-600 border-emerald-600 scale-110 shadow-sm shadow-emerald-600/30'
+                        : 'border-stone-300 bg-stone-100'
                     }`}
                   />
                 ))}
@@ -438,7 +441,7 @@ export function LoginScreen() {
             </div>
 
             {error && (
-              <div className="w-full text-center py-2 px-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 rounded-2xl text-xs font-bold animate-shake">
+              <div className="w-full text-center py-2 px-3 bg-rose-50 border border-rose-300 text-rose-700 rounded-2xl text-xs font-bold animate-shake">
                 {error}
               </div>
             )}
@@ -449,40 +452,40 @@ export function LoginScreen() {
                 <button
                   key={digit}
                   onClick={() => handleNumberClick(digit)}
-                  className="w-18 h-12 rounded-2xl bg-stone-100 hover:bg-stone-200 active:scale-95 border border-stone-200/90 text-xl font-black text-stone-900 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:border-white/10 dark:text-white transition shadow-xs hover:shadow cursor-pointer"
+                  className="w-18 sm:w-20 h-12 sm:h-13 rounded-2xl bg-stone-50 hover:bg-stone-100 active:scale-95 border border-stone-200/90 text-xl font-black text-stone-900 transition shadow-2xs hover:border-stone-300 cursor-pointer select-none flex items-center justify-center"
                 >
                   {digit}
                 </button>
               ))}
               <button
                 onClick={handleClear}
-                className="w-18 h-12 rounded-2xl bg-stone-100/70 hover:bg-stone-200/80 active:scale-95 text-xs font-black text-stone-600 hover:text-stone-900 border border-stone-200/80 dark:bg-white/[0.03] dark:hover:bg-white/[0.07] dark:text-zinc-400 dark:hover:text-white dark:border-white/10 transition cursor-pointer"
+                className="w-18 sm:w-20 h-12 sm:h-13 rounded-2xl bg-stone-100/70 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 active:scale-95 text-xs font-black text-stone-500 border border-stone-200/80 transition cursor-pointer select-none flex items-center justify-center"
               >
                 CLEAR
               </button>
               <button
                 onClick={() => handleNumberClick('0')}
-                className="w-18 h-12 rounded-2xl bg-stone-100 hover:bg-stone-200 active:scale-95 border border-stone-200/90 text-xl font-black text-stone-900 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:border-white/10 dark:text-white transition shadow-xs hover:shadow cursor-pointer"
+                className="w-18 sm:w-20 h-12 sm:h-13 rounded-2xl bg-stone-50 hover:bg-stone-100 active:scale-95 border border-stone-200/90 text-xl font-black text-stone-900 transition shadow-2xs hover:border-stone-300 cursor-pointer select-none flex items-center justify-center"
               >
                 0
               </button>
               <button
                 disabled={loading || pin.length === 0 || !selectedStaffId}
                 onClick={() => handlePinSubmit()}
-                className="w-18 h-12 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-white font-black text-xs shadow-lg shadow-amber-500/30 transition disabled:opacity-40 flex items-center justify-center cursor-pointer"
+                className="w-18 sm:w-20 h-12 sm:h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-xs shadow-md shadow-emerald-600/25 transition disabled:opacity-40 flex items-center justify-center cursor-pointer"
               >
                 {loading ? '...' : <ArrowRight className="w-5 h-5 stroke-[3] text-white" />}
               </button>
             </div>
 
             {/* Forgotten PIN Request Link */}
-            <div className="pt-2 text-center w-full">
+            <div className="pt-1 text-center w-full">
               <button
                 type="button"
                 onClick={handleOpenForgot}
-                className="text-[11px] font-bold text-stone-500 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-amber-300 transition flex items-center justify-center gap-1 mx-auto cursor-pointer py-1"
+                className="text-[11px] font-bold text-stone-500 hover:text-emerald-700 transition flex items-center justify-center gap-1.5 mx-auto cursor-pointer py-1"
               >
-                <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
+                <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Forgot PIN? Request Reset from Manager</span>
               </button>
             </div>
@@ -491,7 +494,7 @@ export function LoginScreen() {
           /* EMAIL / EMPLOYEE CODE LOGIN TAB */
           <form onSubmit={handleEmailSubmit} className="p-6 space-y-4">
             <div>
-              <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5">
+              <label className="block text-xs font-bold text-stone-600 uppercase mb-1.5">
                 Manager / Owner Username, Code or Email
               </label>
               <input
@@ -500,12 +503,12 @@ export function LoginScreen() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 dark:focus:border-amber-500/50 placeholder-stone-400 dark:placeholder-zinc-600 shadow-xs"
+                className="w-full bg-stone-50 border border-stone-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-2xl px-4 py-3 text-xs font-semibold text-stone-900 placeholder-stone-400 shadow-2xs focus:outline-none transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5">
+              <label className="block text-xs font-bold text-stone-600 uppercase mb-1.5">
                 Password
               </label>
               <input
@@ -514,12 +517,12 @@ export function LoginScreen() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 dark:focus:border-amber-500/50 placeholder-stone-400 dark:placeholder-zinc-600 shadow-xs"
+                className="w-full bg-stone-50 border border-stone-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-2xl px-4 py-3 text-xs font-semibold text-stone-900 placeholder-stone-400 shadow-2xs focus:outline-none transition"
               />
             </div>
 
             {error && (
-              <div className="py-2.5 px-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 rounded-2xl text-xs font-bold text-center">
+              <div className="py-2.5 px-3 bg-rose-50 border border-rose-300 text-rose-700 rounded-2xl text-xs font-bold text-center">
                 {error}
               </div>
             )}
@@ -527,7 +530,7 @@ export function LoginScreen() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black text-xs rounded-2xl shadow-xl shadow-amber-500/25 transition cursor-pointer active:scale-98"
+              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-2xl shadow-md shadow-emerald-600/25 transition cursor-pointer active:scale-98"
             >
               {loading ? 'Verifying...' : 'Sign In'}
             </button>
@@ -536,9 +539,9 @@ export function LoginScreen() {
               <button
                 type="button"
                 onClick={handleOpenForgot}
-                className="text-[11px] font-bold text-stone-500 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-amber-300 transition inline-flex items-center gap-1 cursor-pointer"
+                className="text-[11px] font-bold text-stone-500 hover:text-emerald-700 transition inline-flex items-center gap-1.5 cursor-pointer"
               >
-                <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
+                <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Forgot password? Request reset</span>
               </button>
             </div>
@@ -549,47 +552,47 @@ export function LoginScreen() {
       {/* ================= MODAL: FORGOTTEN PIN / PASSWORD RESET REQUEST ================= */}
       {isForgotModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
+          <div className="bg-white border border-stone-200 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-500/20">
                   <KeyRound className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-stone-900 dark:text-white">Credential Reset Request</h3>
-                  <p className="text-[11px] text-stone-500 dark:text-zinc-400">
+                  <h3 className="text-base font-black text-stone-900">Credential Reset Request</h3>
+                  <p className="text-[11px] text-stone-500">
                     Request new PIN or temporary password from Manager
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsForgotModalOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-stone-500 dark:text-zinc-400 cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Explanatory banner */}
-            <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-900 dark:text-amber-300 rounded-2xl text-[11px] leading-relaxed">
+            <div className="mt-3 p-3 bg-emerald-50/60 border border-emerald-200/70 text-emerald-900 rounded-2xl text-[11px] leading-relaxed">
               💡 <strong>Manager / Owner Assistance:</strong> When you submit this request, your Shift Manager or Owner can log into <strong>Staff Management</strong> to immediately generate and provide your new PIN or password.
             </div>
 
             {forgotError && (
-              <div className="mt-3 p-2.5 bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 text-xs font-bold rounded-2xl">
+              <div className="mt-3 p-2.5 bg-rose-50 border border-rose-300 text-rose-700 text-xs font-bold rounded-2xl">
                 {forgotError}
               </div>
             )}
 
             {forgotSuccess ? (
-              <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 rounded-2xl space-y-3 text-center">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+              <div className="mt-4 p-4 bg-emerald-50 border border-emerald-300 rounded-2xl space-y-3 text-center">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
                   <Check className="w-5 h-5 stroke-[3]" />
                 </div>
-                <div className="text-xs font-black text-emerald-800 dark:text-emerald-300">
+                <div className="text-xs font-black text-emerald-900">
                   {forgotSuccess}
                 </div>
-                <p className="text-[11px] text-stone-600 dark:text-zinc-400">
+                <p className="text-[11px] text-stone-600">
                   Please inform your Shift Manager or Owner. They will generate your new credentials in their admin console.
                 </p>
                 <button
@@ -603,13 +606,13 @@ export function LoginScreen() {
             ) : (
               <form onSubmit={handleForgotSubmit} className="space-y-3.5 mt-4">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     Select Your Staff Profile
                   </label>
                   <select
                     value={forgotTargetStaffId}
                     onChange={(e) => setForgotTargetStaffId(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-[#201B17] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-stone-50 border border-stone-300 rounded-2xl px-3 py-2.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     <option value="">-- Choose Profile from List --</option>
                     {staffList.map((s) => (
@@ -622,7 +625,7 @@ export function LoginScreen() {
 
                 {!forgotTargetStaffId && (
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
                       Or Enter Employee Code / Name
                     </label>
                     <input
@@ -630,13 +633,13 @@ export function LoginScreen() {
                       placeholder="e.g. EMP-003 or your full name"
                       value={forgotCustomCode}
                       onChange={(e) => setForgotCustomCode(e.target.value)}
-                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                      className="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     Optional Note for Manager
                   </label>
                   <input
@@ -644,22 +647,22 @@ export function LoginScreen() {
                     placeholder="e.g. Forgot PIN after shift change"
                     value={forgotNote}
                     onChange={(e) => setForgotNote(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
                   <button
                     type="button"
                     onClick={() => setIsForgotModalOpen(false)}
-                    className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] text-stone-700 dark:text-zinc-300 rounded-2xl text-xs font-bold cursor-pointer"
+                    className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-2xl text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={forgotSubmitting}
-                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
+                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
                   >
                     {forgotSubmitting ? 'Submitting...' : 'Submit Request to Manager'}
                   </button>
