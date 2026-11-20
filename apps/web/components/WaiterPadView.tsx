@@ -1134,10 +1134,16 @@ export function WaiterPadView() {
       </div>
 
       {/* MOBILE / TABLET FLOATING DOCK (Visible on < lg screens) */}
-      <div className="lg:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 z-40 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-2 px-3 sm:px-8 shadow-xl flex items-center justify-around">
+      <div
+        className={`lg:hidden fixed bottom-3 right-3 sm:right-6 z-40 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-1.5 sm:p-2 px-2 sm:px-6 shadow-xl flex items-center justify-around transition-all duration-200 ${
+          activeTab === 'menu'
+            ? 'left-[4.75rem] sm:left-[6.5rem] md:left-[7.5rem]'
+            : 'left-3 sm:left-6'
+        }`}
+      >
         <button
           onClick={() => setActiveTab('menu')}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 sm:px-4 rounded-xl transition cursor-pointer ${
+          className={`flex flex-col items-center gap-0.5 sm:gap-1 py-1 px-1.5 sm:px-3 rounded-xl transition cursor-pointer ${
             activeTab === 'menu' ? 'text-emerald-600 font-black' : 'text-stone-500'
           }`}
         >
@@ -1148,18 +1154,18 @@ export function WaiterPadView() {
         {/* Quick Table / Floor Plan Selector in Mobile Dock */}
         <button
           onClick={() => setTableModalOpen(true)}
-          className="flex flex-col items-center gap-1 py-1 px-2.5 sm:px-4 rounded-xl text-stone-600 hover:text-emerald-600 transition cursor-pointer"
+          className="flex flex-col items-center gap-0.5 sm:gap-1 py-1 px-1.5 sm:px-3 rounded-xl text-stone-600 hover:text-emerald-600 transition cursor-pointer"
           title="Change Table or View Floor Plan"
         >
           <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
-          <span className="text-[10px] font-black text-stone-900">
+          <span className="text-[10px] font-black text-stone-900 truncate max-w-[65px] sm:max-w-none">
             {orderType === 'DINE_IN' ? `Table ${waiterTable || '—'}` : 'Takeaway'}
           </span>
         </button>
 
         <button
           onClick={() => setShowMobileDrawer(true)}
-          className="relative flex flex-col items-center gap-1 py-1 px-2.5 sm:px-4 rounded-xl text-stone-500 hover:text-emerald-600 transition cursor-pointer"
+          className="relative flex flex-col items-center gap-0.5 sm:gap-1 py-1 px-1.5 sm:px-3 rounded-xl text-stone-500 hover:text-emerald-600 transition cursor-pointer"
         >
           <div className="relative">
             <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-stone-600" />
@@ -1169,12 +1175,12 @@ export function WaiterPadView() {
               </span>
             )}
           </div>
-          <span className="text-[10px] font-bold">Review Slip</span>
+          <span className="text-[10px] font-bold whitespace-nowrap">Review Slip</span>
         </button>
 
         <button
           onClick={() => setActiveTab('tables')}
-          className={`relative flex flex-col items-center gap-1 py-1 px-2.5 sm:px-4 rounded-xl transition cursor-pointer ${
+          className={`relative flex flex-col items-center gap-0.5 sm:gap-1 py-1 px-1.5 sm:px-3 rounded-xl transition cursor-pointer ${
             activeTab === 'tables' ? 'text-emerald-600 font-black' : 'text-stone-500'
           }`}
         >
@@ -1186,7 +1192,7 @@ export function WaiterPadView() {
               }`}
             />
           )}
-          <span className="text-[10px] font-bold">Kitchen Status</span>
+          <span className="text-[10px] font-bold whitespace-nowrap">Kitchen Status</span>
         </button>
       </div>
 
