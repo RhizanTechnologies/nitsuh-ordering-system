@@ -477,56 +477,69 @@ export function WaiterPadView() {
           </aside>
         )}
 
-        {/* COLUMN 2: CENTER PRODUCT FOOD CARDS GRID */}
+        {/* COLUMN 2: CENTER PRODUCT FOOD CARDS GRID OR LIVE TRACKER */}
         <main className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-24 lg:pb-6 no-scrollbar">
-          {/* Top Search Bar & Controls directly bounded within the food catalog */}
-          <div className="flex items-center gap-2.5 sm:gap-3 mb-3.5 flex-shrink-0">
-            <div className="flex-1 relative flex items-center">
-              <Search className="w-4 h-4 text-stone-400 absolute left-3.5 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search food, drinks..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-white hover:border-stone-300 focus:border-emerald-500 border border-stone-200/90 rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition shadow-2xs font-sans"
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch('')}
-                  className="absolute right-3 p-0.5 text-stone-400 hover:text-stone-900"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+          {/* Top Control Bar:
+              - On Menu tab: Search Bar + Live Status Toggle
+              - On Tracker tab: Back to Food Menu Button + Active counter
+          */}
+          {activeTab === 'menu' ? (
+            <div className="flex items-center gap-2.5 sm:gap-3 mb-3.5 flex-shrink-0">
+              <div className="flex-1 relative flex items-center">
+                <Search className="w-4 h-4 text-stone-400 absolute left-3.5 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search food, drinks..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-white hover:border-stone-300 focus:border-emerald-500 border border-stone-200/90 rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition shadow-2xs font-sans"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch('')}
+                    className="absolute right-3 p-0.5 text-stone-400 hover:text-stone-900"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
 
-            {/* Live Kitchen Preparation Status Toggle */}
-            <button
-              onClick={() => setActiveTab(activeTab === 'menu' ? 'tables' : 'menu')}
-              className={`px-3 py-2.5 rounded-2xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold font-sans flex-shrink-0 ${
-                activeTab === 'tables'
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
-                  : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50 hover:text-stone-900 shadow-2xs'
-              }`}
-              title="Toggle Live Kitchen Preparation Monitor"
-            >
-              <Clock className={`w-3.5 h-3.5 ${activeTab === 'tables' ? 'text-white' : 'text-emerald-600'}`} />
-              <span className="hidden sm:inline">{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
-              {inFlightOrders.length > 0 && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                    delayedOrders.length > 0
-                      ? 'bg-[#C11221] text-white animate-pulse'
-                      : activeTab === 'tables'
-                      ? 'bg-white/20 text-white'
-                      : 'bg-emerald-100 text-emerald-800'
-                  }`}
-                >
-                  {inFlightOrders.length}
-                </span>
-              )}
-            </button>
-          </div>
+              {/* Live Kitchen Preparation Status Toggle Button */}
+              <button
+                onClick={() => setActiveTab('tables')}
+                className="px-3 sm:px-3.5 py-2.5 rounded-2xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold font-sans flex-shrink-0 bg-white border-stone-200 text-stone-700 hover:bg-stone-50 hover:text-stone-900 shadow-2xs active:scale-95"
+                title="Open Live Kitchen Preparation Monitor"
+              >
+                <Clock className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                <span className="whitespace-nowrap">Live Status</span>
+                {inFlightOrders.length > 0 && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                      delayedOrders.length > 0
+                        ? 'bg-[#C11221] text-white animate-pulse'
+                        : 'bg-emerald-100 text-emerald-800'
+                    }`}
+                  >
+                    {inFlightOrders.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-2.5 sm:gap-3 mb-3.5 flex-shrink-0">
+              <button
+                onClick={() => setActiveTab('menu')}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition cursor-pointer active:scale-95"
+              >
+                <Utensils className="w-4 h-4" />
+                <span>Back to Food Menu</span>
+              </button>
+              <div className="flex items-center gap-2 text-xs font-bold text-stone-600 bg-white border border-stone-200 px-3 py-2 rounded-2xl shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{inFlightOrders.length} Active Ticket{inFlightOrders.length === 1 ? '' : 's'}</span>
+              </div>
+            </div>
+          )}
 
           {/* Success Notification Alert */}
           {sentOrderNumber && (
@@ -736,25 +749,30 @@ export function WaiterPadView() {
           {activeTab === 'tables' && (
             <div className="space-y-4">
               <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 shadow-xs">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-stone-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-stone-200">
                   <div>
                     <h3 className="text-sm sm:text-base font-black text-stone-900 flex items-center gap-2">
-                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
                       <span>Live Kitchen Preparation Tracker</span>
                     </h3>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-stone-500 mt-0.5">
                       Real-time status for tickets served by <span className="text-stone-900 font-bold">{currentUser?.name}</span>.
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 text-xs font-semibold">
-                    <span className="flex items-center gap-1.5 text-emerald-700">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Normal (&lt;15m)
+
+                  {/* Clean, Non-Breaking Responsive Status Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 text-[11px] sm:text-xs font-bold pt-1 sm:pt-0">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 whitespace-nowrap shadow-2xs">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                      <span>Normal (&lt;15m)</span>
                     </span>
-                    <span className="flex items-center gap-1.5 text-amber-700">
-                      <span className="w-2 h-2 rounded-full bg-amber-500" /> Warning (15-20m)
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 whitespace-nowrap shadow-2xs">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+                      <span>Warning (15–20m)</span>
                     </span>
-                    <span className="flex items-center gap-1.5 text-rose-700">
-                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" /> Delayed (&gt;20m)
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200/90 whitespace-nowrap shadow-2xs">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping flex-shrink-0" />
+                      <span>Delayed (&gt;20m)</span>
                     </span>
                   </div>
                 </div>
