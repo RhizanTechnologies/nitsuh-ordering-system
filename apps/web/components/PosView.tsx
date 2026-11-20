@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { fetchApi, getSocket } from '@/lib/api';
 import { playSlipChime } from '@/lib/audio';
-import { calculatePrepTime } from '@/lib/timer-utils';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { PaymentModal } from '@/components/PaymentModal';
 import { ReceiptModal } from '@/components/ReceiptModal';
@@ -92,7 +91,6 @@ export function PosView() {
   const [editingSlipTarget, setEditingSlipTarget] = useState<any | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'day_before' | '3_days' | 'all'>('today');
-  const [, setTick] = useState(0);
 
   const loadActiveOrders = () => {
     return fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY,SERVED,COMPLETED&limit=250')
@@ -122,10 +120,6 @@ export function PosView() {
 
   useEffect(() => {
     loadData();
-
-    const interval = setInterval(() => {
-      setTick((t) => t + 1);
-    }, 1000);
 
     const socket = getSocket();
     socket.on('waiter:new_order_note', (slip) => {
@@ -162,7 +156,6 @@ export function PosView() {
     });
 
     return () => {
-      clearInterval(interval);
       socket.off('waiter:new_order_note');
       socket.off('tables:updated');
       socket.off('order:confirmed');
@@ -1538,7 +1531,6 @@ export function PosView() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {filteredSlips.map((slip) => {
-                  const prep = calculatePrepTime(slip.createdAt);
                   const isSlipTakeaway = slip.orderType === "TAKEAWAY";
 
                   return (
@@ -1549,7 +1541,7 @@ export function PosView() {
                       <div>
                         {/* Card Header: Separated into clean non-colliding rows (identical to Waiter) */}
                         <div className="pb-3 border-b border-amber-200/80 space-y-2">
-                          {/* Row 1: Order Number + Table and Live Timer */}
+                          {/* Row 1: Order Number + Table and Order Time */}
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                               <span className="text-base font-black text-stone-900 tracking-tight flex-shrink-0">
@@ -1562,10 +1554,10 @@ export function PosView() {
                               </span>
                             </div>
 
-                            {/* Live Timer Pill */}
-                            <div className="px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border flex-shrink-0 whitespace-nowrap bg-amber-100 text-amber-900 border-amber-300">
-                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                              <span>{`Sent ${prep.formattedTime} ago`}</span>
+                            {/* Order Time Pill */}
+                            <div className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 border flex-shrink-0 whitespace-nowrap bg-amber-100 text-amber-900 border-amber-300">
+                              <Clock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+                              <span>{formatTime(slip.createdAt)}</span>
                             </div>
                           </div>
 
@@ -1681,18 +1673,13 @@ export function PosView() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3.5">
                 {filteredOrders.map((order) => {
-                  const prep = calculatePrepTime(order.createdAt);
-                  const isDraft = order.status === 'DRAFT_NOTE';
-                  const isDelayed = !isDraft && prep.delayStatus === 'DELAYED';
-                  const isWarning = !isDraft && prep.delayStatus === 'WARNING';
                   const isReady = order.status === 'READY';
                   const isServed = order.status === 'SERVED';
                   const isPaid = order.paymentStatus === 'PAID';
                   const isOrderTakeaway = order.orderType === 'TAKEAWAY';
 
-                  const statusLabel = isDraft
-                    ? '⏳ Awaiting Cashier Firing'
-                    : order.status === 'CONFIRMED'
+                  const statusLabel =
+                    order.status === 'CONFIRMED'
                     ? 'In Kitchen'
                     : order.status === 'IN_PREPARATION'
                     ? 'Cooking'
@@ -1709,20 +1696,16 @@ export function PosView() {
                       key={order.id}
                       className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
                         isReady
-                          ? 'bg-emerald-50 border-emerald-300 shadow-xs'
-                          : isDelayed
-                          ? 'bg-rose-50 border-rose-300 shadow-xs'
-                          : isWarning
-                          ? 'bg-amber-50 border-amber-300'
+                          ? 'bg-emerald-50/70 border-emerald-300 shadow-xs'
                           : isServed
-                          ? 'bg-purple-50/50 border-purple-200 shadow-xs'
-                          : 'bg-white border-stone-200 shadow-xs'
+                          ? 'bg-purple-50/40 border-purple-200/90 shadow-xs'
+                          : 'bg-white border-stone-200/90 shadow-xs'
                       }`}
                     >
                       <div>
                         {/* Card Header: Separated into clean non-colliding rows (identical to Waiter) */}
                         <div className="pb-3 border-b border-stone-200/70 space-y-2">
-                          {/* Row 1: Order Number + Table / Destination and Live Timer */}
+                          {/* Row 1: Order Number + Table / Destination and Order Time */}
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                               <span className="text-base font-black text-stone-900 tracking-tight flex-shrink-0">
@@ -1735,22 +1718,10 @@ export function PosView() {
                               </span>
                             </div>
 
-                            {/* Live Timer Pill */}
-                            <div
-                              className={`px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border flex-shrink-0 whitespace-nowrap ${
-                                isReady
-                                  ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
-                                  : isDelayed
-                                  ? 'bg-rose-100 text-rose-900 border-rose-400 animate-pulse'
-                                  : isWarning
-                                  ? 'bg-amber-100 text-amber-900 border-amber-300'
-                                  : isServed
-                                  ? 'bg-purple-100 text-purple-900 border-purple-300'
-                                  : 'bg-stone-100 text-stone-800 border-stone-200'
-                              }`}
-                            >
-                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                              <span>{`${prep.formattedTime} prep`}</span>
+                            {/* Order Time */}
+                            <div className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 border flex-shrink-0 whitespace-nowrap bg-stone-100 text-stone-700 border-stone-200">
+                              <Clock className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
+                              <span>{formatTime(order.createdAt)}</span>
                             </div>
                           </div>
 
@@ -1763,8 +1734,6 @@ export function PosView() {
                                     ? 'success'
                                     : isServed
                                     ? 'purple'
-                                    : isDelayed
-                                    ? 'destructive'
                                     : order.status === 'IN_PREPARATION'
                                     ? 'info'
                                     : order.status === 'CONFIRMED'
