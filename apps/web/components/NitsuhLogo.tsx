@@ -21,11 +21,11 @@ export function NitsuhLogo({
       <div className={`flex flex-col items-center text-center ${className}`}>
         {/* Clean Circular Brand Emblem */}
         <div className="relative mb-3 flex items-center justify-center">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-600 p-2 shadow-md ring-4 ring-emerald-500/20 flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-105">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full shadow-md ring-2 ring-stone-200/80 flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-105">
             <img
               src="/nitsuh-logo.png"
               alt="Nitsuh Foods"
-              className="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.25)] relative z-10"
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
@@ -57,13 +57,13 @@ export function NitsuhLogo({
       className={`group flex items-center gap-2.5 transition select-none ${className}`}
       title="Nitsuh Foods"
     >
-      {/* Circular Emblem matching Reference (Green circle with logo) */}
+      {/* Circular Emblem matching Reference (Clean circular brand icon) */}
       <div className="relative flex-shrink-0">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-600 p-1 shadow-xs ring-1 ring-emerald-500/40 flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full shadow-2xs ring-1 ring-stone-200/90 flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
           <img
             src="/nitsuh-logo.png"
             alt="Nitsuh Foods"
-            className="w-full h-full object-contain filter drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)] relative z-10"
+            className="w-full h-full object-cover"
           />
         </div>
       </div>

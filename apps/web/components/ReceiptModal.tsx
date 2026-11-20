@@ -56,8 +56,8 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
           {/* Header */}
           <div className="text-center space-y-1">
             <div className="flex justify-center mb-1">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-[#E0D9CB] p-1 flex items-center justify-center shadow-xs">
-                <img src="/nitsuh-logo.png" alt="Nitsuh Logo" className="w-full h-full object-contain" />
+              <div className="w-12 h-12 rounded-full border border-stone-200 overflow-hidden flex items-center justify-center shadow-xs">
+                <img src="/nitsuh-logo.png" alt="Nitsuh Logo" className="w-full h-full object-cover" />
               </div>
             </div>
             <div className="font-black text-sm uppercase tracking-wider text-black">
