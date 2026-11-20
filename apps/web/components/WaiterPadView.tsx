@@ -30,7 +30,6 @@ import {
   Drumstick,
   MapPin,
   Utensils,
-  ChevronLeft,
 } from 'lucide-react';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { Button, Badge } from '@/components/ui';
@@ -68,7 +67,7 @@ export function WaiterPadView() {
   const [readyToast, setReadyToast] = useState<any | null>(null);
   const [, setTick] = useState(0);
 
-  // Reference Image Design: Product Customizer Modal (Image 2 & 3 replica)
+  // Customizer Modal State
   const [selectedDetailItem, setSelectedDetailItem] = useState<any | null>(null);
   const [customSize, setCustomSize] = useState<'Regular' | 'Large' | 'X Large'>('Regular');
   const [customQty, setCustomQty] = useState(1);
@@ -167,7 +166,7 @@ export function WaiterPadView() {
     };
   }, []);
 
-  // Category helpers for grouping matching system inventory
+  // Category helpers for grouping
   const isBurger = (catName: string, itemName: string = '') => {
     const c = (catName + ' ' + itemName).toLowerCase();
     return c.includes('burger') || c.includes('sandwich') || c.includes('wrap');
@@ -232,12 +231,7 @@ export function WaiterPadView() {
     return allItems.filter((item) => {
       const catName = item.category?.name || '';
 
-      // Fasting Filter
-      if (groupFilter === 'FASTING' && !isFastingItem(item)) {
-        return false;
-      }
-
-      // Group Filter matching categories
+      if (groupFilter === 'FASTING' && !isFastingItem(item)) return false;
       if (groupFilter === 'BURGER' && !isBurger(catName, item.name)) return false;
       if (groupFilter === 'PIZZA' && !isPizza(catName, item.name)) return false;
       if (groupFilter === 'CHICKEN' && !isChicken(catName, item.name)) return false;
@@ -246,19 +240,15 @@ export function WaiterPadView() {
       if (groupFilter === 'DRINKS' && !isDrinks(catName)) return false;
       if (groupFilter === 'BAKERY' && !isBakery(catName)) return false;
 
-      // Specific Category Selection
       if (selectedCategory && !query && item.categoryId !== selectedCategory) {
         return false;
       }
 
-      // Search matching: name, description, category
       if (query) {
         const matchName = item.name.toLowerCase().includes(query);
         const matchDesc = item.description?.toLowerCase().includes(query);
         const matchCat = catName.toLowerCase().includes(query);
-        if (!matchName && !matchDesc && !matchCat) {
-          return false;
-        }
+        if (!matchName && !matchDesc && !matchCat) return false;
       }
 
       return true;
@@ -271,7 +261,6 @@ export function WaiterPadView() {
   const totalWaiterTax = totalWaiterBase * 0.15;
   const totalWaiterSum = totalWaiterBase + totalWaiterTip + totalWaiterTax;
 
-  // Customizer calculations matching Image 2 & 3
   const getCustomUnitPrice = (item: any) => {
     if (!item) return 0;
     const basePrice = Number(item.price || 0);
@@ -322,7 +311,6 @@ export function WaiterPadView() {
     setSelectedDetailItem(null);
   };
 
-  // Send digital note directly to Cashier POS terminal
   const handleSendToCashier = async () => {
     if (waiterCart.length === 0) return;
 
@@ -369,7 +357,6 @@ export function WaiterPadView() {
     }
   };
 
-  // Mark an order as served to guests
   const handleMarkServed = async (orderId: string) => {
     try {
       const updated = await fetchApi(`/orders/${orderId}/status`, {
@@ -392,7 +379,6 @@ export function WaiterPadView() {
       ? `🛍️ Takeaway (${takeawayCustomer.trim() || 'Customer'})`
       : `🍽️ Table ${waiterTable || '—'}`;
 
-  // Filter in-flight orders: Manager/Owner sees whole floor; individual waiter sees their own
   const isManagerOrOwner = currentUser?.role === 'MANAGER' || currentUser?.role === 'OWNER';
   const inFlightOrders = activeOrders.filter(
     (o) =>
@@ -408,7 +394,6 @@ export function WaiterPadView() {
   const selectedTableObj = tables.find((t) => t.tableNumber === waiterTable);
   const isCurrentTableOccupied = orderType === 'DINE_IN' && selectedTableObj?.status === 'OCCUPIED';
 
-  // Category navigation matching ClaPos layout (Image 1 & 4)
   const categoryCards = [
     { id: 'ALL', label: 'All Menu', icon: LayoutGrid },
     { id: 'BURGER', label: 'Burger', icon: Sandwich },
@@ -422,7 +407,7 @@ export function WaiterPadView() {
   ];
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#F4F5F7] dark:bg-[#0D0B0A] text-stone-900 dark:text-white transition-colors">
+    <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#F4F5F7] text-stone-900">
       {/* Real-time Ready Alert Toast */}
       {readyToast && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-[#C11221] text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce border border-amber-400">
@@ -446,36 +431,36 @@ export function WaiterPadView() {
         </div>
       )}
 
-      {/* TOP BAR: Clean Search + Mode Navigation (Image 1 & 4) */}
-      <header className="h-16 bg-white dark:bg-[#161311] border-b border-stone-200/90 dark:border-white/10 px-4 sm:px-6 flex items-center justify-between gap-4 flex-shrink-0 z-20">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+      {/* TOP BAR: Clean Search + Kitchen Status Toggle */}
+      <header className="h-14 sm:h-16 bg-white border-b border-stone-200/90 px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4 flex-shrink-0 z-20">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
             <Utensils className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <div>
-            <h1 className="text-sm font-black text-stone-900 dark:text-white leading-none">
+          <div className="hidden xs:block">
+            <h1 className="text-xs sm:text-sm font-black text-stone-900 leading-none">
               Waiter Pad
             </h1>
-            <span className="text-[10px] text-stone-500 dark:text-zinc-400 font-semibold">
+            <span className="text-[10px] text-stone-500 font-semibold truncate max-w-[120px] block">
               {currentUser?.name || 'Server Floor'}
             </span>
           </div>
         </div>
 
-        {/* Central Search Bar (matches ClaPos center search) */}
-        <div className="flex-1 max-w-md relative flex items-center">
-          <Search className="w-4 h-4 text-stone-400 dark:text-zinc-400 absolute left-3.5 pointer-events-none" />
+        {/* Central Search Bar */}
+        <div className="flex-1 max-w-md relative flex items-center mx-1 sm:mx-0">
+          <Search className="w-4 h-4 text-stone-400 absolute left-3 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search food, drinks, burger, pizza..."
+            placeholder="Search food, drinks..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#F4F5F7] dark:bg-white/[0.05] border border-transparent hover:border-stone-300 dark:hover:border-white/10 focus:border-emerald-500 rounded-xl pl-10 pr-9 py-2 text-xs sm:text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none transition"
+            className="w-full bg-[#F4F5F7] border border-transparent hover:border-stone-300 focus:border-emerald-500 rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-3 p-0.5 text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white"
+              className="absolute right-2.5 p-0.5 text-stone-400 hover:text-stone-900"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -483,17 +468,17 @@ export function WaiterPadView() {
         </div>
 
         {/* Live Kitchen Preparation Status Toggle */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => setActiveTab(activeTab === 'menu' ? 'tables' : 'menu')}
-            className={`px-3 py-1.5 rounded-xl border transition-all flex items-center gap-2 cursor-pointer text-xs font-bold ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold ${
               activeTab === 'tables'
                 ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
-                : 'bg-white dark:bg-white/[0.05] border-stone-200 dark:border-white/10 text-stone-700 dark:text-zinc-300 hover:bg-stone-50 dark:hover:bg-white/[0.08]'
+                : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50'
             }`}
             title="Toggle Live Kitchen Preparation Monitor"
           >
-            <Clock className={`w-3.5 h-3.5 ${activeTab === 'tables' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} />
+            <Clock className={`w-3.5 h-3.5 ${activeTab === 'tables' ? 'text-white' : 'text-emerald-600'}`} />
             <span className="hidden sm:inline">{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
             {inFlightOrders.length > 0 && (
               <span
@@ -502,7 +487,7 @@ export function WaiterPadView() {
                     ? 'bg-[#C11221] text-white animate-pulse'
                     : activeTab === 'tables'
                     ? 'bg-white/20 text-white'
-                    : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                    : 'bg-emerald-100 text-emerald-800'
                 }`}
               >
                 {inFlightOrders.length}
@@ -512,11 +497,11 @@ export function WaiterPadView() {
         </div>
       </header>
 
-      {/* MAIN 3-COLUMN LAYOUT (Image 1 & 4) */}
+      {/* MAIN LAYOUT */}
       <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
-        {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR */}
+        {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Visible on Tablet & Desktop: md+) */}
         {activeTab === 'menu' && (
-          <aside className="w-20 md:w-24 lg:w-28 bg-white dark:bg-[#161311] border-r border-stone-200/90 dark:border-white/10 flex flex-col py-3 space-y-1 overflow-y-auto no-scrollbar flex-shrink-0 z-10">
+          <aside className="hidden md:flex flex-col w-20 lg:w-24 bg-white border-r border-stone-200/90 py-3 space-y-1 overflow-y-auto no-scrollbar flex-shrink-0 z-10">
             {categoryCards.map((cat) => {
               const isActive = groupFilter === cat.id;
               const Icon = cat.icon;
@@ -530,24 +515,24 @@ export function WaiterPadView() {
                   }}
                   className={`relative flex flex-col items-center justify-center py-3 px-1 rounded-xl transition text-center gap-1 group cursor-pointer ${
                     isActive
-                      ? 'bg-emerald-50/70 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 font-black'
-                      : 'text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/5'
+                      ? 'bg-emerald-50/70 text-emerald-800 font-black'
+                      : 'text-stone-500 hover:text-stone-900 hover:bg-stone-50'
                   }`}
                 >
                   {/* ClaPos Green Indicator Bar on Left Edge */}
                   {isActive && (
-                    <span className="absolute left-0 top-2 bottom-2 w-1 bg-emerald-500 dark:bg-emerald-400 rounded-r-full" />
+                    <span className="absolute left-0 top-2 bottom-2 w-1 bg-emerald-500 rounded-r-full" />
                   )}
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition ${
+                    className={`w-9 h-9 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center transition ${
                       isActive
-                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-zinc-400 group-hover:bg-stone-200 dark:group-hover:bg-white/10'
+                        ? 'bg-emerald-500/15 text-emerald-600'
+                        : 'bg-stone-100 text-stone-600 group-hover:bg-stone-200'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4 lg:w-5 lg:h-5" />
                   </div>
-                  <span className="text-[11px] leading-tight truncate max-w-full px-1">
+                  <span className="text-[10px] lg:text-[11px] leading-tight truncate max-w-full px-1">
                     {cat.label}
                   </span>
                 </button>
@@ -556,11 +541,38 @@ export function WaiterPadView() {
           </aside>
         )}
 
-        {/* COLUMN 2: CENTER PRODUCT FOOD CARDS GRID OR LIVE STATUS MONITOR */}
-        <main className="flex-1 min-h-0 flex flex-col p-4 sm:p-5 overflow-y-auto pb-24 md:pb-6 no-scrollbar">
+        {/* COLUMN 2: CENTER PRODUCT FOOD CARDS GRID */}
+        <main className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-24 lg:pb-6 no-scrollbar">
+          {/* Mobile Horizontal Category Bar (Phone Only: < md) */}
+          {activeTab === 'menu' && (
+            <div className="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 mb-3 flex-shrink-0">
+              {categoryCards.map((cat) => {
+                const isActive = groupFilter === cat.id;
+                const Icon = cat.icon;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setGroupFilter(cat.id as any);
+                      setSelectedCategory('');
+                    }}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 border cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs font-black'
+                        : 'bg-white border-stone-200 text-stone-600 hover:text-stone-900'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {/* Success Notification Alert */}
           {sentOrderNumber && (
-            <div className="mb-4 bg-emerald-950/80 border border-emerald-500/50 p-3.5 rounded-2xl flex items-center gap-3 text-white shadow-xl animate-in fade-in">
+            <div className="mb-4 bg-emerald-950/90 border border-emerald-500/50 p-3.5 rounded-2xl flex items-center gap-3 text-white shadow-xl animate-in fade-in">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
               <div className="flex-1">
                 <div className="text-xs sm:text-sm font-extrabold flex items-center gap-2">
@@ -579,13 +591,13 @@ export function WaiterPadView() {
           {/* TAB 1: MENU PRODUCT GRID */}
           {activeTab === 'menu' && (
             <>
-              {/* Category Active Header Bar */}
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10">
+              {/* Active Category Title & Count */}
+              <div className="flex items-center justify-between pb-2 mb-3 border-b border-stone-200">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-extrabold text-stone-900 dark:text-white">
+                  <h2 className="text-sm sm:text-base font-extrabold text-stone-900">
                     {categoryCards.find((c) => c.id === groupFilter)?.label || 'All Menu'}
                   </h2>
-                  <span className="text-xs bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-300 px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-xs bg-stone-200 text-stone-700 px-2 py-0.5 rounded-full font-bold">
                     {filteredItems.length} items
                   </span>
                 </div>
@@ -593,12 +605,12 @@ export function WaiterPadView() {
 
               {/* Empty State */}
               {filteredItems.length === 0 && (
-                <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-10 text-center my-6 shadow-xs">
-                  <div className="w-12 h-12 rounded-full bg-stone-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-3 text-stone-400">
+                <div className="bg-white border border-stone-200 rounded-2xl p-8 sm:p-10 text-center my-4 shadow-xs">
+                  <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-3 text-stone-400">
                     <Utensils className="w-6 h-6" />
                   </div>
-                  <h4 className="text-sm font-bold text-stone-900 dark:text-white">No menu items found</h4>
-                  <p className="text-xs text-stone-500 dark:text-zinc-400 mt-1">
+                  <h4 className="text-sm font-bold text-stone-900">No menu items found</h4>
+                  <p className="text-xs text-stone-500 mt-1">
                     Try different search keywords or select another category.
                   </p>
                   <button
@@ -607,15 +619,19 @@ export function WaiterPadView() {
                       setSelectedCategory('');
                       setGroupFilter('ALL');
                     }}
-                    className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+                    className="mt-3.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition cursor-pointer"
                   >
                     Reset Filters
                   </button>
                 </div>
               )}
 
-              {/* Food Grid: Clean White Cards with Image, Title, Price, Active Green Line (Image 1 & 4) */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4">
+              {/* RESPONSIVE FOOD GRID:
+                  - Smaller phone (< 640px): 1 card per row (grid-cols-1)
+                  - Tablet (640px - 1024px): 3 cards per row (sm:grid-cols-2 md:grid-cols-3)
+                  - Desktop (1024px+): 3 to 5 cards per row (lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5)
+              */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-3.5">
                 {filteredItems.map((item) => {
                   const inCart = waiterCart.find((c) => c.menuItemId === item.id);
                   const qty = inCart ? inCart.quantity : 0;
@@ -625,7 +641,6 @@ export function WaiterPadView() {
                     <div
                       key={item.id}
                       onClick={() => {
-                        // Open customizer modal if item has modifiers, or add directly
                         if (item.applicableAddons && item.applicableAddons.length > 0) {
                           openItemCustomizer(item);
                         } else {
@@ -637,14 +652,17 @@ export function WaiterPadView() {
                           });
                         }
                       }}
-                      className={`group relative bg-white dark:bg-[#161311] rounded-2xl p-3 border transition-all duration-200 cursor-pointer flex flex-col justify-between hover:shadow-md ${
+                      className={`group relative bg-white rounded-2xl p-3 border transition-all duration-200 cursor-pointer flex flex-row sm:flex-col justify-between items-center sm:items-stretch gap-3 hover:shadow-md ${
                         isSelected
-                          ? 'border-emerald-500 dark:border-emerald-400 ring-2 ring-emerald-500/20'
-                          : 'border-stone-200/90 dark:border-white/10 hover:border-emerald-500/40 dark:hover:border-emerald-500/40'
+                          ? 'border-emerald-500 ring-2 ring-emerald-500/20'
+                          : 'border-stone-200/90 hover:border-emerald-500/40'
                       }`}
                     >
-                      {/* Product Image Container */}
-                      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-stone-50 dark:bg-black/30 mb-2 flex items-center justify-center p-2 border border-stone-100 dark:border-white/5">
+                      {/* Product Image:
+                          - On small phone: w-20 h-20 thumbnail on left
+                          - On tablet/desktop: full-width aspect-square container
+                      */}
+                      <div className="relative w-20 h-20 sm:w-full sm:aspect-square rounded-xl overflow-hidden bg-stone-50 flex-shrink-0 flex items-center justify-center p-1.5 border border-stone-100">
                         <MenuImage
                           src={item.imageUrl}
                           alt={item.name}
@@ -655,26 +673,29 @@ export function WaiterPadView() {
 
                         {/* Selected Indicator Pill */}
                         {isSelected && (
-                          <div className="absolute top-1.5 right-1.5 z-10 bg-emerald-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-xs">
+                          <div className="absolute top-1.5 right-1.5 z-10 bg-emerald-600 text-white font-black text-[10px] px-1.5 py-0.2 rounded-full shadow-xs">
                             x{qty}
                           </div>
                         )}
                       </div>
 
-                      {/* Product Name & Price */}
-                      <div className="flex flex-col flex-1 justify-between">
+                      {/* Product Name, Category & Price */}
+                      <div className="flex flex-col flex-1 min-w-0 justify-between h-full w-full">
                         <div>
                           <h4
-                            className="text-xs sm:text-sm font-bold text-stone-900 dark:text-white truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
+                            className="text-xs sm:text-sm font-bold text-stone-900 truncate group-hover:text-emerald-700 transition"
                             title={item.name}
                           >
                             {item.name}
                           </h4>
+                          <span className="text-[10px] text-stone-500 line-clamp-1 mt-0.5 sm:hidden">
+                            {item.category?.name || 'Dish'}
+                          </span>
                         </div>
 
-                        <div className="flex items-center justify-between gap-1 mt-2 pt-2 border-t border-stone-100 dark:border-white/5">
-                          <div className="text-xs sm:text-sm font-black text-stone-900 dark:text-white">
-                            {Number(item.price).toFixed(2)} <span className="text-[10px] font-bold text-stone-500 dark:text-zinc-400">ETB</span>
+                        <div className="flex items-center justify-between gap-1 mt-1 sm:mt-2 sm:pt-2 sm:border-t sm:border-stone-100">
+                          <div className="text-xs sm:text-sm font-black text-stone-900">
+                            {Number(item.price).toFixed(2)} <span className="text-[10px] font-bold text-stone-500">ETB</span>
                           </div>
 
                           {/* Quick Stepper or Add Button */}
@@ -716,7 +737,7 @@ export function WaiterPadView() {
                                   imageUrl: item.imageUrl,
                                 });
                               }}
-                              className="w-6 h-6 rounded-lg bg-stone-100 dark:bg-white/10 hover:bg-emerald-600 hover:text-white text-stone-700 dark:text-zinc-300 flex items-center justify-center transition cursor-pointer"
+                              className="w-7 h-7 sm:w-6 sm:h-6 rounded-lg bg-emerald-50 sm:bg-stone-100 hover:bg-emerald-600 hover:text-white text-emerald-700 sm:text-stone-700 flex items-center justify-center transition cursor-pointer"
                               title="Add to order"
                             >
                               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -725,7 +746,7 @@ export function WaiterPadView() {
                         </div>
                       </div>
 
-                      {/* ClaPos Green Line on Bottom of Selected Card (Image 4) */}
+                      {/* Green Indicator Line on Bottom */}
                       {isSelected && (
                         <div className="absolute bottom-0 left-3 right-3 h-0.5 bg-emerald-500 rounded-full" />
                       )}
@@ -739,35 +760,35 @@ export function WaiterPadView() {
           {/* TAB 2: LIVE KITCHEN PREPARATION MONITOR */}
           {activeTab === 'tables' && (
             <div className="space-y-4">
-              <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-stone-200 dark:border-white/10">
+              <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 shadow-xs">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-stone-200">
                   <div>
-                    <h3 className="text-base font-black text-stone-900 dark:text-white flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <h3 className="text-sm sm:text-base font-black text-stone-900 flex items-center gap-2">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
                       <span>Live Kitchen Preparation Tracker</span>
                     </h3>
-                    <p className="text-xs text-stone-500 dark:text-zinc-400">
-                      Real-time status for tickets served by <span className="text-stone-900 dark:text-white font-bold">{currentUser?.name}</span>.
+                    <p className="text-xs text-stone-500">
+                      Real-time status for tickets served by <span className="text-stone-900 font-bold">{currentUser?.name}</span>.
                     </p>
                   </div>
                   <div className="flex items-center gap-3 text-xs font-semibold">
-                    <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                    <span className="flex items-center gap-1.5 text-emerald-700">
                       <span className="w-2 h-2 rounded-full bg-emerald-500" /> Normal (&lt;15m)
                     </span>
-                    <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                    <span className="flex items-center gap-1.5 text-amber-700">
                       <span className="w-2 h-2 rounded-full bg-amber-500" /> Warning (15-20m)
                     </span>
-                    <span className="flex items-center gap-1.5 text-rose-700 dark:text-rose-400">
+                    <span className="flex items-center gap-1.5 text-rose-700">
                       <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" /> Delayed (&gt;20m)
                     </span>
                   </div>
                 </div>
 
                 {inFlightOrders.length === 0 ? (
-                  <div className="py-12 text-center text-stone-500 dark:text-zinc-500">
-                    <Clock className="w-10 h-10 mx-auto mb-2 opacity-40 text-emerald-600 dark:text-emerald-400" />
-                    <p className="text-sm font-bold text-stone-800 dark:text-zinc-300">No active tables being prepared right now.</p>
-                    <p className="text-xs text-stone-500 dark:text-zinc-500 mt-1">Take an order to start tracking prep time!</p>
+                  <div className="py-12 text-center text-stone-500">
+                    <Clock className="w-10 h-10 mx-auto mb-2 opacity-40 text-emerald-600" />
+                    <p className="text-sm font-bold text-stone-800">No active tables being prepared right now.</p>
+                    <p className="text-xs text-stone-500 mt-1">Take an order to start tracking prep time!</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -792,18 +813,18 @@ export function WaiterPadView() {
                           key={order.id}
                           className={`p-4 rounded-2xl border transition-all ${
                             isReady
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-500/60 shadow-xs'
+                              ? 'bg-emerald-50 border-emerald-300 shadow-xs'
                               : isDelayed
-                              ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-500/60 shadow-xs'
+                              ? 'bg-rose-50 border-rose-300 shadow-xs'
                               : isWarning
-                              ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-500/50'
-                              : 'bg-white dark:bg-white/[0.04] border-stone-200 dark:border-white/10'
+                              ? 'bg-amber-50 border-amber-300'
+                              : 'bg-white border-stone-200'
                           }`}
                         >
                           <div className="flex items-start justify-between">
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-black text-stone-900 dark:text-white">#{order.orderNumber}</span>
+                                <span className="text-sm font-black text-stone-900">#{order.orderNumber}</span>
                                 <Badge
                                   variant={
                                     isReady
@@ -818,7 +839,7 @@ export function WaiterPadView() {
                                   {statusLabel}
                                 </Badge>
                               </div>
-                              <div className="text-xs font-bold text-stone-700 dark:text-zinc-300 mt-0.5">
+                              <div className="text-xs font-bold text-stone-700 mt-0.5">
                                 {order.orderType === 'TAKEAWAY'
                                   ? `🛍️ Takeaway (${order.customerName})`
                                   : `🍽️ Table ${order.table?.tableNumber || 'Guest'}`}
@@ -829,14 +850,14 @@ export function WaiterPadView() {
                             <div
                               className={`px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border ${
                                 isReady
-                                  ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-900 dark:text-emerald-300 border-emerald-300'
+                                  ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
                                   : isDelayed
-                                  ? 'bg-rose-100 dark:bg-[#C11221] text-rose-900 dark:text-white border-rose-400 animate-pulse'
+                                  ? 'bg-rose-100 text-rose-900 border-rose-400 animate-pulse'
                                   : isWarning
-                                  ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-300'
+                                  ? 'bg-amber-100 text-amber-900 border-amber-300'
                                   : isDraft
-                                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-300'
-                                  : 'bg-stone-100 dark:bg-white/[0.08] text-stone-800 dark:text-zinc-200 border-stone-200 dark:border-white/15'
+                                  ? 'bg-amber-50 text-amber-800 border-amber-300'
+                                  : 'bg-stone-100 text-stone-800 border-stone-200'
                               }`}
                             >
                               <Clock className="w-3.5 h-3.5" />
@@ -845,13 +866,13 @@ export function WaiterPadView() {
                           </div>
 
                           {/* Order Items */}
-                          <div className="mt-3 text-xs text-stone-600 dark:text-zinc-400 space-y-1">
+                          <div className="mt-3 text-xs text-stone-600 space-y-1">
                             {order.items?.map((it: any) => (
                               <div key={it.id} className="flex justify-between">
                                 <span>
                                   {it.quantity}x {it.menuItem?.name || 'Item'}
                                 </span>
-                                <span className="text-stone-500 dark:text-zinc-500">
+                                <span className="text-stone-500">
                                   {it.itemStatus || order.status}
                                 </span>
                               </div>
@@ -859,8 +880,8 @@ export function WaiterPadView() {
                           </div>
 
                           {/* Actions */}
-                          <div className="mt-4 pt-3 border-t border-stone-200 dark:border-white/10 flex items-center justify-between">
-                            <span className="text-xs font-bold text-stone-900 dark:text-white">
+                          <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between">
+                            <span className="text-xs font-bold text-stone-900">
                               {Number(order.totalAmount || 0).toFixed(2)} ETB
                             </span>
 
@@ -885,18 +906,17 @@ export function WaiterPadView() {
           )}
         </main>
 
-        {/* COLUMN 3: RIGHT ORDER DETAILS / SLIP SIDEBAR (Image 1 & 4) */}
-        <aside className="hidden md:flex w-80 lg:w-96 bg-white dark:bg-[#161311] border-l border-stone-200/90 dark:border-white/10 flex-col h-full shadow-xs flex-shrink-0 z-10 text-stone-900 dark:text-white">
+        {/* COLUMN 3: RIGHT ORDER DETAILS / SLIP SIDEBAR (Desktop 1024px+; on tablet/mobile accessible via Floating Dock) */}
+        <aside className="hidden lg:flex w-80 xl:w-96 bg-white border-l border-stone-200/90 flex-col h-full shadow-xs flex-shrink-0 z-10 text-stone-900">
           {/* Top Controls: Dine-In vs Takeaway Toggle & Table Selection */}
-          <div className="p-4 border-b border-stone-200/90 dark:border-white/10 space-y-3">
-            {/* Segmented Control: Dine In | Take Away (matches ClaPos top toggle) */}
-            <div className="flex p-1 bg-stone-100 dark:bg-white/[0.04] rounded-xl border border-stone-200/80 dark:border-white/10">
+          <div className="p-4 border-b border-stone-200/90 space-y-3">
+            <div className="flex p-1 bg-stone-100 rounded-xl border border-stone-200/80">
               <button
                 onClick={() => setOrderType('DINE_IN')}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                   orderType === 'DINE_IN'
                     ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                    : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
                 <Utensils className="w-3.5 h-3.5" />
@@ -907,7 +927,7 @@ export function WaiterPadView() {
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                   orderType === 'TAKEAWAY'
                     ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                    : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
@@ -915,14 +935,13 @@ export function WaiterPadView() {
               </button>
             </div>
 
-            {/* Table Selector (for Dine-In) or Customer Input (for Takeaway) */}
             {orderType === 'DINE_IN' ? (
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase">
+                <div className="flex items-center justify-between text-[11px] font-bold text-stone-600 uppercase">
                   <span>Dining Table</span>
                   <button
                     onClick={() => setTableModalOpen(true)}
-                    className="text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1 font-bold cursor-pointer"
+                    className="text-emerald-700 hover:underline flex items-center gap-1 font-bold cursor-pointer"
                   >
                     <MapPin className="w-3 h-3" />
                     <span>Floor Plan</span>
@@ -932,7 +951,7 @@ export function WaiterPadView() {
                   <select
                     value={waiterTable}
                     onChange={(e) => setWaiterTable(e.target.value)}
-                    className="w-full appearance-none bg-stone-50 dark:bg-white/[0.04] border border-stone-300 dark:border-white/10 hover:border-emerald-500 rounded-xl px-3 py-2 pr-8 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                    className="w-full appearance-none bg-stone-50 border border-stone-300 hover:border-emerald-500 rounded-xl px-3 py-2 pr-8 text-xs font-bold text-stone-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
                   >
                     {tables.map((t) => {
                       const isOccupied = t.status === 'OCCUPIED';
@@ -940,7 +959,7 @@ export function WaiterPadView() {
                         <option
                           key={t.id}
                           value={t.tableNumber}
-                          className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white"
+                          className="bg-white text-stone-900"
                         >
                           Table {t.tableNumber} ({t.capacity} seats){isOccupied ? ' • Seated' : ' • Open'}
                         </option>
@@ -952,7 +971,7 @@ export function WaiterPadView() {
               </div>
             ) : (
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase">
                   Customer Name
                 </label>
                 <input
@@ -960,67 +979,65 @@ export function WaiterPadView() {
                   placeholder="e.g. Abebe, Sara..."
                   value={takeawayCustomer}
                   onChange={(e) => setTakeawayCustomer(e.target.value)}
-                  className="w-full bg-stone-50 dark:bg-white/[0.04] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500"
                 />
               </div>
             )}
           </div>
 
           {/* Order Details Header */}
-          <div className="px-4 py-2.5 bg-stone-50/70 dark:bg-white/[0.02] border-b border-stone-200/90 dark:border-white/10 flex items-center justify-between">
-            <h3 className="text-xs font-black uppercase tracking-wider text-stone-900 dark:text-white">
+          <div className="px-4 py-2.5 bg-stone-50/70 border-b border-stone-200/90 flex items-center justify-between">
+            <h3 className="text-xs font-black uppercase tracking-wider text-stone-900">
               Order Details
             </h3>
             {waiterCart.length > 0 && (
               <button
                 onClick={clearWaiterCart}
-                className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
+                className="text-xs font-semibold text-rose-600 hover:underline cursor-pointer"
               >
                 Clear All Order
               </button>
             )}
           </div>
 
-          {/* Cart Item List (matches ClaPos Image 1 & 4) */}
+          {/* Cart Item List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-2.5 no-scrollbar">
             {waiterCart.length === 0 ? (
-              /* Empty state matching ClaPos Image 1 */
-              <div className="h-56 flex flex-col items-center justify-center text-center text-stone-400 dark:text-zinc-500">
-                <div className="w-14 h-14 rounded-full bg-stone-100 dark:bg-white/5 flex items-center justify-center text-stone-400 dark:text-zinc-500 mb-2.5">
+              <div className="h-56 flex flex-col items-center justify-center text-center text-stone-400">
+                <div className="w-14 h-14 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 mb-2.5">
                   <ShoppingBag className="w-6 h-6 stroke-[1.5]" />
                 </div>
-                <p className="text-xs font-bold text-stone-700 dark:text-zinc-300">No Order</p>
-                <p className="text-[11px] text-stone-400 dark:text-zinc-500 mt-0.5">
+                <p className="text-xs font-bold text-stone-700">No Order</p>
+                <p className="text-[11px] text-stone-400 mt-0.5">
                   Select items to add to order
                 </p>
               </div>
             ) : (
-              /* Active items list matching ClaPos Image 4 */
               waiterCart.map((item) => (
                 <div
                   key={item.menuItemId}
-                  className="bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-xl p-3 flex flex-col gap-2 hover:border-emerald-500/30 transition"
+                  className="bg-stone-50 border border-stone-200 rounded-xl p-3 flex flex-col gap-2 hover:border-emerald-500/30 transition"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-stone-900 dark:text-white leading-tight">
+                      <div className="text-xs font-bold text-stone-900 leading-tight">
                         {item.name}
                       </div>
-                      <div className="text-[10px] text-stone-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1.5">
+                      <div className="text-[10px] text-stone-500 mt-0.5 flex items-center gap-1.5">
                         <span>x{item.quantity}</span>
                         <span>•</span>
                         <span>{item.price.toFixed(2)} ETB each</span>
                       </div>
                     </div>
-                    <div className="text-xs font-black text-stone-900 dark:text-white text-right">
+                    <div className="text-xs font-black text-stone-900 text-right">
                       {((item.price + (item.tip || 0)) * item.quantity).toFixed(2)} ETB
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1 border-t border-stone-200/60 dark:border-white/5">
+                  <div className="flex items-center justify-between pt-1 border-t border-stone-200/60">
                     {/* Server Tip Button */}
                     {item.tip && item.tip > 0 ? (
-                      <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 px-1.5 py-0.2 rounded font-bold text-[9px] flex items-center gap-1">
+                      <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-1.5 py-0.2 rounded font-bold text-[9px] flex items-center gap-1">
                         <span>Tip: +{item.tip.toFixed(2)} ETB</span>
                         <button
                           onClick={() => setWaiterItemTip(item.menuItemId, 0)}
@@ -1040,17 +1057,17 @@ export function WaiterPadView() {
                             }
                           }
                         }}
-                        className="text-[9px] font-bold text-stone-600 dark:text-zinc-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition cursor-pointer"
+                        className="text-[9px] font-bold text-stone-600 hover:text-emerald-700 transition cursor-pointer"
                       >
                         + Tip
                       </button>
                     )}
 
                     {/* Stepper Controls */}
-                    <div className="flex items-center gap-1 bg-white dark:bg-white/10 border border-stone-300 dark:border-white/10 rounded-lg px-1.5 py-0.5">
+                    <div className="flex items-center gap-1 bg-white border border-stone-300 rounded-lg px-1.5 py-0.5">
                       <button
                         onClick={() => updateWaiterQuantity(item.menuItemId, -1)}
-                        className="text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white p-0.5 cursor-pointer"
+                        className="text-stone-600 hover:text-stone-900 p-0.5 cursor-pointer"
                       >
                         <Minus className="w-2.5 h-2.5" />
                       </button>
@@ -1059,7 +1076,7 @@ export function WaiterPadView() {
                       </span>
                       <button
                         onClick={() => updateWaiterQuantity(item.menuItemId, 1)}
-                        className="text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white p-0.5 cursor-pointer"
+                        className="text-stone-600 hover:text-stone-900 p-0.5 cursor-pointer"
                       >
                         <Plus className="w-2.5 h-2.5" />
                       </button>
@@ -1071,40 +1088,39 @@ export function WaiterPadView() {
           </div>
 
           {/* Kitchen / Cashier Special Notes */}
-          <div className="px-4 py-2 border-t border-stone-200/90 dark:border-white/10 bg-stone-50/50 dark:bg-white/[0.02]">
+          <div className="px-4 py-2 border-t border-stone-200/90 bg-stone-50/50">
             <input
               type="text"
               placeholder="Special instructions (e.g. Less spicy, extra sauce)..."
               value={waiterSpecialNotes}
               onChange={(e) => setWaiterSpecialNotes(e.target.value)}
-              className="w-full bg-white dark:bg-white/[0.04] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-white border border-stone-300 rounded-xl px-3 py-1.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500"
             />
           </div>
 
-          {/* Bill Totals & Send Button (ClaPos bottom section) */}
-          <div className="p-4 border-t border-stone-200/90 dark:border-white/10 bg-white dark:bg-[#161311] space-y-3">
-            <div className="space-y-1.5 text-xs text-stone-500 dark:text-zinc-400">
+          {/* Bill Totals & Send Button */}
+          <div className="p-4 border-t border-stone-200/90 bg-white space-y-3">
+            <div className="space-y-1.5 text-xs text-stone-500">
               <div className="flex justify-between items-center">
                 <span>Subtotal ({totalWaiterItems} items)</span>
-                <span className="font-bold text-stone-900 dark:text-white">{totalWaiterBase.toFixed(2)} ETB</span>
+                <span className="font-bold text-stone-900">{totalWaiterBase.toFixed(2)} ETB</span>
               </div>
               {totalWaiterTip > 0 && (
-                <div className="flex justify-between items-center text-emerald-700 dark:text-emerald-400 font-bold">
+                <div className="flex justify-between items-center text-emerald-700 font-bold">
                   <span>Server Tip (No VAT)</span>
                   <span>+{totalWaiterTip.toFixed(2)} ETB</span>
                 </div>
               )}
               <div className="flex justify-between items-center">
                 <span>15% VAT</span>
-                <span className="font-bold text-stone-900 dark:text-white">{totalWaiterTax.toFixed(2)} ETB</span>
+                <span className="font-bold text-stone-900">{totalWaiterTax.toFixed(2)} ETB</span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-white/10 font-black text-sm text-stone-900 dark:text-white">
+              <div className="flex justify-between items-center pt-2 border-t border-stone-200 font-black text-sm text-stone-900">
                 <span>Total</span>
-                <span className="text-base text-stone-900 dark:text-white">{totalWaiterSum.toFixed(2)} ETB</span>
+                <span className="text-base text-stone-900">{totalWaiterSum.toFixed(2)} ETB</span>
               </div>
             </div>
 
-            {/* Big Action Button (matches ClaPos green Process Transaction button) */}
             <button
               disabled={waiterCart.length === 0 || sending}
               onClick={handleSendToCashier}
@@ -1123,24 +1139,24 @@ export function WaiterPadView() {
         </aside>
       </div>
 
-      {/* MOBILE FLOATING DOCK */}
-      <div className="md:hidden fixed bottom-3 left-4 right-4 z-40 bg-white/95 dark:bg-[#161311]/90 backdrop-blur-2xl border border-stone-200/90 dark:border-white/15 rounded-2xl p-2 px-6 shadow-xl flex items-center justify-around transition-colors">
+      {/* MOBILE / TABLET FLOATING DOCK (Visible on < lg screens) */}
+      <div className="lg:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 z-40 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-2 px-4 sm:px-8 shadow-xl flex items-center justify-around">
         <button
           onClick={() => setActiveTab('menu')}
-          className={`flex flex-col items-center gap-1 py-1 px-4 rounded-xl transition cursor-pointer ${
-            activeTab === 'menu' ? 'text-emerald-600 dark:text-emerald-400 font-black' : 'text-stone-500 dark:text-zinc-500'
+          className={`flex flex-col items-center gap-1 py-1 px-3 sm:px-5 rounded-xl transition cursor-pointer ${
+            activeTab === 'menu' ? 'text-emerald-600 font-black' : 'text-stone-500'
           }`}
         >
-          <Utensils className="w-5 h-5" />
+          <Utensils className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="text-[10px] font-bold">Menu</span>
         </button>
 
         <button
           onClick={() => setShowMobileDrawer(true)}
-          className="relative flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-stone-500 dark:text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition cursor-pointer"
+          className="relative flex flex-col items-center gap-1 py-1 px-3 sm:px-5 rounded-xl text-stone-500 hover:text-emerald-600 transition cursor-pointer"
         >
           <div className="relative">
-            <ShoppingBag className="w-5 h-5 text-stone-600 dark:text-zinc-300" />
+            <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-stone-600" />
             {totalWaiterItems > 0 && (
               <span className="absolute -top-1.5 -right-2 bg-emerald-600 text-white text-[9px] w-4 h-4 rounded-full font-black flex items-center justify-center shadow-xs">
                 {totalWaiterItems}
@@ -1152,11 +1168,11 @@ export function WaiterPadView() {
 
         <button
           onClick={() => setActiveTab('tables')}
-          className={`relative flex flex-col items-center gap-1 py-1 px-4 rounded-xl transition cursor-pointer ${
-            activeTab === 'tables' ? 'text-emerald-600 dark:text-emerald-400 font-black' : 'text-stone-500 dark:text-zinc-500'
+          className={`relative flex flex-col items-center gap-1 py-1 px-3 sm:px-5 rounded-xl transition cursor-pointer ${
+            activeTab === 'tables' ? 'text-emerald-600 font-black' : 'text-stone-500'
           }`}
         >
-          <Clock className="w-5 h-5" />
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
           {inFlightOrders.length > 0 && (
             <span
               className={`absolute top-0 right-3 w-2 h-2 rounded-full ${
@@ -1168,18 +1184,18 @@ export function WaiterPadView() {
         </button>
       </div>
 
-      {/* MOBILE FULL-SCREEN SLIP REVIEW DRAWER */}
+      {/* MOBILE / TABLET REVIEW SLIP DRAWER */}
       {showMobileDrawer && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex flex-col justify-end md:hidden animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] border-t border-stone-200 dark:border-white/15 rounded-t-[32px] max-h-[85vh] flex flex-col p-4 shadow-2xl text-stone-900 dark:text-white">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end lg:hidden animate-in fade-in duration-200">
+          <div className="bg-white border-t border-stone-200 rounded-t-[28px] max-h-[85vh] flex flex-col p-4 shadow-2xl text-stone-900">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
               <div>
-                <span className="text-xs text-stone-500 dark:text-zinc-400 font-medium">Review Order Note</span>
-                <h3 className="text-sm font-black text-stone-900 dark:text-white">{destinationLabel}</h3>
+                <span className="text-xs text-stone-500 font-medium">Review Order Note</span>
+                <h3 className="text-sm font-black text-stone-900">{destinationLabel}</h3>
               </div>
               <button
                 onClick={() => setShowMobileDrawer(false)}
-                className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-full text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+                className="p-1.5 bg-stone-100 hover:bg-stone-200 rounded-full text-stone-500 hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1191,7 +1207,7 @@ export function WaiterPadView() {
                 placeholder="Special notes (e.g. Less sugar, extra hot)..."
                 value={waiterSpecialNotes}
                 onChange={(e) => setWaiterSpecialNotes(e.target.value)}
-                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2 text-xs font-medium text-stone-900 placeholder-stone-400 focus:outline-none"
               />
             </div>
 
@@ -1199,34 +1215,34 @@ export function WaiterPadView() {
               {waiterCart.map((item) => (
                 <div
                   key={item.menuItemId}
-                  className="bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 p-2.5 rounded-xl flex items-center justify-between"
+                  className="bg-stone-50 border border-stone-200 p-2.5 rounded-xl flex items-center justify-between"
                 >
                   <div className="min-w-0 pr-2">
-                    <div className="text-xs font-bold text-stone-900 dark:text-white truncate">{item.name}</div>
-                    <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
+                    <div className="text-xs font-bold text-stone-900 truncate">{item.name}</div>
+                    <div className="text-[10px] text-stone-500 font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
                       <span>{item.price.toFixed(2)} ETB × {item.quantity}</span>
                       {item.tip && item.tip > 0 && (
-                        <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 px-1 py-0.2 rounded font-bold text-[9px]">
+                        <span className="bg-emerald-100 text-emerald-800 px-1 py-0.2 rounded font-bold text-[9px]">
                           Tip: +{item.tip.toFixed(2)} ETB
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-xs font-black text-stone-900 dark:text-white">
+                    <span className="text-xs font-black text-stone-900">
                       {((item.price + (item.tip || 0)) * item.quantity).toFixed(2)} ETB
                     </span>
-                    <div className="flex items-center gap-1 bg-white dark:bg-white/[0.08] border border-stone-200 dark:border-white/10 rounded-lg px-1.5 py-0.5">
+                    <div className="flex items-center gap-1 bg-white border border-stone-200 rounded-lg px-1.5 py-0.5">
                       <button
                         onClick={() => updateWaiterQuantity(item.menuItemId, -1)}
-                        className="text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+                        className="text-stone-500 hover:text-stone-900 cursor-pointer"
                       >
                         <Minus className="w-2.5 h-2.5" />
                       </button>
-                      <span className="text-xs font-black px-1 text-stone-900 dark:text-white">{item.quantity}</span>
+                      <span className="text-xs font-black px-1 text-stone-900">{item.quantity}</span>
                       <button
                         onClick={() => updateWaiterQuantity(item.menuItemId, 1)}
-                        className="text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+                        className="text-stone-500 hover:text-stone-900 cursor-pointer"
                       >
                         <Plus className="w-2.5 h-2.5" />
                       </button>
@@ -1236,15 +1252,15 @@ export function WaiterPadView() {
               ))}
             </div>
 
-            <div className="pt-3 border-t border-stone-200 dark:border-white/10 mt-2 space-y-3">
-              <div className="space-y-1 text-xs text-stone-500 dark:text-zinc-400">
+            <div className="pt-3 border-t border-stone-200 mt-2 space-y-3">
+              <div className="space-y-1 text-xs text-stone-500">
                 <div className="flex justify-between items-center">
                   <span>Subtotal ({totalWaiterItems} items)</span>
-                  <span className="font-bold text-stone-900 dark:text-white">{totalWaiterBase.toFixed(2)} ETB</span>
+                  <span className="font-bold text-stone-900">{totalWaiterBase.toFixed(2)} ETB</span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-stone-200 dark:border-white/10 font-black text-sm text-stone-900 dark:text-white">
+                <div className="flex justify-between items-center pt-1 border-t border-stone-200 font-black text-sm text-stone-900">
                   <span>Total</span>
-                  <span className="text-base text-stone-900 dark:text-white">{totalWaiterSum.toFixed(2)} ETB</span>
+                  <span className="text-base text-stone-900">{totalWaiterSum.toFixed(2)} ETB</span>
                 </div>
               </div>
 
@@ -1267,14 +1283,13 @@ export function WaiterPadView() {
         </div>
       )}
 
-      {/* PRODUCT CUSTOMIZER MODAL (Exact Replica of Image 2 & 3) */}
+      {/* PRODUCT CUSTOMIZER MODAL */}
       {selectedDetailItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            {/* Header: Thumbnail + Title + Description + Close Button */}
-            <div className="p-5 pb-4 border-b border-stone-200 dark:border-white/10 flex items-start justify-between gap-3 flex-shrink-0">
+          <div className="relative w-full max-w-lg bg-white border border-stone-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-5 pb-4 border-b border-stone-200 flex items-start justify-between gap-3 flex-shrink-0">
               <div className="flex items-start gap-3 min-w-0">
-                <div className="w-14 h-14 rounded-xl bg-stone-100 dark:bg-black/40 overflow-hidden flex-shrink-0 flex items-center justify-center p-1.5 border border-stone-200/80 dark:border-white/10">
+                <div className="w-14 h-14 rounded-xl bg-stone-100 overflow-hidden flex-shrink-0 flex items-center justify-center p-1.5 border border-stone-200/80">
                   <MenuImage
                     src={selectedDetailItem.imageUrl}
                     alt={selectedDetailItem.name}
@@ -1284,13 +1299,13 @@ export function WaiterPadView() {
                   />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-base font-bold text-stone-900 dark:text-white leading-tight">
+                  <h3 className="text-base font-bold text-stone-900 leading-tight">
                     {selectedDetailItem.name}
                   </h3>
-                  <p className="text-xs text-stone-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                  <p className="text-xs text-stone-500 mt-1 line-clamp-2">
                     {selectedDetailItem.description || 'Delicious freshly prepared recipe with authentic culinary craft.'}
                   </p>
-                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                  <div className="text-xs font-bold text-emerald-600 mt-1">
                     {Number(selectedDetailItem.price).toFixed(2)} ETB
                   </div>
                 </div>
@@ -1298,40 +1313,37 @@ export function WaiterPadView() {
 
               <button
                 onClick={() => setSelectedDetailItem(null)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white cursor-pointer"
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Modal Body */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4 no-scrollbar">
-              {/* Qty Row (matches ClaPos Image 2 & 3: Qty [- 1 +]) */}
-              <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-white/5">
-                <span className="text-xs font-bold text-stone-700 dark:text-zinc-300">Qty</span>
-                <div className="flex items-center gap-2 bg-stone-100 dark:bg-white/5 border border-stone-300 dark:border-white/10 rounded-xl px-2 py-1">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <span className="text-xs font-bold text-stone-700">Qty</span>
+                <div className="flex items-center gap-2 bg-stone-100 border border-stone-300 rounded-xl px-2 py-1">
                   <button
                     disabled={customQty <= 1}
                     onClick={() => setCustomQty((q) => Math.max(1, q - 1))}
-                    className="w-6 h-6 rounded flex items-center justify-center text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white disabled:opacity-30 cursor-pointer"
+                    className="w-6 h-6 rounded flex items-center justify-center text-stone-600 hover:text-stone-900 disabled:opacity-30 cursor-pointer"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="w-6 text-center text-xs font-bold text-stone-900 dark:text-white">
+                  <span className="w-6 text-center text-xs font-bold text-stone-900">
                     {customQty}
                   </span>
                   <button
                     onClick={() => setCustomQty((q) => q + 1)}
-                    className="w-6 h-6 rounded flex items-center justify-center text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+                    className="w-6 h-6 rounded flex items-center justify-center text-stone-600 hover:text-stone-900 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
 
-              {/* Size Selection (matches ClaPos Image 2 & 3 green pills) */}
               <div>
-                <div className="text-xs font-bold text-stone-700 dark:text-zinc-300 mb-2">Size</div>
+                <div className="text-xs font-bold text-stone-700 mb-2">Size</div>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { id: 'Regular', label: 'Regular', add: 0 },
@@ -1346,8 +1358,8 @@ export function WaiterPadView() {
                         onClick={() => setCustomSize(sz.id as any)}
                         className={`py-2 px-3 rounded-xl text-xs transition border flex items-center justify-between cursor-pointer ${
                           isActive
-                            ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-400 dark:border-emerald-500/40 font-bold'
-                            : 'bg-stone-50 dark:bg-white/5 text-stone-700 dark:text-zinc-400 border-stone-200 dark:border-white/10 hover:bg-stone-100'
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-400 font-bold'
+                            : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
                         }`}
                       >
                         <span>{sz.label}</span>
@@ -1360,10 +1372,9 @@ export function WaiterPadView() {
                 </div>
               </div>
 
-              {/* Dynamic Add-ons & Extras from Database */}
               {selectedDetailItem.applicableAddons && selectedDetailItem.applicableAddons.length > 0 && (
                 <div>
-                  <div className="text-xs font-bold text-stone-700 dark:text-zinc-300 mb-2">Add-ons</div>
+                  <div className="text-xs font-bold text-stone-700 mb-2">Add-ons</div>
                   <div className="grid grid-cols-2 gap-2">
                     {selectedDetailItem.applicableAddons.map((addon: any) => {
                       const isSelected = selectedAddonIds.includes(addon.id);
@@ -1374,8 +1385,8 @@ export function WaiterPadView() {
                           onClick={() => toggleAddon(addon.id)}
                           className={`py-2 px-3 rounded-xl text-xs transition border flex items-center justify-between cursor-pointer ${
                             isSelected
-                              ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-400 dark:border-emerald-500/40 font-bold'
-                              : 'bg-stone-50 dark:bg-white/5 text-stone-700 dark:text-zinc-400 border-stone-200 dark:border-white/10 hover:bg-stone-100'
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-400 font-bold'
+                              : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
                           }`}
                         >
                           <span className="truncate">{addon.name}</span>
@@ -1389,9 +1400,8 @@ export function WaiterPadView() {
                 </div>
               )}
 
-              {/* Notes Input (matches ClaPos Image 2 & 3) */}
               <div>
-                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1.5">
+                <label className="block text-xs font-bold text-stone-700 mb-1.5">
                   Notes
                 </label>
                 <input
@@ -1399,16 +1409,15 @@ export function WaiterPadView() {
                   placeholder="Add some notes..."
                   value={customItemNote}
                   onChange={(e) => setCustomItemNote(e.target.value)}
-                  className="w-full bg-stone-50 dark:bg-white/5 border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500"
                 />
               </div>
             </div>
 
-            {/* Footer: Total Price + Cancel & Add Buttons (ClaPos Image 2 & 3) */}
-            <div className="p-4 bg-stone-50 dark:bg-[#12100E] border-t border-stone-200 dark:border-white/10 flex items-center justify-between gap-3 flex-shrink-0">
+            <div className="p-4 bg-stone-50 border-t border-stone-200 flex items-center justify-between gap-3 flex-shrink-0">
               <div className="text-xs">
-                <span className="text-stone-500 dark:text-zinc-400">Total: </span>
-                <span className="text-base font-black text-stone-900 dark:text-white">
+                <span className="text-stone-500">Total: </span>
+                <span className="text-base font-black text-stone-900">
                   {(getCustomUnitPrice(selectedDetailItem) * customQty).toFixed(2)} ETB
                 </span>
               </div>
@@ -1417,7 +1426,7 @@ export function WaiterPadView() {
                 <button
                   type="button"
                   onClick={() => setSelectedDetailItem(null)}
-                  className="px-4 py-2 rounded-xl border border-stone-300 dark:border-white/10 text-stone-700 dark:text-zinc-300 text-xs font-bold hover:bg-stone-100 dark:hover:bg-white/5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-stone-300 text-stone-700 text-xs font-bold hover:bg-stone-100 cursor-pointer"
                 >
                   Cancel
                 </button>
