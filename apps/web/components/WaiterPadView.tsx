@@ -407,7 +407,7 @@ export function WaiterPadView() {
   ];
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#F4F5F7] text-stone-900">
+    <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#F8F9FA] text-stone-900">
       {/* Real-time Ready Alert Toast */}
       {readyToast && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-[#C11221] text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce border border-amber-400">
@@ -435,9 +435,9 @@ export function WaiterPadView() {
 
       {/* MAIN LAYOUT */}
       <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
-        {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Always on left on all devices) */}
+        {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Seamlessly merged with unified background) */}
         {activeTab === 'menu' && (
-          <aside className="w-16 sm:w-20 md:w-24 bg-white border-r border-stone-200/90 py-2 sm:py-3 space-y-1 overflow-y-auto no-scrollbar flex-shrink-0 z-10 flex flex-col">
+          <aside className="w-16 sm:w-20 md:w-24 bg-[#F8F9FA] border-r border-stone-200/70 py-2 sm:py-3 px-1 sm:px-1.5 space-y-1.5 overflow-y-auto no-scrollbar flex-shrink-0 z-10 flex flex-col pb-24 lg:pb-4">
             {categoryCards.map((cat) => {
               const isActive = groupFilter === cat.id;
               const Icon = cat.icon;
@@ -449,26 +449,22 @@ export function WaiterPadView() {
                     setGroupFilter(cat.id as any);
                     setSelectedCategory('');
                   }}
-                  className={`relative flex flex-col items-center justify-center py-2 sm:py-2.5 px-1 rounded-xl transition text-center gap-1 group cursor-pointer ${
+                  className={`w-full flex flex-col items-center justify-center py-2 sm:py-2.5 px-1 rounded-2xl transition text-center gap-1 group cursor-pointer ${
                     isActive
-                      ? 'bg-emerald-50/70 text-emerald-800 font-black'
-                      : 'text-stone-500 hover:text-stone-900 hover:bg-stone-50'
+                      ? 'bg-white shadow-xs border border-emerald-500/40 text-emerald-800 font-black'
+                      : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'
                   }`}
                 >
-                  {/* ClaPos Green Indicator Bar on Left Edge */}
-                  {isActive && (
-                    <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-emerald-500 rounded-r-full" />
-                  )}
                   <div
                     className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition ${
                       isActive
-                        ? 'bg-emerald-500/15 text-emerald-600'
-                        : 'bg-stone-100 text-stone-600 group-hover:bg-stone-200'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'bg-white text-stone-600 shadow-2xs border border-stone-200/70 group-hover:border-stone-300'
                     }`}
                   >
                     <Icon className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
-                  <span className="text-[9px] sm:text-[10px] md:text-[11px] leading-tight truncate max-w-full px-0.5">
+                  <span className="text-[9px] sm:text-[10px] md:text-[11px] font-bold tracking-tight leading-tight truncate max-w-full px-0.5">
                     {cat.label}
                   </span>
                 </button>
