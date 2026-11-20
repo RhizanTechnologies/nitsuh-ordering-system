@@ -185,68 +185,68 @@ export function AnalyticsView() {
           {/* Top 5 KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 relative z-10">
             {/* Total Revenue */}
-            <div className="bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-3xl p-5 shadow-xl backdrop-blur-xl flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 font-extrabold mb-2">
+            <div className="bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs dark:shadow-xl backdrop-blur-xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs text-stone-700 dark:text-zinc-300 font-extrabold mb-2">
                 <span>Total Revenue</span>
                 <span className="text-emerald-700 dark:text-emerald-400 font-black text-[11px] bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-lg">
-                  +2%
+                  Live
                 </span>
               </div>
               <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400">
-                {kpis.totalRevenue > 0 ? kpis.totalRevenue.toFixed(2) : '2,357.00'} <span className="text-xs text-zinc-600 dark:text-zinc-400 font-bold">ETB</span>
+                {(kpis.totalRevenue ?? 0).toFixed(2)} <span className="text-xs text-stone-600 dark:text-zinc-400 font-bold">ETB</span>
               </div>
-              <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mt-2">Verified from settled tenders</div>
+              <div className="text-xs font-semibold text-stone-600 dark:text-zinc-400 mt-2">Verified from settled tenders</div>
             </div>
 
             {/* Real-time Net Profit */}
-            <div className="bg-gradient-to-br from-rose-50/90 via-white to-amber-50/50 dark:bg-gradient-to-br dark:from-[#880814] dark:via-[#A8101E] dark:to-[#4A050B] border border-red-200 dark:border-red-500/40 rounded-3xl p-5 shadow-xl backdrop-blur-xl flex flex-col justify-between">
+            <div className="bg-gradient-to-br from-rose-50/90 via-white to-amber-50/50 dark:bg-gradient-to-br dark:from-[#880814] dark:via-[#A8101E] dark:to-[#4A050B] border border-red-200 dark:border-red-500/40 rounded-3xl p-5 shadow-xs dark:shadow-xl backdrop-blur-xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-xs font-black mb-2 text-rose-800 dark:text-amber-300">
                 <span className="tracking-wide">Estimated Net Profit</span>
                 <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-300 animate-pulse" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-rose-800 dark:text-white dark:text-white-force">
-                {kpis.netProfit > 0 ? kpis.netProfit.toFixed(2) : '1,690.40'}{' '}
+                {(kpis.netProfit ?? 0).toFixed(2)}{' '}
                 <span className="text-xs font-bold text-rose-900/70 dark:text-amber-200/90">ETB</span>
               </div>
               <div className="text-xs font-bold text-rose-800 dark:text-amber-100 mt-2">
-                Margin: {kpis.netMarginPercent > 0 ? kpis.netMarginPercent : '71.8'}% after COGS
+                Margin: {Number(kpis.netMarginPercent ?? 0).toFixed(1)}% after COGS
               </div>
             </div>
 
             {/* Production COGS */}
-            <div className="bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-3xl p-5 shadow-xl backdrop-blur-xl flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 font-extrabold mb-2">
+            <div className="bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs dark:shadow-xl backdrop-blur-xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs text-stone-700 dark:text-zinc-300 font-extrabold mb-2">
                 <span>Production COGS</span>
                 <span className="text-rose-600 dark:text-rose-400 text-xs font-extrabold">Grams basis</span>
               </div>
               <div className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400">
-                {kpis.cogs > 0 ? kpis.cogs.toFixed(2) : '624.10'} <span className="text-xs text-zinc-600 dark:text-zinc-400 font-bold">ETB</span>
+                {(kpis.cogs ?? 0).toFixed(2)} <span className="text-xs text-stone-600 dark:text-zinc-400 font-bold">ETB</span>
               </div>
-              <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mt-2">Direct ingredient cost consumed</div>
+              <div className="text-xs font-semibold text-stone-600 dark:text-zinc-400 mt-2">Direct ingredient cost consumed</div>
             </div>
 
             {/* Total Orders */}
-            <div className="bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-3xl p-5 shadow-xl backdrop-blur-xl flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 font-extrabold mb-2">
+            <div className="bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs dark:shadow-xl backdrop-blur-xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs text-stone-700 dark:text-zinc-300 font-extrabold mb-2">
                 <span>Period Orders</span>
                 <ShoppingBag className="w-4 h-4 text-amber-500" />
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white">
-                {kpis.totalOrdersToday > 0 ? kpis.totalOrdersToday : 234}
+              <div className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                {kpis.totalOrdersToday ?? 0}
               </div>
-              <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mt-2">Avg {kpis.averageOrderValue || '185.00'} ETB / order</div>
+              <div className="text-xs font-semibold text-stone-600 dark:text-zinc-400 mt-2">Avg {(kpis.averageOrderValue ?? 0).toFixed(2)} ETB / order</div>
             </div>
 
             {/* Table Occupancy */}
-            <div className="bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-3xl p-5 shadow-xl backdrop-blur-xl flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 font-extrabold mb-2">
+            <div className="bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs dark:shadow-xl backdrop-blur-xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs text-stone-700 dark:text-zinc-300 font-extrabold mb-2">
                 <span>Available Tables</span>
                 <Users className="w-4 h-4 text-blue-500" />
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white">
-                {kpis.availableTables || '3/12'}
+              <div className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                {kpis.availableTables || '0/0'}
               </div>
-              <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mt-2">Active in-house dining</div>
+              <div className="text-xs font-semibold text-stone-600 dark:text-zinc-400 mt-2">Active in-house dining</div>
             </div>
           </div>
 

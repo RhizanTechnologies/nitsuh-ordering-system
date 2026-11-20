@@ -9,7 +9,7 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderTotal: number;
-  onConfirmPayment: (paymentMethod: string, amount: number) => Promise<void>;
+  onConfirmPayment: (paymentMethod: string, amount: number, transactionRef?: string) => Promise<void>;
   onShowReceipt: () => void;
 }
 
@@ -20,7 +20,8 @@ export function PaymentModal({
   onConfirmPayment,
   onShowReceipt,
 }: PaymentModalProps) {
-  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'MOBILE_PAY'>('CASH');
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'MOBILE_PAY' | 'BANK_TRANSFER'>('CASH');
+  const [transactionRef, setTransactionRef] = useState<string>('');
   const [customTip, setCustomTip] = useState<string>('');
   const [cashReceived, setCashReceived] = useState<string>('');
   const [processing, setProcessing] = useState(false);
@@ -35,7 +36,7 @@ export function PaymentModal({
   const handlePay = async () => {
     setProcessing(true);
     try {
-      await onConfirmPayment(paymentMethod, totalPayable);
+      await onConfirmPayment(paymentMethod, totalPayable, transactionRef.trim() || undefined);
       playPaymentChime();
       onClose();
       onShowReceipt();
@@ -116,7 +117,7 @@ export function PaymentModal({
           <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5">
             Payment Tender
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <button
               type="button"
               onClick={() => setPaymentMethod('CASH')}
@@ -139,8 +140,21 @@ export function PaymentModal({
                   : 'bg-stone-50 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-300 border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.08]'
               }`}
             >
-              <Smartphone className="w-5 h-5 text-amber-500" />
+              <Smartphone className="w-5 h-5 text-sky-500" />
               <span className="text-xs font-bold">Telebirr</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPaymentMethod('BANK_TRANSFER')}
+              className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition cursor-pointer ${
+                paymentMethod === 'BANK_TRANSFER'
+                  ? 'bg-amber-500/15 border-2 border-amber-500 text-stone-900 dark:text-white shadow-xs'
+                  : 'bg-stone-50 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-300 border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.08]'
+              }`}
+            >
+              <CreditCard className="w-5 h-5 text-purple-500" />
+              <span className="text-xs font-bold">CBE Birr</span>
             </button>
 
             <button
@@ -152,11 +166,32 @@ export function PaymentModal({
                   : 'bg-stone-50 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-300 border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.08]'
               }`}
             >
-              <CreditCard className="w-5 h-5 text-purple-500" />
-              <span className="text-xs font-bold">CBE / Card</span>
+              <CreditCard className="w-5 h-5 text-emerald-500" />
+              <span className="text-xs font-bold">Debit Card</span>
             </button>
           </div>
         </div>
+
+        {/* Transaction Reference ID for Electronic Payments (Telebirr, CBE Birr, Card) */}
+        {paymentMethod !== 'CASH' && (
+          <div className="bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl p-3 space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-stone-600 dark:text-zinc-300 font-bold">
+                {paymentMethod === 'MOBILE_PAY'
+                  ? 'Telebirr Transaction ID (Optional)'
+                  : paymentMethod === 'BANK_TRANSFER'
+                  ? 'CBE Reference / Slip Number (Optional)'
+                  : 'Card Auth Code / Ref (Optional)'}
+              </span>
+            </div>
+            <Input
+              type="text"
+              value={transactionRef}
+              onChange={(e) => setTransactionRef(e.target.value)}
+              placeholder="e.g. TXN-9482701..."
+            />
+          </div>
+        )}
 
         {/* Optional Cash Tender for Change Calculation */}
         {paymentMethod === 'CASH' && (

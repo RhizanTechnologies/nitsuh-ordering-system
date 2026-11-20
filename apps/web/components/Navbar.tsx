@@ -21,6 +21,7 @@ import {
   Moon,
   Users,
   KeyRound,
+  Utensils,
 } from 'lucide-react';
 import { fetchApi, getSocket } from '@/lib/api';
 import { TablePlanModal } from '@/components/TablePlanModal';
@@ -146,6 +147,19 @@ export function Navbar() {
                   <Boxes className="w-3.5 h-3.5" />
                   <span>Stock</span>
                 </Link>
+
+                <Link
+                  href="/products"
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
+                    pathname === '/products'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
+                  }`}
+                  title="Menu Products & Recipe Studio"
+                >
+                  <Utensils className="w-3.5 h-3.5" />
+                  <span>Menu</span>
+                </Link>
               </nav>
             )}
 
@@ -191,6 +205,19 @@ export function Navbar() {
                 >
                   <Boxes className="w-3.5 h-3.5" />
                   <span>Stock</span>
+                </Link>
+
+                <Link
+                  href="/products"
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
+                    pathname === '/products'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-sm'
+                      : 'text-stone-600 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white'
+                  }`}
+                  title="Menu Products & Recipe Studio"
+                >
+                  <Utensils className="w-3.5 h-3.5" />
+                  <span>Menu</span>
                 </Link>
 
                 <Link

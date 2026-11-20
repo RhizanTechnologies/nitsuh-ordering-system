@@ -21,6 +21,9 @@ let OrdersService = class OrdersService {
         this.eventsGateway = eventsGateway;
     }
     async createWaiterDraftNote(data) {
+        if (data.orderType === shared_types_1.OrderType.DINE_IN && !data.tableId) {
+            throw new common_1.BadRequestException('A dining table is required for Dine-In orders.');
+        }
         if (data.tableId && data.orderType !== shared_types_1.OrderType.TAKEAWAY) {
             const activeUnsettledOrder = await this.prisma.order.findFirst({
                 where: {
@@ -146,8 +149,12 @@ let OrdersService = class OrdersService {
         const cashier = await this.prisma.user.findFirst({
             where: { role: 'CASHIER', isActive: true },
         });
-        const tax = subtotal * 0.15;
-        const totalAmount = subtotal + totalTip + tax;
+        const discountAmount = data.discount != null && !isNaN(Number(data.discount))
+            ? Number(data.discount)
+            : (data.discountPercent ? (subtotal * Number(data.discountPercent)) / 100 : 0);
+        const taxableAmount = Math.max(0, subtotal - discountAmount);
+        const tax = taxableAmount * 0.15;
+        const totalAmount = taxableAmount + totalTip + tax;
         const order = await this.prisma.order.create({
             data: {
                 orderNumber,
@@ -160,6 +167,7 @@ let OrdersService = class OrdersService {
                 subtotal,
                 tip: totalTip,
                 tax,
+                discount: discountAmount,
                 totalAmount,
                 paymentStatus: shared_types_1.PaymentStatus.UNPAID,
                 items: {
@@ -289,6 +297,8 @@ let OrdersService = class OrdersService {
             customerName: data.customerName,
             waiterId: data.waiterId || data.cashierId,
             orderType: data.orderType,
+            discount: data.discount,
+            discountPercent: data.discountPercent,
             items: data.items,
         });
         return this.confirmOrder(draft.id, data.cashierId);
@@ -339,6 +349,11 @@ let OrdersService = class OrdersService {
             if (kitchenStore) {
                 await this.prisma.$transaction(async (tx) => {
                     for (const itm of order.items) {
+                        if (itm.status === shared_types_1.ItemPrepStatus.READY ||
+                            itm.status === shared_types_1.ItemPrepStatus.SERVED ||
+                            itm.status === shared_types_1.ItemPrepStatus.CANCELLED) {
+                            continue;
+                        }
                         if (!itm.menuItem.isDirectSale && itm.menuItem.recipe) {
                             const portionQty = itm.quantity;
                             for (const ri of itm.menuItem.recipe.ingredients) {
@@ -427,6 +442,40 @@ let OrdersService = class OrdersService {
                                 }
                             }
                         }
+                        await tx.orderItem.update({
+                            where: { id: itm.id },
+                            data: { status: shared_types_1.ItemPrepStatus.READY },
+                        });
+                    }
+                });
+            }
+        }
+        if (status === shared_types_1.OrderStatus.CANCELLED && (order.status === shared_types_1.OrderStatus.IN_PREPARATION || order.status === shared_types_1.OrderStatus.READY)) {
+            const kitchenStore = await this.prisma.inventoryLocation.findUnique({
+                where: { type: shared_types_1.LocationType.KITCHEN_STORE },
+            });
+            if (kitchenStore) {
+                await this.prisma.$transaction(async (tx) => {
+                    for (const itm of order.items) {
+                        if (itm.menuItem.recipe) {
+                            for (const ri of itm.menuItem.recipe.ingredients) {
+                                const totalGramsNeeded = Number(ri.quantity) * itm.quantity;
+                                const unitCost = ri.ingredient.currentCostPerBaseUnit;
+                                await tx.inventoryTransaction.create({
+                                    data: {
+                                        transactionType: shared_types_1.InventoryTransactionType.WASTAGE,
+                                        sourceLocationId: kitchenStore.id,
+                                        ingredientId: ri.ingredientId,
+                                        quantity: totalGramsNeeded,
+                                        unitCost,
+                                        totalCost: new client_1.Prisma.Decimal(totalGramsNeeded).mul(unitCost),
+                                        referenceId: order.orderNumber,
+                                        reason: `Cancelled In-Prep Order Wastage: ${order.orderNumber} - ${itm.menuItem.name} x${itm.quantity}`,
+                                        userId: resolvedUserId,
+                                    },
+                                });
+                            }
+                        }
                     }
                 });
             }
@@ -441,6 +490,31 @@ let OrdersService = class OrdersService {
                 items: { include: { menuItem: true } },
             },
         });
+        if (order.tableId && (status === shared_types_1.OrderStatus.CANCELLED || status === shared_types_1.OrderStatus.COMPLETED)) {
+            const otherActiveOrders = await this.prisma.order.findFirst({
+                where: {
+                    tableId: order.tableId,
+                    id: { not: orderId },
+                    status: { in: [shared_types_1.OrderStatus.CONFIRMED, shared_types_1.OrderStatus.IN_PREPARATION, shared_types_1.OrderStatus.READY, shared_types_1.OrderStatus.SERVED] },
+                },
+            });
+            if (!otherActiveOrders) {
+                await this.prisma.diningTable.update({
+                    where: { id: order.tableId },
+                    data: { status: client_1.TableStatus.AVAILABLE },
+                });
+                const allTables = await this.prisma.diningTable.findMany({
+                    orderBy: { tableNumber: 'asc' },
+                    include: {
+                        orders: {
+                            where: { status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] } },
+                            select: { id: true, orderNumber: true, totalAmount: true, status: true },
+                        },
+                    },
+                });
+                this.eventsGateway.broadcastTablesUpdated(allTables);
+            }
+        }
         this.eventsGateway.broadcastOrderStatus(updated);
         return updated;
     }

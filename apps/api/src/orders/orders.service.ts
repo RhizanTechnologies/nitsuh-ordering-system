@@ -25,6 +25,8 @@ export class OrdersService {
     customerName?: string;
     waiterId: string;
     orderType?: OrderType;
+    discount?: number;
+    discountPercent?: number;
     items: {
       menuItemId: string;
       quantity: number;
@@ -33,6 +35,10 @@ export class OrdersService {
       selectedAddons?: any[];
     }[];
   }) {
+    if (data.orderType === OrderType.DINE_IN && !data.tableId) {
+      throw new BadRequestException('A dining table is required for Dine-In orders.');
+    }
+
     // If dine-in and tableId specified, automatically append to active unsettled bill if guests order more items!
     if (data.tableId && data.orderType !== OrderType.TAKEAWAY) {
       const activeUnsettledOrder = await this.prisma.order.findFirst({
@@ -176,8 +182,12 @@ export class OrdersService {
       where: { role: 'CASHIER', isActive: true },
     });
 
-    const tax = subtotal * 0.15; // 15% Ethiopian VAT
-    const totalAmount = subtotal + totalTip + tax;
+    const discountAmount = data.discount != null && !isNaN(Number(data.discount))
+      ? Number(data.discount)
+      : (data.discountPercent ? (subtotal * Number(data.discountPercent)) / 100 : 0);
+    const taxableAmount = Math.max(0, subtotal - discountAmount);
+    const tax = taxableAmount * 0.15; // 15% Ethiopian VAT
+    const totalAmount = taxableAmount + totalTip + tax;
 
     const order = await this.prisma.order.create({
       data: {
@@ -191,6 +201,7 @@ export class OrdersService {
         subtotal,
         tip: totalTip,
         tax,
+        discount: discountAmount,
         totalAmount,
         paymentStatus: PaymentStatus.UNPAID,
         items: {
@@ -313,6 +324,8 @@ export class OrdersService {
     customerName?: string;
     waiterId?: string;
     orderType: OrderType;
+    discount?: number;
+    discountPercent?: number;
     items: {
       menuItemId: string;
       quantity: number;
@@ -350,6 +363,8 @@ export class OrdersService {
       customerName: data.customerName,
       waiterId: data.waiterId || data.cashierId,
       orderType: data.orderType,
+      discount: data.discount,
+      discountPercent: data.discountPercent,
       items: data.items,
     });
 
@@ -409,6 +424,15 @@ export class OrdersService {
       if (kitchenStore) {
         await this.prisma.$transaction(async (tx) => {
           for (const itm of order.items) {
+            // Guard against double deduction if item was already deducted previously
+            if (
+              itm.status === ItemPrepStatus.READY ||
+              itm.status === ItemPrepStatus.SERVED ||
+              itm.status === ItemPrepStatus.CANCELLED
+            ) {
+              continue;
+            }
+
             // Recipe-based meal production deduction
             if (!itm.menuItem.isDirectSale && itm.menuItem.recipe) {
               const portionQty = itm.quantity;
@@ -511,6 +535,44 @@ export class OrdersService {
                 }
               }
             }
+
+            // Mark this specific item as READY so subsequent rounds will not double deduct it
+            await tx.orderItem.update({
+              where: { id: itm.id },
+              data: { status: ItemPrepStatus.READY },
+            });
+          }
+        });
+      }
+    }
+
+    // Automatic Wastage Logging when cancelling an in-prep or ready order (BUG-038)
+    if (status === OrderStatus.CANCELLED && (order.status === OrderStatus.IN_PREPARATION || order.status === OrderStatus.READY)) {
+      const kitchenStore = await this.prisma.inventoryLocation.findUnique({
+        where: { type: LocationType.KITCHEN_STORE },
+      });
+      if (kitchenStore) {
+        await this.prisma.$transaction(async (tx) => {
+          for (const itm of order.items) {
+            if (itm.menuItem.recipe) {
+              for (const ri of itm.menuItem.recipe.ingredients) {
+                const totalGramsNeeded = Number(ri.quantity) * itm.quantity;
+                const unitCost = ri.ingredient.currentCostPerBaseUnit;
+                await tx.inventoryTransaction.create({
+                  data: {
+                    transactionType: InventoryTransactionType.WASTAGE,
+                    sourceLocationId: kitchenStore.id,
+                    ingredientId: ri.ingredientId,
+                    quantity: totalGramsNeeded,
+                    unitCost,
+                    totalCost: new Prisma.Decimal(totalGramsNeeded).mul(unitCost),
+                    referenceId: order.orderNumber,
+                    reason: `Cancelled In-Prep Order Wastage: ${order.orderNumber} - ${itm.menuItem.name} x${itm.quantity}`,
+                    userId: resolvedUserId,
+                  },
+                });
+              }
+            }
           }
         });
       }
@@ -526,6 +588,35 @@ export class OrdersService {
         items: { include: { menuItem: true } },
       },
     });
+
+    // Auto-release dining table when order is cancelled or completed (BUG-011)
+    if (order.tableId && (status === OrderStatus.CANCELLED || status === OrderStatus.COMPLETED)) {
+      const otherActiveOrders = await this.prisma.order.findFirst({
+        where: {
+          tableId: order.tableId,
+          id: { not: orderId },
+          status: { in: [OrderStatus.CONFIRMED, OrderStatus.IN_PREPARATION, OrderStatus.READY, OrderStatus.SERVED] },
+        },
+      });
+
+      if (!otherActiveOrders) {
+        await this.prisma.diningTable.update({
+          where: { id: order.tableId },
+          data: { status: TableStatus.AVAILABLE },
+        });
+
+        const allTables = await this.prisma.diningTable.findMany({
+          orderBy: { tableNumber: 'asc' },
+          include: {
+            orders: {
+              where: { status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] } },
+              select: { id: true, orderNumber: true, totalAmount: true, status: true },
+            },
+          },
+        });
+        this.eventsGateway.broadcastTablesUpdated(allTables);
+      }
+    }
 
     this.eventsGateway.broadcastOrderStatus(updated);
     return updated;

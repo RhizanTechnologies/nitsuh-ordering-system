@@ -75,6 +75,9 @@ export declare class UsersController {
         role: import("@prisma/client").$Enums.UserRole;
         isActive: boolean;
     }>;
+    deleteUser(req: any, id: string): Promise<{
+        message: string;
+    }>;
     terminalResetPin(body: {
         managerCredential: string;
         targetUserId: string;

@@ -20,6 +20,9 @@ export function PurchaseOrderModal({
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [paymentTerms, setPaymentTerms] = useState<'PAID' | 'CREDIT' | 'PARTIAL'>('PAID');
+  const [amountPaidNow, setAmountPaidNow] = useState('');
+  const [creditDueDate, setCreditDueDate] = useState('');
   const [notes, setNotes] = useState('');
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [items, setItems] = useState<
@@ -79,6 +82,15 @@ export function PurchaseOrderModal({
     e.preventDefault();
     if (items.length === 0 || !selectedSupplierId) return;
 
+    const paymentSummary =
+      paymentTerms === 'PAID'
+        ? `[Tender: Paid in Full (${grandTotal.toFixed(2)} ETB)]`
+        : paymentTerms === 'CREDIT'
+        ? `[Tender: On Credit / AP - Due: ${creditDueDate || 'Net 30'}] (Unpaid: ${grandTotal.toFixed(2)} ETB)`
+        : `[Tender: Partial Deposit - Paid: ${parseFloat(amountPaidNow || '0').toFixed(2)} ETB, Balance Due: ${(grandTotal - (parseFloat(amountPaidNow) || 0)).toFixed(2)} ETB, Due: ${creditDueDate || 'Net 30'}]`;
+
+    const combinedNotes = [paymentSummary, notes.trim()].filter(Boolean).join(' • ');
+
     setSubmitting(true);
     try {
       await fetchApi('/inventory/purchases', {
@@ -87,7 +99,7 @@ export function PurchaseOrderModal({
           supplierId: selectedSupplierId,
           invoiceNumber,
           createdById: currentUserId || 'm01-storekeeper',
-          notes,
+          notes: combinedNotes,
           items: items.map((i) => ({
             ingredientId: i.ingredientId,
             quantity: i.quantity,
@@ -259,6 +271,85 @@ export function PurchaseOrderModal({
           <div className="flex justify-between items-center bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 p-3 rounded-2xl text-xs font-bold">
             <span className="text-stone-600 dark:text-zinc-400">Total Purchase Value:</span>
             <span className="text-base text-amber-600 dark:text-amber-400 font-extrabold">{grandTotal.toFixed(2)} ETB</span>
+          </div>
+
+          {/* Payment Terms & Credit Tracking (BUG-017) */}
+          <div className="bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl p-3 space-y-2">
+            <div className="text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase">Payment Terms & Credit Status</div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setPaymentTerms('PAID')}
+                className={`py-1.5 px-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                  paymentTerms === 'PAID'
+                    ? 'bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-400'
+                    : 'bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400'
+                }`}
+              >
+                Paid in Full
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentTerms('CREDIT')}
+                className={`py-1.5 px-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                  paymentTerms === 'CREDIT'
+                    ? 'bg-rose-500/15 border-rose-500 text-rose-700 dark:text-rose-400'
+                    : 'bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400'
+                }`}
+              >
+                On Credit (AP)
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentTerms('PARTIAL')}
+                className={`py-1.5 px-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                  paymentTerms === 'PARTIAL'
+                    ? 'bg-amber-500/15 border-amber-500 text-amber-700 dark:text-amber-400'
+                    : 'bg-white dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400'
+                }`}
+              >
+                Partial Deposit
+              </button>
+            </div>
+
+            {paymentTerms === 'PARTIAL' && (
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div>
+                  <label className="block text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase mb-0.5">Amount Paid (ETB)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={amountPaidNow}
+                    onChange={(e) => setAmountPaidNow(e.target.value)}
+                    placeholder="e.g. 500"
+                    className="w-full bg-white dark:bg-white/5 border border-stone-300 dark:border-white/10 rounded-xl px-2.5 py-1 text-xs font-bold text-stone-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase mb-0.5">Due Date / Terms</label>
+                  <input
+                    type="text"
+                    value={creditDueDate}
+                    onChange={(e) => setCreditDueDate(e.target.value)}
+                    placeholder="e.g. In 15 days"
+                    className="w-full bg-white dark:bg-white/5 border border-stone-300 dark:border-white/10 rounded-xl px-2.5 py-1 text-xs font-bold text-stone-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            )}
+
+            {paymentTerms === 'CREDIT' && (
+              <div className="pt-1">
+                <label className="block text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase mb-0.5">Payment Due Date</label>
+                <input
+                  type="text"
+                  value={creditDueDate}
+                  onChange={(e) => setCreditDueDate(e.target.value)}
+                  placeholder="e.g. End of Month / Net 30"
+                  className="w-full bg-white dark:bg-white/5 border border-stone-300 dark:border-white/10 rounded-xl px-2.5 py-1 text-xs font-bold text-stone-900 dark:text-white"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">

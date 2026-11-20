@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -96,6 +97,16 @@ export class UsersController {
       throw new ForbiddenException('Only Owner and General Manager can toggle staff status');
     }
     return this.usersService.toggleStatus(id, req.user.id);
+  }
+
+  // Delete or archive staff member (BUG-007)
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':id')
+  async deleteUser(@Req() req: any, @Param('id') id: string) {
+    if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
+      throw new ForbiddenException('Only Owner and General Manager can delete or archive staff');
+    }
+    return this.usersService.deleteUser(id, req.user.id);
   }
 
   // Terminal Forgotten PIN Reset (Called from Login Screen)

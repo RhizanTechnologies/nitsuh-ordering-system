@@ -29,6 +29,7 @@ import {
   LayoutGrid,
   BarChart3,
   X,
+  Trash2,
 } from 'lucide-react';
 import { StaffAvatarUploader, AVATAR_PRESETS } from './StaffAvatarUploader';
 import { Button, Badge, Input, Card } from '@/components/ui';
@@ -352,6 +353,22 @@ export function StaffManagementView() {
     }
   };
 
+  const handleArchiveStaff = async (staff: StaffMember) => {
+    if (staff.role === 'OWNER') {
+      alert('The Owner account cannot be deleted or archived.');
+      return;
+    }
+    if (!confirm(`Are you sure you want to archive/remove staff member "${staff.name}"? This removes them from active terminals while safely preserving past audit logs.`)) return;
+
+    try {
+      const res = await fetchApi(`/users/${staff.id}`, { method: 'DELETE' });
+      triggerToast(res?.message || `Staff member "${staff.name}" archived.`);
+      loadStaff();
+    } catch (err: any) {
+      alert(err.message || 'Failed to archive staff');
+    }
+  };
+
   const handleOpenPasswordModal = (staff: StaffMember) => {
     setSelectedStaff(staff);
     setNewPassword('');
@@ -458,7 +475,7 @@ export function StaffManagementView() {
                 <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white tracking-tight flex items-center gap-2">
                   Staff & User Management
                   <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                    Owner Terminal
+                    {currentUser?.role === 'OWNER' ? 'Owner Terminal' : 'Manager Console'}
                   </span>
                 </h1>
               </div>
@@ -726,11 +743,18 @@ export function StaffManagementView() {
               <div
                 key={staff.id}
                 className={`bg-white dark:bg-[#161311] border rounded-3xl p-5 shadow-xs transition hover:shadow-md relative overflow-hidden flex flex-col justify-between ${
-                  staff.isActive
+                  staff.role === 'OWNER'
+                    ? 'border-amber-400 dark:border-amber-500/60 ring-2 ring-amber-400/20 bg-gradient-to-b from-amber-50/40 via-white to-white dark:from-amber-950/20 dark:via-[#161311] dark:to-[#161311]'
+                    : staff.isActive
                     ? 'border-stone-200/90 dark:border-white/10'
                     : 'border-rose-300 dark:border-rose-900/40 bg-stone-50/50 dark:bg-stone-950/20 opacity-80'
                 }`}
               >
+                {staff.role === 'OWNER' && (
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 text-[9px] font-black uppercase tracking-wider px-3 py-0.5 rounded-bl-xl shadow-xs">
+                    ★ Executive Owner
+                  </div>
+                )}
                 <div>
                   {/* Top: Avatar, Name, Code, and Status Badge */}
                   <div className="flex items-start justify-between gap-3">
@@ -762,27 +786,18 @@ export function StaffManagementView() {
                       </div>
                     </div>
 
-                    {/* Status Pill */}
+                    {/* Status Toggle Switch (BUG-006) */}
                     <button
                       onClick={() => handleToggleStatus(staff)}
                       title={`Click to ${staff.isActive ? 'Deactivate' : 'Activate'}`}
-                      className={`text-[10px] font-black px-2 py-1 rounded-xl flex items-center gap-1 transition cursor-pointer ${
+                      className={`text-[10px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs ${
                         staff.isActive
-                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 hover:bg-emerald-100'
-                          : 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 hover:bg-rose-100'
+                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 hover:bg-emerald-100'
+                          : 'bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 hover:bg-rose-100'
                       }`}
                     >
-                      {staff.isActive ? (
-                        <>
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span>Active</span>
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="w-3 h-3" />
-                          <span>Locked</span>
-                        </>
-                      )}
+                      <span className={`w-2 h-2 rounded-full ${staff.isActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                      <span>{staff.isActive ? 'Active' : 'Deactivated'}</span>
                     </button>
                   </div>
 
@@ -817,27 +832,44 @@ export function StaffManagementView() {
                     </div>
                   </div>
 
-                  {/* Workload Stats */}
-                  <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-                    <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
-                      <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">POS Sales</div>
-                      <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
-                        {staff._count?.ordersCreated || 0}
+                  {/* Workload Stats - Role Relevant (BUG-008) */}
+                  {staff.role === 'CASHIER' || staff.role === 'WAITER' || staff.role === 'OWNER' || staff.role === 'MANAGER' ? (
+                    <div className="grid grid-cols-3 gap-2 mt-3 text-center">
+                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
+                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">POS Sales</div>
+                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
+                          {staff._count?.ordersCreated || 0}
+                        </div>
+                      </div>
+                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
+                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Waiter Slips</div>
+                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
+                          {staff._count?.ordersWaitered || 0}
+                        </div>
+                      </div>
+                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
+                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Cash Shifts</div>
+                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
+                          {staff._count?.shifts || 0}
+                        </div>
                       </div>
                     </div>
-                    <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
-                      <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Waiter Slips</div>
-                      <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
-                        {staff._count?.ordersWaitered || 0}
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 mt-3 text-center">
+                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
+                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Station Duty</div>
+                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
+                          {staff.isActive ? 'Active on Floor' : 'Off Duty'}
+                        </div>
+                      </div>
+                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
+                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Access Scope</div>
+                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
+                          {staff.role.includes('STORE') ? 'Inventory & Ledger' : 'Kitchen KDS'}
+                        </div>
                       </div>
                     </div>
-                    <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
-                      <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Cash Shifts</div>
-                      <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
-                        {staff._count?.shifts || 0}
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Bottom Card Actions */}
@@ -874,7 +906,17 @@ export function StaffManagementView() {
                       className="py-1.5 px-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Lock className="w-3 h-3" />
-                      <span>Pass</span>
+                      <span>Password</span>
+                    </button>
+                  )}
+
+                  {staff.role !== 'OWNER' && (
+                    <button
+                      onClick={() => handleArchiveStaff(staff)}
+                      title="Archive or remove departed employee"
+                      className="py-1.5 px-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   )}
                 </div>
@@ -967,8 +1009,8 @@ export function StaffManagementView() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
-                    Role & Station <span className="text-rose-500">*</span>
+                  <label className="flex items-center min-h-[20px] text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                    Role & Station <span className="text-rose-500 ml-0.5">*</span>
                   </label>
                   <select
                     value={formRole}
@@ -986,7 +1028,7 @@ export function StaffManagementView() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="flex items-center min-h-[20px] text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
                     Employee Code (Optional)
                   </label>
                   <input

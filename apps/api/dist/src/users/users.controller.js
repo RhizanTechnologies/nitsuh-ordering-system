@@ -62,6 +62,12 @@ let UsersController = class UsersController {
         }
         return this.usersService.toggleStatus(id, req.user.id);
     }
+    async deleteUser(req, id) {
+        if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
+            throw new common_1.ForbiddenException('Only Owner and General Manager can delete or archive staff');
+        }
+        return this.usersService.deleteUser(id, req.user.id);
+    }
     async terminalResetPin(body) {
         return this.usersService.managerOverrideResetPin(body.managerCredential, body.targetUserId, body.newPin);
     }
@@ -162,6 +168,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "toggleStatus", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "deleteUser", null);
 __decorate([
     (0, common_1.Post)('terminal-reset-pin'),
     __param(0, (0, common_1.Body)()),

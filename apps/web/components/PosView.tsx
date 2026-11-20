@@ -330,6 +330,8 @@ export function PosView() {
           tableId: selectedTableObj ? selectedTableObj.id : null,
           customerName: isTakeaway ? (customerName.trim() || 'Takeaway Customer') : (customerName || 'Guest'),
           orderType,
+          discount: discountAmount,
+          discountPercent,
           items: cart.map((c) => ({
             menuItemId: c.menuItemId,
             quantity: c.quantity,
@@ -437,11 +439,11 @@ export function PosView() {
   };
 
   // Settle Bill payment
-  const handleConfirmPayment = async (paymentMethod: string, amount: number) => {
+  const handleConfirmPayment = async (paymentMethod: string, amount: number, transactionRef?: string) => {
     if (orderToSettle) {
       const payRes = await fetchApi(`/orders/${orderToSettle.id}/payment`, {
         method: 'POST',
-        body: JSON.stringify({ amount, paymentMethod }),
+        body: JSON.stringify({ amount, paymentMethod, transactionRef }),
       });
       setLastCompletedOrder(payRes.order);
       setOrderToSettle(null);
@@ -459,6 +461,8 @@ export function PosView() {
           tableId: selectedTableObj ? selectedTableObj.id : null,
           customerName: isTakeaway ? (customerName.trim() || 'Takeaway Customer') : (customerName || 'Guest'),
           orderType,
+          discount: discountAmount,
+          discountPercent,
           items: cart.map((c) => ({
             menuItemId: c.menuItemId,
             quantity: c.quantity,
@@ -472,7 +476,7 @@ export function PosView() {
 
       const payRes = await fetchApi(`/orders/${res.id}/payment`, {
         method: 'POST',
-        body: JSON.stringify({ amount, paymentMethod }),
+        body: JSON.stringify({ amount, paymentMethod, transactionRef }),
       });
 
       setLastCompletedOrder(payRes.order);

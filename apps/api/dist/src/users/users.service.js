@@ -288,6 +288,32 @@ let UsersService = class UsersService {
         });
         return updated;
     }
+    async deleteUser(id, requesterId) {
+        if (id === requesterId) {
+            throw new common_1.BadRequestException('You cannot delete or archive your own account');
+        }
+        const user = await this.getUserById(id);
+        if (user.role === client_1.UserRole.OWNER) {
+            throw new common_1.BadRequestException('Owner account cannot be deleted or archived');
+        }
+        const [orderCount, shiftCount, txCount] = await Promise.all([
+            this.prisma.order.count({ where: { OR: [{ waiterId: id }, { cashierId: id }] } }),
+            this.prisma.cashierShift.count({ where: { cashierId: id } }),
+            this.prisma.inventoryTransaction.count({ where: { userId: id } }),
+        ]);
+        if (orderCount > 0 || shiftCount > 0 || txCount > 0) {
+            await this.prisma.user.update({
+                where: { id },
+                data: {
+                    isActive: false,
+                    pinCode: `ARC-${Date.now().toString().slice(-4)}`,
+                },
+            });
+            return { message: `Staff member ${user.name} has existing transaction history and was archived safely.` };
+        }
+        await this.prisma.user.delete({ where: { id } });
+        return { message: `Staff member ${user.name} was permanently removed.` };
+    }
     async managerOverrideResetPin(managerCred, targetUserId, newPin) {
         const trimmedPin = newPin?.trim();
         if (!trimmedPin || !/^\d{4,6}$/.test(trimmedPin)) {

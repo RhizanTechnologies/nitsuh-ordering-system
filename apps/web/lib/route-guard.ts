@@ -48,6 +48,12 @@ export const STATION_ROUTES: RouteConfig[] = [
     icon: 'Boxes',
   },
   {
+    path: '/products',
+    label: 'Menu Studio',
+    allowedRoles: ['OWNER', 'MANAGER', 'HEAD_CHEF'],
+    icon: 'Utensils',
+  },
+  {
     path: '/tables',
     label: 'Tables Floor Plan',
     allowedRoles: ['OWNER', 'MANAGER'],

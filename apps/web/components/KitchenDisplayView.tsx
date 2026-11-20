@@ -1,35 +1,35 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
 import { fetchApi, getSocket } from '@/lib/api';
-import { ChefHat, Flame, CheckCircle, Clock, Utensils, AlertTriangle, X, Volume2 } from 'lucide-react';
+import { ChefHat, Flame, CheckCircle, Clock, Utensils, AlertTriangle, X, Volume2, Undo2, Check } from 'lucide-react';
 import { playKitchenChime, playReadyChime } from '@/lib/audio';
 import { calculatePrepTime } from '@/lib/timer-utils';
 import { Button, Badge } from '@/components/ui';
 
 // Clean helpers for formatting and high-contrast badges across themes
 const formatOrderNumber = (num: any) => {
-  const str = String(num || '');
-  return str.startsWith('#') ? str : `#${str}`;
+  const str = String(num || '').trim().replace(/^#+/, '');
+  return `#${str}`;
 };
 
 const getPrepBadge = (prep: any) => {
   if (prep.delayStatus === 'DELAYED') {
     return {
       dot: 'bg-rose-500 animate-ping',
-      badge: 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-500/40 font-black',
+      badge: 'bg-rose-200 dark:bg-rose-900/60 text-rose-950 dark:text-rose-100 border-rose-400 dark:border-rose-500 font-black',
     };
   }
   if (prep.delayStatus === 'WARNING') {
     return {
       dot: 'bg-amber-400',
-      badge: 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/40 font-bold',
+      badge: 'bg-amber-100 dark:bg-amber-900/50 text-amber-950 dark:text-amber-100 border-amber-400 dark:border-amber-600 font-bold',
     };
   }
   return {
     dot: 'bg-emerald-400',
-    badge: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40 font-bold',
+    badge: 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-950 dark:text-emerald-100 border-emerald-400 dark:border-emerald-600 font-bold',
   };
 };
 
@@ -38,8 +38,17 @@ export function KitchenDisplayView() {
   const [orders, setOrders] = useState<any[]>([]);
   const [mobileTab, setMobileTab] = useState<'NEW' | 'PREPARING' | 'READY'>('NEW');
   const [toastError, setToastError] = useState<string | null>(null);
+  const [undoToast, setUndoToast] = useState<{ orderId: string; prevStatus: string; orderNumber: string } | null>(null);
+  const [completedItemIds, setCompletedItemIds] = useState<Record<string, boolean>>({});
   const [audioPrompt, setAudioPrompt] = useState(false);
   const [, setTick] = useState(0);
+
+  const toggleItemCompleted = (itemId: string) => {
+    setCompletedItemIds((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }));
+  };
 
   const enableAudio = () => {
     try {
@@ -96,6 +105,7 @@ export function KitchenDisplayView() {
 
   const updateStatus = async (orderId: string, status: string) => {
     try {
+      const current = orders.find((o) => o.id === orderId);
       const updated = await fetchApi(`/orders/${orderId}/status`, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -103,6 +113,15 @@ export function KitchenDisplayView() {
           actorUserId: currentUser?.id,
         }),
       });
+
+      if (current && ['READY', 'SERVED'].includes(status)) {
+        setUndoToast({
+          orderId,
+          prevStatus: current.status,
+          orderNumber: formatOrderNumber(current.orderNumber),
+        });
+        setTimeout(() => setUndoToast(null), 6000);
+      }
 
       setOrders((prev) => {
         if (['SERVED', 'COMPLETED', 'CANCELLED'].includes(status)) {
@@ -117,16 +136,37 @@ export function KitchenDisplayView() {
     }
   };
 
+  const handleUndo = async () => {
+    if (!undoToast) return;
+    try {
+      await fetchApi(`/orders/${undoToast.orderId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          status: undoToast.prevStatus,
+          actorUserId: currentUser?.id,
+        }),
+      });
+      setUndoToast(null);
+      loadActiveOrders();
+    } catch (err: any) {
+      setToastError('Failed to undo order status');
+    }
+  };
+
   const newOrders = orders.filter((o) => o.status === 'CONFIRMED');
   const preparingOrders = orders.filter((o) => o.status === 'IN_PREPARATION');
   const readyOrders = orders.filter((o) => o.status === 'READY');
 
-  // Auto-focus on active tickets if currently selected mobile tab has none
+  // Set initial mobile tab once on load - NEVER interrupt cooks while viewing tickets (BUG-029)
+  const initialTabSetRef = useRef(false);
   useEffect(() => {
-    if (newOrders.length > 0) setMobileTab('NEW');
-    else if (preparingOrders.length > 0) setMobileTab('PREPARING');
-    else if (readyOrders.length > 0) setMobileTab('READY');
-  }, [newOrders.length, preparingOrders.length, readyOrders.length]);
+    if (!initialTabSetRef.current && orders.length > 0) {
+      if (newOrders.length > 0) setMobileTab('NEW');
+      else if (preparingOrders.length > 0) setMobileTab('PREPARING');
+      else if (readyOrders.length > 0) setMobileTab('READY');
+      initialTabSetRef.current = true;
+    }
+  }, [orders.length, newOrders.length, preparingOrders.length, readyOrders.length]);
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white relative transition-colors">
@@ -282,8 +322,8 @@ export function KitchenDisplayView() {
                         <span
                           className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                             order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/30'
-                              : 'bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-500/30'
+                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-500/30'
+                              : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 border-stone-300 dark:border-stone-700'
                           }`}
                         >
                           {order.orderType === 'TAKEAWAY'
@@ -293,20 +333,34 @@ export function KitchenDisplayView() {
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-stone-600 dark:text-zinc-400 mb-2">
+                    <div className="text-[11px] text-stone-600 dark:text-stone-300 mb-2">
                       {order.orderType === 'TAKEAWAY' && order.customerName && (
-                        <span>Customer: <strong className="text-stone-900 dark:text-white">{order.customerName}</strong> • </span>
+                        <span>Customer: <strong className="text-stone-900 dark:text-white font-bold">{order.customerName}</strong> • </span>
                       )}
-                      <span>Server: <strong className="text-amber-700 dark:text-amber-400 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                      <span>Server: <strong className="text-stone-900 dark:text-stone-100 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
                     </div>
 
                     {/* Items list */}
                     <div className="space-y-1.5 mb-3 border-t border-b border-stone-200 dark:border-white/10 py-2">
                       {order.items.map((item: any) => (
-                        <div key={item.id} className="text-xs">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-black text-amber-700 dark:text-amber-400">{item.quantity}x</span>
-                            <span className="text-stone-900 dark:text-white font-bold">{item.menuItem.name}</span>
+                        <div
+                          key={item.id}
+                          onClick={() => toggleItemCompleted(item.id)}
+                          className={`p-1 rounded-lg cursor-pointer transition select-none ${
+                            completedItemIds[item.id]
+                              ? 'opacity-40 line-through bg-stone-100/60 dark:bg-white/[0.03]'
+                              : 'hover:bg-stone-100/40 dark:hover:bg-white/[0.04]'
+                          }`}
+                          title="Click to check off prepared item"
+                        >
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-black text-amber-700 dark:text-amber-400">{item.quantity}x</span>
+                              <span className="text-stone-900 dark:text-white font-bold">{item.menuItem?.name || item.name || 'Dish'}</span>
+                            </div>
+                            {completedItemIds[item.id] && (
+                              <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
+                            )}
                           </div>
                           {item.specialInstructions && (
                             <div className="text-[10px] text-amber-800 dark:text-amber-300/90 italic pl-5 mt-0.5">
@@ -357,9 +411,9 @@ export function KitchenDisplayView() {
                     key={order.id}
                     className={`bg-white dark:bg-white/[0.05] border rounded-2xl p-3.5 shadow-xs backdrop-blur-xl transition ${
                       prep.delayStatus === 'DELAYED'
-                        ? 'border-red-500 ring-2 ring-red-500/20'
+                        ? 'border-rose-400 dark:border-rose-500/80 ring-1 ring-rose-500/30'
                         : prep.delayStatus === 'WARNING'
-                        ? 'border-amber-500/80'
+                        ? 'border-amber-500/80 ring-1 ring-amber-500/20'
                         : 'border-stone-200 dark:border-white/10 hover:border-orange-500/40'
                     }`}
                   >
@@ -377,8 +431,8 @@ export function KitchenDisplayView() {
                         <span
                           className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                             order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/30'
-                              : 'bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-500/30'
+                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-500/30'
+                              : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 border-stone-300 dark:border-stone-700'
                           }`}
                         >
                           {order.orderType === 'TAKEAWAY'
@@ -388,20 +442,34 @@ export function KitchenDisplayView() {
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-stone-600 dark:text-zinc-400 mb-2">
+                    <div className="text-[11px] text-stone-600 dark:text-stone-300 mb-2">
                       {order.orderType === 'TAKEAWAY' && order.customerName && (
-                        <span>Customer: <strong className="text-stone-900 dark:text-white">{order.customerName}</strong> • </span>
+                        <span>Customer: <strong className="text-stone-900 dark:text-white font-bold">{order.customerName}</strong> • </span>
                       )}
-                      <span>Server: <strong className="text-amber-700 dark:text-amber-400 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                      <span>Server: <strong className="text-stone-900 dark:text-stone-100 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
                     </div>
 
                     {/* Items list */}
                     <div className="space-y-1.5 mb-3 border-t border-b border-stone-200 dark:border-white/10 py-2">
                       {order.items.map((item: any) => (
-                        <div key={item.id} className="text-xs">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-black text-orange-600 dark:text-orange-400">{item.quantity}x</span>
-                            <span className="text-stone-900 dark:text-white font-bold">{item.menuItem.name}</span>
+                        <div
+                          key={item.id}
+                          onClick={() => toggleItemCompleted(item.id)}
+                          className={`p-1 rounded-lg cursor-pointer transition select-none ${
+                            completedItemIds[item.id]
+                              ? 'opacity-40 line-through bg-stone-100/60 dark:bg-white/[0.03]'
+                              : 'hover:bg-stone-100/40 dark:hover:bg-white/[0.04]'
+                          }`}
+                          title="Click to check off prepared item"
+                        >
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-black text-orange-600 dark:text-orange-400">{item.quantity}x</span>
+                              <span className="text-stone-900 dark:text-white font-bold">{item.menuItem?.name || item.name || 'Dish'}</span>
+                            </div>
+                            {completedItemIds[item.id] && (
+                              <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
+                            )}
                           </div>
                           {item.specialInstructions && (
                             <div className="text-[10px] text-amber-800 dark:text-amber-300/90 italic pl-5 mt-0.5">
@@ -466,8 +534,8 @@ export function KitchenDisplayView() {
                         <span
                           className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                             order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/30'
-                              : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30'
+                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-500/30'
+                              : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-950 dark:text-emerald-100 border-emerald-300 dark:border-emerald-600'
                           }`}
                         >
                           {order.orderType === 'TAKEAWAY'
@@ -477,9 +545,9 @@ export function KitchenDisplayView() {
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-stone-600 dark:text-zinc-400 mb-2">
-                      <span>Server: <strong className="text-amber-700 dark:text-amber-400 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
-                      {order.customerName && <span> • Guest: <strong className="text-stone-900 dark:text-white">{order.customerName}</strong></span>}
+                    <div className="text-[11px] text-stone-600 dark:text-stone-300 mb-2">
+                      <span>Server: <strong className="text-stone-900 dark:text-stone-100 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                      {order.customerName && <span> • Guest: <strong className="text-stone-900 dark:text-white font-bold">{order.customerName}</strong></span>}
                     </div>
 
                     {/* Items list */}
@@ -487,7 +555,7 @@ export function KitchenDisplayView() {
                       {order.items.map((item: any) => (
                         <div key={item.id} className="flex items-center gap-1.5">
                           <span className="font-bold text-emerald-600 dark:text-emerald-400">{item.quantity}x</span>
-                          <span className="font-bold text-stone-900 dark:text-white">{item.menuItem.name}</span>
+                          <span className="font-bold text-stone-900 dark:text-white">{item.menuItem?.name || item.name || 'Dish'}</span>
                         </div>
                       ))}
                     </div>
@@ -508,6 +576,24 @@ export function KitchenDisplayView() {
           </div>
         </div>
       </div>
+
+      {/* Quick 6-Second Undo Toast (BUG-028) */}
+      {undoToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900/95 dark:bg-stone-950 text-white border border-stone-700/80 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <span className="text-xs font-bold">
+            Order <strong className="text-amber-400">{undoToast.orderNumber}</strong> status updated.
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleUndo}
+            className="h-7 px-2.5 text-xs font-black bg-amber-500 text-stone-950 hover:bg-amber-400 border-none flex items-center gap-1 cursor-pointer"
+          >
+            <Undo2 className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Undo</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

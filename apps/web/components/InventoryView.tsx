@@ -80,7 +80,17 @@ export function InventoryView() {
   const [sendSearch, setSendSearch] = useState('');
   const [sendSubmitting, setSendSubmitting] = useState(false);
 
-  // Threshold Settings Modal State (Owner adjusts cutoff levels)
+  // Mobile Store Balances view switcher (BUG-014)
+  const [mobileBalanceTab, setMobileBalanceTab] = useState<'ALL' | 'MAIN' | 'KITCHEN'>('ALL');
+
+  // Supplier Registration Modal State (BUG-016)
+  const [newSupplierModalOpen, setNewSupplierModalOpen] = useState(false);
+  const [supName, setSupName] = useState('');
+  const [supContact, setSupContact] = useState('');
+  const [supPhone, setSupPhone] = useState('');
+  const [supEmail, setSupEmail] = useState('');
+  const [supAddress, setSupAddress] = useState('');
+  const [supSubmitting, setSupSubmitting] = useState(false);
   const [thresholdModalOpen, setThresholdModalOpen] = useState(false);
   const [thresholdSearch, setThresholdSearch] = useState('');
   const [editingThresholds, setEditingThresholds] = useState<Record<string, { main: string; kitchen: string }>>({});
@@ -98,6 +108,7 @@ export function InventoryView() {
   const [wasteIngredientId, setWasteIngredientId] = useState('');
   const [wasteQuantity, setWasteQuantity] = useState('');
   const [wasteReason, setWasteReason] = useState('Spoilage / Expired');
+  const [customWasteReason, setCustomWasteReason] = useState('');
   const [wasteSuccess, setWasteSuccess] = useState(false);
 
   const loadData = () => {
@@ -141,6 +152,20 @@ export function InventoryView() {
       alert('Please enter a valid positive quantity');
       return;
     }
+
+    const currentLoc = adjustLocationType === 'MAIN_STORE' ? mainStoreLoc : kitchenStoreLoc;
+    const currentBalanceObj = currentLoc?.balances?.find(
+      (b: any) => b.ingredientId === adjustIngredient.id || b.ingredient?.id === adjustIngredient.id,
+    );
+    const currentQty = Number(currentBalanceObj?.quantity || 0);
+
+    if (adjustMode === 'REMOVE' && qtyNum > currentQty) {
+      alert(
+        `Cannot remove ${qtyNum} ${adjustIngredient.baseUnit?.symbol || 'units'}. Current available balance is only ${currentQty} ${adjustIngredient.baseUnit?.symbol || 'units'}. Stock balance cannot be negative.`
+      );
+      return;
+    }
+
     const delta = adjustMode === 'ADD' ? qtyNum : -qtyNum;
 
     setAdjustSubmitting(true);
@@ -291,17 +316,51 @@ export function InventoryView() {
     }
   };
 
+  const handleCreateSupplier = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supName.trim()) return;
+    setSupSubmitting(true);
+    try {
+      await fetchApi('/inventory/suppliers', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: supName.trim(),
+          contactPerson: supContact.trim() || undefined,
+          phone: supPhone.trim() || undefined,
+          email: supEmail.trim() || undefined,
+          address: supAddress.trim() || undefined,
+        }),
+      });
+      setNewSupplierModalOpen(false);
+      setSupName('');
+      setSupContact('');
+      setSupPhone('');
+      setSupEmail('');
+      setSupAddress('');
+      loadData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to create supplier');
+    } finally {
+      setSupSubmitting(false);
+    }
+  };
+
   const handleRecordWastage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!wasteIngredientId || !wasteQuantity) return;
     try {
+      const finalReason =
+        wasteReason === 'Other'
+          ? customWasteReason.trim() || 'Other wastage'
+          : wasteReason;
+
       await fetchApi('/inventory/wastage', {
         method: 'POST',
         body: JSON.stringify({
           userId: currentUser.id || 'k01-storekeeper',
           ingredientId: wasteIngredientId,
           quantity: parseFloat(wasteQuantity),
-          reason: wasteReason,
+          reason: finalReason,
         }),
       });
       setWasteQuantity('');
@@ -652,27 +711,65 @@ export function InventoryView() {
               </div>
             )}
 
+            {/* Mobile Store Balances View Switcher (BUG-014) */}
+            {!isHeadChefOnly && (
+              <div className="flex lg:hidden items-center gap-1.5 p-1 bg-stone-100 dark:bg-white/[0.05] rounded-2xl border border-stone-200 dark:border-white/10">
+                <button
+                  onClick={() => setMobileBalanceTab('ALL')}
+                  className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
+                    mobileBalanceTab === 'ALL'
+                      ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                      : 'text-stone-600 dark:text-zinc-400'
+                  }`}
+                >
+                  All Stores
+                </button>
+                <button
+                  onClick={() => setMobileBalanceTab('MAIN')}
+                  className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
+                    mobileBalanceTab === 'MAIN'
+                      ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                      : 'text-stone-600 dark:text-zinc-400'
+                  }`}
+                >
+                  Main Store
+                </button>
+                <button
+                  onClick={() => setMobileBalanceTab('KITCHEN')}
+                  className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
+                    mobileBalanceTab === 'KITCHEN'
+                      ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                      : 'text-stone-600 dark:text-zinc-400'
+                  }`}
+                >
+                  Kitchen Store
+                </button>
+              </div>
+            )}
+
             {/* Store Balances Grid */}
             <div className={`grid gap-6 ${isHeadChefOnly ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
               {/* Store 1: Main Store (Bulk Warehouse) - NEVER shown to Head Chef / Kitchen Staff */}
               {!isHeadChefOnly && (
-                <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl flex flex-col">
-                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10 flex-shrink-0">
+                <div className={`bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs flex flex-col ${
+                  mobileBalanceTab === 'ALL' || mobileBalanceTab === 'MAIN' ? 'flex' : 'hidden lg:flex'
+                }`}>
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
                     <div>
-                      <h3 className="text-sm font-bold text-white flex items-center gap-2 font-heading">
+                      <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2 font-heading">
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50" />
                         Main Store (Bulk Warehouse)
                       </h3>
-                      <div className="text-xs text-zinc-400">Add/remove stock or dispatch directly to kitchen</div>
+                      <div className="text-xs text-stone-500 dark:text-zinc-400">Add/remove stock or dispatch directly to kitchen</div>
                     </div>
                     <div className="flex items-center gap-2">
                       {isMainStorekeeper && (
                         <button
                           onClick={() => setSendDirectModalOpen(true)}
-                          className="text-xs font-bold text-white bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+                          className="text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
                           title="Send items directly to kitchen floor"
                         >
-                          <Send className="w-3.5 h-3.5 text-amber-400" />
+                          <Send className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                           <span className="hidden sm:inline">Send to Kitchen</span>
                         </button>
                       )}
@@ -688,82 +785,98 @@ export function InventoryView() {
 
                   {/* Main Store Cards List */}
                   <div className="space-y-2.5 max-h-[550px] overflow-y-auto pr-1 no-scrollbar">
-                    {mainStoreLoc?.balances?.map((b: any) => (
-                      <div
-                        key={b.id}
-                        className="p-3 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold text-white truncate">{b.ingredient.name}</div>
-                          <div className="text-[10px] text-zinc-400 font-medium">
-                            Valuation: {Number(b.ingredient.currentCostPerBaseUnit).toFixed(4)} ETB / {b.ingredient.baseUnit.symbol}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            <div className="text-sm font-extrabold text-white">
-                              {Number(b.quantity).toLocaleString()} {b.ingredient.baseUnit.symbol}
-                            </div>
-                            <div className="text-[10px] font-bold text-amber-400">
-                              {(Number(b.quantity) * Number(b.ingredient.currentCostPerBaseUnit)).toFixed(2)} ETB
-                            </div>
-                          </div>
-
-                          {/* Storekeeper Controls: Add Stock, Remove Stock, Send to Kitchen */}
-                          {isMainStorekeeper && (
-                            <div className="flex items-center gap-1">
-                              {isOwnerOrManager && (
-                                <button
-                                  onClick={() => handleOpenEditStockItem(b.ingredient)}
-                                  className="p-1.5 bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white rounded-xl transition cursor-pointer"
-                                  title="Edit stock item configuration"
-                                >
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                </button>
+                    {mainStoreLoc?.balances?.map((b: any) => {
+                      const isLow = Number(b.quantity) <= Number(b.ingredient.reorderThresholdMain ?? 1000);
+                      return (
+                        <div
+                          key={b.id}
+                          className={`p-3 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+                            isLow
+                              ? 'bg-amber-500/10 border-amber-500/30'
+                              : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5 hover:border-stone-300 dark:hover:border-white/10'
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5">
+                              <span className="truncate">{b.ingredient.name}</span>
+                              {isLow && (
+                                <span className="text-[9px] bg-rose-600 text-white font-black px-1.5 py-0.5 rounded-md flex-shrink-0 animate-pulse">
+                                  LOW STOCK
+                                </span>
                               )}
-                              <button
-                                onClick={() => handleOpenAdjust(b.ingredient, 'MAIN_STORE', 'ADD')}
-                                className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer"
-                                title="Add amount to Main Store stock"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleOpenAdjust(b.ingredient, 'MAIN_STORE', 'REMOVE')}
-                                className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer"
-                                title="Remove amount from Main Store stock"
-                              >
-                                <Minus className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setBatchQuantities((prev) => ({ ...prev, [b.ingredient.id]: prev[b.ingredient.id] || '' }));
-                                  setSendDirectModalOpen(true);
-                                }}
-                                className="p-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 rounded-xl transition cursor-pointer"
-                                title="Send this ingredient to Kitchen Store"
-                              >
-                                <Send className="w-3.5 h-3.5" />
-                              </button>
                             </div>
-                          )}
+                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium">
+                              Valuation: {Number(b.ingredient.currentCostPerBaseUnit).toFixed(4)} ETB / {b.ingredient.baseUnit.symbol}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <div className={`text-sm font-extrabold ${isLow ? 'text-amber-700 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
+                                {Number(b.quantity).toLocaleString()} {b.ingredient.baseUnit.symbol}
+                              </div>
+                              <div className="text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                                {(Number(b.quantity) * Number(b.ingredient.currentCostPerBaseUnit)).toFixed(2)} ETB
+                              </div>
+                            </div>
+
+                            {/* Storekeeper Controls: Add Stock, Remove Stock, Send to Kitchen */}
+                            {isMainStorekeeper && (
+                              <div className="flex items-center gap-1">
+                                {isOwnerOrManager && (
+                                  <button
+                                    onClick={() => handleOpenEditStockItem(b.ingredient)}
+                                    className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/20 text-stone-700 dark:text-zinc-300 rounded-xl transition cursor-pointer"
+                                    title="Edit stock item configuration"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleOpenAdjust(b.ingredient, 'MAIN_STORE', 'ADD')}
+                                  className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer"
+                                  title="Add amount to Main Store stock"
+                                >
+                                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                </button>
+                                <button
+                                  onClick={() => handleOpenAdjust(b.ingredient, 'MAIN_STORE', 'REMOVE')}
+                                  className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer"
+                                  title="Remove amount from Main Store stock"
+                                >
+                                  <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setBatchQuantities((prev) => ({ ...prev, [b.ingredient.id]: prev[b.ingredient.id] || '' }));
+                                    setSendDirectModalOpen(true);
+                                  }}
+                                  className="p-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-400 border border-amber-500/30 rounded-xl transition cursor-pointer"
+                                  title="Send this ingredient to Kitchen Store"
+                                >
+                                  <Send className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
               {/* Store 2: Kitchen Store (Production Floor) */}
-              <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-5 shadow-xl flex flex-col">
-                <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10 flex-shrink-0">
+              <div className={`bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs flex flex-col ${
+                mobileBalanceTab === 'ALL' || mobileBalanceTab === 'KITCHEN' ? 'flex' : 'hidden lg:flex'
+              }`}>
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
                   <div>
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2 font-heading">
+                    <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2 font-heading">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#C11221] shadow-sm shadow-red-500/50" />
                       Kitchen Store (Production Floor)
                     </h3>
-                    <div className="text-xs text-zinc-400">Head Chef controlled: auto-deducted on food preparation</div>
+                    <div className="text-xs text-stone-500 dark:text-zinc-400">Head Chef controlled: auto-deducted on food preparation</div>
                   </div>
                 </div>
 
@@ -777,29 +890,29 @@ export function InventoryView() {
                         className={`p-3 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
                           isLow
                             ? 'bg-amber-500/10 border-amber-500/30'
-                            : 'bg-white/[0.02] border-white/5 hover:border-white/10'
+                            : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5 hover:border-stone-300 dark:hover:border-white/10'
                         }`}
                       >
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5">
                             <span className="truncate">{b.ingredient.name}</span>
                             {isLow && (
-                              <span className="text-[9px] bg-[#C11221] text-white font-extrabold px-1.5 py-0.5 rounded-md flex-shrink-0">
-                                Low
+                              <span className="text-[9px] bg-rose-600 text-white font-black px-1.5 py-0.5 rounded-md flex-shrink-0 animate-pulse">
+                                LOW STOCK
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] text-zinc-400 font-medium">
+                          <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium">
                             Threshold: {b.ingredient.reorderThresholdKitchen} {b.ingredient.baseUnit.symbol}
                           </div>
                         </div>
 
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <div className={`text-sm font-extrabold ${isLow ? 'text-amber-400' : 'text-white'}`}>
+                            <div className={`text-sm font-extrabold ${isLow ? 'text-amber-700 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
                               {Number(b.quantity).toLocaleString()} {b.ingredient.baseUnit.symbol}
                             </div>
-                            <div className="text-[10px] text-zinc-400 font-medium">
+                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium">
                               Ready for cooking
                             </div>
                           </div>
@@ -1515,39 +1628,48 @@ export function InventoryView() {
 
         {/* TAB 4: SUPPLIERS & BULK PURCHASES */}
         {activeTab === 'purchases' && (
-          <div className="bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 gap-3">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 gap-3">
               <div>
-                <h3 className="text-base font-bold text-white font-heading">Suppliers & Goods Receipt</h3>
-                <p className="text-xs text-zinc-400">
+                <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Suppliers & Goods Receipt</h3>
+                <p className="text-xs text-stone-500 dark:text-zinc-400">
                   Bulk supplier purchases restock the Main Store and recalculate cost per gram automatically.
                 </p>
               </div>
-              <button
-                onClick={() => setPurchaseModalOpen(true)}
-                className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold rounded-2xl text-xs transition shadow-lg shadow-amber-500/20 flex items-center gap-1.5 w-fit cursor-pointer"
-              >
-                <Truck className="w-4 h-4" />
-                <span>Record Supplier Bulk Delivery</span>
-              </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => setNewSupplierModalOpen(true)}
+                  className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/15 text-stone-900 dark:text-white font-bold rounded-2xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ Register Supplier</span>
+                </button>
+                <button
+                  onClick={() => setPurchaseModalOpen(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-2xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Truck className="w-4 h-4" />
+                  <span>Record Supplier Bulk Delivery</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {suppliers.map((sup) => (
                 <div
                   key={sup.id}
-                  className="p-4 bg-white/[0.02] border border-white/10 rounded-2xl space-y-2 hover:border-white/20 transition"
+                  className="p-4 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 rounded-2xl space-y-2 hover:border-amber-500/40 transition"
                 >
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-white">{sup.name}</h4>
-                    <span className="text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                    <h4 className="text-xs font-bold text-stone-900 dark:text-white">{sup.name}</h4>
+                    <span className="text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full">
                       Supplier
                     </span>
                   </div>
-                  <div className="text-[11px] text-zinc-400">
+                  <div className="text-[11px] text-stone-600 dark:text-zinc-400">
                     Contact: {sup.contactPerson || 'N/A'} • {sup.phone || 'N/A'}
                   </div>
-                  <div className="text-[10px] text-zinc-400 truncate">{sup.address}</div>
+                  <div className="text-[10px] text-stone-500 dark:text-zinc-500 truncate">{sup.address || 'No address registered'}</div>
                 </div>
               ))}
             </div>
@@ -1610,15 +1732,32 @@ export function InventoryView() {
                 <select
                   value={wasteReason}
                   onChange={(e) => setWasteReason(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
                 >
-                  <option value="Overcooked / Burnt dish" className="bg-[#1C1815] text-white">Overcooked / Burnt dish</option>
-                  <option value="Accidental Spillage" className="bg-[#1C1815] text-white">Accidental Spillage</option>
-                  <option value="Expired / Past fresh date" className="bg-[#1C1815] text-white">Expired / Past fresh date</option>
-                  <option value="Quality check failure" className="bg-[#1C1815] text-white">Quality check failure</option>
-                  <option value="Customer Return" className="bg-[#1C1815] text-white">Customer Return</option>
+                  <option value="Overcooked / Burnt dish" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Overcooked / Burnt dish</option>
+                  <option value="Accidental Spillage" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Accidental Spillage</option>
+                  <option value="Expired / Past fresh date" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Expired / Past fresh date</option>
+                  <option value="Quality check failure" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Quality check failure</option>
+                  <option value="Customer Return" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Customer Return</option>
+                  <option value="Other" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Other (Specify below)</option>
                 </select>
               </div>
+
+              {wasteReason === 'Other' && (
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                    Specify Reason
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Broken storage jar, power outage thawing..."
+                    value={customWasteReason}
+                    onChange={(e) => setCustomWasteReason(e.target.value)}
+                    required
+                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -2225,6 +2364,116 @@ export function InventoryView() {
                 <span>{deletingItem ? 'Deleting...' : 'Confirm Delete'}</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* REGISTER SUPPLIER MODAL (BUG-016) */}
+      {newSupplierModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-stone-900 dark:text-white space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black">Register New Supplier</h3>
+                  <div className="text-xs text-stone-500 dark:text-zinc-400">Vendor directory for bulk purchase receipts</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setNewSupplierModalOpen(false)}
+                className="p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-white/10 text-stone-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateSupplier} className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                  Supplier / Vendor Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={supName}
+                  onChange={(e) => setSupName(e.target.value)}
+                  placeholder="e.g. Oromia Coffee Farmers Union, Horizon Foods..."
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                    Contact Person
+                  </label>
+                  <input
+                    type="text"
+                    value={supContact}
+                    onChange={(e) => setSupContact(e.target.value)}
+                    placeholder="e.g. Abebe K."
+                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    value={supPhone}
+                    onChange={(e) => setSupPhone(e.target.value)}
+                    placeholder="e.g. +251 91 123 4567"
+                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                  Email (Optional)
+                </label>
+                <input
+                  type="email"
+                  value={supEmail}
+                  onChange={(e) => setSupEmail(e.target.value)}
+                  placeholder="e.g. orders@supplier.et"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                  Warehouse / Physical Address
+                </label>
+                <input
+                  type="text"
+                  value={supAddress}
+                  onChange={(e) => setSupAddress(e.target.value)}
+                  placeholder="e.g. Merkato Block 4, Addis Ababa"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200 dark:border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setNewSupplierModalOpen(false)}
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-300 font-bold rounded-2xl text-xs transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={supSubmitting}
+                  className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black rounded-2xl text-xs shadow-xs transition cursor-pointer disabled:opacity-50"
+                >
+                  {supSubmitting ? 'Saving...' : 'Register Supplier'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

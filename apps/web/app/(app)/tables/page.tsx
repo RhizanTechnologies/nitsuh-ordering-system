@@ -69,14 +69,47 @@ export default function TablesPage() {
     };
   }, []);
 
+  const getNextSequentialTableNumber = () => {
+    const nums = tablesList
+      .map((t) => {
+        const match = t.tableNumber.match(/\d+/);
+        return match ? parseInt(match[0], 10) : 0;
+      })
+      .filter((n) => n > 0);
+    const max = nums.length > 0 ? Math.max(...nums) : 0;
+    const nextNum = max + 1;
+    return `Table ${nextNum < 10 ? '0' + nextNum : nextNum}`;
+  };
+
   const handleStartAdd = () => {
     setEditingTableId(null);
-    setTableNumber('');
+    setTableNumber(getNextSequentialTableNumber());
     setCapacity('4');
     setStatus('AVAILABLE');
     setShowAddForm(true);
     setError(null);
     setSuccessMsg(null);
+  };
+
+  const handleInstantAutoAddNext = async () => {
+    const nextNum = getNextSequentialTableNumber();
+    setFormLoading(true);
+    try {
+      await fetchApi('/menu/tables', {
+        method: 'POST',
+        body: JSON.stringify({
+          tableNumber: nextNum,
+          capacity: 4,
+          status: 'AVAILABLE',
+        }),
+      });
+      setSuccessMsg(`"${nextNum}" automatically created!`);
+      loadTables();
+    } catch (err: any) {
+      setError(err.message || 'Failed to auto-add table');
+    } finally {
+      setFormLoading(false);
+    }
   };
 
   const handleStartEdit = (t: any) => {
@@ -182,13 +215,23 @@ export default function TablesPage() {
           </button>
 
           {isOwnerOrManager && (
-            <button
-              onClick={handleStartAdd}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 rounded-2xl text-xs font-black transition shadow-xs cursor-pointer"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Add New Table</span>
-            </button>
+            <>
+              <button
+                onClick={handleInstantAutoAddNext}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 active:scale-95 rounded-2xl text-xs font-bold transition shadow-xs cursor-pointer"
+                title="1-Click Auto-Number & Create Next Table"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span className="hidden sm:inline">+ Auto Next</span>
+              </button>
+              <button
+                onClick={handleStartAdd}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 rounded-2xl text-xs font-black transition shadow-xs cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>Add New Table</span>
+              </button>
+            </>
           )}
         </div>
       </div>

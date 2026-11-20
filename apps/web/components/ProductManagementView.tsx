@@ -95,7 +95,7 @@ export function ProductManagementView() {
       const img = document.createElement('img');
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_DIM = 800;
+        const MAX_DIM = 480;
         let width = img.width;
         let height = img.height;
 
@@ -116,10 +116,10 @@ export function ProductManagementView() {
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
           const optimizedSizeKb = Math.round((dataUrl.length * 3) / 4 / 1024);
           setFormImageUrl(dataUrl);
-          setImageSizeInfo(`Optimized: ${optimizedSizeKb} KB (from ${originalSizeKb} KB)`);
+          setImageSizeInfo(`Optimized: ${optimizedSizeKb} KB (Compressed from ${originalSizeKb} KB)`);
         }
         setUploadingImage(false);
       };

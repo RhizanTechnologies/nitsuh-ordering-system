@@ -309,6 +309,41 @@ export class UsersService {
     return updated;
   }
 
+  // Delete or archive departed staff member (BUG-007)
+  async deleteUser(id: string, requesterId: string) {
+    if (id === requesterId) {
+      throw new BadRequestException('You cannot delete or archive your own account');
+    }
+
+    const user = await this.getUserById(id);
+    if (user.role === UserRole.OWNER) {
+      throw new BadRequestException('Owner account cannot be deleted or archived');
+    }
+
+    // Check if user has associated history (orders, shifts, transactions)
+    const [orderCount, shiftCount, txCount] = await Promise.all([
+      this.prisma.order.count({ where: { OR: [{ waiterId: id }, { cashierId: id }] } }),
+      this.prisma.cashierShift.count({ where: { cashierId: id } }),
+      this.prisma.inventoryTransaction.count({ where: { userId: id } }),
+    ]);
+
+    if (orderCount > 0 || shiftCount > 0 || txCount > 0) {
+      // Soft-archive to preserve foreign key references and financial history
+      await this.prisma.user.update({
+        where: { id },
+        data: {
+          isActive: false,
+          pinCode: `ARC-${Date.now().toString().slice(-4)}`,
+        },
+      });
+      return { message: `Staff member ${user.name} has existing transaction history and was archived safely.` };
+    }
+
+    // If completely fresh account with no linked records, delete completely
+    await this.prisma.user.delete({ where: { id } });
+    return { message: `Staff member ${user.name} was permanently removed.` };
+  }
+
   // On-terminal forgotten PIN reset by authorized Shift Manager / Owner
   async managerOverrideResetPin(managerCred: string, targetUserId: string, newPin: string) {
     const trimmedPin = newPin?.trim();

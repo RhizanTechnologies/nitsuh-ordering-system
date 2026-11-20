@@ -44,6 +44,8 @@ export class OrdersController {
       customerName?: string;
       waiterId?: string;
       orderType: OrderType;
+      discount?: number;
+      discountPercent?: number;
       items: { menuItemId: string; quantity: number; specialInstructions?: string }[];
     },
   ) {

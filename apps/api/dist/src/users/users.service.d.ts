@@ -88,6 +88,9 @@ export declare class UsersService {
         role: import("@prisma/client").$Enums.UserRole;
         isActive: boolean;
     }>;
+    deleteUser(id: string, requesterId: string): Promise<{
+        message: string;
+    }>;
     managerOverrideResetPin(managerCred: string, targetUserId: string, newPin: string): Promise<{
         success: boolean;
         message: string;

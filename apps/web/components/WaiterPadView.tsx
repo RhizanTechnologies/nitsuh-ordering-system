@@ -340,11 +340,18 @@ export function WaiterPadView() {
   // Send digital note directly to Cashier POS terminal
   const handleSendToCashier = async () => {
     if (waiterCart.length === 0) return;
+
+    const isTakeaway = orderType === 'TAKEAWAY';
+    const selectedTableObj = isTakeaway ? null : tables.find((t) => t.tableNumber === waiterTable);
+
+    if (!isTakeaway && (!waiterTable || !selectedTableObj)) {
+      alert('Please select a valid dining table for Dine-In orders before sending.');
+      return;
+    }
+
     setSending(true);
 
     try {
-      const isTakeaway = orderType === 'TAKEAWAY';
-      const selectedTableObj = isTakeaway ? null : tables.find((t) => t.tableNumber === waiterTable);
       const res = await fetchApi('/orders/waiter-note', {
         method: 'POST',
         body: JSON.stringify({
@@ -465,11 +472,11 @@ export function WaiterPadView() {
             className={`px-3.5 py-1.5 rounded-2xl border transition-all flex items-center gap-2 cursor-pointer text-xs font-bold ${
               activeTab === 'tables'
                 ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-md shadow-amber-500/20'
-                : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-800 dark:text-zinc-200 hover:text-stone-950 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/[0.08] shadow-xs'
+                : 'bg-white dark:bg-white/[0.05] border-stone-200/90 dark:border-white/10 text-stone-900 dark:text-zinc-100 hover:bg-stone-100 dark:hover:bg-white/[0.08] shadow-xs'
             }`}
             title="Toggle Live Table Preparation Monitor"
           >
-            <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <span className="font-black text-stone-900 dark:text-zinc-100">{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
             {inFlightOrders.length > 0 && (
               <span
@@ -842,9 +849,19 @@ export function WaiterPadView() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {inFlightOrders.map((order) => {
                     const prep = calculatePrepTime(order.createdAt);
-                    const isDelayed = prep.delayStatus === 'DELAYED';
-                    const isWarning = prep.delayStatus === 'WARNING';
+                    const isDraft = order.status === 'DRAFT_NOTE';
+                    const isDelayed = !isDraft && prep.delayStatus === 'DELAYED';
+                    const isWarning = !isDraft && prep.delayStatus === 'WARNING';
                     const isReady = order.status === 'READY';
+                    const statusLabel = isDraft
+                      ? '⏳ Awaiting Cashier Firing'
+                      : order.status === 'CONFIRMED'
+                      ? 'In Kitchen'
+                      : order.status === 'IN_PREPARATION'
+                      ? 'Cooking'
+                      : order.status === 'READY'
+                      ? 'Ready to Serve'
+                      : order.status;
 
                     return (
                       <div
@@ -869,10 +886,12 @@ export function WaiterPadView() {
                                     ? 'success'
                                     : isDelayed
                                     ? 'destructive'
-                                    : 'amber'
+                                    : isDraft
+                                    ? 'amber'
+                                    : 'default'
                                 }
                               >
-                                {order.status}
+                                {statusLabel}
                               </Badge>
                             </div>
                             <div className="text-xs font-bold text-stone-700 dark:text-zinc-300 mt-0.5">
@@ -882,31 +901,33 @@ export function WaiterPadView() {
                             </div>
                           </div>
 
-                          {/* Live Timer Pill */}
+                          {/* Live Timer Pill with Contrast Protection */}
                           <div
                             className={`px-3 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border ${
                               isReady
-                                ? 'bg-emerald-500 text-black border-emerald-400'
+                                ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-900 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40'
                                 : isDelayed
-                                ? 'bg-[#C11221] text-white border-rose-400 animate-pulse'
+                                ? 'bg-rose-100 dark:bg-[#C11221] text-rose-900 dark:text-white border-rose-400 animate-pulse'
                                 : isWarning
-                                ? 'bg-amber-500 text-black border-amber-400'
-                                : 'bg-white/[0.08] text-white border-white/15'
+                                ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-500/40'
+                                : isDraft
+                                ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/30'
+                                : 'bg-stone-100 dark:bg-white/[0.08] text-stone-800 dark:text-zinc-200 border-stone-200 dark:border-white/15'
                             }`}
                           >
                             <Clock className="w-3.5 h-3.5" />
-                            <span>{prep.formattedTime} elapsed</span>
+                            <span>{isDraft ? `Sent ${prep.formattedTime} ago` : `${prep.formattedTime} prep`}</span>
                           </div>
                         </div>
 
                         {/* Order Items */}
-                        <div className="mt-3 text-xs text-zinc-400 space-y-1">
+                        <div className="mt-3 text-xs text-stone-600 dark:text-zinc-400 space-y-1">
                           {order.items?.map((it: any) => (
                             <div key={it.id} className="flex justify-between">
                               <span>
                                 {it.quantity}x {it.menuItem?.name || 'Item'}
                               </span>
-                              <span className="text-zinc-500">
+                              <span className="text-stone-500 dark:text-zinc-500">
                                 {it.itemStatus || order.status}
                               </span>
                             </div>
@@ -914,8 +935,8 @@ export function WaiterPadView() {
                         </div>
 
                         {/* Actions */}
-                        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-                          <span className="text-xs font-bold text-amber-400">
+                        <div className="mt-4 pt-3 border-t border-stone-200 dark:border-white/10 flex items-center justify-between">
+                          <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
                             {Number(order.totalAmount || 0).toFixed(2)} ETB
                           </span>
 
@@ -1220,16 +1241,16 @@ export function WaiterPadView() {
               </div>
 
               <button
-                disabled={waiterCart.length === 0 || sending || isCurrentTableOccupied}
+                disabled={waiterCart.length === 0 || sending || (orderType === 'DINE_IN' && !waiterTable)}
                 onClick={handleSendToCashier}
                 className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] text-stone-950 rounded-2xl text-xs font-black shadow-xs flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
               >
                 <Send className="w-4 h-4 text-stone-950" />
                 <span>
-                  {isCurrentTableOccupied
-                    ? 'Table Occupied (Settle Bill First)'
-                    : sending
+                  {sending
                     ? 'Sending...'
+                    : isCurrentTableOccupied
+                    ? `Append Round to Table ${waiterTable} (Active Bill)`
                     : 'Confirm & Send to Cashier'}
                 </span>
               </button>
