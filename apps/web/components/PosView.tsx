@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { fetchApi, getSocket } from '@/lib/api';
 import { playSlipChime } from '@/lib/audio';
+import { calculatePrepTime } from '@/lib/timer-utils';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { PaymentModal } from '@/components/PaymentModal';
 import { ReceiptModal } from '@/components/ReceiptModal';
@@ -91,6 +92,7 @@ export function PosView() {
   const [editingSlipTarget, setEditingSlipTarget] = useState<any | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'day_before' | '3_days' | 'all'>('today');
+  const [, setTick] = useState(0);
 
   const loadActiveOrders = () => {
     return fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY,SERVED,COMPLETED&limit=250')
@@ -120,6 +122,10 @@ export function PosView() {
 
   useEffect(() => {
     loadData();
+
+    const interval = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 1000);
 
     const socket = getSocket();
     socket.on('waiter:new_order_note', (slip) => {
@@ -156,6 +162,7 @@ export function PosView() {
     });
 
     return () => {
+      clearInterval(interval);
       socket.off('waiter:new_order_note');
       socket.off('tables:updated');
       socket.off('order:confirmed');
@@ -1531,91 +1538,107 @@ export function PosView() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {filteredSlips.map((slip) => {
+                  const prep = calculatePrepTime(slip.createdAt);
                   const isSlipTakeaway = slip.orderType === "TAKEAWAY";
-                  const totalItems = slip.items?.reduce((s: number, i: any) => s + i.quantity, 0) || 0;
 
                   return (
                     <div
                       key={slip.id}
-                      className="bg-white border border-stone-200/90 rounded-2xl p-3.5 shadow-xs flex flex-col justify-between gap-2.5 hover:border-emerald-500/50 transition"
+                      className="p-4 rounded-2xl border transition-all bg-amber-50/60 border-amber-300 shadow-xs flex flex-col justify-between gap-3 hover:border-amber-400"
                     >
                       <div>
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <Badge variant={isSlipTakeaway ? 'purple' : 'success'}>
-                              {isSlipTakeaway ? "🛍️ Takeaway" : `🍽️ Table ${slip.table?.tableNumber || "Assigned"}`}
-                            </Badge>
-                            <span className="text-xs font-mono text-stone-500 font-bold">
-                              {slip.orderNumber?.startsWith('#') ? slip.orderNumber : `#${slip.orderNumber}`}
-                            </span>
-                          </div>
-
-                          <div className="text-right">
-                            <div className="text-sm font-black text-emerald-700">
-                              {Number(slip.totalAmount || 0).toFixed(2)} ETB
+                        {/* Card Header: Separated into clean non-colliding rows (identical to Waiter) */}
+                        <div className="pb-3 border-b border-amber-200/80 space-y-2">
+                          {/* Row 1: Order Number + Table and Live Timer */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-base font-black text-stone-900 tracking-tight flex-shrink-0">
+                                {slip.orderNumber?.startsWith('#') ? slip.orderNumber : `#${slip.orderNumber}`}
+                              </span>
+                              <span className="text-xs font-bold text-stone-700 truncate">
+                                {isSlipTakeaway
+                                  ? `🛍️ Takeaway (${slip.customerName || 'Guest'})`
+                                  : `🍽️ Table ${slip.table?.tableNumber || 'Assigned'}`}
+                              </span>
                             </div>
-                            <span className="text-[10px] text-stone-400 font-bold">
-                              {formatTime(slip.createdAt)}
-                            </span>
+
+                            {/* Live Timer Pill */}
+                            <div className="px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border flex-shrink-0 whitespace-nowrap bg-amber-100 text-amber-900 border-amber-300">
+                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span>{`Sent ${prep.formattedTime} ago`}</span>
+                            </div>
+                          </div>
+
+                          {/* Row 2: Status Badge + Attribution */}
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <Badge variant="amber">
+                              ⏳ Awaiting Cashier Firing
+                            </Badge>
+
+                            <div className="text-[11px] text-stone-500 flex items-center gap-1.5 ml-auto">
+                              <span>Server: <strong className="text-stone-800">{slip.waiter?.name || 'Waiter'}</strong></span>
+                              {slip.customerName && <span>• Guest: <strong>{slip.customerName}</strong></span>}
+                            </div>
                           </div>
                         </div>
 
-                        <div className="text-xs text-stone-500 mb-2 flex items-center gap-1.5 flex-wrap">
-                          <span>Server: <strong className="text-stone-800">{slip.waiter?.name || "Waiter"}</strong></span>
-                          {slip.customerName && <span>• Guest: <strong>{slip.customerName}</strong></span>}
-                          <span>• {totalItems} items</span>
-                        </div>
-
-                        <div className="bg-stone-50 rounded-xl p-2.5 space-y-1.5 text-xs text-stone-700 border border-stone-200/80 max-h-36 overflow-y-auto no-scrollbar">
+                        {/* Order Items */}
+                        <div className="mt-3 text-xs text-stone-600 space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
                           {slip.items?.map((item: any) => (
-                            <div key={item.id} className="flex items-start justify-between text-xs gap-2">
-                              <div>
-                                <span className="font-black text-emerald-800 mr-1.5">{item.quantity}x</span>
-                                <span className="font-medium text-stone-900">{item.menuItem?.name}</span>
+                            <div key={item.id} className="flex items-center justify-between">
+                              <span className="truncate pr-2">
+                                <strong className="text-stone-900 mr-1.5">{item.quantity}x</strong>
+                                <span className="text-stone-800">{item.menuItem?.name || item.name}</span>
                                 {item.specialInstructions && (
-                                  <div className="text-[10px] text-emerald-700 italic">
+                                  <span className="text-[10px] text-emerald-700 italic ml-1">
                                     &quot;{item.specialInstructions}&quot;
-                                  </div>
+                                  </span>
                                 )}
-                              </div>
+                              </span>
                               <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
-                                {Number(item.subtotal || item.unitPrice * item.quantity).toFixed(2)} ETB
+                                {Number(item.subtotal || (item.unitPrice || item.price) * item.quantity).toFixed(2)} ETB
                               </span>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => confirmWaiterSlipDirectly(slip.id)}
-                          className="flex-1"
-                        >
-                          <Flame className="w-3.5 h-3.5" />
-                          <span>Fire to Kitchen</span>
-                        </Button>
+                      {/* Actions & Total */}
+                      <div className="mt-4 pt-3 border-t border-amber-200/80 flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-sm sm:text-base font-black text-stone-900">
+                          {Number(slip.totalAmount || 0).toFixed(2)} ETB
+                        </span>
 
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleReviewWaiterSlip(slip)}
-                          title="Edit items in slip before firing"
-                        >
-                          <FileEdit className="w-3.5 h-3.5 text-stone-500" />
-                          <span>Edit</span>
-                        </Button>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => confirmWaiterSlipDirectly(slip.id)}
+                          >
+                            <Flame className="w-3.5 h-3.5" />
+                            <span>Fire to Kitchen</span>
+                          </Button>
 
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => handleRejectWaiterSlip(slip.id)}
-                          className="text-stone-400 hover:text-[#C11221]"
-                          title="Reject order note"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleReviewWaiterSlip(slip)}
+                            title="Edit items in slip before firing"
+                          >
+                            <FileEdit className="w-3.5 h-3.5 text-stone-600" />
+                            <span>Edit</span>
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => handleRejectWaiterSlip(slip.id)}
+                            className="text-stone-400 hover:text-[#C11221]"
+                            title="Reject order note"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1658,92 +1681,134 @@ export function PosView() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3.5">
                 {filteredOrders.map((order) => {
+                  const prep = calculatePrepTime(order.createdAt);
+                  const isDraft = order.status === 'DRAFT_NOTE';
+                  const isDelayed = !isDraft && prep.delayStatus === 'DELAYED';
+                  const isWarning = !isDraft && prep.delayStatus === 'WARNING';
+                  const isReady = order.status === 'READY';
+                  const isServed = order.status === 'SERVED';
                   const isPaid = order.paymentStatus === 'PAID';
                   const isOrderTakeaway = order.orderType === 'TAKEAWAY';
+
+                  const statusLabel = isDraft
+                    ? '⏳ Awaiting Cashier Firing'
+                    : order.status === 'CONFIRMED'
+                    ? 'In Kitchen'
+                    : order.status === 'IN_PREPARATION'
+                    ? 'Cooking'
+                    : order.status === 'READY'
+                    ? 'Ready to Serve'
+                    : order.status === 'SERVED'
+                    ? 'Served'
+                    : order.status === 'COMPLETED'
+                    ? 'Completed'
+                    : order.status;
 
                   return (
                     <div
                       key={order.id}
-                      className="bg-white border border-stone-200/90 rounded-2xl p-4 shadow-xs hover:border-emerald-500/40 transition flex flex-col justify-between gap-3"
+                      className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
+                        isReady
+                          ? 'bg-emerald-50 border-emerald-300 shadow-xs'
+                          : isDelayed
+                          ? 'bg-rose-50 border-rose-300 shadow-xs'
+                          : isWarning
+                          ? 'bg-amber-50 border-amber-300'
+                          : isServed
+                          ? 'bg-purple-50/50 border-purple-200 shadow-xs'
+                          : 'bg-white border-stone-200 shadow-xs'
+                      }`}
                     >
-                      {/* Top Metadata */}
                       <div>
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-sm font-black text-stone-900">
-                              {order.orderNumber?.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`}
-                            </span>
-
-                            {/* Destination */}
-                            {isOrderTakeaway ? (
-                              <Badge variant="purple">
-                                <ShoppingBag className="w-3 h-3" />
-                                TAKEAWAY ({order.customerName || 'Pickup'})
-                              </Badge>
-                            ) : (
-                              <Badge variant="info">
-                                <Utensils className="w-3 h-3" />
-                                Table {order.table?.tableNumber || 'Assigned'}
-                              </Badge>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-1 flex-wrap justify-end">
-                            {/* Kitchen Status Badge */}
-                            <Badge
-                              variant={
-                                order.status === 'READY'
-                                  ? 'success'
-                                  : order.status === 'SERVED'
-                                  ? 'purple'
-                                  : order.status === 'IN_PREPARATION'
-                                  ? 'info'
-                                  : order.status === 'CONFIRMED'
-                                  ? 'amber'
-                                  : 'default'
-                              }
-                            >
-                              {order.status}
-                            </Badge>
-
-                            {/* Payment Badge */}
-                            <Badge variant={isPaid ? 'success' : 'destructive'}>
-                              {isPaid ? 'PAID' : 'UNPAID'}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        {/* Attribution line */}
-                        <div className="flex items-center gap-2.5 text-[11px] text-stone-500 flex-wrap mb-2.5">
-                          <div className="flex items-center gap-1 text-stone-700">
-                            <UserCheck className="w-3 h-3 text-emerald-600" />
-                            <span>Cashier:</span>
-                            <span className="font-bold text-stone-900">
-                              {order.cashier?.name || 'Counter'}
-                            </span>
-                          </div>
-
-                          {order.waiter && (
-                            <div className="flex items-center gap-1 text-stone-700">
-                              <Smartphone className="w-3 h-3 text-emerald-600" />
-                              <span>Server:</span>
-                              <span className="font-semibold">{order.waiter.name}</span>
+                        {/* Card Header: Separated into clean non-colliding rows (identical to Waiter) */}
+                        <div className="pb-3 border-b border-stone-200/70 space-y-2">
+                          {/* Row 1: Order Number + Table / Destination and Live Timer */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-base font-black text-stone-900 tracking-tight flex-shrink-0">
+                                {order.orderNumber?.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`}
+                              </span>
+                              <span className="text-xs font-bold text-stone-700 truncate">
+                                {isOrderTakeaway
+                                  ? `🛍️ Takeaway (${order.customerName || 'Guest'})`
+                                  : `🍽️ Table ${order.table?.tableNumber || 'Guest'}`}
+                              </span>
                             </div>
-                          )}
 
-                          <div className="flex items-center gap-1 text-stone-400 ml-auto">
-                            <Clock className="w-3 h-3" />
-                            <span>{formatTime(order.createdAt)}</span>
+                            {/* Live Timer Pill */}
+                            <div
+                              className={`px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border flex-shrink-0 whitespace-nowrap ${
+                                isReady
+                                  ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                                  : isDelayed
+                                  ? 'bg-rose-100 text-rose-900 border-rose-400 animate-pulse'
+                                  : isWarning
+                                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                  : isServed
+                                  ? 'bg-purple-100 text-purple-900 border-purple-300'
+                                  : 'bg-stone-100 text-stone-800 border-stone-200'
+                              }`}
+                            >
+                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span>{`${prep.formattedTime} prep`}</span>
+                            </div>
+                          </div>
+
+                          {/* Row 2: Status Badge + Payment Badge + Attribution */}
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <Badge
+                                variant={
+                                  isReady
+                                    ? 'success'
+                                    : isServed
+                                    ? 'purple'
+                                    : isDelayed
+                                    ? 'destructive'
+                                    : order.status === 'IN_PREPARATION'
+                                    ? 'info'
+                                    : order.status === 'CONFIRMED'
+                                    ? 'amber'
+                                    : 'default'
+                                }
+                              >
+                                {statusLabel}
+                              </Badge>
+
+                              {/* Payment Badge */}
+                              <Badge variant={isPaid ? 'success' : 'destructive'}>
+                                {isPaid ? 'PAID' : 'UNPAID'}
+                              </Badge>
+                            </div>
+
+                            {/* Staff Attribution */}
+                            <div className="text-[11px] text-stone-500 flex items-center gap-1.5 ml-auto flex-wrap">
+                              {order.waiter && (
+                                <span>
+                                  Server: <strong className="text-stone-800">{order.waiter.name}</strong>
+                                </span>
+                              )}
+                              {order.cashier && (
+                                <span>
+                                  • Cashier: <strong className="text-stone-800">{order.cashier.name}</strong>
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
 
-                        {/* Items breakdown list */}
-                        <div className="bg-stone-50 rounded-xl p-2.5 space-y-1 text-xs border border-stone-200/80 max-h-32 overflow-y-auto no-scrollbar">
+                        {/* Order Items: Clean unboxed typography matching Waiter */}
+                        <div className="mt-3 text-xs text-stone-600 space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
                           {order.items?.map((itm: any) => (
-                            <div key={itm.id} className="flex items-center justify-between text-xs">
+                            <div key={itm.id} className="flex items-center justify-between">
                               <span className="truncate pr-2">
-                                <strong className="text-emerald-800 mr-1.5">{itm.quantity}x</strong>
-                                <span className="text-stone-900">{itm.menuItem?.name || itm.name}</span>
+                                <strong className="text-stone-900 mr-1.5">{itm.quantity}x</strong>
+                                <span className="text-stone-800">{itm.menuItem?.name || itm.name}</span>
+                                {itm.specialInstructions && (
+                                  <span className="text-[10px] text-emerald-700 italic ml-1">
+                                    &quot;{itm.specialInstructions}&quot;
+                                  </span>
+                                )}
                               </span>
                               <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
                                 {Number(itm.subtotal || (itm.unitPrice || itm.price) * itm.quantity).toFixed(2)} ETB
@@ -1753,14 +1818,11 @@ export function PosView() {
                         </div>
                       </div>
 
-                      {/* Financial Total & Action Buttons */}
-                      <div className="pt-2.5 border-t border-stone-100 flex items-center justify-between gap-2 flex-wrap">
-                        <div>
-                          <div className="text-[10px] text-stone-500 font-bold uppercase">Total Bill</div>
-                          <div className="text-base font-black text-emerald-700">
-                            {Number(order.totalAmount).toFixed(2)} ETB
-                          </div>
-                        </div>
+                      {/* Actions & Total Bill */}
+                      <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-sm sm:text-base font-black text-stone-900">
+                          {Number(order.totalAmount || 0).toFixed(2)} ETB
+                        </span>
 
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {/* Edit / Modify Order Items (Add or Remove items) */}
@@ -1816,8 +1878,8 @@ export function PosView() {
                               <span>Settle Bill</span>
                             </Button>
                           ) : (
-                            <span className="text-xs font-bold text-emerald-600 flex items-center gap-1 px-2 py-1">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span className="text-xs font-bold text-emerald-700 flex items-center gap-1 px-2.5 py-1 bg-emerald-50 rounded-lg border border-emerald-200">
+                              <Check className="w-3.5 h-3.5" />
                               <span>Settled</span>
                             </span>
                           )}
