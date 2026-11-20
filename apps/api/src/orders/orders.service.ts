@@ -186,8 +186,9 @@ export class OrdersService {
       ? Number(data.discount)
       : (data.discountPercent ? (subtotal * Number(data.discountPercent)) / 100 : 0);
     const taxableAmount = Math.max(0, subtotal - discountAmount);
-    const tax = taxableAmount * 0.15; // 15% Ethiopian VAT
-    const totalAmount = taxableAmount + totalTip + tax;
+    // Menu prices already include tax (tax-inclusive): do not add extra tax on top
+    const tax = taxableAmount > 0 ? Number(((taxableAmount * 0.15) / 1.15).toFixed(2)) : 0;
+    const totalAmount = taxableAmount + totalTip;
 
     const order = await this.prisma.order.create({
       data: {
@@ -465,8 +466,9 @@ export class OrdersService {
       ? Number(data.discount)
       : (data.discountPercent ? (subtotal * Number(data.discountPercent)) / 100 : 0);
     const taxableAmount = Math.max(0, subtotal - discountAmount);
-    const tax = taxableAmount * 0.15; // 15% Ethiopian VAT
-    const totalAmount = taxableAmount + totalTip + tax;
+    // Menu prices already include tax (tax-inclusive): do not add extra tax on top
+    const tax = taxableAmount > 0 ? Number(((taxableAmount * 0.15) / 1.15).toFixed(2)) : 0;
+    const totalAmount = taxableAmount + totalTip;
 
     await this.prisma.$transaction(async (tx) => {
       await tx.orderItem.deleteMany({
@@ -1025,8 +1027,11 @@ export class OrdersService {
 
     const newSubtotal = Number(order.subtotal) + addedSubtotal;
     const newTip = Number((order as any).tip || 0) + addedTip;
-    const newTax = newSubtotal * 0.15;
-    const newTotal = newSubtotal + newTip - Number(order.discount || 0) + newTax;
+    const discount = Number(order.discount || 0);
+    const taxable = Math.max(0, newSubtotal - discount);
+    // Menu prices already include tax (tax-inclusive): do not add extra tax on top
+    const newTax = taxable > 0 ? Number(((taxable * 0.15) / 1.15).toFixed(2)) : 0;
+    const newTotal = taxable + newTip;
 
     const updated = await this.prisma.order.update({
       where: { id: orderId },

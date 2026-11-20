@@ -393,8 +393,9 @@ export function PosView() {
   const totalTip = cart.reduce((sum, item) => sum + (item.tip || 0) * item.quantity, 0);
   const discountAmount = (subtotal * discountPercent) / 100;
   const taxableAmount = Math.max(0, subtotal - discountAmount);
-  const tax = taxableAmount * 0.15; // 15% Ethiopian VAT
-  const total = taxableAmount + totalTip + tax;
+  // Menu prices are inclusive of tax: no extra tax added on top
+  const tax = taxableAmount > 0 ? Number(((taxableAmount * 0.15) / 1.15).toFixed(2)) : 0;
+  const total = taxableAmount + totalTip;
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // Time formatter (day-aware)
@@ -706,6 +707,43 @@ export function PosView() {
     setPosTab('menu');
   };
 
+  // Start editing an active order (allows cashier to add, reduce, or remove items)
+  const handleStartEditOrder = (order: any) => {
+    clearCart();
+    setAppendOrderTarget(null);
+    setEditingSlipTarget(order);
+    setOrderType(order.orderType || 'DINE_IN');
+    if (order.orderType === 'TAKEAWAY') {
+      setCustomerName(order.customerName || 'Takeaway Customer');
+    } else {
+      setSelectedTable(order.table?.tableNumber || 'B12 - Indoor');
+      setCustomerName(order.customerName || 'Guest');
+    }
+
+    for (const item of order.items || []) {
+      for (let i = 0; i < item.quantity; i++) {
+        const itemAddons = Array.isArray((item as any).selectedAddons) ? (item as any).selectedAddons : [];
+        const itemAddonIds = itemAddons.map((a: any) => a.id).filter(Boolean);
+        const displayName = item.specialInstructions
+          ? `${item.menuItem?.name || item.name} (${item.specialInstructions})`
+          : (item.menuItem?.name || item.name);
+
+        addToCart({
+          id: item.menuItemId || item.menuItem?.id,
+          name: displayName,
+          price: Number(item.unitPrice || item.price),
+          imageUrl: item.menuItem?.imageUrl,
+          isDirectSale: item.menuItem?.isDirectSale,
+          specialInstructions: item.specialInstructions || undefined,
+          selectedAddonIds: itemAddonIds,
+          selectedAddons: itemAddons,
+        });
+      }
+    }
+
+    setPosTab('menu');
+  };
+
   const isTakeaway = orderType === 'TAKEAWAY';
   const destinationDisplay = isTakeaway
     ? `🛍️ TAKEAWAY (${customerName.trim() || 'Counter Pickup'})`
@@ -826,19 +864,21 @@ export function PosView() {
       </div>
 
       {/* Customer & Destination Pickers */}
-      <div className="p-3.5 sm:p-4 grid grid-cols-2 gap-2.5 sm:gap-3 border-b border-stone-200/90 dark:border-white/10 flex-shrink-0">
-        <div>
-          <label className="block text-[10px] sm:text-[11px] font-bold text-stone-500 dark:text-zinc-400 uppercase mb-1">
-            Customer Name
-          </label>
-          <input
-            type="text"
-            placeholder={isTakeaway ? "e.g. Abebe - Takeaway" : "Guest"}
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            className="w-full bg-stone-100 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-xl px-2.5 sm:px-3 py-1.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500/50"
-          />
-        </div>
+      <div className={`p-3.5 sm:p-4 grid ${isTakeaway ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 sm:gap-3 border-b border-stone-200/90 dark:border-white/10 flex-shrink-0`}>
+        {isTakeaway && (
+          <div>
+            <label className="block text-[10px] sm:text-[11px] font-bold text-stone-500 dark:text-zinc-400 uppercase mb-1">
+              Customer Name
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Abebe - Takeaway"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className="w-full bg-stone-100 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 rounded-xl px-2.5 sm:px-3 py-1.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+        )}
 
         <div>
           <label className="block text-[10px] sm:text-[11px] font-bold text-stone-500 dark:text-zinc-400 uppercase mb-1">
@@ -990,9 +1030,9 @@ export function PosView() {
               <span>-{discountAmount.toFixed(2)} ETB</span>
             </div>
           )}
-          <div className="flex justify-between">
-            <span>Tax (15% VAT)</span>
-            <span className="text-stone-900 dark:text-white font-bold">{tax.toFixed(2)} ETB</span>
+          <div className="flex justify-between text-stone-400 text-[11px]">
+            <span>VAT (15%)</span>
+            <span className="font-semibold text-stone-500">Included in prices</span>
           </div>
           <div className="flex justify-between pt-1.5 border-t border-stone-200 dark:border-white/10 text-sm font-bold text-stone-900 dark:text-white">
             <span>Total Due</span>
@@ -1015,7 +1055,7 @@ export function PosView() {
               {loading
                 ? "Firing..."
                 : editingSlipTarget
-                  ? "Update & Fire to Kitchen"
+                  ? "Update Order"
                   : appendOrderTarget
                     ? "Append to Bill"
                     : "Fire to Kitchen"}
@@ -1052,55 +1092,52 @@ export function PosView() {
             <span className="truncate">Cashier Terminal</span>
           </div>
 
-          {/* Primary View Switcher: Orders vs New Order */}
-          <div className="flex items-center bg-stone-100 p-1 rounded-2xl border border-stone-200/80 shadow-2xs">
-            <button
-              onClick={() => setPosTab('orders')}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
-                posTab === 'orders'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-950'
-              }`}
-            >
-              <Receipt className="w-3.5 h-3.5" />
-              <span>Orders & Billing</span>
-              {(incomingSlips.length > 0 || unpaidOrders.length > 0) && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  posTab === 'orders' ? 'bg-emerald-800 text-white' : 'bg-[#C11221] text-white'
-                }`}>
-                  {incomingSlips.length + unpaidOrders.length}
-                </span>
-              )}
-            </button>
+          {/* Primary View Switcher */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-stone-100 p-1 rounded-2xl border border-stone-200/80 shadow-2xs">
+              <button
+                onClick={() => setPosTab('orders')}
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+                  posTab === 'orders'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-stone-600 hover:text-stone-950'
+                }`}
+              >
+                <Receipt className="w-3.5 h-3.5" />
+                <span>Orders & Billing</span>
+                {(incomingSlips.length > 0 || unpaidOrders.length > 0) && (
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                    posTab === 'orders' ? 'bg-emerald-800 text-white' : 'bg-[#C11221] text-white'
+                  }`}>
+                    {incomingSlips.length + unpaidOrders.length}
+                  </span>
+                )}
+              </button>
+            </div>
 
-            <button
-              onClick={() => {
-                if (posTab !== 'menu') {
-                  setPosTab('menu');
-                }
-              }}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
-                posTab === 'menu'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-950'
-              }`}
-            >
-              <Utensils className="w-3.5 h-3.5" />
-              <span>
-                {editingSlipTarget
-                  ? `Editing ${editingSlipTarget.orderNumber?.startsWith('#') ? editingSlipTarget.orderNumber : `#${editingSlipTarget.orderNumber}`}`
-                  : appendOrderTarget
-                    ? `Append ${appendOrderTarget.orderNumber?.startsWith('#') ? appendOrderTarget.orderNumber : `#${appendOrderTarget.orderNumber}`}`
-                    : '+ New Order'}
-              </span>
-              {cart.length > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  posTab === 'menu' ? 'bg-emerald-800 text-white' : 'bg-emerald-600 text-white'
-                }`}>
-                  {totalCartItems}
+            {/* Active editing/appending indicator */}
+            {(editingSlipTarget || appendOrderTarget) && (
+              <div className="hidden sm:flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-900 px-3 py-1.5 rounded-xl text-xs font-bold animate-in fade-in">
+                <FileEdit className="w-3.5 h-3.5 text-amber-600" />
+                <span>
+                  {editingSlipTarget
+                    ? `Editing ${editingSlipTarget.orderNumber?.startsWith('#') ? editingSlipTarget.orderNumber : `#${editingSlipTarget.orderNumber}`}`
+                    : `Appending to ${appendOrderTarget.orderNumber?.startsWith('#') ? appendOrderTarget.orderNumber : `#${appendOrderTarget.orderNumber}`}`}
                 </span>
-              )}
-            </button>
+                <button
+                  onClick={() => {
+                    clearCart();
+                    setEditingSlipTarget(null);
+                    setAppendOrderTarget(null);
+                    setPosTab('orders');
+                    loadData();
+                  }}
+                  className="ml-1 text-[10px] text-red-600 hover:underline cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1513,18 +1550,6 @@ export function PosView() {
                   ({filteredOrders.length})
                 </span>
               </h3>
-
-              <button
-                onClick={() => {
-                  clearCart();
-                  setAppendOrderTarget(null);
-                  setEditingSlipTarget(null);
-                  setPosTab('menu');
-                }}
-                className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
-              >
-                <span>+ Punch New Counter Order</span>
-              </button>
             </div>
 
             {filteredOrders.length === 0 ? (
@@ -1645,13 +1670,26 @@ export function PosView() {
                       {/* Financial Total & Action Buttons */}
                       <div className="pt-2.5 border-t border-stone-100 flex items-center justify-between gap-2 flex-wrap">
                         <div>
-                          <div className="text-[10px] text-stone-500 font-bold uppercase">Total Bill (15% VAT)</div>
+                          <div className="text-[10px] text-stone-500 font-bold uppercase">Total Bill</div>
                           <div className="text-base font-black text-emerald-700">
                             {Number(order.totalAmount).toFixed(2)} ETB
                           </div>
                         </div>
 
                         <div className="flex items-center gap-1.5 flex-wrap">
+                          {/* Edit / Modify Order Items (Add or Remove items) */}
+                          {!isPaid && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleStartEditOrder(order)}
+                              title="Edit order items (add or remove items)"
+                            >
+                              <FileEdit className="w-3.5 h-3.5 text-emerald-700" />
+                              <span>Edit</span>
+                            </Button>
+                          )}
+
                           {/* Add Items */}
                           {!isPaid && (
                             <Button
