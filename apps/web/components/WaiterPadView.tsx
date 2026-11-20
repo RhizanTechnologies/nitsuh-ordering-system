@@ -431,71 +431,7 @@ export function WaiterPadView() {
         </div>
       )}
 
-      {/* TOP BAR: Clean Search + Kitchen Status Toggle */}
-      <header className="h-14 sm:h-16 bg-white border-b border-stone-200/90 px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4 flex-shrink-0 z-20">
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-            <Utensils className="w-4 h-4 stroke-[2.5]" />
-          </div>
-          <div className="hidden xs:block">
-            <h1 className="text-xs sm:text-sm font-black text-stone-900 leading-none">
-              Waiter Pad
-            </h1>
-            <span className="text-[10px] text-stone-500 font-semibold truncate max-w-[120px] block">
-              {currentUser?.name || 'Server Floor'}
-            </span>
-          </div>
-        </div>
 
-        {/* Central Search Bar */}
-        <div className="flex-1 max-w-md relative flex items-center mx-1 sm:mx-0">
-          <Search className="w-4 h-4 text-stone-400 absolute left-3 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search food, drinks..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#F4F5F7] hover:bg-stone-100/80 focus:bg-white border border-stone-200/80 hover:border-stone-300 focus:border-emerald-500 rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition font-sans"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-2.5 p-0.5 text-stone-400 hover:text-stone-900"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Live Kitchen Preparation Status Toggle */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={() => setActiveTab(activeTab === 'menu' ? 'tables' : 'menu')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold font-sans ${
-              activeTab === 'tables'
-                ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
-                : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-100 hover:text-stone-900'
-            }`}
-            title="Toggle Live Kitchen Preparation Monitor"
-          >
-            <Clock className={`w-3.5 h-3.5 ${activeTab === 'tables' ? 'text-white' : 'text-amber-600'}`} />
-            <span className="hidden sm:inline">{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
-            {inFlightOrders.length > 0 && (
-              <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  delayedOrders.length > 0
-                    ? 'bg-[#C11221] text-white animate-pulse'
-                    : activeTab === 'tables'
-                    ? 'bg-white/20 text-white'
-                    : 'bg-emerald-100 text-emerald-800'
-                }`}
-              >
-                {inFlightOrders.length}
-              </span>
-            )}
-          </button>
-        </div>
-      </header>
 
       {/* MAIN LAYOUT */}
       <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
@@ -543,6 +479,55 @@ export function WaiterPadView() {
 
         {/* COLUMN 2: CENTER PRODUCT FOOD CARDS GRID */}
         <main className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-24 lg:pb-6 no-scrollbar">
+          {/* Top Search Bar & Controls directly bounded within the food catalog */}
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-3.5 flex-shrink-0">
+            <div className="flex-1 relative flex items-center">
+              <Search className="w-4 h-4 text-stone-400 absolute left-3.5 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search food, drinks..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-white hover:border-stone-300 focus:border-emerald-500 border border-stone-200/90 rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition shadow-2xs font-sans"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 p-0.5 text-stone-400 hover:text-stone-900"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Live Kitchen Preparation Status Toggle */}
+            <button
+              onClick={() => setActiveTab(activeTab === 'menu' ? 'tables' : 'menu')}
+              className={`px-3 py-2.5 rounded-2xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold font-sans flex-shrink-0 ${
+                activeTab === 'tables'
+                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                  : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50 hover:text-stone-900 shadow-2xs'
+              }`}
+              title="Toggle Live Kitchen Preparation Monitor"
+            >
+              <Clock className={`w-3.5 h-3.5 ${activeTab === 'tables' ? 'text-white' : 'text-emerald-600'}`} />
+              <span className="hidden sm:inline">{activeTab === 'tables' ? 'Back to Food' : 'Live Status'}</span>
+              {inFlightOrders.length > 0 && (
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                    delayedOrders.length > 0
+                      ? 'bg-[#C11221] text-white animate-pulse'
+                      : activeTab === 'tables'
+                      ? 'bg-white/20 text-white'
+                      : 'bg-emerald-100 text-emerald-800'
+                  }`}
+                >
+                  {inFlightOrders.length}
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* Success Notification Alert */}
           {sentOrderNumber && (
             <div className="mb-4 bg-emerald-950/90 border border-emerald-500/50 p-3.5 rounded-2xl flex items-center gap-3 text-white shadow-xl animate-in fade-in">
