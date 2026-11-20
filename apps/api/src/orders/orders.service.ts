@@ -317,6 +317,183 @@ export class OrdersService {
     return updated;
   }
 
+  // Update Draft Note items & details, and confirm/fire to kitchen
+  async updateAndConfirmDraftNote(
+    orderId: string,
+    data: {
+      cashierId: string;
+      tableId?: string | null;
+      customerName?: string;
+      orderType?: OrderType;
+      discount?: number;
+      discountPercent?: number;
+      items: {
+        menuItemId: string;
+        quantity: number;
+        tip?: number;
+        specialInstructions?: string;
+        selectedAddonIds?: string[];
+        selectedAddons?: any[];
+      }[];
+    },
+  ) {
+    const existing = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Order with id ${orderId} not found`);
+    }
+
+    const orderType = data.orderType || existing.orderType || OrderType.DINE_IN;
+    const isTakeaway = orderType === OrderType.TAKEAWAY;
+    const tableId = isTakeaway ? null : (data.tableId !== undefined ? data.tableId : existing.tableId);
+
+    if (orderType === OrderType.DINE_IN && !tableId) {
+      throw new BadRequestException('A dining table is required for Dine-In orders.');
+    }
+
+    // Fetch items with price and recipes to compute subtotal and portion cost snapshot
+    const itemIds = data.items.map((i) => i.menuItemId);
+    const menuItems = await this.prisma.menuItem.findMany({
+      where: { id: { in: itemIds } },
+      include: {
+        recipe: {
+          include: {
+            ingredients: {
+              include: { ingredient: true },
+            },
+          },
+        },
+        directIngredient: true,
+      },
+    });
+
+    // Fetch any referenced addons to ensure exact pricing & ingredient deduction
+    const allAddonIds: string[] = [];
+    for (const itm of data.items) {
+      if (Array.isArray(itm.selectedAddonIds)) {
+        allAddonIds.push(...itm.selectedAddonIds);
+      }
+      if (Array.isArray(itm.selectedAddons)) {
+        for (const a of itm.selectedAddons) {
+          if (a?.id) allAddonIds.push(a.id);
+        }
+      }
+    }
+    const dbAddons = allAddonIds.length > 0
+      ? await this.prisma.menuItemAddon.findMany({
+          where: { id: { in: Array.from(new Set(allAddonIds)) } },
+          include: { ingredient: { include: { baseUnit: true } }, unit: true },
+        })
+      : [];
+
+    let subtotal = 0;
+    let totalTip = 0;
+    const orderItemsCreate = data.items.map((cartItem) => {
+      const mi = menuItems.find((m) => m.id === cartItem.menuItemId);
+      if (!mi) throw new NotFoundException(`Item not found`);
+
+      // Resolve selected addons
+      const selectedAddonsSnapshot: any[] = [];
+      let addonsPriceTotal = 0;
+      let addonsCostTotal = 0;
+
+      const itemAddonIds = [
+        ...(cartItem.selectedAddonIds || []),
+        ...(cartItem.selectedAddons?.map((a: any) => a.id) || []),
+      ];
+      const uniqueAddonIds = Array.from(new Set(itemAddonIds.filter(Boolean)));
+
+      for (const addonId of uniqueAddonIds) {
+        const addon = dbAddons.find((a) => a.id === addonId);
+        if (addon) {
+          const aPrice = Number(addon.price);
+          const aQty = Number(addon.quantity || 0);
+          const aCost = addon.ingredient
+            ? Number(addon.ingredient.currentCostPerBaseUnit) * aQty
+            : 0;
+
+          addonsPriceTotal += aPrice;
+          addonsCostTotal += aCost;
+          selectedAddonsSnapshot.push({
+            id: addon.id,
+            name: addon.name,
+            price: aPrice,
+            ingredientId: addon.ingredientId,
+            ingredientName: addon.ingredient?.name,
+            quantity: aQty,
+            unitSymbol: addon.ingredient?.baseUnit?.symbol || addon.unit?.symbol || 'g',
+            costAtSale: Number(aCost.toFixed(4)),
+          });
+        }
+      }
+
+      const unitPrice = Number(mi.price) + addonsPriceTotal;
+      const tipPerItem = Number((cartItem as any).tip || 0);
+      const lineSubtotal = unitPrice * cartItem.quantity;
+      const lineTip = tipPerItem * cartItem.quantity;
+      subtotal += lineSubtotal;
+      totalTip += lineTip;
+
+      // Calculate cost at sale (base recipe + addon ingredients)
+      let costPerPortion = 0;
+      if (mi.isDirectSale && mi.directIngredient) {
+        costPerPortion = Number(mi.directIngredient.currentCostPerBaseUnit);
+      } else if (mi.recipe) {
+        for (const ri of mi.recipe.ingredients) {
+          costPerPortion += Number(ri.ingredient.currentCostPerBaseUnit) * Number(ri.quantity);
+        }
+      }
+      costPerPortion += addonsCostTotal;
+
+      return {
+        menuItemId: mi.id,
+        quantity: cartItem.quantity,
+        unitPrice: unitPrice,
+        tip: tipPerItem,
+        subtotal: lineSubtotal,
+        specialInstructions: cartItem.specialInstructions,
+        status: ItemPrepStatus.PENDING,
+        costAtSale: Number(costPerPortion.toFixed(4)),
+        selectedAddons: selectedAddonsSnapshot.length > 0 ? selectedAddonsSnapshot : undefined,
+      };
+    });
+
+    const discountAmount = data.discount != null && !isNaN(Number(data.discount))
+      ? Number(data.discount)
+      : (data.discountPercent ? (subtotal * Number(data.discountPercent)) / 100 : 0);
+    const taxableAmount = Math.max(0, subtotal - discountAmount);
+    const tax = taxableAmount * 0.15; // 15% Ethiopian VAT
+    const totalAmount = taxableAmount + totalTip + tax;
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.orderItem.deleteMany({
+        where: { orderId },
+      });
+
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          orderType,
+          tableId: tableId || null,
+          customerName: isTakeaway ? (data.customerName || 'Takeaway Customer') : (data.customerName || existing.customerName || 'Guest'),
+          subtotal,
+          tip: totalTip,
+          tax,
+          discount: discountAmount,
+          totalAmount,
+          items: {
+            create: orderItemsCreate,
+          },
+        },
+      });
+    });
+
+    return this.confirmOrder(orderId, data.cashierId);
+  }
+
   // 3. Direct POS Order Entry by Cashier (Walk-in / Dine-in / Takeaway)
   async createPosOrder(data: {
     cashierId: string;

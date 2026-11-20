@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query, Patch } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { OrderStatus, OrderType, PaymentMethod } from '@cafe/shared-types';
 
@@ -58,6 +58,31 @@ export class OrdersController {
     @Body() body: { cashierId: string },
   ) {
     return this.ordersService.confirmOrder(id, body.cashierId);
+  }
+
+  @Put(':id/update-and-confirm')
+  @Post(':id/update-and-confirm')
+  async updateAndConfirmOrder(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      cashierId: string;
+      tableId?: string;
+      customerName?: string;
+      orderType?: OrderType;
+      discount?: number;
+      discountPercent?: number;
+      items: {
+        menuItemId: string;
+        quantity: number;
+        tip?: number;
+        specialInstructions?: string;
+        selectedAddonIds?: string[];
+        selectedAddons?: any[];
+      }[];
+    },
+  ) {
+    return this.ordersService.updateAndConfirmDraftNote(id, body);
   }
 
   @Post(':id/append-items')

@@ -35,6 +35,9 @@ let OrdersController = class OrdersController {
     async confirmOrder(id, body) {
         return this.ordersService.confirmOrder(id, body.cashierId);
     }
+    async updateAndConfirmOrder(id, body) {
+        return this.ordersService.updateAndConfirmDraftNote(id, body);
+    }
     async appendItems(id, body) {
         return this.ordersService.appendItemsToOrder(id, body);
     }
@@ -83,6 +86,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "confirmOrder", null);
+__decorate([
+    (0, common_1.Put)(':id/update-and-confirm'),
+    (0, common_1.Post)(':id/update-and-confirm'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "updateAndConfirmOrder", null);
 __decorate([
     (0, common_1.Post)(':id/append-items'),
     __param(0, (0, common_1.Param)('id')),

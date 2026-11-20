@@ -87,6 +87,7 @@ export function PosView() {
   const [lastCompletedOrder, setLastCompletedOrder] = useState<any | null>(null);
   const [orderToSettle, setOrderToSettle] = useState<any | null>(null);
   const [appendOrderTarget, setAppendOrderTarget] = useState<any | null>(null);
+  const [editingSlipTarget, setEditingSlipTarget] = useState<any | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
 
   const loadActiveOrders = () => {
@@ -319,6 +320,50 @@ export function PosView() {
         return;
       }
 
+      // If reviewing/editing an incoming waiter slip, update that exact slip in-place and fire it!
+      if (editingSlipTarget) {
+        const isTakeaway = orderType === 'TAKEAWAY';
+        const selectedTableObj = isTakeaway ? null : tables.find((t) => t.tableNumber === selectedTable);
+
+        const res = await fetchApi(`/orders/${editingSlipTarget.id}/update-and-confirm`, {
+          method: 'POST',
+          body: JSON.stringify({
+            cashierId: currentUser.id || 'c01-cashier',
+            tableId: selectedTableObj ? selectedTableObj.id : null,
+            customerName: isTakeaway ? (customerName.trim() || 'Takeaway Customer') : (customerName || 'Guest'),
+            orderType,
+            discount: discountAmount,
+            discountPercent,
+            items: cart.map((c) => ({
+              menuItemId: c.menuItemId,
+              quantity: c.quantity,
+              tip: c.tip || 0,
+              specialInstructions: c.specialInstructions,
+              selectedAddonIds: c.selectedAddonIds || [],
+              selectedAddons: c.selectedAddons || [],
+            })),
+          }),
+        });
+
+        setLastCompletedOrder({
+          ...res,
+          subtotal,
+          tip: totalTip,
+          tax,
+          discount: discountAmount,
+          totalAmount: total,
+        });
+
+        setSuccessOrder(res.orderNumber);
+        clearCart();
+        setEditingSlipTarget(null);
+        setPosTab('orders');
+        setTimeout(() => setSuccessOrder(null), 4000);
+        loadActiveOrders();
+        loadData();
+        return;
+      }
+
       // New POS Order
       const isTakeaway = orderType === 'TAKEAWAY';
       const selectedTableObj = isTakeaway ? null : tables.find((t) => t.tableNumber === selectedTable);
@@ -368,6 +413,7 @@ export function PosView() {
   const handleReviewWaiterSlip = (slip: any) => {
     clearCart();
     setAppendOrderTarget(null);
+    setEditingSlipTarget(slip);
     setOrderType(slip.orderType || 'DINE_IN');
     if (slip.orderType === 'TAKEAWAY') {
       setCustomerName(slip.customerName || 'Takeaway Customer');
@@ -496,7 +542,7 @@ export function PosView() {
   const handleSelectTable = (tableNumber: string) => {
     setSelectedTable(tableNumber);
     const tableObj = tables.find((t) => t.tableNumber === tableNumber);
-    if (tableObj) {
+    if (tableObj && !editingSlipTarget) {
       const active = activeOrders.find(
         (o) =>
           o.tableId === tableObj.id &&
@@ -508,13 +554,14 @@ export function PosView() {
       } else {
         setAppendOrderTarget(null);
       }
-    } else {
+    } else if (!editingSlipTarget) {
       setAppendOrderTarget(null);
     }
   };
 
   // Start appending items to an existing active order
   const handleStartAppendItems = (order: any) => {
+    setEditingSlipTarget(null);
     setAppendOrderTarget(order);
     if (order.orderType === 'TAKEAWAY') {
       setOrderType('TAKEAWAY');
@@ -562,12 +609,40 @@ export function PosView() {
           onClick={() => {
             clearCart();
             setAppendOrderTarget(null);
+            setEditingSlipTarget(null);
+            loadData();
           }}
           className="text-xs font-semibold text-stone-400 hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400 transition cursor-pointer flex-shrink-0 ml-2"
         >
           Clear
         </button>
       </div>
+
+      {/* Editing Waiter Note Banner */}
+      {editingSlipTarget && (
+        <div className="mx-3.5 sm:mx-4 mt-3 p-2.5 sm:p-3 bg-amber-50 border border-amber-300 rounded-2xl flex items-center justify-between text-xs flex-shrink-0">
+          <div>
+            <div className="font-black text-amber-900 flex items-center gap-1.5">
+              <FileEdit className="w-3.5 h-3.5 text-amber-600" />
+              <span>Editing Slip {editingSlipTarget.orderNumber?.startsWith('#') ? editingSlipTarget.orderNumber : `#${editingSlipTarget.orderNumber}`}</span>
+            </div>
+            <div className="text-[10px] text-stone-500">
+              {editingSlipTarget.orderType === "TAKEAWAY" ? "Takeaway Order" : `Table ${editingSlipTarget.table?.tableNumber || "Assigned"}`}
+              {editingSlipTarget.waiter?.name ? ` • Waiter: ${editingSlipTarget.waiter.name}` : ''}
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              clearCart();
+              setEditingSlipTarget(null);
+              loadData();
+            }}
+            className="text-[10px] font-bold text-amber-900 hover:text-stone-900 bg-amber-200/80 hover:bg-amber-300 px-2 py-0.5 rounded-lg cursor-pointer transition"
+          >
+            Cancel Edit
+          </button>
+        </div>
+      )}
 
       {/* Append Items Active Banner */}
       {appendOrderTarget && (
@@ -805,7 +880,13 @@ export function PosView() {
             className="flex-1"
           >
             <span>
-              {loading ? "Firing..." : appendOrderTarget ? "Append to Bill" : "Fire to Kitchen"}
+              {loading
+                ? "Firing..."
+                : editingSlipTarget
+                  ? "Update & Fire to Kitchen"
+                  : appendOrderTarget
+                    ? "Append to Bill"
+                    : "Fire to Kitchen"}
             </span>
             <ArrowRight className="w-4 h-4 text-white" />
           </Button>
@@ -874,9 +955,11 @@ export function PosView() {
             >
               <Utensils className="w-3.5 h-3.5" />
               <span>
-                {appendOrderTarget
-                  ? `Append ${appendOrderTarget.orderNumber?.startsWith('#') ? appendOrderTarget.orderNumber : `#${appendOrderTarget.orderNumber}`}`
-                  : '+ New Order'}
+                {editingSlipTarget
+                  ? `Editing ${editingSlipTarget.orderNumber?.startsWith('#') ? editingSlipTarget.orderNumber : `#${editingSlipTarget.orderNumber}`}`
+                  : appendOrderTarget
+                    ? `Append ${appendOrderTarget.orderNumber?.startsWith('#') ? appendOrderTarget.orderNumber : `#${appendOrderTarget.orderNumber}`}`
+                    : '+ New Order'}
               </span>
               {cart.length > 0 && (
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
@@ -1219,7 +1302,9 @@ export function PosView() {
 
               <button
                 onClick={() => {
+                  clearCart();
                   setAppendOrderTarget(null);
+                  setEditingSlipTarget(null);
                   setPosTab('menu');
                 }}
                 className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
@@ -1237,7 +1322,9 @@ export function PosView() {
                 </p>
                 <button
                   onClick={() => {
+                    clearCart();
                     setAppendOrderTarget(null);
+                    setEditingSlipTarget(null);
                     setPosTab('menu');
                   }}
                   className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-xs transition"
@@ -1424,7 +1511,27 @@ export function PosView() {
                 <span>← Back to Orders & Billing</span>
               </button>
 
-              {appendOrderTarget && (
+              {editingSlipTarget ? (
+                <div className="bg-amber-500/20 text-amber-900 border border-amber-500/30 px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                  <FileEdit className="w-3.5 h-3.5 text-amber-600" />
+                  <span>
+                    Editing Waiter Note{' '}
+                    {editingSlipTarget.orderNumber?.startsWith('#')
+                      ? editingSlipTarget.orderNumber
+                      : `#${editingSlipTarget.orderNumber}`}
+                  </span>
+                  <button
+                    onClick={() => {
+                      clearCart();
+                      setEditingSlipTarget(null);
+                      loadData();
+                    }}
+                    className="ml-1 text-red-600 hover:underline cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : appendOrderTarget ? (
                 <div className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>
@@ -1440,7 +1547,7 @@ export function PosView() {
                     Cancel
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
 
             {/* UNIFIED POS ACTION BAR */}
