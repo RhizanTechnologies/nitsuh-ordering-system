@@ -1955,19 +1955,8 @@ export function PosView() {
                     </button>
                   </div>
 
-                  {/* Dine-In: Floor Plan Table Choice */}
-                  {orderType === 'DINE_IN' ? (
-                    <button
-                      type="button"
-                      onClick={() => setTableModalOpen(true)}
-                      className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-emerald-900 transition cursor-pointer"
-                      title="Open Dining Tables & Floor Plan"
-                    >
-                      <LayoutGrid className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>{selectedTable ? `Table ${selectedTable}` : 'Choose Table'}</span>
-                    </button>
-                  ) : (
-                    /* Takeaway: Quick Customer Name */
+                  {/* Takeaway: Quick Customer Name */}
+                  {orderType === 'TAKEAWAY' && (
                     <input
                       type="text"
                       placeholder="Customer name..."
@@ -2284,10 +2273,20 @@ export function PosView() {
         {/* Floor Plan Tables */}
         <button
           onClick={() => setTableModalOpen(true)}
-          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl text-stone-500 hover:text-emerald-600 transition cursor-pointer"
+          className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl transition cursor-pointer ${
+            selectedTable ? 'text-emerald-700 font-black' : 'text-stone-500 hover:text-emerald-600'
+          }`}
+          title="Open Dining Tables & Floor Plan"
         >
-          <LayoutGrid className="w-5 h-5" />
-          <span className="text-[10px] font-bold">Tables</span>
+          <div className="relative">
+            <LayoutGrid className="w-5 h-5" />
+            {selectedTable && (
+              <span className="w-2 h-2 rounded-full bg-emerald-600 absolute -top-0.5 -right-0.5" />
+            )}
+          </div>
+          <span className="text-[10px] font-bold">
+            {selectedTable ? `Table ${selectedTable}` : 'Tables'}
+          </span>
         </button>
       </div>
 
