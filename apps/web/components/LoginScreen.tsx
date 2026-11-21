@@ -149,9 +149,20 @@ export function LoginScreen() {
 
   // Physical Numpad, Hardware Keyboard & Barcode Scanner listener
   useEffect(() => {
-    if (activeTab !== 'pin' || loading) return;
+    if (activeTab !== 'pin' || loading || isForgotModalOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept if user is typing in an input, textarea, select, or if modal is open
+      const target = e.target as HTMLElement | null;
+      if (
+        isForgotModalOpen ||
+        (target &&
+          (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) ||
+            target.isContentEditable))
+      ) {
+        return;
+      }
+
       if (/^[0-9]$/.test(e.key)) {
         e.preventDefault();
         handleNumberClick(e.key);
@@ -166,7 +177,7 @@ export function LoginScreen() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab, loading, pin, selectedStaffId]);
+  }, [activeTab, loading, isForgotModalOpen, pin, selectedStaffId]);
 
   const handlePinSubmit = async (pinToTest?: string) => {
     const finalPin = pinToTest || pin;

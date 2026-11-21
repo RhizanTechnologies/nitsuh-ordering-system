@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { UserRole } from '@prisma/client';
+import { UserRole, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 export interface CreateUserDto {
@@ -476,7 +476,7 @@ export class UsersService {
         entityName: 'User',
         entityId: user.id,
         action: 'CREDENTIAL_RESET_REQUEST',
-        newValue: null,
+        newValue: { equals: Prisma.AnyNull },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -503,7 +503,7 @@ export class UsersService {
           role: user.role,
           note: dto.note?.trim() || 'Forgot credentials / PIN',
         },
-        newValue: null,
+        newValue: Prisma.DbNull,
         reason: `Credential reset requested for ${user.name} (${user.role})`,
       },
     });

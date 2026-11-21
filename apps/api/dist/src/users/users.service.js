@@ -423,7 +423,7 @@ let UsersService = class UsersService {
                 entityName: 'User',
                 entityId: user.id,
                 action: 'CREDENTIAL_RESET_REQUEST',
-                newValue: null,
+                newValue: { equals: client_1.Prisma.AnyNull },
             },
             orderBy: { createdAt: 'desc' },
         });
@@ -448,7 +448,7 @@ let UsersService = class UsersService {
                     role: user.role,
                     note: dto.note?.trim() || 'Forgot credentials / PIN',
                 },
-                newValue: null,
+                newValue: client_1.Prisma.DbNull,
                 reason: `Credential reset requested for ${user.name} (${user.role})`,
             },
         });
