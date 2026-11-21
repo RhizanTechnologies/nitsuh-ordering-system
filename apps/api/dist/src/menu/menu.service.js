@@ -266,6 +266,17 @@ let MenuService = class MenuService {
                 throw new common_1.BadRequestException(`Table "${cleanNumber}" already exists.`);
             }
         }
+        if (data.status === 'AVAILABLE') {
+            await this.prisma.order.updateMany({
+                where: {
+                    tableId: id,
+                    status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] },
+                },
+                data: {
+                    tableId: null,
+                },
+            });
+        }
         const updated = await this.prisma.diningTable.update({
             where: { id },
             data: {

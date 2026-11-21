@@ -156,17 +156,13 @@ export default function TablesPage() {
     setFormLoading(true);
     setError(null);
     try {
-      const payload: any = {
-        tableNumber: tableNumber.trim(),
-        capacity: parseInt(capacity, 10) || 4,
-      };
-      const currentTable = tablesList.find((t) => t.id === editingTableId);
-      if (currentTable?.status !== 'OCCUPIED') {
-        payload.status = status;
-      }
       await fetchApi(`/menu/tables/${editingTableId}`, {
         method: 'PATCH',
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          tableNumber: tableNumber.trim(),
+          capacity: parseInt(capacity, 10) || 4,
+          status,
+        }),
       });
       setSuccessMsg(`Table "${tableNumber}" updated successfully!`);
       setEditingTableId(null);
@@ -175,6 +171,23 @@ export default function TablesPage() {
       setError(err.message || 'Failed to update table');
     } finally {
       setFormLoading(false);
+    }
+  };
+
+  const handleFreeTable = async (tableId: string, name: string) => {
+    if (!confirm(`Are you sure you want to release "${name}" and mark it Available?`)) return;
+    setLoading(true);
+    try {
+      await fetchApi(`/menu/tables/${tableId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'AVAILABLE' }),
+      });
+      setSuccessMsg(`Table "${name}" has been released and is now Available.`);
+      await loadTables();
+    } catch (err: any) {
+      setError(err.message || 'Failed to release table');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -416,20 +429,15 @@ export default function TablesPage() {
                       <label className="block text-[10px] font-black text-stone-600 uppercase mb-1">
                         Table Status
                       </label>
-                      {t.status === 'OCCUPIED' ? (
-                        <div className="text-[11px] font-bold text-rose-700 bg-rose-50 px-3 py-2 rounded-xl border border-rose-200">
-                          Occupied (Settle bill to clear)
-                        </div>
-                      ) : (
-                        <select
-                          value={status}
-                          onChange={(e) => setStatus(e.target.value as any)}
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 bg-stone-50 text-stone-900 cursor-pointer font-medium"
-                        >
-                          <option value="AVAILABLE">Available</option>
-                          <option value="RESERVED">Reserved</option>
-                        </select>
-                      )}
+                      <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as any)}
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 bg-stone-50 text-stone-900 cursor-pointer font-medium"
+                      >
+                        <option value="AVAILABLE">Available (Open)</option>
+                        <option value="RESERVED">Reserved</option>
+                        {t.status === 'OCCUPIED' && <option value="OCCUPIED">Occupied</option>}
+                      </select>
                     </div>
 
                     {error && editingTableId === t.id && (
@@ -497,29 +505,52 @@ export default function TablesPage() {
 
                   {isOccupied && (() => {
                     const activeOrder = activeOrders.find((o) => o.tableId === t.id);
-                    if (!activeOrder) return null;
-                    const prep = calculatePrepTime(activeOrder.createdAt);
+                    const prep = activeOrder ? calculatePrepTime(activeOrder.createdAt) : null;
                     return (
                       <div className="bg-white rounded-2xl p-2.5 mb-3 border border-stone-200 text-xs space-y-1.5 shadow-2xs">
-                        <div className="flex items-center justify-between">
-                          <span className="font-black text-stone-900">{activeOrder.orderNumber}</span>
-                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${prep.badgeClass}`}>
-                            {prep.formattedTime}
-                          </span>
+                        {activeOrder ? (
+                          <>
+                            <div className="flex items-center justify-between">
+                              <span className="font-black text-stone-900">{activeOrder.orderNumber}</span>
+                              {prep && (
+                                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${prep.badgeClass}`}>
+                                  {prep.formattedTime}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between text-[11px] text-stone-600">
+                              <span>Server: <strong className="text-emerald-700">{activeOrder.waiter?.name || 'Staff'}</strong></span>
+                              <span className="font-extrabold text-stone-900 font-mono">
+                                {Number(activeOrder.totalAmount || 0).toFixed(2)} ETB
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-[11px] font-bold text-amber-800 py-1">
+                            Table marked occupied (no active order found).
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1.5 pt-1">
+                          {activeOrder && (
+                            <Link
+                              href="/pos"
+                              className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 transition shadow-xs"
+                            >
+                              <span>Settle in POS</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </Link>
+                          )}
+                          {isOwnerOrManager && (
+                            <button
+                              type="button"
+                              onClick={() => handleFreeTable(t.id, t.tableNumber)}
+                              className="py-1.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] rounded-xl transition cursor-pointer"
+                              title="Force clear table and set to Available"
+                            >
+                              Free Table
+                            </button>
+                          )}
                         </div>
-                        <div className="flex items-center justify-between text-[11px] text-stone-600">
-                          <span>Server: <strong className="text-emerald-700">{activeOrder.waiter?.name || 'Staff'}</strong></span>
-                          <span className="font-extrabold text-stone-900 font-mono">
-                            {Number(activeOrder.totalAmount || 0).toFixed(2)} ETB
-                          </span>
-                        </div>
-                        <Link
-                          href="/pos"
-                          className="mt-1 w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 transition shadow-xs"
-                        >
-                          <span>Settle in POS</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </Link>
                       </div>
                     );
                   })()}

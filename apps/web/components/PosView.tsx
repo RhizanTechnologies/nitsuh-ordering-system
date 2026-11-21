@@ -323,8 +323,13 @@ export function PosView() {
   }, [activeOrders]);
 
   // Orders filtered by the selected date bucket (today by default, yesterday, day before, 3-day range, or all days)
+  // CRITICAL: Any unsettled order (unpaid bill or active kitchen/floor order) MUST ALWAYS be visible on the POS screen!
+  // Unsettled dining orders cannot be hidden simply because midnight rolled over.
   const dayFilteredOrders = useMemo(() => {
     return activeOrders.filter((o) => {
+      const isUnsettled = o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED' && o.status !== 'CANCELLED';
+      if (isUnsettled) return true;
+
       const key = getOrderDayKey(o.createdAt);
       if (dateFilter === 'today') return key === 'today';
       if (dateFilter === 'yesterday') return key === 'yesterday';
@@ -335,15 +340,15 @@ export function PosView() {
     });
   }, [activeOrders, dateFilter]);
 
-  // Statistics calculation for Cashier Command Center (scoped to selected date bucket)
+  // Statistics calculation for Cashier Command Center (unpaid bills count ALL active unsettled bills)
   const unpaidOrders = useMemo(
-    () => dayFilteredOrders.filter((o) => o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED'),
-    [dayFilteredOrders]
+    () => activeOrders.filter((o) => o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED' && o.status !== 'CANCELLED'),
+    [activeOrders]
   );
   const unpaidTotalAmount = useMemo(() => unpaidOrders.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0), [unpaidOrders]);
-  const inPrepCount = useMemo(() => dayFilteredOrders.filter((o) => ['CONFIRMED', 'IN_PREPARATION'].includes(o.status)).length, [dayFilteredOrders]);
-  const readyCount = useMemo(() => dayFilteredOrders.filter((o) => o.status === 'READY').length, [dayFilteredOrders]);
-  const servedCount = useMemo(() => dayFilteredOrders.filter((o) => o.status === 'SERVED').length, [dayFilteredOrders]);
+  const inPrepCount = useMemo(() => activeOrders.filter((o) => ['CONFIRMED', 'IN_PREPARATION'].includes(o.status)).length, [activeOrders]);
+  const readyCount = useMemo(() => activeOrders.filter((o) => o.status === 'READY').length, [activeOrders]);
+  const servedCount = useMemo(() => activeOrders.filter((o) => o.status === 'SERVED' && o.paymentStatus !== 'PAID').length, [activeOrders]);
 
   // Filtered & Sorted Orders for the Cashier main page
   // Requirement: UNPAID and SERVED orders MUST appear FIRST!
