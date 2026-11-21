@@ -1878,7 +1878,7 @@ export function PosView() {
                 className="flex items-center gap-1.5 text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white transition cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>← Back to Orders & Billing</span>
+                <span>Back to Orders & Billing</span>
               </button>
 
               {editingSlipTarget ? (
