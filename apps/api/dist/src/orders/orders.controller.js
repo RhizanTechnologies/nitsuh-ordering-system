@@ -28,7 +28,13 @@ let OrdersController = class OrdersController {
         return this.ordersService.getWaiterDraftSlips();
     }
     async createWaiterDraftNote(body) {
-        return this.ordersService.createWaiterDraftNote(body);
+        try {
+            return await this.ordersService.createWaiterDraftNote(body);
+        }
+        catch (err) {
+            console.error('ERROR in createWaiterDraftNote:', err);
+            throw new common_1.BadRequestException(err?.message || 'Failed to create waiter draft note');
+        }
     }
     async createPosOrder(body) {
         return this.ordersService.createPosOrder(body);

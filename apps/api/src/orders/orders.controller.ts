@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, Query, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query, Patch, BadRequestException } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { OrderStatus, OrderType, PaymentMethod } from '@cafe/shared-types';
 
@@ -37,7 +37,12 @@ export class OrdersController {
       items: { menuItemId: string; quantity: number; specialInstructions?: string; selectedAddonIds?: string[]; selectedAddons?: any[] }[];
     },
   ) {
-    return this.ordersService.createWaiterDraftNote(body);
+    try {
+      return await this.ordersService.createWaiterDraftNote(body);
+    } catch (err: any) {
+      console.error('ERROR in createWaiterDraftNote:', err);
+      throw new BadRequestException(err?.message || 'Failed to create waiter draft note');
+    }
   }
 
   @Post('pos')

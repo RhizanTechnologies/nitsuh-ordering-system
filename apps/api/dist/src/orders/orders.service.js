@@ -15,6 +15,10 @@ const prisma_service_1 = require("../prisma.service");
 const events_gateway_1 = require("../events/events.gateway");
 const shared_types_1 = require("@cafe/shared-types");
 const client_1 = require("@prisma/client");
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isUuid(val) {
+    return Boolean(val && UUID_REGEX.test(val));
+}
 let OrdersService = class OrdersService {
     constructor(prisma, eventsGateway) {
         this.prisma = prisma;
@@ -24,7 +28,28 @@ let OrdersService = class OrdersService {
         if (data.orderType === shared_types_1.OrderType.DINE_IN && !data.tableId) {
             throw new common_1.BadRequestException('A dining table is required for Dine-In orders.');
         }
-        let waiter = data.waiterId ? await this.prisma.user.findUnique({ where: { id: data.waiterId } }) : null;
+        let resolvedTableId = isUuid(data.tableId) ? data.tableId : null;
+        if (data.tableId && !resolvedTableId) {
+            try {
+                const table = await this.prisma.diningTable.findFirst({
+                    where: {
+                        OR: [
+                            { tableNumber: data.tableId },
+                            { tableNumber: { startsWith: data.tableId } },
+                        ],
+                    },
+                });
+                resolvedTableId = table ? table.id : null;
+            }
+            catch (_) { }
+        }
+        let waiter = null;
+        if (isUuid(data.waiterId)) {
+            try {
+                waiter = await this.prisma.user.findUnique({ where: { id: data.waiterId } });
+            }
+            catch (_) { }
+        }
         if (!waiter) {
             waiter = await this.prisma.user.findFirst({ where: { role: 'WAITER', isActive: true } });
         }
@@ -34,10 +59,10 @@ let OrdersService = class OrdersService {
         if (!cashier) {
             cashier = waiter || (await this.prisma.user.findFirst({ where: { isActive: true } })) || (await this.prisma.user.findFirst());
         }
-        if (data.tableId && data.orderType !== shared_types_1.OrderType.TAKEAWAY) {
+        if (resolvedTableId && data.orderType !== shared_types_1.OrderType.TAKEAWAY) {
             const activeUnsettledOrder = await this.prisma.order.findFirst({
                 where: {
-                    tableId: data.tableId,
+                    tableId: resolvedTableId,
                     paymentStatus: { not: shared_types_1.PaymentStatus.PAID },
                     status: { in: [shared_types_1.OrderStatus.DRAFT_NOTE, shared_types_1.OrderStatus.CONFIRMED, shared_types_1.OrderStatus.IN_PREPARATION, shared_types_1.OrderStatus.READY, shared_types_1.OrderStatus.SERVED] },
                 },
@@ -175,7 +200,7 @@ let OrdersService = class OrdersService {
                 data: {
                     orderNumber,
                     orderType: data.orderType || shared_types_1.OrderType.DINE_IN,
-                    tableId: data.tableId || null,
+                    tableId: resolvedTableId || null,
                     customerName: data.customerName || 'Guest',
                     waiterId: waiter ? waiter.id : null,
                     cashierId: resolvedCashierId,
@@ -206,7 +231,7 @@ let OrdersService = class OrdersService {
                     data: {
                         orderNumber,
                         orderType: data.orderType || shared_types_1.OrderType.DINE_IN,
-                        tableId: data.tableId || null,
+                        tableId: resolvedTableId || null,
                         customerName: data.customerName || 'Guest',
                         waiterId: waiter ? waiter.id : null,
                         cashierId: resolvedCashierId,
@@ -234,7 +259,7 @@ let OrdersService = class OrdersService {
                 const fallbackData = {
                     orderNumber,
                     orderType: data.orderType || shared_types_1.OrderType.DINE_IN,
-                    tableId: data.tableId || null,
+                    tableId: resolvedTableId || null,
                     customerName: data.customerName || 'Guest',
                     waiterId: waiter ? waiter.id : null,
                     cashierId: resolvedCashierId,
@@ -905,9 +930,18 @@ let OrdersService = class OrdersService {
         const kitchenStore = await this.prisma.inventoryLocation.findUnique({
             where: { type: shared_types_1.LocationType.KITCHEN_STORE },
         });
-        let validUserId = data.cashierId || order.cashierId;
-        const userExists = await this.prisma.user.findUnique({ where: { id: validUserId } });
-        if (!userExists) {
+        let validUserId = isUuid(data.cashierId) ? data.cashierId : null;
+        if (validUserId) {
+            try {
+                const userExists = await this.prisma.user.findUnique({ where: { id: validUserId } });
+                if (!userExists)
+                    validUserId = null;
+            }
+            catch (_) {
+                validUserId = null;
+            }
+        }
+        if (!validUserId) {
             const anyUser = await this.prisma.user.findFirst();
             validUserId = anyUser ? anyUser.id : order.cashierId;
         }

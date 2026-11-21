@@ -9,7 +9,7 @@ export declare class OrdersService {
     createWaiterDraftNote(data: {
         tableId?: string;
         customerName?: string;
-        waiterId: string;
+        waiterId?: string;
         orderType?: OrderType;
         notes?: string;
         discount?: number;
@@ -249,10 +249,10 @@ export declare class OrdersService {
             id: string;
             createdAt: Date;
             orderId: string;
-            cashierShiftId: string | null;
             amount: Prisma.Decimal;
             paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
             transactionRef: string | null;
+            cashierShiftId: string | null;
         };
         order: {
             table: {
@@ -301,10 +301,10 @@ export declare class OrdersService {
                 id: string;
                 createdAt: Date;
                 orderId: string;
-                cashierShiftId: string | null;
                 amount: Prisma.Decimal;
                 paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
                 transactionRef: string | null;
+                cashierShiftId: string | null;
             }[];
         } & {
             id: string;
@@ -390,10 +390,10 @@ export declare class OrdersService {
             id: string;
             createdAt: Date;
             orderId: string;
-            cashierShiftId: string | null;
             amount: Prisma.Decimal;
             paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
             transactionRef: string | null;
+            cashierShiftId: string | null;
         }[];
     } & {
         id: string;

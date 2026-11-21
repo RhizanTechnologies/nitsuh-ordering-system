@@ -12,6 +12,11 @@ import {
 } from '@cafe/shared-types';
 import { Prisma, TableStatus } from '@prisma/client';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isUuid(val?: string | null): boolean {
+  return Boolean(val && UUID_REGEX.test(val));
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -23,7 +28,7 @@ export class OrdersService {
   async createWaiterDraftNote(data: {
     tableId?: string;
     customerName?: string;
-    waiterId: string;
+    waiterId?: string;
     orderType?: OrderType;
     notes?: string;
     discount?: number;
@@ -40,8 +45,29 @@ export class OrdersService {
       throw new BadRequestException('A dining table is required for Dine-In orders.');
     }
 
-    // Ensure valid user foreign keys
-    let waiter = data.waiterId ? await this.prisma.user.findUnique({ where: { id: data.waiterId } }) : null;
+    // Resolve table safely (support both UUID and tableNumber)
+    let resolvedTableId = isUuid(data.tableId) ? data.tableId : null;
+    if (data.tableId && !resolvedTableId) {
+      try {
+        const table = await this.prisma.diningTable.findFirst({
+          where: {
+            OR: [
+              { tableNumber: data.tableId },
+              { tableNumber: { startsWith: data.tableId } },
+            ],
+          },
+        });
+        resolvedTableId = table ? table.id : null;
+      } catch (_) {}
+    }
+
+    // Ensure valid user foreign keys safely (avoid querying non-UUIDs)
+    let waiter = null;
+    if (isUuid(data.waiterId)) {
+      try {
+        waiter = await this.prisma.user.findUnique({ where: { id: data.waiterId! } });
+      } catch (_) {}
+    }
     if (!waiter) {
       waiter = await this.prisma.user.findFirst({ where: { role: 'WAITER', isActive: true } });
     }
@@ -52,11 +78,11 @@ export class OrdersService {
       cashier = waiter || (await this.prisma.user.findFirst({ where: { isActive: true } })) || (await this.prisma.user.findFirst());
     }
 
-    // If dine-in and tableId specified, automatically append to active unsettled bill if guests order more items!
-    if (data.tableId && data.orderType !== OrderType.TAKEAWAY) {
+    // If dine-in and table specified, automatically append to active unsettled bill if guests order more items!
+    if (resolvedTableId && data.orderType !== OrderType.TAKEAWAY) {
       const activeUnsettledOrder = await this.prisma.order.findFirst({
         where: {
-          tableId: data.tableId,
+          tableId: resolvedTableId,
           paymentStatus: { not: PaymentStatus.PAID },
           status: { in: [OrderStatus.DRAFT_NOTE, OrderStatus.CONFIRMED, OrderStatus.IN_PREPARATION, OrderStatus.READY, OrderStatus.SERVED] },
         },
@@ -213,7 +239,7 @@ export class OrdersService {
         data: {
           orderNumber,
           orderType: data.orderType || OrderType.DINE_IN,
-          tableId: data.tableId || null,
+          tableId: resolvedTableId || null,
           customerName: data.customerName || 'Guest',
           waiterId: waiter ? waiter.id : null,
           cashierId: resolvedCashierId,
@@ -244,7 +270,7 @@ export class OrdersService {
           data: {
             orderNumber,
             orderType: data.orderType || OrderType.DINE_IN,
-            tableId: data.tableId || null,
+            tableId: resolvedTableId || null,
             customerName: data.customerName || 'Guest',
             waiterId: waiter ? waiter.id : null,
             cashierId: resolvedCashierId,
@@ -271,7 +297,7 @@ export class OrdersService {
         const fallbackData: any = {
           orderNumber,
           orderType: data.orderType || OrderType.DINE_IN,
-          tableId: data.tableId || null,
+          tableId: resolvedTableId || null,
           customerName: data.customerName || 'Guest',
           waiterId: waiter ? waiter.id : null,
           cashierId: resolvedCashierId,
@@ -1089,9 +1115,16 @@ export class OrdersService {
     });
 
     // Ensure a valid userId for direct inventory logs
-    let validUserId = data.cashierId || order.cashierId;
-    const userExists = await this.prisma.user.findUnique({ where: { id: validUserId } });
-    if (!userExists) {
+    let validUserId = isUuid(data.cashierId) ? data.cashierId : null;
+    if (validUserId) {
+      try {
+        const userExists = await this.prisma.user.findUnique({ where: { id: validUserId } });
+        if (!userExists) validUserId = null;
+      } catch (_) {
+        validUserId = null;
+      }
+    }
+    if (!validUserId) {
       const anyUser = await this.prisma.user.findFirst();
       validUserId = anyUser ? anyUser.id : order.cashierId;
     }
