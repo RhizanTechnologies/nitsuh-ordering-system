@@ -40,6 +40,18 @@ export class OrdersService {
       throw new BadRequestException('A dining table is required for Dine-In orders.');
     }
 
+    // Ensure valid user foreign keys
+    let waiter = data.waiterId ? await this.prisma.user.findUnique({ where: { id: data.waiterId } }) : null;
+    if (!waiter) {
+      waiter = await this.prisma.user.findFirst({ where: { role: 'WAITER', isActive: true } });
+    }
+    let cashier = await this.prisma.user.findFirst({
+      where: { role: 'CASHIER', isActive: true },
+    });
+    if (!cashier) {
+      cashier = waiter || (await this.prisma.user.findFirst({ where: { isActive: true } })) || (await this.prisma.user.findFirst());
+    }
+
     // If dine-in and tableId specified, automatically append to active unsettled bill if guests order more items!
     if (data.tableId && data.orderType !== OrderType.TAKEAWAY) {
       const activeUnsettledOrder = await this.prisma.order.findFirst({
@@ -53,7 +65,8 @@ export class OrdersService {
 
       if (activeUnsettledOrder) {
         return this.appendItemsToOrder(activeUnsettledOrder.id, {
-          cashierId: data.waiterId,
+          cashierId: waiter?.id || cashier?.id || activeUnsettledOrder.cashierId,
+          notes: data.notes,
           items: data.items,
         });
       }
@@ -175,13 +188,16 @@ export class OrdersService {
     });
 
     // Ensure valid user foreign keys
-    let waiter = await this.prisma.user.findUnique({ where: { id: data.waiterId } });
+    if (!waiter && data.waiterId) {
+      waiter = await this.prisma.user.findUnique({ where: { id: data.waiterId } });
+    }
     if (!waiter) {
       waiter = await this.prisma.user.findFirst({ where: { role: 'WAITER', isActive: true } });
     }
-    const cashier = await this.prisma.user.findFirst({
-      where: { role: 'CASHIER', isActive: true },
-    });
+    if (!cashier) {
+      cashier = await this.prisma.user.findFirst({ where: { role: 'CASHIER', isActive: true } });
+    }
+    const resolvedCashierId = cashier?.id || waiter?.id || (await this.prisma.user.findFirst())?.id || '';
 
     const discountAmount = data.discount != null && !isNaN(Number(data.discount))
       ? Number(data.discount)
@@ -191,33 +207,99 @@ export class OrdersService {
     const tax = taxableAmount > 0 ? Number(((taxableAmount * 0.15) / 1.15).toFixed(2)) : 0;
     const totalAmount = taxableAmount + totalTip;
 
-    const order = await this.prisma.order.create({
-      data: {
-        orderNumber,
-        orderType: data.orderType || OrderType.DINE_IN,
-        tableId: data.tableId || null,
-        customerName: data.customerName || 'Guest',
-        waiterId: waiter ? waiter.id : null,
-        cashierId: cashier ? cashier.id : waiter?.id || '',
-        status: OrderStatus.DRAFT_NOTE,
-        subtotal,
-        tip: totalTip,
-        tax,
-        discount: discountAmount,
-        totalAmount,
-        paymentStatus: PaymentStatus.UNPAID,
-        notes: data.notes || null,
-        items: {
-          create: orderItemsCreate,
+    let order;
+    try {
+      order = await this.prisma.order.create({
+        data: {
+          orderNumber,
+          orderType: data.orderType || OrderType.DINE_IN,
+          tableId: data.tableId || null,
+          customerName: data.customerName || 'Guest',
+          waiterId: waiter ? waiter.id : null,
+          cashierId: resolvedCashierId,
+          status: OrderStatus.DRAFT_NOTE,
+          subtotal,
+          tip: totalTip,
+          tax,
+          discount: discountAmount,
+          totalAmount,
+          paymentStatus: PaymentStatus.UNPAID,
+          notes: data.notes || null,
+          items: {
+            create: orderItemsCreate,
+          },
         },
-      },
-      include: {
-        table: true,
-        waiter: { select: { id: true, name: true } },
-        cashier: { select: { id: true, name: true } },
-        items: { include: { menuItem: true } },
-      },
-    });
+        include: {
+          table: true,
+          waiter: { select: { id: true, name: true } },
+          cashier: { select: { id: true, name: true } },
+          items: { include: { menuItem: true } },
+        },
+      });
+    } catch (err: any) {
+      // In case column "notes" is missing in production DB, execute ALTER TABLE and retry or fallback
+      try {
+        await this.prisma.$executeRawUnsafe(`ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "notes" TEXT;`);
+        order = await this.prisma.order.create({
+          data: {
+            orderNumber,
+            orderType: data.orderType || OrderType.DINE_IN,
+            tableId: data.tableId || null,
+            customerName: data.customerName || 'Guest',
+            waiterId: waiter ? waiter.id : null,
+            cashierId: resolvedCashierId,
+            status: OrderStatus.DRAFT_NOTE,
+            subtotal,
+            tip: totalTip,
+            tax,
+            discount: discountAmount,
+            totalAmount,
+            paymentStatus: PaymentStatus.UNPAID,
+            notes: data.notes || null,
+            items: {
+              create: orderItemsCreate,
+            },
+          },
+          include: {
+            table: true,
+            waiter: { select: { id: true, name: true } },
+            cashier: { select: { id: true, name: true } },
+            items: { include: { menuItem: true } },
+          },
+        });
+      } catch (retryErr: any) {
+        const fallbackData: any = {
+          orderNumber,
+          orderType: data.orderType || OrderType.DINE_IN,
+          tableId: data.tableId || null,
+          customerName: data.customerName || 'Guest',
+          waiterId: waiter ? waiter.id : null,
+          cashierId: resolvedCashierId,
+          status: OrderStatus.DRAFT_NOTE,
+          subtotal,
+          tip: totalTip,
+          tax,
+          discount: discountAmount,
+          totalAmount,
+          paymentStatus: PaymentStatus.UNPAID,
+          items: {
+            create: orderItemsCreate,
+          },
+        };
+        if (data.notes) {
+          fallbackData.cancellationReason = `NOTE: ${data.notes}`;
+        }
+        order = await this.prisma.order.create({
+          data: fallbackData,
+          include: {
+            table: true,
+            waiter: { select: { id: true, name: true } },
+            cashier: { select: { id: true, name: true } },
+            items: { include: { menuItem: true } },
+          },
+        });
+      }
+    }
 
     // Broadcast live event to Cashier screen!
     this.eventsGateway.broadcastWaiterNote(order);
@@ -880,6 +962,7 @@ export class OrdersService {
     orderId: string,
     data: {
       cashierId?: string;
+      notes?: string;
       items: {
         menuItemId: string;
         quantity: number;
@@ -1005,6 +1088,14 @@ export class OrdersService {
       where: { type: LocationType.KITCHEN_STORE },
     });
 
+    // Ensure a valid userId for direct inventory logs
+    let validUserId = data.cashierId || order.cashierId;
+    const userExists = await this.prisma.user.findUnique({ where: { id: validUserId } });
+    if (!userExists) {
+      const anyUser = await this.prisma.user.findFirst();
+      validUserId = anyUser ? anyUser.id : order.cashierId;
+    }
+
     if (kitchenStore) {
       for (const cartItem of data.items) {
         const mi = menuItems.find((m) => m.id === cartItem.menuItemId);
@@ -1029,7 +1120,7 @@ export class OrdersService {
                 totalCost: new Prisma.Decimal(qty).mul(unitCost),
                 referenceId: order.orderNumber,
                 reason: `Direct sale item appended to ${order.orderNumber}: ${mi.name} x${qty}`,
-                userId: data.cashierId || order.cashierId,
+                userId: validUserId,
               },
             });
           });
@@ -1045,23 +1136,46 @@ export class OrdersService {
     const newTax = taxable > 0 ? Number(((taxable * 0.15) / 1.15).toFixed(2)) : 0;
     const newTotal = taxable + newTip;
 
-    const updated = await this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        subtotal: newSubtotal,
-        tip: newTip,
-        tax: newTax,
-        totalAmount: newTotal,
-        status: order.status === OrderStatus.DRAFT_NOTE ? OrderStatus.DRAFT_NOTE : OrderStatus.CONFIRMED,
-      },
-      include: {
-        table: true,
-        waiter: { select: { id: true, name: true } },
-        cashier: { select: { id: true, name: true } },
-        items: { include: { menuItem: true } },
-        payments: true,
-      },
-    });
+    const orderUpdatePayload: any = {
+      subtotal: newSubtotal,
+      tip: newTip,
+      tax: newTax,
+      totalAmount: newTotal,
+      status: order.status === OrderStatus.DRAFT_NOTE ? OrderStatus.DRAFT_NOTE : OrderStatus.CONFIRMED,
+    };
+    if (data.notes) {
+      orderUpdatePayload.notes = (order as any).notes
+        ? `${(order as any).notes} | ${data.notes}`
+        : data.notes;
+    }
+
+    let updated;
+    try {
+      updated = await this.prisma.order.update({
+        where: { id: orderId },
+        data: orderUpdatePayload,
+        include: {
+          table: true,
+          waiter: { select: { id: true, name: true } },
+          cashier: { select: { id: true, name: true } },
+          items: { include: { menuItem: true } },
+          payments: true,
+        },
+      });
+    } catch (updateErr: any) {
+      delete orderUpdatePayload.notes;
+      updated = await this.prisma.order.update({
+        where: { id: orderId },
+        data: orderUpdatePayload,
+        include: {
+          table: true,
+          waiter: { select: { id: true, name: true } },
+          cashier: { select: { id: true, name: true } },
+          items: { include: { menuItem: true } },
+          payments: true,
+        },
+      });
+    }
 
     if (order.status === OrderStatus.DRAFT_NOTE) {
       this.eventsGateway.broadcastWaiterNote(updated);

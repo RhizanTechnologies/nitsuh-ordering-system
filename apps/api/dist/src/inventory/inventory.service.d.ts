@@ -33,9 +33,9 @@ export declare class InventoryService {
             id: string;
             quantity: Prisma.Decimal;
             ingredientId: string;
+            locationId: string;
             reservedQuantity: Prisma.Decimal;
             lastUpdatedAt: Date;
-            locationId: string;
         })[];
     } & {
         id: string;
@@ -75,9 +75,9 @@ export declare class InventoryService {
         id: string;
         quantity: Prisma.Decimal;
         ingredientId: string;
+        locationId: string;
         reservedQuantity: Prisma.Decimal;
         lastUpdatedAt: Date;
-        locationId: string;
     })[]>;
     requestTransfer(requestedById: string, items: {
         ingredientId: string;
@@ -108,10 +108,10 @@ export declare class InventoryService {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: Prisma.Decimal;
             dispatchedQty: Prisma.Decimal | null;
             receivedQty: Prisma.Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -160,10 +160,10 @@ export declare class InventoryService {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: Prisma.Decimal;
             dispatchedQty: Prisma.Decimal | null;
             receivedQty: Prisma.Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -217,10 +217,10 @@ export declare class InventoryService {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: Prisma.Decimal;
             dispatchedQty: Prisma.Decimal | null;
             receivedQty: Prisma.Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -270,10 +270,10 @@ export declare class InventoryService {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: Prisma.Decimal;
             dispatchedQty: Prisma.Decimal | null;
             receivedQty: Prisma.Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -334,10 +334,10 @@ export declare class InventoryService {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: Prisma.Decimal;
             dispatchedQty: Prisma.Decimal | null;
             receivedQty: Prisma.Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         sourceLocation: {
@@ -402,14 +402,14 @@ export declare class InventoryService {
         id: string;
         createdAt: Date;
         quantity: Prisma.Decimal;
-        ingredientId: string;
         transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+        sourceLocationId: string | null;
+        destLocationId: string | null;
+        ingredientId: string;
         unitCost: Prisma.Decimal;
         totalCost: Prisma.Decimal;
         referenceId: string | null;
         reason: string | null;
-        sourceLocationId: string | null;
-        destLocationId: string | null;
         userId: string;
     }>;
     getTransfers(): Promise<({
@@ -445,10 +445,10 @@ export declare class InventoryService {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: Prisma.Decimal;
             dispatchedQty: Prisma.Decimal | null;
             receivedQty: Prisma.Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -481,6 +481,18 @@ export declare class InventoryService {
             name: string;
             role: import("@prisma/client").$Enums.UserRole;
         };
+        sourceLocation: {
+            id: string;
+            createdAt: Date;
+            name: string;
+            type: import("@prisma/client").$Enums.LocationType;
+        };
+        destLocation: {
+            id: string;
+            createdAt: Date;
+            name: string;
+            type: import("@prisma/client").$Enums.LocationType;
+        };
         ingredient: {
             baseUnit: {
                 symbol: string;
@@ -502,30 +514,18 @@ export declare class InventoryService {
             reorderThresholdMain: Prisma.Decimal;
             reorderThresholdKitchen: Prisma.Decimal;
         };
-        sourceLocation: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            type: import("@prisma/client").$Enums.LocationType;
-        };
-        destLocation: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            type: import("@prisma/client").$Enums.LocationType;
-        };
     } & {
         id: string;
         createdAt: Date;
         quantity: Prisma.Decimal;
-        ingredientId: string;
         transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+        sourceLocationId: string | null;
+        destLocationId: string | null;
+        ingredientId: string;
         unitCost: Prisma.Decimal;
         totalCost: Prisma.Decimal;
         referenceId: string | null;
         reason: string | null;
-        sourceLocationId: string | null;
-        destLocationId: string | null;
         userId: string;
     })[]>;
     getSuppliers(): Promise<({
@@ -586,9 +586,9 @@ export declare class InventoryService {
             id: string;
             quantity: Prisma.Decimal;
             ingredientId: string;
-            unitId: string;
             unitCost: Prisma.Decimal;
             totalCost: Prisma.Decimal;
+            unitId: string;
             purchaseOrderId: string;
         })[];
         supplier: {
@@ -683,22 +683,22 @@ export declare class InventoryService {
             id: string;
             quantity: Prisma.Decimal;
             ingredientId: string;
+            locationId: string;
             reservedQuantity: Prisma.Decimal;
             lastUpdatedAt: Date;
-            locationId: string;
         };
         transaction: {
             id: string;
             createdAt: Date;
             quantity: Prisma.Decimal;
-            ingredientId: string;
             transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+            sourceLocationId: string | null;
+            destLocationId: string | null;
+            ingredientId: string;
             unitCost: Prisma.Decimal;
             totalCost: Prisma.Decimal;
             referenceId: string | null;
             reason: string | null;
-            sourceLocationId: string | null;
-            destLocationId: string | null;
             userId: string;
         };
     }>;
@@ -738,10 +738,10 @@ export declare class InventoryService {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: Prisma.Decimal;
             dispatchedQty: Prisma.Decimal | null;
             receivedQty: Prisma.Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -769,13 +769,6 @@ export declare class InventoryService {
         approvedById: string | null;
     }>;
     getIngredients(): Promise<({
-        baseUnit: {
-            symbol: string;
-            id: string;
-            name: string;
-            type: import("@prisma/client").$Enums.UnitType;
-            baseMultiplier: Prisma.Decimal;
-        };
         balances: ({
             location: {
                 id: string;
@@ -787,10 +780,17 @@ export declare class InventoryService {
             id: string;
             quantity: Prisma.Decimal;
             ingredientId: string;
+            locationId: string;
             reservedQuantity: Prisma.Decimal;
             lastUpdatedAt: Date;
-            locationId: string;
         })[];
+        baseUnit: {
+            symbol: string;
+            id: string;
+            name: string;
+            type: import("@prisma/client").$Enums.UnitType;
+            baseMultiplier: Prisma.Decimal;
+        };
     } & {
         id: string;
         createdAt: Date;
@@ -852,13 +852,6 @@ export declare class InventoryService {
         reorderThresholdKitchen?: number;
         isActive?: boolean;
     }): Promise<{
-        baseUnit: {
-            symbol: string;
-            id: string;
-            name: string;
-            type: import("@prisma/client").$Enums.UnitType;
-            baseMultiplier: Prisma.Decimal;
-        };
         balances: ({
             location: {
                 id: string;
@@ -870,10 +863,17 @@ export declare class InventoryService {
             id: string;
             quantity: Prisma.Decimal;
             ingredientId: string;
+            locationId: string;
             reservedQuantity: Prisma.Decimal;
             lastUpdatedAt: Date;
-            locationId: string;
         })[];
+        baseUnit: {
+            symbol: string;
+            id: string;
+            name: string;
+            type: import("@prisma/client").$Enums.UnitType;
+            baseMultiplier: Prisma.Decimal;
+        };
     } & {
         id: string;
         createdAt: Date;

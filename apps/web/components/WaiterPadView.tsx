@@ -266,8 +266,9 @@ export function WaiterPadView() {
   const totalWaiterItems = waiterCart.reduce((sum, item) => sum + item.quantity, 0);
   const totalWaiterBase = waiterCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalWaiterTip = waiterCart.reduce((sum, item) => sum + (item.tip || 0) * item.quantity, 0);
-  const totalWaiterTax = totalWaiterBase * 0.15;
-  const totalWaiterSum = totalWaiterBase + totalWaiterTip + totalWaiterTax;
+  // All menu prices are VAT-inclusive (15% included in base price)
+  const totalWaiterTax = totalWaiterBase > 0 ? (totalWaiterBase * 0.15) / 1.15 : 0;
+  const totalWaiterSum = totalWaiterBase + totalWaiterTip;
 
   const getCustomUnitPrice = (item: any) => {
     if (!item) return 0;
@@ -1036,9 +1037,9 @@ export function WaiterPadView() {
                   <span>+{totalWaiterTip.toFixed(2)} ETB</span>
                 </div>
               )}
-              <div className="flex justify-between items-center">
-                <span>15% VAT</span>
-                <span className="font-bold text-stone-900">{totalWaiterTax.toFixed(2)} ETB</span>
+              <div className="flex justify-between items-center text-stone-400 text-[11px]">
+                <span>VAT (15% Included)</span>
+                <span>{totalWaiterTax.toFixed(2)} ETB</span>
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-stone-200 font-black text-sm text-stone-900">
                 <span>Total</span>

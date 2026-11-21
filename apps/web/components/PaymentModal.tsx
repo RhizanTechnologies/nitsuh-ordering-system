@@ -25,6 +25,7 @@ export function PaymentModal({
   const [customTip, setCustomTip] = useState<string>('');
   const [cashReceived, setCashReceived] = useState<string>('');
   const [processing, setProcessing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -35,13 +36,14 @@ export function PaymentModal({
 
   const handlePay = async () => {
     setProcessing(true);
+    setErrorMsg(null);
     try {
       await onConfirmPayment(paymentMethod, totalPayable, transactionRef.trim() || undefined);
       playPaymentChime();
       onClose();
       onShowReceipt();
     } catch (e: any) {
-      alert(`Payment failed: ${e.message}`);
+      setErrorMsg(`Payment failed: ${e.message}`);
     } finally {
       setProcessing(false);
     }
@@ -64,6 +66,12 @@ export function PaymentModal({
             <X className="w-4 h-4" />
           </Button>
         </div>
+
+        {errorMsg && (
+          <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 rounded-xl text-xs font-semibold">
+            {errorMsg}
+          </div>
+        )}
 
         {/* Big Total Banner */}
         <div className="bg-stone-50 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 p-4 rounded-2xl text-center">

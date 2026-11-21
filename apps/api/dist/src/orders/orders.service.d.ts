@@ -21,69 +21,7 @@ export declare class OrdersService {
             selectedAddonIds?: string[];
             selectedAddons?: any[];
         }[];
-    }): Promise<{
-        table: {
-            id: string;
-            status: import("@prisma/client").$Enums.TableStatus;
-            tableNumber: string;
-            capacity: number;
-        };
-        waiter: {
-            id: string;
-            name: string;
-        };
-        cashier: {
-            id: string;
-            name: string;
-        };
-        items: ({
-            menuItem: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                name: string;
-                categoryId: string;
-                description: string | null;
-                price: Prisma.Decimal;
-                isDirectSale: boolean;
-                directIngredientId: string | null;
-                prepSection: string;
-                imageUrl: string | null;
-                isAvailable: boolean;
-            };
-        } & {
-            id: string;
-            status: import("@prisma/client").$Enums.ItemPrepStatus;
-            subtotal: Prisma.Decimal;
-            tip: Prisma.Decimal;
-            quantity: number;
-            unitPrice: Prisma.Decimal;
-            specialInstructions: string | null;
-            costAtSale: Prisma.Decimal | null;
-            selectedAddons: Prisma.JsonValue | null;
-            menuItemId: string;
-            orderId: string;
-        })[];
-    } & {
-        id: string;
-        orderNumber: string;
-        orderType: import("@prisma/client").$Enums.OrderType;
-        tableId: string | null;
-        customerName: string | null;
-        waiterId: string | null;
-        cashierId: string;
-        status: import("@prisma/client").$Enums.OrderStatus;
-        subtotal: Prisma.Decimal;
-        tip: Prisma.Decimal;
-        tax: Prisma.Decimal;
-        discount: Prisma.Decimal;
-        totalAmount: Prisma.Decimal;
-        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
-        cancellationReason: string | null;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-    }>;
+    }): Promise<any>;
     confirmOrder(orderId: string, cashierId: string): Promise<{
         table: {
             id: string;
@@ -119,13 +57,13 @@ export declare class OrdersService {
             status: import("@prisma/client").$Enums.ItemPrepStatus;
             subtotal: Prisma.Decimal;
             tip: Prisma.Decimal;
+            orderId: string;
+            menuItemId: string;
             quantity: number;
             unitPrice: Prisma.Decimal;
             specialInstructions: string | null;
             costAtSale: Prisma.Decimal | null;
             selectedAddons: Prisma.JsonValue | null;
-            menuItemId: string;
-            orderId: string;
         })[];
     } & {
         id: string;
@@ -197,13 +135,13 @@ export declare class OrdersService {
             status: import("@prisma/client").$Enums.ItemPrepStatus;
             subtotal: Prisma.Decimal;
             tip: Prisma.Decimal;
+            orderId: string;
+            menuItemId: string;
             quantity: number;
             unitPrice: Prisma.Decimal;
             specialInstructions: string | null;
             costAtSale: Prisma.Decimal | null;
             selectedAddons: Prisma.JsonValue | null;
-            menuItemId: string;
-            orderId: string;
         })[];
     } & {
         id: string;
@@ -238,69 +176,7 @@ export declare class OrdersService {
             quantity: number;
             specialInstructions?: string;
         }[];
-    }): Promise<{
-        table: {
-            id: string;
-            status: import("@prisma/client").$Enums.TableStatus;
-            tableNumber: string;
-            capacity: number;
-        };
-        waiter: {
-            id: string;
-            name: string;
-        };
-        cashier: {
-            id: string;
-            name: string;
-        };
-        items: ({
-            menuItem: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                name: string;
-                categoryId: string;
-                description: string | null;
-                price: Prisma.Decimal;
-                isDirectSale: boolean;
-                directIngredientId: string | null;
-                prepSection: string;
-                imageUrl: string | null;
-                isAvailable: boolean;
-            };
-        } & {
-            id: string;
-            status: import("@prisma/client").$Enums.ItemPrepStatus;
-            subtotal: Prisma.Decimal;
-            tip: Prisma.Decimal;
-            quantity: number;
-            unitPrice: Prisma.Decimal;
-            specialInstructions: string | null;
-            costAtSale: Prisma.Decimal | null;
-            selectedAddons: Prisma.JsonValue | null;
-            menuItemId: string;
-            orderId: string;
-        })[];
-    } & {
-        id: string;
-        orderNumber: string;
-        orderType: import("@prisma/client").$Enums.OrderType;
-        tableId: string | null;
-        customerName: string | null;
-        waiterId: string | null;
-        cashierId: string;
-        status: import("@prisma/client").$Enums.OrderStatus;
-        subtotal: Prisma.Decimal;
-        tip: Prisma.Decimal;
-        tax: Prisma.Decimal;
-        discount: Prisma.Decimal;
-        totalAmount: Prisma.Decimal;
-        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
-        cancellationReason: string | null;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-    }>;
+    }): Promise<any>;
     updateOrderStatus(orderId: string, status: OrderStatus, actorUserId?: string): Promise<{
         table: {
             id: string;
@@ -336,13 +212,13 @@ export declare class OrdersService {
             status: import("@prisma/client").$Enums.ItemPrepStatus;
             subtotal: Prisma.Decimal;
             tip: Prisma.Decimal;
+            orderId: string;
+            menuItemId: string;
             quantity: number;
             unitPrice: Prisma.Decimal;
             specialInstructions: string | null;
             costAtSale: Prisma.Decimal | null;
             selectedAddons: Prisma.JsonValue | null;
-            menuItemId: string;
-            orderId: string;
         })[];
     } & {
         id: string;
@@ -413,13 +289,13 @@ export declare class OrdersService {
                 status: import("@prisma/client").$Enums.ItemPrepStatus;
                 subtotal: Prisma.Decimal;
                 tip: Prisma.Decimal;
+                orderId: string;
+                menuItemId: string;
                 quantity: number;
                 unitPrice: Prisma.Decimal;
                 specialInstructions: string | null;
                 costAtSale: Prisma.Decimal | null;
                 selectedAddons: Prisma.JsonValue | null;
-                menuItemId: string;
-                orderId: string;
             })[];
             payments: {
                 id: string;
@@ -453,6 +329,7 @@ export declare class OrdersService {
     }>;
     appendItemsToOrder(orderId: string, data: {
         cashierId?: string;
+        notes?: string;
         items: {
             menuItemId: string;
             quantity: number;
@@ -460,78 +337,7 @@ export declare class OrdersService {
             selectedAddonIds?: string[];
             selectedAddons?: any[];
         }[];
-    }): Promise<{
-        table: {
-            id: string;
-            status: import("@prisma/client").$Enums.TableStatus;
-            tableNumber: string;
-            capacity: number;
-        };
-        waiter: {
-            id: string;
-            name: string;
-        };
-        cashier: {
-            id: string;
-            name: string;
-        };
-        items: ({
-            menuItem: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                name: string;
-                categoryId: string;
-                description: string | null;
-                price: Prisma.Decimal;
-                isDirectSale: boolean;
-                directIngredientId: string | null;
-                prepSection: string;
-                imageUrl: string | null;
-                isAvailable: boolean;
-            };
-        } & {
-            id: string;
-            status: import("@prisma/client").$Enums.ItemPrepStatus;
-            subtotal: Prisma.Decimal;
-            tip: Prisma.Decimal;
-            quantity: number;
-            unitPrice: Prisma.Decimal;
-            specialInstructions: string | null;
-            costAtSale: Prisma.Decimal | null;
-            selectedAddons: Prisma.JsonValue | null;
-            menuItemId: string;
-            orderId: string;
-        })[];
-        payments: {
-            id: string;
-            createdAt: Date;
-            orderId: string;
-            cashierShiftId: string | null;
-            amount: Prisma.Decimal;
-            paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
-            transactionRef: string | null;
-        }[];
-    } & {
-        id: string;
-        orderNumber: string;
-        orderType: import("@prisma/client").$Enums.OrderType;
-        tableId: string | null;
-        customerName: string | null;
-        waiterId: string | null;
-        cashierId: string;
-        status: import("@prisma/client").$Enums.OrderStatus;
-        subtotal: Prisma.Decimal;
-        tip: Prisma.Decimal;
-        tax: Prisma.Decimal;
-        discount: Prisma.Decimal;
-        totalAmount: Prisma.Decimal;
-        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
-        cancellationReason: string | null;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-    }>;
+    }): Promise<any>;
     getOrders(params?: {
         statuses?: OrderStatus[];
         tableId?: string;
@@ -572,13 +378,13 @@ export declare class OrdersService {
             status: import("@prisma/client").$Enums.ItemPrepStatus;
             subtotal: Prisma.Decimal;
             tip: Prisma.Decimal;
+            orderId: string;
+            menuItemId: string;
             quantity: number;
             unitPrice: Prisma.Decimal;
             specialInstructions: string | null;
             costAtSale: Prisma.Decimal | null;
             selectedAddons: Prisma.JsonValue | null;
-            menuItemId: string;
-            orderId: string;
         })[];
         payments: {
             id: string;
@@ -641,13 +447,13 @@ export declare class OrdersService {
             status: import("@prisma/client").$Enums.ItemPrepStatus;
             subtotal: Prisma.Decimal;
             tip: Prisma.Decimal;
+            orderId: string;
+            menuItemId: string;
             quantity: number;
             unitPrice: Prisma.Decimal;
             specialInstructions: string | null;
             costAtSale: Prisma.Decimal | null;
             selectedAddons: Prisma.JsonValue | null;
-            menuItemId: string;
-            orderId: string;
         })[];
     } & {
         id: string;

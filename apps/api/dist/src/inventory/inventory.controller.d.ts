@@ -30,9 +30,9 @@ export declare class InventoryController {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
             ingredientId: string;
+            locationId: string;
             reservedQuantity: import("@prisma/client/runtime/library").Decimal;
             lastUpdatedAt: Date;
-            locationId: string;
         })[];
     } & {
         id: string;
@@ -72,9 +72,9 @@ export declare class InventoryController {
         id: string;
         quantity: import("@prisma/client/runtime/library").Decimal;
         ingredientId: string;
+        locationId: string;
         reservedQuantity: import("@prisma/client/runtime/library").Decimal;
         lastUpdatedAt: Date;
-        locationId: string;
     })[]>;
     getTransfers(): Promise<({
         items: ({
@@ -109,10 +109,10 @@ export declare class InventoryController {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: import("@prisma/client/runtime/library").Decimal;
             dispatchedQty: import("@prisma/client/runtime/library").Decimal | null;
             receivedQty: import("@prisma/client/runtime/library").Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -172,10 +172,10 @@ export declare class InventoryController {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: import("@prisma/client/runtime/library").Decimal;
             dispatchedQty: import("@prisma/client/runtime/library").Decimal | null;
             receivedQty: import("@prisma/client/runtime/library").Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -227,10 +227,10 @@ export declare class InventoryController {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: import("@prisma/client/runtime/library").Decimal;
             dispatchedQty: import("@prisma/client/runtime/library").Decimal | null;
             receivedQty: import("@prisma/client/runtime/library").Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -296,10 +296,10 @@ export declare class InventoryController {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: import("@prisma/client/runtime/library").Decimal;
             dispatchedQty: import("@prisma/client/runtime/library").Decimal | null;
             receivedQty: import("@prisma/client/runtime/library").Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         sourceLocation: {
@@ -365,10 +365,10 @@ export declare class InventoryController {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: import("@prisma/client/runtime/library").Decimal;
             dispatchedQty: import("@prisma/client/runtime/library").Decimal | null;
             receivedQty: import("@prisma/client/runtime/library").Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -455,10 +455,10 @@ export declare class InventoryController {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: import("@prisma/client/runtime/library").Decimal;
             dispatchedQty: import("@prisma/client/runtime/library").Decimal | null;
             receivedQty: import("@prisma/client/runtime/library").Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -492,14 +492,14 @@ export declare class InventoryController {
         id: string;
         createdAt: Date;
         quantity: import("@prisma/client/runtime/library").Decimal;
-        ingredientId: string;
         transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+        sourceLocationId: string | null;
+        destLocationId: string | null;
+        ingredientId: string;
         unitCost: import("@prisma/client/runtime/library").Decimal;
         totalCost: import("@prisma/client/runtime/library").Decimal;
         referenceId: string | null;
         reason: string | null;
-        sourceLocationId: string | null;
-        destLocationId: string | null;
         userId: string;
     }>;
     getLedger(limit?: string): Promise<({
@@ -507,6 +507,18 @@ export declare class InventoryController {
             id: string;
             name: string;
             role: import("@prisma/client").$Enums.UserRole;
+        };
+        sourceLocation: {
+            id: string;
+            createdAt: Date;
+            name: string;
+            type: import("@prisma/client").$Enums.LocationType;
+        };
+        destLocation: {
+            id: string;
+            createdAt: Date;
+            name: string;
+            type: import("@prisma/client").$Enums.LocationType;
         };
         ingredient: {
             baseUnit: {
@@ -529,30 +541,18 @@ export declare class InventoryController {
             reorderThresholdMain: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdKitchen: import("@prisma/client/runtime/library").Decimal;
         };
-        sourceLocation: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            type: import("@prisma/client").$Enums.LocationType;
-        };
-        destLocation: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            type: import("@prisma/client").$Enums.LocationType;
-        };
     } & {
         id: string;
         createdAt: Date;
         quantity: import("@prisma/client/runtime/library").Decimal;
-        ingredientId: string;
         transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+        sourceLocationId: string | null;
+        destLocationId: string | null;
+        ingredientId: string;
         unitCost: import("@prisma/client/runtime/library").Decimal;
         totalCost: import("@prisma/client/runtime/library").Decimal;
         referenceId: string | null;
         reason: string | null;
-        sourceLocationId: string | null;
-        destLocationId: string | null;
         userId: string;
     })[]>;
     getSuppliers(): Promise<({
@@ -613,9 +613,9 @@ export declare class InventoryController {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
             ingredientId: string;
-            unitId: string;
             unitCost: import("@prisma/client/runtime/library").Decimal;
             totalCost: import("@prisma/client/runtime/library").Decimal;
+            unitId: string;
             purchaseOrderId: string;
         })[];
         supplier: {
@@ -720,22 +720,22 @@ export declare class InventoryController {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
             ingredientId: string;
+            locationId: string;
             reservedQuantity: import("@prisma/client/runtime/library").Decimal;
             lastUpdatedAt: Date;
-            locationId: string;
         };
         transaction: {
             id: string;
             createdAt: Date;
             quantity: import("@prisma/client/runtime/library").Decimal;
-            ingredientId: string;
             transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+            sourceLocationId: string | null;
+            destLocationId: string | null;
+            ingredientId: string;
             unitCost: import("@prisma/client/runtime/library").Decimal;
             totalCost: import("@prisma/client/runtime/library").Decimal;
             referenceId: string | null;
             reason: string | null;
-            sourceLocationId: string | null;
-            destLocationId: string | null;
             userId: string;
         };
     }>;
@@ -782,10 +782,10 @@ export declare class InventoryController {
         } & {
             id: string;
             ingredientId: string;
-            unitId: string;
             requestedQty: import("@prisma/client/runtime/library").Decimal;
             dispatchedQty: import("@prisma/client/runtime/library").Decimal | null;
             receivedQty: import("@prisma/client/runtime/library").Decimal | null;
+            unitId: string;
             transferId: string;
         })[];
         requestedBy: {
@@ -813,13 +813,6 @@ export declare class InventoryController {
         approvedById: string | null;
     }>;
     getIngredients(): Promise<({
-        baseUnit: {
-            symbol: string;
-            id: string;
-            name: string;
-            type: import("@prisma/client").$Enums.UnitType;
-            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
-        };
         balances: ({
             location: {
                 id: string;
@@ -831,10 +824,17 @@ export declare class InventoryController {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
             ingredientId: string;
+            locationId: string;
             reservedQuantity: import("@prisma/client/runtime/library").Decimal;
             lastUpdatedAt: Date;
-            locationId: string;
         })[];
+        baseUnit: {
+            symbol: string;
+            id: string;
+            name: string;
+            type: import("@prisma/client").$Enums.UnitType;
+            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
+        };
     } & {
         id: string;
         createdAt: Date;
@@ -896,13 +896,6 @@ export declare class InventoryController {
         reorderThresholdKitchen?: number;
         isActive?: boolean;
     }): Promise<{
-        baseUnit: {
-            symbol: string;
-            id: string;
-            name: string;
-            type: import("@prisma/client").$Enums.UnitType;
-            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
-        };
         balances: ({
             location: {
                 id: string;
@@ -914,10 +907,17 @@ export declare class InventoryController {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
             ingredientId: string;
+            locationId: string;
             reservedQuantity: import("@prisma/client/runtime/library").Decimal;
             lastUpdatedAt: Date;
-            locationId: string;
         })[];
+        baseUnit: {
+            symbol: string;
+            id: string;
+            name: string;
+            type: import("@prisma/client").$Enums.UnitType;
+            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
+        };
     } & {
         id: string;
         createdAt: Date;

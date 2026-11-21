@@ -150,7 +150,7 @@ export function TablePlanModal({
 
   const handleDeleteTable = async (t: any) => {
     if (t.orders && t.orders.length > 0) {
-      alert(`Cannot delete Table ${t.tableNumber} while it has an active dining bill.`);
+      setError(`Cannot delete Table ${t.tableNumber} while it has an active dining bill.`);
       return;
     }
 

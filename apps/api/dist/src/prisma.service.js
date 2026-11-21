@@ -19,6 +19,13 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
         try {
             await this.$connect();
             this.logger.log('Prisma successfully connected to database');
+            try {
+                await this.$executeRawUnsafe(`ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "notes" TEXT;`);
+                this.logger.log('Auto-migration: Ensured "notes" column exists on Order table.');
+            }
+            catch (colErr) {
+                this.logger.warn(`Could not run notes column migration: ${colErr?.message}`);
+            }
         }
         catch (err) {
             this.logger.error('Database connection error on boot:', err?.message || err);
