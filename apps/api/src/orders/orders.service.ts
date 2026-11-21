@@ -25,6 +25,7 @@ export class OrdersService {
     customerName?: string;
     waiterId: string;
     orderType?: OrderType;
+    notes?: string;
     discount?: number;
     discountPercent?: number;
     items: {
@@ -205,6 +206,7 @@ export class OrdersService {
         discount: discountAmount,
         totalAmount,
         paymentStatus: PaymentStatus.UNPAID,
+        notes: data.notes || null,
         items: {
           create: orderItemsCreate,
         },

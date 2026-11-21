@@ -31,7 +31,10 @@ export class OrdersController {
       customerName?: string;
       waiterId: string;
       orderType?: OrderType;
-      items: { menuItemId: string; quantity: number; specialInstructions?: string }[];
+      notes?: string;
+      discount?: number;
+      discountPercent?: number;
+      items: { menuItemId: string; quantity: number; specialInstructions?: string; selectedAddonIds?: string[]; selectedAddons?: any[] }[];
     },
   ) {
     return this.ordersService.createWaiterDraftNote(body);

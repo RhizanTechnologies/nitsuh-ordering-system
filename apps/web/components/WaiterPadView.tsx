@@ -335,11 +335,12 @@ export function WaiterPadView() {
           customerName: isTakeaway
             ? (takeawayCustomer.trim() || 'Takeaway Customer')
             : (waiterCustomerName.trim() || 'Table Guest'),
+          notes: waiterSpecialNotes.trim() || undefined,
           items: waiterCart.map((i) => ({
             menuItemId: i.menuItemId,
             quantity: i.quantity,
             tip: i.tip || 0,
-            specialInstructions: i.specialInstructions || waiterSpecialNotes,
+            specialInstructions: i.specialInstructions || undefined,
             selectedAddonIds: i.selectedAddonIds || [],
             selectedAddons: i.selectedAddons || [],
           })),
@@ -748,18 +749,32 @@ export function WaiterPadView() {
                           </div>
 
                           {/* Order Items */}
-                          <div className="mt-3 text-xs text-stone-600 space-y-1">
+                          <div className="mt-3 text-xs text-stone-600 space-y-1.5">
                             {order.items?.map((it: any) => (
-                              <div key={it.id} className="flex justify-between">
-                                <span>
-                                  {it.quantity}x {it.menuItem?.name || 'Item'}
+                              <div key={it.id} className="flex items-center justify-between">
+                                <span className="truncate pr-2">
+                                  <strong className="text-stone-900 mr-1.5">{it.quantity}x</strong>
+                                  <span className="text-stone-800">{it.menuItem?.name || it.name || 'Item'}</span>
+                                  {it.specialInstructions && (
+                                    <span className="text-[10px] text-emerald-700 italic ml-1">
+                                      &quot;{it.specialInstructions}&quot;
+                                    </span>
+                                  )}
                                 </span>
-                                <span className="text-stone-500">
-                                  {it.itemStatus || order.status}
+                                <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
+                                  {Number(it.subtotal || (it.unitPrice || it.price || it.menuItem?.price || 0) * it.quantity).toFixed(2)} ETB
                                 </span>
                               </div>
                             ))}
                           </div>
+
+                          {/* Order Note (shown once for the entire ticket) */}
+                          {order.notes && (
+                            <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
+                              <MessageSquare className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                              <span>Note: <strong>{order.notes}</strong></span>
+                            </div>
+                          )}
 
                           {/* Actions */}
                           <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between">

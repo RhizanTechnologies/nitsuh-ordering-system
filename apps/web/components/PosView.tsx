@@ -20,6 +20,7 @@ import {
   ArrowLeft,
   Receipt,
   FileEdit,
+  FileText,
   LayoutGrid,
   CreditCard,
   ShoppingBag,
@@ -1595,6 +1596,14 @@ export function PosView() {
                             </div>
                           ))}
                         </div>
+
+                        {/* Order Note */}
+                        {slip.notes && (
+                          <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                            <span>Note: <strong>{slip.notes}</strong></span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Actions & Total */}
@@ -1786,6 +1795,12 @@ export function PosView() {
                               </span>
                             </div>
                           ))}
+                          {order.notes && (
+                            <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
+                              <FileText className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                              <span>Note: <strong>{order.notes}</strong></span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
