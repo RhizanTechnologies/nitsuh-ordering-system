@@ -46,7 +46,7 @@ export class OrdersService {
         where: {
           tableId: data.tableId,
           paymentStatus: { not: PaymentStatus.PAID },
-          status: { in: [OrderStatus.CONFIRMED, OrderStatus.IN_PREPARATION, OrderStatus.READY, OrderStatus.SERVED] },
+          status: { in: [OrderStatus.DRAFT_NOTE, OrderStatus.CONFIRMED, OrderStatus.IN_PREPARATION, OrderStatus.READY, OrderStatus.SERVED] },
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -524,6 +524,7 @@ export class OrdersService {
           paymentStatus: { not: PaymentStatus.PAID },
           status: {
             in: [
+              OrderStatus.DRAFT_NOTE,
               OrderStatus.CONFIRMED,
               OrderStatus.IN_PREPARATION,
               OrderStatus.READY,
@@ -1051,7 +1052,7 @@ export class OrdersService {
         tip: newTip,
         tax: newTax,
         totalAmount: newTotal,
-        status: OrderStatus.CONFIRMED,
+        status: order.status === OrderStatus.DRAFT_NOTE ? OrderStatus.DRAFT_NOTE : OrderStatus.CONFIRMED,
       },
       include: {
         table: true,
@@ -1062,7 +1063,11 @@ export class OrdersService {
       },
     });
 
-    this.eventsGateway.broadcastOrderConfirmed(updated);
+    if (order.status === OrderStatus.DRAFT_NOTE) {
+      this.eventsGateway.broadcastWaiterNote(updated);
+    } else {
+      this.eventsGateway.broadcastOrderConfirmed(updated);
+    }
     this.eventsGateway.broadcastOrderUpdated(updated);
     return updated;
   }

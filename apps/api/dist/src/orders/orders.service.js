@@ -29,7 +29,7 @@ let OrdersService = class OrdersService {
                 where: {
                     tableId: data.tableId,
                     paymentStatus: { not: shared_types_1.PaymentStatus.PAID },
-                    status: { in: [shared_types_1.OrderStatus.CONFIRMED, shared_types_1.OrderStatus.IN_PREPARATION, shared_types_1.OrderStatus.READY, shared_types_1.OrderStatus.SERVED] },
+                    status: { in: [shared_types_1.OrderStatus.DRAFT_NOTE, shared_types_1.OrderStatus.CONFIRMED, shared_types_1.OrderStatus.IN_PREPARATION, shared_types_1.OrderStatus.READY, shared_types_1.OrderStatus.SERVED] },
                 },
                 orderBy: { createdAt: 'desc' },
             });
@@ -419,6 +419,7 @@ let OrdersService = class OrdersService {
                     paymentStatus: { not: shared_types_1.PaymentStatus.PAID },
                     status: {
                         in: [
+                            shared_types_1.OrderStatus.DRAFT_NOTE,
                             shared_types_1.OrderStatus.CONFIRMED,
                             shared_types_1.OrderStatus.IN_PREPARATION,
                             shared_types_1.OrderStatus.READY,
@@ -865,7 +866,7 @@ let OrdersService = class OrdersService {
                 tip: newTip,
                 tax: newTax,
                 totalAmount: newTotal,
-                status: shared_types_1.OrderStatus.CONFIRMED,
+                status: order.status === shared_types_1.OrderStatus.DRAFT_NOTE ? shared_types_1.OrderStatus.DRAFT_NOTE : shared_types_1.OrderStatus.CONFIRMED,
             },
             include: {
                 table: true,
@@ -875,7 +876,12 @@ let OrdersService = class OrdersService {
                 payments: true,
             },
         });
-        this.eventsGateway.broadcastOrderConfirmed(updated);
+        if (order.status === shared_types_1.OrderStatus.DRAFT_NOTE) {
+            this.eventsGateway.broadcastWaiterNote(updated);
+        }
+        else {
+            this.eventsGateway.broadcastOrderConfirmed(updated);
+        }
         this.eventsGateway.broadcastOrderUpdated(updated);
         return updated;
     }

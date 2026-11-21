@@ -720,7 +720,7 @@ export function PosView() {
       const active = activeOrders.find(
         (o) =>
           o.tableId === tableObj.id &&
-          ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'].includes(o.status) &&
+          ['DRAFT_NOTE', 'CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'].includes(o.status) &&
           o.paymentStatus !== 'PAID',
       );
       if (active) {
