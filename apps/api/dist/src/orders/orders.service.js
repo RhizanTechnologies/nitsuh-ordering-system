@@ -292,11 +292,16 @@ let OrdersService = class OrdersService {
         return order;
     }
     async confirmOrder(orderId, cashierId) {
-        let validCashier = await this.prisma.user.findUnique({ where: { id: cashierId } });
+        let validCashier = isUuid(cashierId)
+            ? await this.prisma.user.findUnique({ where: { id: cashierId } })
+            : null;
         if (!validCashier) {
             validCashier = await this.prisma.user.findFirst({ where: { role: 'CASHIER', isActive: true } });
         }
-        const resolvedCashierId = validCashier ? validCashier.id : cashierId;
+        if (!validCashier) {
+            validCashier = await this.prisma.user.findFirst({ where: { isActive: true } });
+        }
+        const resolvedCashierId = validCashier ? validCashier.id : (await this.prisma.user.findFirst())?.id || '';
         const existing = await this.prisma.order.findUnique({
             where: { id: orderId },
             include: {
@@ -388,10 +393,40 @@ let OrdersService = class OrdersService {
         }
         const orderType = data.orderType || existing.orderType || shared_types_1.OrderType.DINE_IN;
         const isTakeaway = orderType === shared_types_1.OrderType.TAKEAWAY;
-        const tableId = isTakeaway ? null : (data.tableId !== undefined ? data.tableId : existing.tableId);
-        if (orderType === shared_types_1.OrderType.DINE_IN && !tableId) {
+        const rawTableId = isTakeaway ? null : (data.tableId !== undefined ? data.tableId : existing.tableId);
+        let resolvedTableId = isUuid(rawTableId) ? rawTableId : null;
+        if (rawTableId && !resolvedTableId) {
+            try {
+                const t = await this.prisma.diningTable.findFirst({
+                    where: {
+                        OR: [
+                            { tableNumber: rawTableId },
+                            { tableNumber: { startsWith: rawTableId } },
+                        ],
+                    },
+                });
+                resolvedTableId = t ? t.id : existing.tableId;
+            }
+            catch (_) {
+                resolvedTableId = existing.tableId;
+            }
+        }
+        if (orderType === shared_types_1.OrderType.DINE_IN && !resolvedTableId) {
+            resolvedTableId = existing.tableId;
+        }
+        if (orderType === shared_types_1.OrderType.DINE_IN && !resolvedTableId) {
             throw new common_1.BadRequestException('A dining table is required for Dine-In orders.');
         }
+        let validCashier = isUuid(data.cashierId)
+            ? await this.prisma.user.findUnique({ where: { id: data.cashierId } })
+            : null;
+        if (!validCashier) {
+            validCashier = await this.prisma.user.findFirst({ where: { role: 'CASHIER', isActive: true } });
+        }
+        if (!validCashier) {
+            validCashier = await this.prisma.user.findFirst({ where: { isActive: true } });
+        }
+        const resolvedCashierId = validCashier ? validCashier.id : (await this.prisma.user.findFirst())?.id || '';
         const itemIds = data.items.map((i) => i.menuItemId);
         const menuItems = await this.prisma.menuItem.findMany({
             where: { id: { in: itemIds } },
@@ -502,7 +537,7 @@ let OrdersService = class OrdersService {
                 where: { id: orderId },
                 data: {
                     orderType,
-                    tableId: tableId || null,
+                    tableId: resolvedTableId || null,
                     customerName: isTakeaway ? (data.customerName || 'Takeaway Customer') : (data.customerName || existing.customerName || 'Guest'),
                     subtotal,
                     tip: totalTip,
@@ -515,7 +550,7 @@ let OrdersService = class OrdersService {
                 },
             });
         });
-        return this.confirmOrder(orderId, data.cashierId);
+        return this.confirmOrder(orderId, resolvedCashierId);
     }
     async createPosOrder(data) {
         if (data.tableId && data.orderType === shared_types_1.OrderType.DINE_IN) {

@@ -334,11 +334,16 @@ export class OrdersService {
 
   // 2. Cashier Confirms & Fires Order to Kitchen (or direct POS entry)
   async confirmOrder(orderId: string, cashierId: string) {
-    let validCashier = await this.prisma.user.findUnique({ where: { id: cashierId } });
+    let validCashier = isUuid(cashierId)
+      ? await this.prisma.user.findUnique({ where: { id: cashierId } })
+      : null;
     if (!validCashier) {
       validCashier = await this.prisma.user.findFirst({ where: { role: 'CASHIER', isActive: true } });
     }
-    const resolvedCashierId = validCashier ? validCashier.id : cashierId;
+    if (!validCashier) {
+      validCashier = await this.prisma.user.findFirst({ where: { isActive: true } });
+    }
+    const resolvedCashierId = validCashier ? validCashier.id : (await this.prisma.user.findFirst())?.id || '';
 
     const existing = await this.prisma.order.findUnique({
       where: { id: orderId },
@@ -462,11 +467,42 @@ export class OrdersService {
 
     const orderType = data.orderType || existing.orderType || OrderType.DINE_IN;
     const isTakeaway = orderType === OrderType.TAKEAWAY;
-    const tableId = isTakeaway ? null : (data.tableId !== undefined ? data.tableId : existing.tableId);
+    const rawTableId = isTakeaway ? null : (data.tableId !== undefined ? data.tableId : existing.tableId);
+    let resolvedTableId = isUuid(rawTableId) ? rawTableId : null;
+    if (rawTableId && !resolvedTableId) {
+      try {
+        const t = await this.prisma.diningTable.findFirst({
+          where: {
+            OR: [
+              { tableNumber: rawTableId },
+              { tableNumber: { startsWith: rawTableId } },
+            ],
+          },
+        });
+        resolvedTableId = t ? t.id : existing.tableId;
+      } catch (_) {
+        resolvedTableId = existing.tableId;
+      }
+    }
+    if (orderType === OrderType.DINE_IN && !resolvedTableId) {
+      resolvedTableId = existing.tableId;
+    }
 
-    if (orderType === OrderType.DINE_IN && !tableId) {
+    if (orderType === OrderType.DINE_IN && !resolvedTableId) {
       throw new BadRequestException('A dining table is required for Dine-In orders.');
     }
+
+    // Resolve valid cashier safely
+    let validCashier = isUuid(data.cashierId)
+      ? await this.prisma.user.findUnique({ where: { id: data.cashierId } })
+      : null;
+    if (!validCashier) {
+      validCashier = await this.prisma.user.findFirst({ where: { role: 'CASHIER', isActive: true } });
+    }
+    if (!validCashier) {
+      validCashier = await this.prisma.user.findFirst({ where: { isActive: true } });
+    }
+    const resolvedCashierId = validCashier ? validCashier.id : (await this.prisma.user.findFirst())?.id || '';
 
     // Fetch items with price and recipes to compute subtotal and portion cost snapshot
     const itemIds = data.items.map((i) => i.menuItemId);
@@ -592,7 +628,7 @@ export class OrdersService {
         where: { id: orderId },
         data: {
           orderType,
-          tableId: tableId || null,
+          tableId: resolvedTableId || null,
           customerName: isTakeaway ? (data.customerName || 'Takeaway Customer') : (data.customerName || existing.customerName || 'Guest'),
           subtotal,
           tip: totalTip,
@@ -606,7 +642,7 @@ export class OrdersService {
       });
     });
 
-    return this.confirmOrder(orderId, data.cashierId);
+    return this.confirmOrder(orderId, resolvedCashierId);
   }
 
   // 3. Direct POS Order Entry by Cashier (Walk-in / Dine-in / Takeaway)

@@ -502,7 +502,7 @@ export function PosView() {
         const res = await fetchApi(`/orders/${editingSlipTarget.id}/update-and-confirm`, {
           method: 'POST',
           body: JSON.stringify({
-            cashierId: currentUser.id || 'c01-cashier',
+            cashierId: currentUser?.id,
             tableId: selectedTableObj ? selectedTableObj.id : null,
             customerName: isTakeaway ? (customerName.trim() || 'Takeaway Customer') : (customerName || 'Guest'),
             orderType,

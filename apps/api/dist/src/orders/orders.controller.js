@@ -42,8 +42,23 @@ let OrdersController = class OrdersController {
     async confirmOrder(id, body) {
         return this.ordersService.confirmOrder(id, body.cashierId);
     }
-    async updateAndConfirmOrder(id, body) {
-        return this.ordersService.updateAndConfirmDraftNote(id, body);
+    async updateAndConfirmOrderPut(id, body) {
+        try {
+            return await this.ordersService.updateAndConfirmDraftNote(id, body);
+        }
+        catch (err) {
+            console.error('ERROR in updateAndConfirmOrderPut:', err);
+            throw new common_1.BadRequestException(err?.message || 'Failed to update and confirm order');
+        }
+    }
+    async updateAndConfirmOrderPost(id, body) {
+        try {
+            return await this.ordersService.updateAndConfirmDraftNote(id, body);
+        }
+        catch (err) {
+            console.error('ERROR in updateAndConfirmOrderPost:', err);
+            throw new common_1.BadRequestException(err?.message || 'Failed to update and confirm order');
+        }
     }
     async appendItems(id, body) {
         return this.ordersService.appendItemsToOrder(id, body);
@@ -96,13 +111,20 @@ __decorate([
 ], OrdersController.prototype, "confirmOrder", null);
 __decorate([
     (0, common_1.Put)(':id/update-and-confirm'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "updateAndConfirmOrderPut", null);
+__decorate([
     (0, common_1.Post)(':id/update-and-confirm'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "updateAndConfirmOrder", null);
+], OrdersController.prototype, "updateAndConfirmOrderPost", null);
 __decorate([
     (0, common_1.Post)(':id/append-items'),
     __param(0, (0, common_1.Param)('id')),

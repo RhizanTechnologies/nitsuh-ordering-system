@@ -71,8 +71,7 @@ export class OrdersController {
   }
 
   @Put(':id/update-and-confirm')
-  @Post(':id/update-and-confirm')
-  async updateAndConfirmOrder(
+  async updateAndConfirmOrderPut(
     @Param('id') id: string,
     @Body()
     body: {
@@ -92,7 +91,41 @@ export class OrdersController {
       }[];
     },
   ) {
-    return this.ordersService.updateAndConfirmDraftNote(id, body);
+    try {
+      return await this.ordersService.updateAndConfirmDraftNote(id, body);
+    } catch (err: any) {
+      console.error('ERROR in updateAndConfirmOrderPut:', err);
+      throw new BadRequestException(err?.message || 'Failed to update and confirm order');
+    }
+  }
+
+  @Post(':id/update-and-confirm')
+  async updateAndConfirmOrderPost(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      cashierId: string;
+      tableId?: string;
+      customerName?: string;
+      orderType?: OrderType;
+      discount?: number;
+      discountPercent?: number;
+      items: {
+        menuItemId: string;
+        quantity: number;
+        tip?: number;
+        specialInstructions?: string;
+        selectedAddonIds?: string[];
+        selectedAddons?: any[];
+      }[];
+    },
+  ) {
+    try {
+      return await this.ordersService.updateAndConfirmDraftNote(id, body);
+    } catch (err: any) {
+      console.error('ERROR in updateAndConfirmOrderPost:', err);
+      throw new BadRequestException(err?.message || 'Failed to update and confirm order');
+    }
   }
 
   @Post(':id/append-items')
