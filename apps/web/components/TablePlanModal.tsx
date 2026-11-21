@@ -169,9 +169,9 @@ export function TablePlanModal({
   };
 
   const filteredTables = tablesList.filter((t) => {
-    const hasActiveOrder = t.orders && t.orders.length > 0;
-    if (statusFilter === 'AVAILABLE') return !hasActiveOrder && t.status !== 'RESERVED';
-    if (statusFilter === 'OCCUPIED') return hasActiveOrder;
+    const isOccupied = t.status === 'OCCUPIED';
+    if (statusFilter === 'AVAILABLE') return t.status === 'AVAILABLE';
+    if (statusFilter === 'OCCUPIED') return isOccupied;
     if (statusFilter === 'RESERVED') return t.status === 'RESERVED';
     return true;
   });
@@ -370,7 +370,8 @@ export function TablePlanModal({
         {/* Table Cards Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto no-scrollbar pr-1 pt-1">
           {filteredTables.map((t) => {
-            const hasActiveOrder = t.orders && t.orders.length > 0;
+            const isOccupied = t.status === 'OCCUPIED';
+            const hasActiveOrder = isOccupied && t.orders && t.orders.length > 0;
             const isSelected = selectedTable === t.tableNumber;
             const isReserved = t.status === 'RESERVED';
 
@@ -386,7 +387,7 @@ export function TablePlanModal({
                 className={`p-3.5 rounded-2xl border transition relative flex flex-col justify-between ${
                   isSelected
                     ? 'border-emerald-600 ring-2 ring-emerald-500/30 bg-emerald-50/50'
-                    : hasActiveOrder
+                    : isOccupied
                     ? 'bg-amber-50/40 border-amber-300/80 hover:border-amber-500'
                     : isReserved
                     ? 'bg-purple-50/40 border-purple-300'
@@ -410,10 +411,10 @@ export function TablePlanModal({
 
                   {/* Status Badge */}
                   <Badge
-                    variant={hasActiveOrder ? 'amber' : isReserved ? 'purple' : 'success'}
+                    variant={isOccupied ? 'amber' : isReserved ? 'purple' : 'success'}
                     className="flex-shrink-0"
                   >
-                    {hasActiveOrder ? 'Seated' : isReserved ? 'Reserved' : 'Open'}
+                    {isOccupied ? 'Seated' : isReserved ? 'Reserved' : 'Open'}
                   </Badge>
                 </div>
 
@@ -424,9 +425,34 @@ export function TablePlanModal({
                 </div>
 
                 {/* Active Order Summary if Seated */}
-                {hasActiveOrder && (
-                  <div className="text-[11px] font-bold border-t border-amber-500/20 dark:border-white/10 pt-1.5 mb-2 text-amber-700 dark:text-amber-300">
-                    Active: {t.orders[0].orderNumber} ({Number(t.orders[0].totalAmount).toFixed(2)} ETB)
+                {isOccupied && (
+                  <div className="flex items-center justify-between gap-1 text-[11px] font-bold border-t border-amber-500/20 dark:border-white/10 pt-1.5 mb-2 text-amber-700 dark:text-amber-300">
+                    <span className="truncate">
+                      {hasActiveOrder
+                        ? `Active: ${t.orders[0].orderNumber} (${Number(t.orders[0].totalAmount).toFixed(2)} ETB)`
+                        : 'Occupied'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          await fetchApi(`/menu/tables/${t.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ status: 'AVAILABLE' }),
+                          });
+                          setSuccessMsg(`Table ${t.tableNumber} is now Open.`);
+                          await refreshTables();
+                          setTimeout(() => setSuccessMsg(null), 2500);
+                        } catch (err: any) {
+                          setError(err.message || 'Failed to release table');
+                        }
+                      }}
+                      className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-200/70 hover:bg-emerald-600 hover:text-white text-amber-900 transition flex-shrink-0 cursor-pointer"
+                      title="Clear table and set to Open"
+                    >
+                      Free Table
+                    </button>
                   </div>
                 )}
 

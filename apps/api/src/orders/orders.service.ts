@@ -305,8 +305,11 @@ export class OrdersService {
         orderBy: { tableNumber: 'asc' },
         include: {
           orders: {
-            where: { status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] } },
-            select: { id: true, orderNumber: true, totalAmount: true, status: true },
+            where: {
+              status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] },
+              paymentStatus: { not: PaymentStatus.PAID },
+            },
+            select: { id: true, orderNumber: true, totalAmount: true, status: true, paymentStatus: true },
           },
         },
       });
@@ -788,8 +791,11 @@ export class OrdersService {
           orderBy: { tableNumber: 'asc' },
           include: {
             orders: {
-              where: { status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] } },
-              select: { id: true, orderNumber: true, totalAmount: true, status: true },
+              where: {
+                status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] },
+                paymentStatus: { not: PaymentStatus.PAID },
+              },
+              select: { id: true, orderNumber: true, totalAmount: true, status: true, paymentStatus: true },
             },
           },
         });
@@ -851,8 +857,11 @@ export class OrdersService {
         orderBy: { tableNumber: 'asc' },
         include: {
           orders: {
-            where: { status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] } },
-            select: { id: true, orderNumber: true, totalAmount: true, status: true },
+            where: {
+              status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] },
+              paymentStatus: { not: PaymentStatus.PAID },
+            },
+            select: { id: true, orderNumber: true, totalAmount: true, status: true, paymentStatus: true },
           },
         },
       });
