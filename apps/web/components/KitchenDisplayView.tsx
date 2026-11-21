@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
 import { fetchApi, getSocket } from '@/lib/api';
-import { ChefHat, Flame, CheckCircle, Clock, Utensils, AlertTriangle, X, Volume2, Undo2, Check } from 'lucide-react';
+import { ChefHat, Flame, CheckCircle, Clock, Utensils, AlertTriangle, X, Volume2, Undo2, Check, Loader2 } from 'lucide-react';
 import { playKitchenChime, playReadyChime } from '@/lib/audio';
 import { calculatePrepTime } from '@/lib/timer-utils';
 import { Button, Badge } from '@/components/ui';
@@ -18,18 +18,18 @@ const getPrepBadge = (prep: any) => {
   if (prep.delayStatus === 'DELAYED') {
     return {
       dot: 'bg-rose-500 animate-ping',
-      badge: 'bg-rose-200 dark:bg-rose-900/60 text-rose-950 dark:text-rose-100 border-rose-400 dark:border-rose-500 font-black',
+      badge: 'bg-rose-50 text-rose-800 border-rose-200 font-bold',
     };
   }
   if (prep.delayStatus === 'WARNING') {
     return {
       dot: 'bg-amber-400',
-      badge: 'bg-amber-100 dark:bg-amber-900/50 text-amber-950 dark:text-amber-100 border-amber-400 dark:border-amber-600 font-bold',
+      badge: 'bg-amber-50 text-amber-800 border-amber-200 font-bold',
     };
   }
   return {
-    dot: 'bg-emerald-400',
-    badge: 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-950 dark:text-emerald-100 border-emerald-400 dark:border-emerald-600 font-bold',
+    dot: 'bg-emerald-500',
+    badge: 'bg-emerald-50 text-emerald-800 border-emerald-200 font-bold',
   };
 };
 
@@ -40,6 +40,7 @@ export function KitchenDisplayView() {
   const [toastError, setToastError] = useState<string | null>(null);
   const [undoToast, setUndoToast] = useState<{ orderId: string; prevStatus: string; orderNumber: string } | null>(null);
   const [completedItemIds, setCompletedItemIds] = useState<Record<string, boolean>>({});
+  const [loadingOrderIds, setLoadingOrderIds] = useState<Record<string, boolean>>({});
   const [audioPrompt, setAudioPrompt] = useState(false);
   const [, setTick] = useState(0);
 
@@ -104,6 +105,9 @@ export function KitchenDisplayView() {
   }, []);
 
   const updateStatus = async (orderId: string, status: string) => {
+    if (loadingOrderIds[orderId]) return;
+    setLoadingOrderIds((prev) => ({ ...prev, [orderId]: true }));
+
     try {
       const current = orders.find((o) => o.id === orderId);
       const updated = await fetchApi(`/orders/${orderId}/status`, {
@@ -133,6 +137,8 @@ export function KitchenDisplayView() {
     } catch (err: any) {
       setToastError(err.message || 'Error updating order status');
       setTimeout(() => setToastError(null), 5000);
+    } finally {
+      setLoadingOrderIds((prev) => ({ ...prev, [orderId]: false }));
     }
   };
 
@@ -169,75 +175,69 @@ export function KitchenDisplayView() {
   }, [orders.length, newOrders.length, preparingOrders.length, readyOrders.length]);
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white relative transition-colors">
-      {/* Background ambient lighting */}
-      <div className="absolute top-0 left-1/3 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C11221]/10 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Clean Top KDS Bar - Minimal & High Contrast */}
-      <div className="bg-white/95 dark:bg-[#12100E]/95 backdrop-blur-xl border-b border-stone-200 dark:border-white/10 px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between flex-shrink-0 relative z-10">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] text-stone-900 font-sans relative transition-colors">
+      {/* Clean Top KDS Bar - Matching Waiter and POS Style */}
+      <div className="bg-white border-b border-stone-200/90 px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between flex-shrink-0 z-10 shadow-2xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-[#C11221] p-0.5 shadow-xs flex-shrink-0">
-            <div className="w-full h-full rounded-[10px] bg-stone-50 dark:bg-[#161311] flex items-center justify-center text-amber-500 dark:text-amber-400">
-              <ChefHat className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-            </div>
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/90 flex items-center justify-center flex-shrink-0 shadow-2xs">
+            <ChefHat className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
           </div>
           <div>
-            <h2 className="text-xs sm:text-sm font-black tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
+            <h2 className="text-xs sm:text-sm font-black tracking-tight text-stone-900 flex items-center gap-2">
               <span>Kitchen Display (KDS)</span>
-              <span className="text-[9px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded-full font-bold">
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
                 LIVE
               </span>
             </h2>
           </div>
         </div>
 
-        {/* Live Counters (Hidden on mobile where switcher tabs show counts) */}
-        <div className="hidden sm:flex items-center gap-2 sm:gap-4 text-xs font-bold">
-          <div className="flex items-center gap-1 sm:gap-1.5 text-amber-600 dark:text-amber-400">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+        {/* Live Counters */}
+        <div className="hidden sm:flex items-center gap-2 sm:gap-3 text-xs font-bold">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             <span>{newOrders.length} New</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 text-orange-600 dark:text-orange-400">
-            <Flame className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-800 border border-orange-200/90 shadow-2xs">
+            <Flame className="w-3.5 h-3.5 text-orange-600" />
             <span>{preparingOrders.length} Cooking</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 text-emerald-600 dark:text-emerald-400">
-            <CheckCircle className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 shadow-2xs">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
             <span>{readyOrders.length} Ready</span>
           </div>
         </div>
       </div>
 
-      {/* Floating In-App Toast Notification (Zero thread-locking window.alert) */}
+      {/* Floating In-App Toast Notification */}
       {toastError && (
-        <div className="mx-3 mt-2 p-3 bg-rose-500/15 border border-rose-500/40 rounded-2xl flex items-center justify-between text-xs text-rose-300 shadow-xl backdrop-blur-xl relative z-20 animate-in slide-in-from-top-2">
+        <div className="mx-3 mt-2 p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-xs text-rose-800 shadow-md relative z-20 animate-in slide-in-from-top-2">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
             <span className="font-semibold">{toastError}</span>
           </div>
           <button
             onClick={() => setToastError(null)}
-            className="p-1 hover:bg-rose-500/20 rounded-lg text-rose-400 hover:text-white transition"
+            className="p-1 hover:bg-rose-100 rounded-lg text-rose-600 transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Mobile Stage Switcher (<md): 1 Tap to View Active Category with ZERO Scrolling */}
-      <div className="md:hidden flex items-center p-1 bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-2xl mx-3 mt-2.5 mb-1 gap-1 flex-shrink-0 relative z-10">
+      {/* Mobile Stage Switcher (<md): 1 Tap to View Active Category */}
+      <div className="md:hidden flex items-center p-1 bg-white border border-stone-200/90 rounded-2xl mx-3 mt-2.5 mb-1 gap-1 flex-shrink-0 shadow-2xs">
         <button
           onClick={() => setMobileTab('NEW')}
-          className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
             mobileTab === 'NEW'
-              ? 'bg-amber-500 text-stone-950 shadow-md font-black'
-              : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+              ? 'bg-amber-500 text-white shadow-xs font-black'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
           }`}
         >
           <span>🟡 New</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-            mobileTab === 'NEW' ? 'bg-black/20 text-stone-950 font-black' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
+            mobileTab === 'NEW' ? 'bg-black/20 text-white' : 'bg-stone-100 text-stone-600'
           }`}>
             {newOrders.length}
           </span>
@@ -245,15 +245,15 @@ export function KitchenDisplayView() {
 
         <button
           onClick={() => setMobileTab('PREPARING')}
-          className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
             mobileTab === 'PREPARING'
-              ? 'bg-orange-500 text-white shadow-md font-black'
-              : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+              ? 'bg-orange-500 text-white shadow-xs font-black'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
           }`}
         >
           <span>🔥 Cooking</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-            mobileTab === 'PREPARING' ? 'bg-black/20 text-white font-black' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
+            mobileTab === 'PREPARING' ? 'bg-black/20 text-white' : 'bg-stone-100 text-stone-600'
           }`}>
             {preparingOrders.length}
           </span>
@@ -261,15 +261,15 @@ export function KitchenDisplayView() {
 
         <button
           onClick={() => setMobileTab('READY')}
-          className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
             mobileTab === 'READY'
-              ? 'bg-emerald-500 text-white shadow-md font-black'
-              : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+              ? 'bg-emerald-600 text-white shadow-xs font-black'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
           }`}
         >
           <span>✅ Ready</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-            mobileTab === 'READY' ? 'bg-black/20 text-white font-black' : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400'
+            mobileTab === 'READY' ? 'bg-black/20 text-white' : 'bg-stone-100 text-stone-600'
           }`}>
             {readyOrders.length}
           </span>
@@ -277,93 +277,92 @@ export function KitchenDisplayView() {
       </div>
 
       {/* Kanban Board: 3 Columns on Tablet/Desktop, 1 Responsive Active Column on Mobile */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-5 overflow-y-auto relative z-10 no-scrollbar">
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-5 overflow-y-auto relative no-scrollbar">
         {/* Column 1: New Confirmed Orders */}
-        <div className={`${mobileTab === 'NEW' ? 'flex' : 'hidden md:flex'} flex-col bg-white/70 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xs min-h-[300px]`}>
-          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
-            <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+        <div className={`${mobileTab === 'NEW' ? 'flex' : 'hidden md:flex'} flex-col bg-stone-100/70 border border-stone-200/90 rounded-3xl p-3.5 sm:p-4 shadow-xs min-h-[300px]`}>
+          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200/80 flex-shrink-0">
+            <span className="text-xs font-black uppercase tracking-wider text-amber-800 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
               <span>1. New Tickets ({newOrders.length})</span>
             </span>
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
             {newOrders.length === 0 ? (
-              <div className="h-32 flex flex-col items-center justify-center text-xs text-zinc-500">
-                <Clock className="w-6 h-6 mb-1 text-zinc-600 stroke-1" />
+              <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400">
+                <Clock className="w-6 h-6 mb-1 text-stone-400 stroke-1" />
                 <span>No new tickets waiting</span>
               </div>
             ) : (
               newOrders.map((order) => {
                 const prep = calculatePrepTime(order.createdAt);
                 const prepStyle = getPrepBadge(prep);
+                const isLoading = Boolean(loadingOrderIds[order.id]);
                 return (
                   <div
                     key={order.id}
-                    className={`bg-white dark:bg-white/[0.05] border rounded-2xl p-3.5 shadow-xs backdrop-blur-xl transition ${
-                      prep.delayStatus === 'DELAYED'
-                        ? 'border-red-500 ring-2 ring-red-500/20'
-                        : prep.delayStatus === 'WARNING'
-                        ? 'border-amber-500/80'
-                        : 'border-stone-200 dark:border-white/10 hover:border-amber-500/40'
-                    }`}
+                    className="bg-white border border-stone-200/90 hover:border-amber-400 rounded-2xl p-4 shadow-xs transition"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-black text-stone-900 dark:text-white">
+                      <span className="text-base font-black text-stone-900">
                         {formatOrderNumber(order.orderNumber)}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <span
-                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}
-                        >
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${prepStyle.dot}`} />
                           {prep.formattedTime}
                         </span>
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                            order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-500/30'
-                              : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 border-stone-300 dark:border-stone-700'
-                          }`}
-                        >
-                          {order.orderType === 'TAKEAWAY'
-                            ? `🛍️ TAKEAWAY`
-                            : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                          order.orderType === 'TAKEAWAY'
+                            ? 'bg-purple-50 text-purple-800 border-purple-200'
+                            : 'bg-stone-100 text-stone-800 border-stone-200'
+                        }`}>
+                          {order.orderType === 'TAKEAWAY' ? '🛍️ TAKEAWAY' : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-stone-600 dark:text-stone-300 mb-2">
-                      {order.orderType === 'TAKEAWAY' && order.customerName && (
-                        <span>Customer: <strong className="text-stone-900 dark:text-white font-bold">{order.customerName}</strong> • </span>
-                      )}
-                      <span>Server: <strong className="text-stone-900 dark:text-stone-100 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                    <div className="text-[11px] text-stone-500 mb-2 flex items-center justify-between">
+                      <div>
+                        {order.orderType === 'TAKEAWAY' && order.customerName && (
+                          <span>Guest: <strong className="text-stone-900 font-bold">{order.customerName}</strong> • </span>
+                        )}
+                        <span>Server: <strong className="text-stone-800 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                      </div>
                     </div>
 
+                    {/* Order Note Callout if any */}
+                    {order.notes && (
+                      <div className="mb-2.5 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-medium flex items-start gap-1.5">
+                        <span className="font-bold text-amber-800 flex-shrink-0">Note:</span>
+                        <span className="break-words">{order.notes}</span>
+                      </div>
+                    )}
+
                     {/* Items list */}
-                    <div className="space-y-1.5 mb-3 border-t border-b border-stone-200 dark:border-white/10 py-2">
+                    <div className="space-y-1.5 mb-3 border-t border-b border-stone-100 py-2.5">
                       {order.items.map((item: any) => (
                         <div
                           key={item.id}
                           onClick={() => toggleItemCompleted(item.id)}
-                          className={`p-1 rounded-lg cursor-pointer transition select-none ${
+                          className={`p-1.5 rounded-xl cursor-pointer transition select-none ${
                             completedItemIds[item.id]
-                              ? 'opacity-40 line-through bg-stone-100/60 dark:bg-white/[0.03]'
-                              : 'hover:bg-stone-100/40 dark:hover:bg-white/[0.04]'
+                              ? 'opacity-40 line-through bg-stone-100'
+                              : 'hover:bg-stone-50'
                           }`}
                           title="Click to check off prepared item"
                         >
                           <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-black text-amber-700 dark:text-amber-400">{item.quantity}x</span>
-                              <span className="text-stone-900 dark:text-white font-bold">{item.menuItem?.name || item.name || 'Dish'}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-stone-900 bg-stone-100 px-1.5 py-0.5 rounded-md">{item.quantity}x</span>
+                              <span className="text-stone-800 font-bold">{item.menuItem?.name || item.name || 'Dish'}</span>
                             </div>
                             {completedItemIds[item.id] && (
-                              <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
+                              <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
                             )}
                           </div>
                           {item.specialInstructions && (
-                            <div className="text-[10px] text-amber-800 dark:text-amber-300/90 italic pl-5 mt-0.5">
+                            <div className="text-[10px] text-amber-800 italic pl-7 mt-0.5">
                               &ldquo;{item.specialInstructions}&rdquo;
                             </div>
                           )}
@@ -371,15 +370,23 @@ export function KitchenDisplayView() {
                       ))}
                     </div>
 
-                    <Button
-                      variant="primary"
-                      size="default"
+                    <button
+                      disabled={isLoading}
                       onClick={() => updateStatus(order.id, 'IN_PREPARATION')}
-                      className="w-full"
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Flame className="w-4 h-4 fill-black" />
-                      <span>Accept & Start Prep</span>
-                    </Button>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-white" />
+                          <span>Starting Prep...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Flame className="w-4 h-4" />
+                          <span>Accept & Start Prep</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 );
               })
@@ -388,91 +395,90 @@ export function KitchenDisplayView() {
         </div>
 
         {/* Column 2: In Preparation */}
-        <div className={`${mobileTab === 'PREPARING' ? 'flex' : 'hidden md:flex'} flex-col bg-white/70 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xs min-h-[300px]`}>
-          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
-            <span className="text-xs font-black uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+        <div className={`${mobileTab === 'PREPARING' ? 'flex' : 'hidden md:flex'} flex-col bg-stone-100/70 border border-stone-200/90 rounded-3xl p-3.5 sm:p-4 shadow-xs min-h-[300px]`}>
+          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200/80 flex-shrink-0">
+            <span className="text-xs font-black uppercase tracking-wider text-orange-800 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
               <span>2. Cooking / Brewing ({preparingOrders.length})</span>
             </span>
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
             {preparingOrders.length === 0 ? (
-              <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400 dark:text-zinc-500">
-                <Flame className="w-6 h-6 mb-1 text-stone-400 dark:text-zinc-600 stroke-1" />
+              <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400">
+                <Flame className="w-6 h-6 mb-1 text-stone-400 stroke-1" />
                 <span>Kitchen is all clear</span>
               </div>
             ) : (
               preparingOrders.map((order) => {
                 const prep = calculatePrepTime(order.createdAt);
                 const prepStyle = getPrepBadge(prep);
+                const isLoading = Boolean(loadingOrderIds[order.id]);
                 return (
                   <div
                     key={order.id}
-                    className={`bg-white dark:bg-white/[0.05] border rounded-2xl p-3.5 shadow-xs backdrop-blur-xl transition ${
-                      prep.delayStatus === 'DELAYED'
-                        ? 'border-rose-400 dark:border-rose-500/80 ring-1 ring-rose-500/30'
-                        : prep.delayStatus === 'WARNING'
-                        ? 'border-amber-500/80 ring-1 ring-amber-500/20'
-                        : 'border-stone-200 dark:border-white/10 hover:border-orange-500/40'
-                    }`}
+                    className="bg-white border border-stone-200/90 hover:border-orange-400 rounded-2xl p-4 shadow-xs transition"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-black text-stone-900 dark:text-white">
+                      <span className="text-base font-black text-stone-900">
                         {formatOrderNumber(order.orderNumber)}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <span
-                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}
-                        >
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${prepStyle.dot}`} />
                           {prep.formattedTime}
                         </span>
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                            order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-500/30'
-                              : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 border-stone-300 dark:border-stone-700'
-                          }`}
-                        >
-                          {order.orderType === 'TAKEAWAY'
-                            ? `🛍️ TAKEAWAY`
-                            : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                          order.orderType === 'TAKEAWAY'
+                            ? 'bg-purple-50 text-purple-800 border-purple-200'
+                            : 'bg-stone-100 text-stone-800 border-stone-200'
+                        }`}>
+                          {order.orderType === 'TAKEAWAY' ? '🛍️ TAKEAWAY' : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-stone-600 dark:text-stone-300 mb-2">
-                      {order.orderType === 'TAKEAWAY' && order.customerName && (
-                        <span>Customer: <strong className="text-stone-900 dark:text-white font-bold">{order.customerName}</strong> • </span>
-                      )}
-                      <span>Server: <strong className="text-stone-900 dark:text-stone-100 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                    <div className="text-[11px] text-stone-500 mb-2 flex items-center justify-between">
+                      <div>
+                        {order.orderType === 'TAKEAWAY' && order.customerName && (
+                          <span>Guest: <strong className="text-stone-900 font-bold">{order.customerName}</strong> • </span>
+                        )}
+                        <span>Server: <strong className="text-stone-800 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                      </div>
                     </div>
 
+                    {/* Order Note Callout if any */}
+                    {order.notes && (
+                      <div className="mb-2.5 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-medium flex items-start gap-1.5">
+                        <span className="font-bold text-amber-800 flex-shrink-0">Note:</span>
+                        <span className="break-words">{order.notes}</span>
+                      </div>
+                    )}
+
                     {/* Items list */}
-                    <div className="space-y-1.5 mb-3 border-t border-b border-stone-200 dark:border-white/10 py-2">
+                    <div className="space-y-1.5 mb-3 border-t border-b border-stone-100 py-2.5">
                       {order.items.map((item: any) => (
                         <div
                           key={item.id}
                           onClick={() => toggleItemCompleted(item.id)}
-                          className={`p-1 rounded-lg cursor-pointer transition select-none ${
+                          className={`p-1.5 rounded-xl cursor-pointer transition select-none ${
                             completedItemIds[item.id]
-                              ? 'opacity-40 line-through bg-stone-100/60 dark:bg-white/[0.03]'
-                              : 'hover:bg-stone-100/40 dark:hover:bg-white/[0.04]'
+                              ? 'opacity-40 line-through bg-stone-100'
+                              : 'hover:bg-stone-50'
                           }`}
                           title="Click to check off prepared item"
                         >
                           <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-black text-orange-600 dark:text-orange-400">{item.quantity}x</span>
-                              <span className="text-stone-900 dark:text-white font-bold">{item.menuItem?.name || item.name || 'Dish'}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-md">{item.quantity}x</span>
+                              <span className="text-stone-800 font-bold">{item.menuItem?.name || item.name || 'Dish'}</span>
                             </div>
                             {completedItemIds[item.id] && (
-                              <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
+                              <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
                             )}
                           </div>
                           {item.specialInstructions && (
-                            <div className="text-[10px] text-amber-800 dark:text-amber-300/90 italic pl-5 mt-0.5">
+                            <div className="text-[10px] text-amber-800 italic pl-7 mt-0.5">
                               &ldquo;{item.specialInstructions}&rdquo;
                             </div>
                           )}
@@ -480,15 +486,23 @@ export function KitchenDisplayView() {
                       ))}
                     </div>
 
-                    <Button
-                      variant="success"
-                      size="default"
+                    <button
+                      disabled={isLoading}
                       onClick={() => updateStatus(order.id, 'READY')}
-                      className="w-full"
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Mark Order Ready!</span>
-                    </Button>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-white" />
+                          <span>Marking Ready...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4" />
+                          <span>Mark Order Ready!</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 );
               })
@@ -497,78 +511,91 @@ export function KitchenDisplayView() {
         </div>
 
         {/* Column 3: Ready for Serving */}
-        <div className={`${mobileTab === 'READY' ? 'flex' : 'hidden md:flex'} flex-col bg-white/70 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-3xl p-3.5 sm:p-4 backdrop-blur-xl shadow-xs min-h-[300px]`}>
-          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <div className={`${mobileTab === 'READY' ? 'flex' : 'hidden md:flex'} flex-col bg-stone-100/70 border border-stone-200/90 rounded-3xl p-3.5 sm:p-4 shadow-xs min-h-[300px]`}>
+          <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200/80 flex-shrink-0">
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-800 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>3. Ready for Service ({readyOrders.length})</span>
             </span>
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
             {readyOrders.length === 0 ? (
-              <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400 dark:text-zinc-500">
-                <CheckCircle className="w-6 h-6 mb-1 text-stone-400 dark:text-zinc-600 stroke-1" />
+              <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400">
+                <CheckCircle className="w-6 h-6 mb-1 text-stone-400 stroke-1" />
                 <span>No orders waiting for pickup</span>
               </div>
             ) : (
               readyOrders.map((order) => {
                 const prep = calculatePrepTime(order.createdAt);
                 const prepStyle = getPrepBadge(prep);
+                const isLoading = Boolean(loadingOrderIds[order.id]);
                 return (
                   <div
                     key={order.id}
-                    className="bg-white dark:bg-white/[0.05] border border-emerald-300 dark:border-emerald-500/40 rounded-2xl p-3.5 shadow-xs backdrop-blur-xl animate-fade-in"
+                    className="bg-emerald-50/50 border border-emerald-200/90 hover:border-emerald-300 rounded-2xl p-4 shadow-xs transition animate-fade-in"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-black text-emerald-700 dark:text-emerald-300">
+                      <span className="text-base font-black text-emerald-800">
                         {formatOrderNumber(order.orderNumber)}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <span
-                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}
-                        >
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${prepStyle.badge}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${prepStyle.dot}`} />
                           {prep.formattedTime}
                         </span>
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                            order.orderType === 'TAKEAWAY'
-                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-500/30'
-                              : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-950 dark:text-emerald-100 border-emerald-300 dark:border-emerald-600'
-                          }`}
-                        >
-                          {order.orderType === 'TAKEAWAY'
-                            ? `🛍️ TAKEAWAY`
-                            : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                          order.orderType === 'TAKEAWAY'
+                            ? 'bg-purple-50 text-purple-800 border-purple-200'
+                            : 'bg-emerald-100 text-emerald-900 border-emerald-200'
+                        }`}>
+                          {order.orderType === 'TAKEAWAY' ? '🛍️ TAKEAWAY' : `🍽️ Table ${order.table?.tableNumber || 'Assigned'}`}
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-stone-600 dark:text-stone-300 mb-2">
-                      <span>Server: <strong className="text-stone-900 dark:text-stone-100 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
-                      {order.customerName && <span> • Guest: <strong className="text-stone-900 dark:text-white font-bold">{order.customerName}</strong></span>}
+                    <div className="text-[11px] text-stone-500 mb-2 flex items-center justify-between">
+                      <div>
+                        {order.customerName && <span>Guest: <strong className="text-stone-900 font-bold">{order.customerName}</strong> • </span>}
+                        <span>Server: <strong className="text-stone-800 font-bold">{order.waiter?.name || 'Counter'}</strong></span>
+                      </div>
                     </div>
 
+                    {/* Order Note Callout if any */}
+                    {order.notes && (
+                      <div className="mb-2.5 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-medium flex items-start gap-1.5">
+                        <span className="font-bold text-amber-800 flex-shrink-0">Note:</span>
+                        <span className="break-words">{order.notes}</span>
+                      </div>
+                    )}
+
                     {/* Items list */}
-                    <div className="space-y-1 mb-3 text-xs border-t border-b border-stone-200 dark:border-white/10 py-2">
+                    <div className="space-y-1 mb-3 text-xs border-t border-b border-emerald-100/80 py-2.5">
                       {order.items.map((item: any) => (
-                        <div key={item.id} className="flex items-center gap-1.5">
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">{item.quantity}x</span>
-                          <span className="font-bold text-stone-900 dark:text-white">{item.menuItem?.name || item.name || 'Dish'}</span>
+                        <div key={item.id} className="flex items-center gap-2">
+                          <span className="font-bold text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded-md">{item.quantity}x</span>
+                          <span className="font-bold text-stone-800">{item.menuItem?.name || item.name || 'Dish'}</span>
                         </div>
                       ))}
                     </div>
 
-                    <Button
-                      variant="primary"
-                      size="default"
+                    <button
+                      disabled={isLoading}
                       onClick={() => updateStatus(order.id, 'SERVED')}
-                      className="w-full"
+                      className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Utensils className="w-4 h-4" />
-                      <span>Delivered & Served</span>
-                    </Button>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-white" />
+                          <span>Delivering...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Utensils className="w-4 h-4" />
+                          <span>Delivered & Served</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 );
               })
@@ -577,9 +604,9 @@ export function KitchenDisplayView() {
         </div>
       </div>
 
-      {/* Quick 6-Second Undo Toast (BUG-028) */}
+      {/* Quick 6-Second Undo Toast */}
       {undoToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900/95 dark:bg-stone-950 text-white border border-stone-700/80 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900 text-white border border-stone-700/80 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
           <span className="text-xs font-bold">
             Order <strong className="text-amber-400">{undoToast.orderNumber}</strong> status updated.
           </span>
