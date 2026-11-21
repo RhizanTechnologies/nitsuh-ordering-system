@@ -11,6 +11,7 @@ import {
   Trash2,
   ChefHat,
   Check,
+  CheckCircle2,
   X,
   AlertCircle,
   Filter,
@@ -62,6 +63,23 @@ export function ProductManagementView() {
   const [savingProduct, setSavingProduct] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
+  // Modern In-App Toast & Confirmation
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    title: string;
+    description: string;
+    confirmText: string;
+    isDanger?: boolean;
+    onConfirm: () => void;
+  } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast((curr) => (curr?.message === message ? null : curr));
+    }, 4000);
+  };
+
   // Tab: 'products' | 'addons'
   const [activeTab, setActiveTab] = useState<'products' | 'addons'>('products');
 
@@ -83,7 +101,7 @@ export function ProductManagementView() {
 
   const processAndSetImage = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('Please upload a valid image file (PNG, JPG, WebP).');
+      showToast('Please upload a valid image file (PNG, JPG, WebP).', 'error');
       return;
     }
 
@@ -224,24 +242,32 @@ export function ProductManagementView() {
 
       setAddonModalOpen(false);
       loadData();
+      showToast(isEditingAddon ? `Add-on updated successfully!` : `New Add-on "${formAddonName}" created!`, 'success');
       setTimeout(() => setActionMessage(null), 4000);
     } catch (err: any) {
-      alert(`Error saving add-on: ${err.message}`);
+      showToast(`Error saving add-on: ${err.message}`, 'error');
     } finally {
       setSavingAddon(false);
     }
   };
 
-  const handleDeleteAddon = async (addon: any) => {
-    if (!confirm(`Are you sure you want to delete add-on "${addon.name}"?`)) return;
-    try {
-      await fetchApi(`/menu/addons/${addon.id}`, { method: 'DELETE' });
-      setActionMessage(`Add-on "${addon.name}" removed.`);
-      loadData();
-      setTimeout(() => setActionMessage(null), 4000);
-    } catch (err: any) {
-      alert(`Failed to delete add-on: ${err.message}`);
-    }
+  const handleDeleteAddon = (addon: any) => {
+    setConfirmModal({
+      title: 'Delete Add-on',
+      description: `Are you sure you want to delete add-on "${addon.name}"?`,
+      confirmText: 'Delete Add-on',
+      isDanger: true,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        try {
+          await fetchApi(`/menu/addons/${addon.id}`, { method: 'DELETE' });
+          showToast(`Add-on "${addon.name}" removed.`, 'success');
+          loadData();
+        } catch (err: any) {
+          showToast(`Failed to delete add-on: ${err.message}`, 'error');
+        }
+      },
+    });
   };
 
   const handleToggleAddonActive = async (addon: any) => {
@@ -252,7 +278,7 @@ export function ProductManagementView() {
       });
       loadData();
     } catch (err: any) {
-      alert(`Failed to update add-on status: ${err.message}`);
+      showToast(`Failed to update add-on status: ${err.message}`, 'error');
     }
   };
 
@@ -382,24 +408,32 @@ export function ProductManagementView() {
 
       setProductModalOpen(false);
       loadData();
+      showToast(editingId ? `Product updated successfully!` : `New product "${formName}" added to menu!`, 'success');
       setTimeout(() => setActionMessage(null), 4000);
     } catch (err: any) {
-      alert(`Error saving product: ${err.message}`);
+      showToast(`Error saving product: ${err.message}`, 'error');
     } finally {
       setSavingProduct(false);
     }
   };
 
-  const handleDeleteProduct = async (item: any) => {
-    if (!confirm(`Are you sure you want to remove "${item.name}" from the menu?`)) return;
-    try {
-      await fetchApi(`/menu/items/${item.id}`, { method: 'DELETE' });
-      setActionMessage(`Product "${item.name}" removed.`);
-      loadData();
-      setTimeout(() => setActionMessage(null), 4000);
-    } catch (err: any) {
-      alert(`Failed to delete product: ${err.message}`);
-    }
+  const handleDeleteProduct = (item: any) => {
+    setConfirmModal({
+      title: 'Remove Product',
+      description: `Are you sure you want to remove "${item.name}" from the menu?`,
+      confirmText: 'Remove Product',
+      isDanger: true,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        try {
+          await fetchApi(`/menu/items/${item.id}`, { method: 'DELETE' });
+          showToast(`Product "${item.name}" removed.`, 'success');
+          loadData();
+        } catch (err: any) {
+          showToast(`Failed to delete product: ${err.message}`, 'error');
+        }
+      },
+    });
   };
 
   const selectedIngredient = ingredientsPool.find((i) => i.id === formAddonIngredientId);
@@ -412,6 +446,82 @@ export function ProductManagementView() {
 
   return (
     <div className="space-y-5 text-stone-900 font-sans">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-20 right-5 z-50 max-w-sm w-full sm:w-auto animate-in fade-in slide-in-from-top-3 duration-200">
+          <div
+            className={`px-4 py-3 rounded-2xl shadow-2xl border flex items-center justify-between gap-3 text-xs font-black ${
+              toast.type === 'error'
+                ? 'bg-rose-600 text-white border-rose-700 shadow-rose-900/20'
+                : 'bg-emerald-600 text-white border-emerald-700 shadow-emerald-900/20'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {toast.type === 'error' ? (
+                <AlertCircle className="w-4 h-4 shrink-0 text-white" />
+              ) : (
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-white" />
+              )}
+              <span>{toast.message}</span>
+            </div>
+            <button
+              onClick={() => setToast(null)}
+              className="text-white/80 hover:text-white p-1 rounded-lg transition cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white border border-stone-200/90 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                confirmModal.isDanger
+                  ? 'bg-rose-50 border border-rose-200 text-rose-600'
+                  : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+              }`}
+            >
+              {confirmModal.isDanger ? (
+                <AlertCircle className="w-6 h-6" />
+              ) : (
+                <CheckCircle2 className="w-6 h-6" />
+              )}
+            </div>
+
+            <div>
+              <h3 className="text-base font-black text-stone-900">{confirmModal.title}</h3>
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                {confirmModal.description}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmModal.onConfirm}
+                className={`px-4 py-2.5 rounded-xl text-white font-black text-xs transition shadow-xs cursor-pointer active:scale-95 ${
+                  confirmModal.isDanger
+                    ? 'bg-rose-600 hover:bg-rose-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
+              >
+                {confirmModal.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Top Action & Control Bar */}
       <div className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-5 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -10,6 +10,7 @@ import {
   ShieldAlert,
   Search,
   CheckCircle2,
+  AlertCircle,
   XCircle,
   Eye,
   EyeOff,
@@ -74,7 +75,14 @@ export function StaffManagementView() {
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    title: string;
+    description: string;
+    confirmText: string;
+    isDanger?: boolean;
+    onConfirm: () => void;
+  } | null>(null);
 
   // Reset Requests state
   const [resetRequests, setResetRequests] = useState<ResetRequest[]>([]);
@@ -183,7 +191,7 @@ export function StaffManagementView() {
       loadResetRequests();
       loadStaff();
     } catch (err: any) {
-      alert(err.message || 'Failed to resolve request');
+      triggerToast(err.message || 'Failed to resolve request', 'error');
     } finally {
       setResolvingRequestId(null);
     }
@@ -191,7 +199,7 @@ export function StaffManagementView() {
 
   const handleInstantGeneratePin = async (staff: StaffMember) => {
     if (!isOwner && staff.role === 'OWNER') {
-      alert('Managers cannot alter Owner credentials.');
+      triggerToast('Managers cannot alter Owner credentials.', 'error');
       return;
     }
     try {
@@ -203,16 +211,18 @@ export function StaffManagementView() {
         type: 'PIN',
         value: res.pinCode,
       });
-      triggerToast(`Generated new PIN ${res.pinCode} for ${staff.name}!`);
+      triggerToast(`Generated new PIN ${res.pinCode} for ${staff.name}!`, 'success');
       loadStaff();
     } catch (err: any) {
-      alert(err.message || 'Failed to generate PIN');
+      triggerToast(err.message || 'Failed to generate PIN', 'error');
     }
   };
 
-  const triggerToast = (msg: string) => {
-    setSuccessToast(msg);
-    setTimeout(() => setSuccessToast(null), 4500);
+  const triggerToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message: msg, type });
+    setTimeout(() => {
+      setToast((curr) => (curr?.message === msg ? null : curr));
+    }, 4500);
   };
 
   const generateRandomPin = () => {
@@ -270,7 +280,7 @@ export function StaffManagementView() {
 
   const handleOpenResetPin = (staff: StaffMember) => {
     if (!isOwner && staff.role === 'OWNER') {
-      alert('Managers cannot alter Owner credentials.');
+      triggerToast('Managers cannot alter Owner credentials.', 'error');
       return;
     }
     setSelectedStaff(staff);
@@ -296,7 +306,7 @@ export function StaffManagementView() {
         body: JSON.stringify({ pinCode: newPin.trim() }),
       });
 
-      triggerToast(`PIN for ${selectedStaff.name} updated to ${newPin.trim()}`);
+      triggerToast(`PIN for ${selectedStaff.name} updated to ${newPin.trim()}`, 'success');
       setIsResetPinOpen(false);
       loadStaff();
     } catch (err: any) {
@@ -308,7 +318,7 @@ export function StaffManagementView() {
 
   const handleOpenEdit = (staff: StaffMember) => {
     if (!isOwner && staff.role === 'OWNER') {
-      alert('Managers cannot edit Owner profiles.');
+      triggerToast('Managers cannot edit Owner profiles.', 'error');
       return;
     }
     setSelectedStaff(staff);
@@ -338,7 +348,7 @@ export function StaffManagementView() {
         }),
       });
 
-      triggerToast(`Profile for ${editName} updated successfully`);
+      triggerToast(`Profile for ${editName} updated successfully`, 'success');
       setIsEditOpen(false);
       loadStaff();
     } catch (err: any) {
@@ -348,47 +358,62 @@ export function StaffManagementView() {
     }
   };
 
-  const handleToggleStatus = async (staff: StaffMember) => {
+  const handleToggleStatus = (staff: StaffMember) => {
     if (!isOwner && staff.role === 'OWNER') {
-      alert('Managers cannot alter Owner status.');
+      triggerToast('Managers cannot alter Owner status.', 'error');
       return;
     }
     if (staff.id === currentUser?.id) {
-      alert('You cannot deactivate your own active session!');
+      triggerToast('You cannot deactivate your own active session!', 'error');
       return;
     }
 
     const action = staff.isActive ? 'deactivate' : 'activate';
-    if (!confirm(`Are you sure you want to ${action} ${staff.name}?`)) return;
-
-    try {
-      await fetchApi(`/users/${staff.id}/toggle-status`, { method: 'PATCH' });
-      triggerToast(`${staff.name} is now ${staff.isActive ? 'inactive (locked out)' : 'active'}`);
-      loadStaff();
-    } catch (err: any) {
-      alert(err.message || 'Failed to toggle status');
-    }
+    setConfirmModal({
+      title: `${staff.isActive ? 'Deactivate' : 'Activate'} Staff Member`,
+      description: `Are you sure you want to ${action} ${staff.name}? ${staff.isActive ? 'They will not be able to log in to active terminals.' : 'They will regain access to system terminals.'}`,
+      confirmText: staff.isActive ? 'Deactivate' : 'Activate',
+      isDanger: staff.isActive,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        try {
+          await fetchApi(`/users/${staff.id}/toggle-status`, { method: 'PATCH' });
+          triggerToast(`${staff.name} is now ${staff.isActive ? 'inactive (locked out)' : 'active'}`, 'success');
+          loadStaff();
+        } catch (err: any) {
+          triggerToast(err.message || 'Failed to toggle status', 'error');
+        }
+      },
+    });
   };
 
-  const handleArchiveStaff = async (staff: StaffMember) => {
+  const handleArchiveStaff = (staff: StaffMember) => {
     if (staff.role === 'OWNER') {
-      alert('The Owner account cannot be deleted or archived.');
+      triggerToast('The Owner account cannot be deleted or archived.', 'error');
       return;
     }
-    if (!confirm(`Are you sure you want to archive/remove staff member "${staff.name}"? This removes them from active terminals while safely preserving past audit logs.`)) return;
 
-    try {
-      const res = await fetchApi(`/users/${staff.id}`, { method: 'DELETE' });
-      triggerToast(res?.message || `Staff member "${staff.name}" archived.`);
-      loadStaff();
-    } catch (err: any) {
-      alert(err.message || 'Failed to archive staff');
-    }
+    setConfirmModal({
+      title: 'Archive Staff Member',
+      description: `Are you sure you want to archive staff member "${staff.name}"? This removes them from active terminals while safely preserving past audit logs.`,
+      confirmText: 'Archive Staff',
+      isDanger: true,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        try {
+          const res = await fetchApi(`/users/${staff.id}`, { method: 'DELETE' });
+          triggerToast(res?.message || `Staff member "${staff.name}" archived.`, 'success');
+          loadStaff();
+        } catch (err: any) {
+          triggerToast(err.message || 'Failed to archive staff', 'error');
+        }
+      },
+    });
   };
 
   const handleOpenPasswordModal = (staff: StaffMember) => {
     if (!isOwner && staff.role === 'OWNER') {
-      alert('Managers cannot reset Owner password.');
+      triggerToast('Managers cannot reset Owner password.', 'error');
       return;
     }
     setSelectedStaff(staff);
@@ -488,12 +513,32 @@ export function StaffManagementView() {
     <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 no-scrollbar bg-[#F8F9FA] text-stone-900 font-sans">
       <div className="max-w-7xl mx-auto space-y-5 pb-16">
         {/* Toast Notification */}
-      {successToast && (
-        <div className="fixed top-20 right-5 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3 duration-200">
-          <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-          <span className="text-xs font-black">{successToast}</span>
-        </div>
-      )}
+        {toast && (
+          <div className="fixed top-20 right-5 z-50 max-w-sm w-full sm:w-auto animate-in fade-in slide-in-from-top-3 duration-200">
+            <div
+              className={`px-4 py-3 rounded-2xl shadow-2xl border flex items-center justify-between gap-3 text-xs font-black ${
+                toast.type === 'error'
+                  ? 'bg-rose-600 text-white border-rose-700 shadow-rose-900/20'
+                  : 'bg-emerald-600 text-white border-emerald-700 shadow-emerald-900/20'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {toast.type === 'error' ? (
+                  <AlertCircle className="w-4 h-4 shrink-0 text-white" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-white" />
+                )}
+                <span>{toast.message}</span>
+              </div>
+              <button
+                onClick={() => setToast(null)}
+                className="text-white/80 hover:text-white p-1 rounded-lg transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
       {/* Main Header Card */}
       <div className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-5 shadow-xs">
@@ -1253,6 +1298,54 @@ export function StaffManagementView() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white border border-stone-200/90 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                confirmModal.isDanger
+                  ? 'bg-rose-50 border border-rose-200 text-rose-600'
+                  : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+              }`}
+            >
+              {confirmModal.isDanger ? (
+                <AlertCircle className="w-6 h-6" />
+              ) : (
+                <CheckCircle2 className="w-6 h-6" />
+              )}
+            </div>
+
+            <div>
+              <h3 className="text-base font-black text-stone-900">{confirmModal.title}</h3>
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                {confirmModal.description}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmModal.onConfirm}
+                className={`px-4 py-2.5 rounded-xl text-white font-black text-xs transition shadow-xs cursor-pointer active:scale-95 ${
+                  confirmModal.isDanger
+                    ? 'bg-rose-600 hover:bg-rose-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
+              >
+                {confirmModal.confirmText}
+              </button>
+            </div>
           </div>
         </div>
       )}

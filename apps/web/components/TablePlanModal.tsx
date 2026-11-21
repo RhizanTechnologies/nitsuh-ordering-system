@@ -49,6 +49,7 @@ export function TablePlanModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [tableToDelete, setTableToDelete] = useState<any | null>(null);
 
   const isOwnerOrManager = currentUser?.role === 'OWNER' || currentUser?.role === 'MANAGER';
 
@@ -148,16 +149,18 @@ export function TablePlanModal({
     }
   };
 
-  const handleDeleteTable = async (t: any) => {
+  const handleDeleteTable = (t: any) => {
     if (t.orders && t.orders.length > 0) {
       setError(`Cannot delete Table ${t.tableNumber} while it has an active dining bill.`);
       return;
     }
+    setTableToDelete(t);
+  };
 
-    if (!confirm(`Are you sure you want to delete Table "${t.tableNumber}"?`)) {
-      return;
-    }
-
+  const confirmDeleteTable = async () => {
+    if (!tableToDelete) return;
+    const t = tableToDelete;
+    setTableToDelete(null);
     try {
       await fetchApi(`/menu/tables/${t.id}`, { method: 'DELETE' });
       setSuccessMsg(`Table ${t.tableNumber} deleted.`);
@@ -506,6 +509,41 @@ export function TablePlanModal({
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal for Table Deletion */}
+      {tableToDelete && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white border border-stone-200/90 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
+              <Trash2 className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-base font-black text-stone-900">Delete Table</h3>
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                Are you sure you want to delete table <strong className="text-stone-800 font-bold">&quot;{tableToDelete.tableNumber}&quot;</strong>? This action will remove it from the floor plan.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setTableToDelete(null)}
+                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteTable}
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer"
+              >
+                Delete Table
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

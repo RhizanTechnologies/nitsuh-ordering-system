@@ -7,6 +7,7 @@ import { useAppStore } from '@/lib/store';
 import {
   Users,
   CheckCircle,
+  CheckCircle2,
   Plus,
   Trash2,
   Edit3,
@@ -34,8 +35,20 @@ export default function TablesPage() {
   const [capacity, setCapacity] = useState('4');
   const [status, setStatus] = useState<'AVAILABLE' | 'RESERVED'>('AVAILABLE');
   const [formLoading, setFormLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Modern In-App Confirmation Modals (Replacing browser alert / confirm)
+  const [deleteModal, setDeleteModal] = useState<{ id: string; name: string } | null>(null);
+  const [freeModal, setFreeModal] = useState<{ id: string; name: string } | null>(null);
+
+  // In-App Toast
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast((curr) => (curr?.message === message ? null : curr));
+    }, 4000);
+  };
 
   const isOwnerOrManager = currentUser?.role === 'OWNER' || currentUser?.role === 'MANAGER';
 
@@ -87,8 +100,6 @@ export default function TablesPage() {
     setCapacity('4');
     setStatus('AVAILABLE');
     setShowAddForm(true);
-    setError(null);
-    setSuccessMsg(null);
   };
 
   const handleInstantAutoAddNext = async () => {
@@ -103,10 +114,10 @@ export default function TablesPage() {
           status: 'AVAILABLE',
         }),
       });
-      setSuccessMsg(`"${nextNum}" automatically created!`);
+      showToast(`"${nextNum}" automatically created!`, 'success');
       loadTables();
     } catch (err: any) {
-      setError(err.message || 'Failed to auto-add table');
+      showToast(err.message || 'Failed to auto-add table', 'error');
     } finally {
       setFormLoading(false);
     }
@@ -118,18 +129,15 @@ export default function TablesPage() {
     setTableNumber(t.tableNumber);
     setCapacity(String(t.capacity));
     setStatus(t.status === 'RESERVED' ? 'RESERVED' : 'AVAILABLE');
-    setError(null);
-    setSuccessMsg(null);
   };
 
   const handleSaveAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tableNumber.trim()) {
-      setError('Table name or identifier is required');
+      showToast('Table name or identifier is required', 'error');
       return;
     }
     setFormLoading(true);
-    setError(null);
     try {
       await fetchApi('/menu/tables', {
         method: 'POST',
@@ -139,12 +147,12 @@ export default function TablesPage() {
           status,
         }),
       });
-      setSuccessMsg(`Table "${tableNumber}" added successfully!`);
+      showToast(`Table "${tableNumber}" added successfully!`, 'success');
       setShowAddForm(false);
       setTableNumber('');
       loadTables();
     } catch (err: any) {
-      setError(err.message || 'Failed to add table');
+      showToast(err.message || 'Failed to add table', 'error');
     } finally {
       setFormLoading(false);
     }
@@ -154,7 +162,6 @@ export default function TablesPage() {
     e.preventDefault();
     if (!editingTableId || !tableNumber.trim()) return;
     setFormLoading(true);
-    setError(null);
     try {
       await fetchApi(`/menu/tables/${editingTableId}`, {
         method: 'PATCH',
@@ -164,43 +171,60 @@ export default function TablesPage() {
           status,
         }),
       });
-      setSuccessMsg(`Table "${tableNumber}" updated successfully!`);
+      showToast(`Table "${tableNumber}" updated successfully!`, 'success');
       setEditingTableId(null);
       loadTables();
     } catch (err: any) {
-      setError(err.message || 'Failed to update table');
+      showToast(err.message || 'Failed to update table', 'error');
     } finally {
       setFormLoading(false);
     }
   };
 
-  const handleFreeTable = async (tableId: string, name: string) => {
-    if (!confirm(`Are you sure you want to release "${name}" and mark it Available?`)) return;
+  // Open modern in-app confirmation modal for releasing table
+  const handleFreeTable = (tableId: string, name: string) => {
+    setFreeModal({ id: tableId, name });
+  };
+
+  const executeFreeTable = async () => {
+    if (!freeModal) return;
+    const { id, name } = freeModal;
+    setFreeModal(null);
     setLoading(true);
     try {
-      await fetchApi(`/menu/tables/${tableId}`, {
+      await fetchApi(`/menu/tables/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status: 'AVAILABLE' }),
       });
-      setSuccessMsg(`Table "${name}" has been released and is now Available.`);
+      showToast(`Table "${name}" has been released and is now Available.`, 'success');
       await loadTables();
     } catch (err: any) {
-      setError(err.message || 'Failed to release table');
+      showToast(err.message || 'Failed to release table', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (tableId: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete table "${name}"?`)) return;
+  // Open modern in-app confirmation modal for deleting table
+  const handleDelete = (tableId: string, name: string) => {
+    setDeleteModal({ id: tableId, name });
+  };
+
+  const executeDelete = async () => {
+    if (!deleteModal) return;
+    const { id, name } = deleteModal;
+    setDeleteModal(null);
+    setLoading(true);
     try {
-      await fetchApi(`/menu/tables/${tableId}`, {
+      await fetchApi(`/menu/tables/${id}`, {
         method: 'DELETE',
       });
-      setSuccessMsg(`Table "${name}" removed.`);
+      showToast(`Table "${name}" removed.`, 'success');
       loadTables();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete table. Check if table has active orders.');
+      showToast(err.message || 'Failed to delete table. Check if table has active orders.', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -256,17 +280,31 @@ export default function TablesPage() {
           </div>
         </div>
 
-        {successMsg && (
-          <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs flex items-center gap-2 animate-in fade-in">
-            <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs flex items-center gap-2 animate-in fade-in">
-            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-            <span>{error}</span>
+        {/* Floating Toast Notification */}
+        {toast && (
+          <div className="fixed top-5 right-5 z-[100] max-w-sm w-full sm:w-auto animate-in fade-in slide-in-from-top-3 duration-200">
+            <div
+              className={`px-4 py-3 rounded-2xl shadow-xl border flex items-center justify-between gap-3 text-xs font-black ${
+                toast.type === 'error'
+                  ? 'bg-rose-600 text-white border-rose-700 shadow-rose-900/20'
+                  : 'bg-emerald-600 text-white border-emerald-700 shadow-emerald-900/20'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {toast.type === 'error' ? (
+                  <AlertCircle className="w-4 h-4 shrink-0 text-white" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-white" />
+                )}
+                <span>{toast.message}</span>
+              </div>
+              <button
+                onClick={() => setToast(null)}
+                className="text-white/80 hover:text-white p-1 rounded-lg transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         )}
 
@@ -440,12 +478,6 @@ export default function TablesPage() {
                       </select>
                     </div>
 
-                    {error && editingTableId === t.id && (
-                      <div className="p-2 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-[11px] font-medium">
-                        {error}
-                      </div>
-                    )}
-
                     <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
                       <button
                         type="submit"
@@ -579,6 +611,76 @@ export default function TablesPage() {
           })}
         </div>
       </div>
+
+      {/* Modern In-App Confirmation Modal for Table Deletion */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white border border-stone-200/90 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
+              <Trash2 className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-base font-black text-stone-900">Delete Table</h3>
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                Are you sure you want to delete table <strong className="text-stone-800 font-bold">&quot;{deleteModal.name}&quot;</strong>? This action will remove it from the dining floor.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteModal(null)}
+                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDelete}
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer"
+              >
+                Delete Table
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modern In-App Confirmation Modal for Releasing Table */}
+      {freeModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white border border-stone-200/90 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
+              <CheckCircle className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-base font-black text-stone-900">Release Table</h3>
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                Are you sure you want to release table <strong className="text-stone-800 font-bold">&quot;{freeModal.name}&quot;</strong> and mark it Available? Any open orders will be cleared from this table.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setFreeModal(null)}
+                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeFreeTable}
+                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer"
+              >
+                Release Table
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
