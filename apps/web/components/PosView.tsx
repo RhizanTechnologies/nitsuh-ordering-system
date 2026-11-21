@@ -2058,8 +2058,8 @@ export function PosView() {
               })}
             </div>
 
-            {/* Food Items Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+            {/* Food Items Grid (Consistent with Waiter Pad) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 sm:gap-4">
               {filteredItems.map((item) => {
                 const inCart = cart.find((c) => c.menuItemId === item.id);
                 const qty = inCart ? inCart.quantity : 0;
@@ -2077,90 +2077,95 @@ export function PosView() {
                         isDirectSale: item.isDirectSale,
                       })
                     }
-                    className={`group relative bg-white dark:bg-[#161311] rounded-3xl p-3 sm:p-3.5 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.12)] ${
+                    className={`group relative bg-white rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden hover:shadow-md ${
                       isSelected
-                        ? "border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/30"
-                        : "border-stone-200/90 dark:border-white/10 hover:border-[#B83E18]/50 dark:hover:border-amber-500/50"
+                        ? 'border-emerald-500 ring-2 ring-emerald-500/25 shadow-sm'
+                        : 'border-stone-200/90 hover:border-emerald-500/50'
                     }`}
                   >
-                    {/* Food Image */}
-                    <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-2.5 sm:mb-3 bg-stone-100 dark:bg-black/40 border border-stone-200/60 dark:border-white/10 flex-shrink-0">
+                    {/* Full Culinary Image Header (Edge-to-Edge Shadcn Style, matching Waiter) */}
+                    <div className="relative w-full aspect-[4/3] bg-stone-100 overflow-hidden flex-shrink-0">
                       <MenuImage
                         src={item.imageUrl}
                         alt={item.name}
                         categoryName={item.category?.name}
                         prepSection={item.prepSection}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 drop-shadow-sm"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
 
-                      {/* Selection Overlay */}
+                      {/* Selected Count Badge Overlay */}
                       {isSelected && (
-                        <div className="absolute bottom-2 right-2 z-10 bg-emerald-600 text-white font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full shadow-xs border border-emerald-400/40 flex items-center gap-1">
-                          <span>x{qty} in order</span>
+                        <div className="absolute top-2 right-2 z-10 bg-emerald-600 text-white font-black text-xs px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                          <span>x{qty}</span>
+                        </div>
+                      )}
+
+                      {/* Station Tag */}
+                      {item.prepSection && (
+                        <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-xs text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                          {item.prepSection}
                         </div>
                       )}
                     </div>
 
-                    {/* Item Details */}
-                    <div className="flex flex-col flex-1 justify-between">
+                    {/* Card Content: Category Tag, Dish Title */}
+                    <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
                       <div>
+                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
+                          {item.category?.name || 'Dish'}
+                        </span>
                         <h3
-                          className="text-xs sm:text-base font-black text-stone-900 truncate group-hover:text-emerald-700 transition"
+                          className="font-heading font-black text-sm sm:text-base text-stone-900 leading-snug mt-0.5 group-hover:text-emerald-700 transition line-clamp-1"
                           title={item.name}
                         >
                           {item.name}
                         </h3>
                       </div>
 
-                      {/* Price & Action Row */}
-                      <div className="flex items-end justify-between gap-2 mt-3 pt-2.5 border-t border-stone-100">
+                      {/* Card Footer: Price & Add / Stepper */}
+                      <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-stone-100">
                         <div>
-                          <div className="text-xs sm:text-base font-black text-emerald-700 tracking-tight leading-none">
-                            {Number(item.price).toLocaleString()} <span className="text-[10px] sm:text-xs font-bold text-stone-500">ETB</span>
+                          <div className="text-sm sm:text-base font-black text-stone-900 tracking-tight">
+                            {Number(item.price).toFixed(2)}{' '}
+                            <span className="text-[10px] font-bold text-stone-500">ETB</span>
                           </div>
-                          <span className="text-[9px] text-stone-400 dark:text-zinc-500 font-bold uppercase tracking-wider block mt-1">
-                            VAT Inc.
-                          </span>
                         </div>
 
-                        {/* Stepper Pill if selected, or Quick-Add Button */}
+                        {/* Stepper or Quick Add Button */}
                         {qty > 0 ? (
                           <div
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1 sm:gap-1.5 bg-[#B83E18] text-pure-white stepper-btn p-1 rounded-full shadow-md shadow-[#B83E18]/30 flex-shrink-0 animate-in zoom-in-75 duration-150"
-                            style={{ color: '#ffffff' }}
+                            className="flex items-center gap-1 bg-emerald-600 text-white p-1 rounded-xl shadow-xs"
                           >
                             <button
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 updateQuantity(item.id, -1);
                               }}
-                              className="w-6 h-6 rounded-full bg-white/25 hover:bg-white/40 active:scale-90 text-pure-white stepper-btn flex items-center justify-center transition cursor-pointer"
-                              title="Reduce amount"
-                              style={{ color: '#ffffff' }}
+                              className="w-6 h-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 flex items-center justify-center cursor-pointer transition active:scale-90"
+                              title="Decrease quantity"
                             >
-                              <Minus className="w-3.5 h-3.5 stroke-[3] text-pure-white" style={{ stroke: '#ffffff', color: '#ffffff' }} />
+                              <Minus className="w-3.5 h-3.5 stroke-[3]" />
                             </button>
-                            <span
-                              className="text-xs font-black px-1.5 min-w-[18px] text-center select-none text-pure-white stepper-btn font-mono"
-                              style={{ color: '#ffffff' }}
-                            >
+                            <span className="text-xs font-black px-1.5 min-w-[18px] text-center">
                               {qty}
                             </span>
                             <button
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 updateQuantity(item.id, 1);
                               }}
-                              className="w-6 h-6 rounded-full bg-white/25 hover:bg-white/40 active:scale-90 text-pure-white stepper-btn flex items-center justify-center transition cursor-pointer"
-                              title="Add more"
-                              style={{ color: '#ffffff' }}
+                              className="w-6 h-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 flex items-center justify-center cursor-pointer transition active:scale-90"
+                              title="Increase quantity"
                             >
-                              <Plus className="w-3.5 h-3.5 stroke-[3] text-pure-white" style={{ stroke: '#ffffff', color: '#ffffff' }} />
+                              <Plus className="w-3.5 h-3.5 stroke-[3]" />
                             </button>
                           </div>
                         ) : (
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               addToCart({
@@ -2171,11 +2176,10 @@ export function PosView() {
                                 isDirectSale: item.isDirectSale,
                               });
                             }}
-                            className="w-8 h-8 rounded-full bg-[#B83E18] hover:bg-[#9E3312] active:scale-90 text-pure-white stepper-btn flex items-center justify-center shadow-md shadow-[#B83E18]/30 transition cursor-pointer flex-shrink-0"
-                            title="Add to cart"
-                            style={{ color: '#ffffff' }}
+                            className="h-8 px-3 rounded-xl bg-stone-100 hover:bg-emerald-600 text-stone-700 hover:text-white font-bold text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer group-hover:bg-emerald-600 group-hover:text-white active:scale-95"
                           >
-                            <Plus className="w-4 h-4 stroke-[3] text-pure-white" style={{ stroke: '#ffffff', color: '#ffffff' }} />
+                            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>Add</span>
                           </button>
                         )}
                       </div>
