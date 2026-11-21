@@ -1191,17 +1191,18 @@ export function PosView() {
 
       {/* Success Alert Banner */}
       {successOrder && (
-        <div className="mx-3.5 sm:mx-6 mt-3 bg-emerald-950/70 border border-emerald-500/40 p-3 rounded-2xl flex items-center justify-between text-white shadow-xl animate-fade-in backdrop-blur-xl z-20 flex-shrink-0">
+        <div className="mx-3.5 sm:mx-6 mt-3 bg-emerald-600 p-2.5 sm:p-3 rounded-xl flex items-center justify-between text-white shadow-sm animate-fade-in z-20 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <div className="text-xs font-bold">Order {successOrder} Fired Successfully!</div>
+            <CheckCircle2 className="w-4 h-4 text-white flex-shrink-0" />
+            <div className="text-xs sm:text-sm font-black">Order {successOrder} Fired Successfully!</div>
           </div>
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
             onClick={() => setReceiptModalOpen(true)}
+            className="bg-white/20 hover:bg-white text-white hover:text-emerald-800 border-0 font-bold"
           >
-            <Receipt className="w-3 h-3" />
+            <Receipt className="w-3.5 h-3.5 mr-1" />
             <span>Print</span>
           </Button>
         </div>

@@ -543,19 +543,16 @@ export function WaiterPadView() {
 
           {/* Success Notification Alert */}
           {sentOrderNumber && (
-            <div className="mb-4 bg-emerald-950/90 border border-emerald-500/50 p-3.5 rounded-2xl flex items-center gap-3 text-white shadow-xl animate-in fade-in">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-              <div className="flex-1">
-                <div className="text-xs sm:text-sm font-extrabold flex items-center gap-2">
-                  <span>Order {sentOrderNumber} Sent to Cashier!</span>
-                  <span className="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">
-                    Paperless
-                  </span>
-                </div>
-                <div className="text-[11px] text-zinc-400 mt-0.5">
-                  The Cashier counter now has this note on screen ready to confirm and fire to the kitchen.
-                </div>
+            <div className="mb-3 bg-emerald-600 text-white px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 shadow-sm animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-white flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-black">
+                  Order {sentOrderNumber} Sent to Cashier!
+                </span>
               </div>
+              <span className="bg-white/20 text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+                Paperless
+              </span>
             </div>
           )}
 
