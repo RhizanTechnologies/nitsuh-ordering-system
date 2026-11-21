@@ -9,6 +9,7 @@ import { MenuImage } from '@/components/MenuImage';
 import { MenuItemCard } from '@/components/MenuItemCard';
 import {
   Send,
+  AlertCircle,
   Plus,
   Minus,
   CheckCircle2,
@@ -63,6 +64,12 @@ export function WaiterPadView() {
   const [search, setSearch] = useState('');
   const [sending, setSending] = useState(false);
   const [sentOrderNumber, setSentOrderNumber] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const showError = (msg: string) => {
+    setErrorMessage(msg);
+    setTimeout(() => setErrorMessage(null), 6000);
+  };
   const [showMobileDrawer, setShowMobileDrawer] = useState(false);
   const [tableModalOpen, setTableModalOpen] = useState(false);
   const [readyToast, setReadyToast] = useState<any | null>(null);
@@ -319,7 +326,7 @@ export function WaiterPadView() {
     const selectedTableObj = isTakeaway ? null : tables.find((t) => t.tableNumber === waiterTable);
 
     if (!isTakeaway && (!waiterTable || !selectedTableObj)) {
-      alert('Please select a valid dining table for Dine-In orders before sending.');
+      showError('Please select a valid dining table for Dine-In orders before sending.');
       return;
     }
 
@@ -353,7 +360,7 @@ export function WaiterPadView() {
       loadActiveOrders();
       setTimeout(() => setSentOrderNumber(null), 6000);
     } catch (err: any) {
-      alert(`Error sending order note: ${err.message}`);
+      showError(`Error sending order note: ${err.message}`);
     } finally {
       setSending(false);
     }
@@ -372,7 +379,7 @@ export function WaiterPadView() {
         prev.map((o) => (o.id === updated.id ? updated : o))
       );
     } catch (err: any) {
-      alert(`Error marking served: ${err.message}`);
+      showError(`Error marking served: ${err.message}`);
     }
   };
 
@@ -539,6 +546,24 @@ export function WaiterPadView() {
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>{inFlightOrders.length} Active Ticket{inFlightOrders.length === 1 ? '' : 's'}</span>
               </div>
+            </div>
+          )}
+
+          {/* Error Notification Alert */}
+          {errorMessage && (
+            <div className="mb-3 bg-[#C11221] text-white px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 shadow-sm animate-in fade-in">
+              <div className="flex items-center gap-2 min-w-0">
+                <AlertCircle className="w-4 h-4 text-white flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-bold truncate">
+                  {errorMessage}
+                </span>
+              </div>
+              <button
+                onClick={() => setErrorMessage(null)}
+                className="p-1 rounded-lg hover:bg-white/20 text-white flex-shrink-0 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           )}
 

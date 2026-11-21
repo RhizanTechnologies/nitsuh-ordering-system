@@ -223,8 +223,9 @@ let MenuService = class MenuService {
                 orders: {
                     where: {
                         status: { in: ['CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] },
+                        paymentStatus: { not: 'PAID' },
                     },
-                    select: { id: true, orderNumber: true, totalAmount: true, status: true },
+                    select: { id: true, orderNumber: true, totalAmount: true, status: true, paymentStatus: true },
                 },
             },
         });

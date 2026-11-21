@@ -9,10 +9,10 @@ export declare class MenuController {
     } & {
         id: string;
         name: string;
+        isActive: boolean;
         displayOrder: number;
         iconName: string | null;
         badgeColor: string | null;
-        isActive: boolean;
     })[]>;
     getItems(categoryId?: string): Promise<any[]>;
     createMenuItem(body: {
@@ -27,24 +27,24 @@ export declare class MenuController {
         category: {
             id: string;
             name: string;
+            isActive: boolean;
             displayOrder: number;
             iconName: string | null;
             badgeColor: string | null;
-            isActive: boolean;
         };
     } & {
         id: string;
-        isDirectSale: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         categoryId: string;
         description: string | null;
         price: import("@prisma/client/runtime/library").Decimal;
+        isDirectSale: boolean;
         directIngredientId: string | null;
         prepSection: string;
         imageUrl: string | null;
         isAvailable: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     updateMenuItem(id: string, body: {
         name?: string;
@@ -59,24 +59,24 @@ export declare class MenuController {
         category: {
             id: string;
             name: string;
+            isActive: boolean;
             displayOrder: number;
             iconName: string | null;
             badgeColor: string | null;
-            isActive: boolean;
         };
     } & {
         id: string;
-        isDirectSale: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         categoryId: string;
         description: string | null;
         price: import("@prisma/client/runtime/library").Decimal;
+        isDirectSale: boolean;
         directIngredientId: string | null;
         prepSection: string;
         imageUrl: string | null;
         isAvailable: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     deleteMenuItem(id: string): Promise<{
         success: boolean;
@@ -96,6 +96,19 @@ export declare class MenuController {
         }[];
     }): Promise<{
         ingredients: ({
+            ingredient: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                isActive: boolean;
+                category: string;
+                sku: string;
+                baseUnitId: string;
+                currentCostPerBaseUnit: import("@prisma/client/runtime/library").Decimal;
+                reorderThresholdMain: import("@prisma/client/runtime/library").Decimal;
+                reorderThresholdKitchen: import("@prisma/client/runtime/library").Decimal;
+            };
             unit: {
                 symbol: string;
                 id: string;
@@ -103,31 +116,18 @@ export declare class MenuController {
                 type: import("@prisma/client").$Enums.UnitType;
                 baseMultiplier: import("@prisma/client/runtime/library").Decimal;
             };
-            ingredient: {
-                id: string;
-                name: string;
-                isActive: boolean;
-                category: string;
-                createdAt: Date;
-                updatedAt: Date;
-                sku: string;
-                baseUnitId: string;
-                currentCostPerBaseUnit: import("@prisma/client/runtime/library").Decimal;
-                reorderThresholdMain: import("@prisma/client/runtime/library").Decimal;
-                reorderThresholdKitchen: import("@prisma/client/runtime/library").Decimal;
-            };
         } & {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
             ingredientId: string;
-            recipeId: string;
             unitId: string;
+            recipeId: string;
         })[];
     } & {
         id: string;
-        isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isActive: boolean;
         menuItemId: string;
         yieldPortions: import("@prisma/client/runtime/library").Decimal;
         prepInstructions: string | null;
@@ -136,15 +136,16 @@ export declare class MenuController {
     getTables(): Promise<({
         orders: {
             id: string;
-            status: import("@prisma/client").$Enums.OrderStatus;
             orderNumber: string;
+            status: import("@prisma/client").$Enums.OrderStatus;
             totalAmount: import("@prisma/client/runtime/library").Decimal;
+            paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         }[];
     } & {
         id: string;
+        status: import("@prisma/client").$Enums.TableStatus;
         tableNumber: string;
         capacity: number;
-        status: import("@prisma/client").$Enums.TableStatus;
     })[]>;
     createTable(body: {
         tableNumber: string;
@@ -152,9 +153,9 @@ export declare class MenuController {
         status?: 'AVAILABLE' | 'OCCUPIED' | 'RESERVED';
     }): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.TableStatus;
         tableNumber: string;
         capacity: number;
-        status: import("@prisma/client").$Enums.TableStatus;
     }>;
     updateTable(id: string, body: {
         tableNumber?: string;
@@ -162,9 +163,9 @@ export declare class MenuController {
         status?: 'AVAILABLE' | 'OCCUPIED' | 'RESERVED';
     }): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.TableStatus;
         tableNumber: string;
         capacity: number;
-        status: import("@prisma/client").$Enums.TableStatus;
     }>;
     deleteTable(id: string): Promise<{
         success: boolean;
@@ -176,34 +177,27 @@ export declare class MenuController {
         costPerAddon: number;
         profitPerAddon: number;
         marginPercent: number;
-        category: {
-            id: string;
-            name: string;
-            displayOrder: number;
-            iconName: string | null;
-            badgeColor: string | null;
-            isActive: boolean;
-        };
         menuItem: {
             id: string;
-            isDirectSale: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             categoryId: string;
             description: string | null;
             price: import("@prisma/client/runtime/library").Decimal;
+            isDirectSale: boolean;
             directIngredientId: string | null;
             prepSection: string;
             imageUrl: string | null;
             isAvailable: boolean;
-            createdAt: Date;
-            updatedAt: Date;
         };
-        unit: {
-            symbol: string;
+        category: {
             id: string;
             name: string;
-            type: import("@prisma/client").$Enums.UnitType;
-            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
+            isActive: boolean;
+            displayOrder: number;
+            iconName: string | null;
+            badgeColor: string | null;
         };
         ingredient: {
             baseUnit: {
@@ -215,25 +209,32 @@ export declare class MenuController {
             };
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             isActive: boolean;
             category: string;
-            createdAt: Date;
-            updatedAt: Date;
             sku: string;
             baseUnitId: string;
             currentCostPerBaseUnit: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdMain: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdKitchen: import("@prisma/client/runtime/library").Decimal;
         };
+        unit: {
+            symbol: string;
+            id: string;
+            name: string;
+            type: import("@prisma/client").$Enums.UnitType;
+            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
+        };
         id: string;
-        ingredientId: string | null;
-        name: string;
-        isActive: boolean;
-        categoryId: string | null;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         menuItemId: string | null;
+        categoryId: string | null;
+        ingredientId: string | null;
         unitId: string | null;
     }[]>;
     createAddon(body: {
@@ -245,34 +246,27 @@ export declare class MenuController {
         categoryId?: string;
         menuItemId?: string;
     }): Promise<{
-        category: {
-            id: string;
-            name: string;
-            displayOrder: number;
-            iconName: string | null;
-            badgeColor: string | null;
-            isActive: boolean;
-        };
         menuItem: {
             id: string;
-            isDirectSale: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             categoryId: string;
             description: string | null;
             price: import("@prisma/client/runtime/library").Decimal;
+            isDirectSale: boolean;
             directIngredientId: string | null;
             prepSection: string;
             imageUrl: string | null;
             isAvailable: boolean;
-            createdAt: Date;
-            updatedAt: Date;
         };
-        unit: {
-            symbol: string;
+        category: {
             id: string;
             name: string;
-            type: import("@prisma/client").$Enums.UnitType;
-            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
+            isActive: boolean;
+            displayOrder: number;
+            iconName: string | null;
+            badgeColor: string | null;
         };
         ingredient: {
             baseUnit: {
@@ -284,28 +278,35 @@ export declare class MenuController {
             };
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             isActive: boolean;
             category: string;
-            createdAt: Date;
-            updatedAt: Date;
             sku: string;
             baseUnitId: string;
             currentCostPerBaseUnit: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdMain: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdKitchen: import("@prisma/client/runtime/library").Decimal;
         };
+        unit: {
+            symbol: string;
+            id: string;
+            name: string;
+            type: import("@prisma/client").$Enums.UnitType;
+            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
+        };
     } & {
         id: string;
-        quantity: import("@prisma/client/runtime/library").Decimal;
-        ingredientId: string | null;
-        name: string;
-        isActive: boolean;
-        categoryId: string | null;
-        price: import("@prisma/client/runtime/library").Decimal;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
+        quantity: import("@prisma/client/runtime/library").Decimal;
         menuItemId: string | null;
+        categoryId: string | null;
+        price: import("@prisma/client/runtime/library").Decimal;
+        ingredientId: string | null;
         unitId: string | null;
     }>;
     updateAddon(id: string, body: {
@@ -318,34 +319,27 @@ export declare class MenuController {
         menuItemId?: string | null;
         isActive?: boolean;
     }): Promise<{
-        category: {
-            id: string;
-            name: string;
-            displayOrder: number;
-            iconName: string | null;
-            badgeColor: string | null;
-            isActive: boolean;
-        };
         menuItem: {
             id: string;
-            isDirectSale: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             categoryId: string;
             description: string | null;
             price: import("@prisma/client/runtime/library").Decimal;
+            isDirectSale: boolean;
             directIngredientId: string | null;
             prepSection: string;
             imageUrl: string | null;
             isAvailable: boolean;
-            createdAt: Date;
-            updatedAt: Date;
         };
-        unit: {
-            symbol: string;
+        category: {
             id: string;
             name: string;
-            type: import("@prisma/client").$Enums.UnitType;
-            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
+            isActive: boolean;
+            displayOrder: number;
+            iconName: string | null;
+            badgeColor: string | null;
         };
         ingredient: {
             baseUnit: {
@@ -357,28 +351,35 @@ export declare class MenuController {
             };
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             isActive: boolean;
             category: string;
-            createdAt: Date;
-            updatedAt: Date;
             sku: string;
             baseUnitId: string;
             currentCostPerBaseUnit: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdMain: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdKitchen: import("@prisma/client/runtime/library").Decimal;
         };
+        unit: {
+            symbol: string;
+            id: string;
+            name: string;
+            type: import("@prisma/client").$Enums.UnitType;
+            baseMultiplier: import("@prisma/client/runtime/library").Decimal;
+        };
     } & {
         id: string;
-        quantity: import("@prisma/client/runtime/library").Decimal;
-        ingredientId: string | null;
-        name: string;
-        isActive: boolean;
-        categoryId: string | null;
-        price: import("@prisma/client/runtime/library").Decimal;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
+        quantity: import("@prisma/client/runtime/library").Decimal;
         menuItemId: string | null;
+        categoryId: string | null;
+        price: import("@prisma/client/runtime/library").Decimal;
+        ingredientId: string | null;
         unitId: string | null;
     }>;
     deleteAddon(id: string): Promise<{

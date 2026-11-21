@@ -11,6 +11,7 @@ export declare class OrdersService {
         customerName?: string;
         waiterId: string;
         orderType?: OrderType;
+        notes?: string;
         discount?: number;
         discountPercent?: number;
         items: {
@@ -79,6 +80,7 @@ export declare class OrdersService {
         totalAmount: Prisma.Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -141,6 +143,7 @@ export declare class OrdersService {
         totalAmount: Prisma.Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -218,6 +221,7 @@ export declare class OrdersService {
         totalAmount: Prisma.Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -293,6 +297,7 @@ export declare class OrdersService {
         totalAmount: Prisma.Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -355,6 +360,7 @@ export declare class OrdersService {
         totalAmount: Prisma.Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -440,6 +446,7 @@ export declare class OrdersService {
             totalAmount: Prisma.Decimal;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
             cancellationReason: string | null;
+            notes: string | null;
             createdAt: Date;
             updatedAt: Date;
         };
@@ -521,6 +528,7 @@ export declare class OrdersService {
         totalAmount: Prisma.Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -597,6 +605,7 @@ export declare class OrdersService {
         totalAmount: Prisma.Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -656,6 +665,7 @@ export declare class OrdersService {
         totalAmount: Prisma.Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     })[]>;

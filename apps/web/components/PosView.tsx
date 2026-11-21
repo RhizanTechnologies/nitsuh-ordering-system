@@ -81,6 +81,12 @@ export function PosView() {
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [successOrder, setSuccessOrder] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const showError = (msg: string) => {
+    setErrorMessage(msg);
+    setTimeout(() => setErrorMessage(null), 6000);
+  };
 
   // Mobile drawer & modals
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
@@ -571,7 +577,7 @@ export function PosView() {
       setTimeout(() => setSuccessOrder(null), 4000);
       loadData();
     } catch (err: any) {
-      alert(`Error placing order: ${err.message}`);
+      showError(`Error placing order: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -630,7 +636,7 @@ export function PosView() {
       loadData();
       setTimeout(() => setSuccessOrder(null), 4000);
     } catch (err: any) {
-      alert(`Error sending order to kitchen: ${err.message}`);
+      showError(`Error sending order to kitchen: ${err.message}`);
     }
   };
 
@@ -648,7 +654,7 @@ export function PosView() {
       setIncomingSlips((prev) => prev.filter((s) => s.id !== slipId));
       setWaiterSlipsCount(Math.max(0, incomingSlips.length - 1));
     } catch (e: any) {
-      alert(e.message || 'Error rejecting slip');
+      showError(e.message || 'Error rejecting slip');
     }
   };
 
@@ -1189,6 +1195,22 @@ export function PosView() {
           </Button>
         </div>
       </div>
+
+      {/* Error Alert Toast */}
+      {errorMessage && (
+        <div className="mx-3.5 sm:mx-6 mt-3 bg-[#C11221] p-3 rounded-xl flex items-center justify-between text-white shadow-md animate-fade-in z-30 flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-white" />
+            <span className="text-xs sm:text-sm font-bold truncate">{errorMessage}</span>
+          </div>
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="p-1 rounded-lg hover:bg-white/20 text-white flex-shrink-0 cursor-pointer transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Success Alert Banner */}
       {successOrder && (

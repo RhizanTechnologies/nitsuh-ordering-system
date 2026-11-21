@@ -19,9 +19,10 @@ let OrdersController = class OrdersController {
     constructor(ordersService) {
         this.ordersService = ordersService;
     }
-    async getOrders(statuses, tableId, waiterId) {
+    async getOrders(statuses, tableId, waiterId, limit) {
         const statusArray = statuses ? statuses.split(',') : undefined;
-        return this.ordersService.getOrders({ statuses: statusArray, tableId, waiterId });
+        const parsedLimit = limit ? parseInt(limit, 10) : undefined;
+        return this.ordersService.getOrders({ statuses: statusArray, tableId, waiterId, limit: parsedLimit });
     }
     async getWaiterSlips() {
         return this.ordersService.getWaiterDraftSlips();
@@ -54,8 +55,9 @@ __decorate([
     __param(0, (0, common_1.Query)('statuses')),
     __param(1, (0, common_1.Query)('tableId')),
     __param(2, (0, common_1.Query)('waiterId')),
+    __param(3, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getOrders", null);
 __decorate([

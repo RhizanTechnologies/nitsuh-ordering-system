@@ -3,7 +3,7 @@ import { OrderStatus, OrderType, PaymentMethod } from '@cafe/shared-types';
 export declare class OrdersController {
     private ordersService;
     constructor(ordersService: OrdersService);
-    getOrders(statuses?: string, tableId?: string, waiterId?: string): Promise<({
+    getOrders(statuses?: string, tableId?: string, waiterId?: string, limit?: string): Promise<({
         table: {
             id: string;
             status: import("@prisma/client").$Enums.TableStatus;
@@ -71,6 +71,7 @@ export declare class OrdersController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -130,6 +131,7 @@ export declare class OrdersController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -138,10 +140,15 @@ export declare class OrdersController {
         customerName?: string;
         waiterId: string;
         orderType?: OrderType;
+        notes?: string;
+        discount?: number;
+        discountPercent?: number;
         items: {
             menuItemId: string;
             quantity: number;
             specialInstructions?: string;
+            selectedAddonIds?: string[];
+            selectedAddons?: any[];
         }[];
     }): Promise<{
         table: {
@@ -202,6 +209,7 @@ export declare class OrdersController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -277,6 +285,7 @@ export declare class OrdersController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -341,6 +350,7 @@ export declare class OrdersController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -418,6 +428,7 @@ export declare class OrdersController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -496,6 +507,7 @@ export declare class OrdersController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -561,6 +573,7 @@ export declare class OrdersController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         cancellationReason: string | null;
+        notes: string | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -646,6 +659,7 @@ export declare class OrdersController {
             totalAmount: import("@prisma/client/runtime/library").Decimal;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
             cancellationReason: string | null;
+            notes: string | null;
             createdAt: Date;
             updatedAt: Date;
         };
