@@ -372,27 +372,37 @@ export function TablePlanModal({
           {filteredTables.map((t) => {
             const isOccupied = t.status === 'OCCUPIED';
             const hasActiveOrder = isOccupied && t.orders && t.orders.length > 0;
-            const isSelected = selectedTable === t.tableNumber;
             const isReserved = t.status === 'RESERVED';
+            const isAvailable = t.status === 'AVAILABLE';
+            // Only genuinely available tables can show as selected for a new order
+            const isSelected = selectedTable === t.tableNumber && isAvailable;
 
             return (
               <div
                 key={t.id}
                 onClick={() => {
                   if (activeTab === 'floor' && onSelectTable) {
+                    if (isOccupied) {
+                      setError(`Table "${t.tableNumber}" is currently seated with an active bill. Please select an available Open table.`);
+                      return;
+                    }
+                    if (isReserved) {
+                      setError(`Table "${t.tableNumber}" is currently reserved. Please select an available Open table.`);
+                      return;
+                    }
                     onSelectTable(t.tableNumber);
                     onClose();
                   }
                 }}
                 className={`p-3.5 rounded-2xl border transition relative flex flex-col justify-between ${
                   isSelected
-                    ? 'border-emerald-600 ring-2 ring-emerald-500/30 bg-emerald-50/50'
+                    ? 'border-emerald-600 ring-2 ring-emerald-500/30 bg-emerald-50/50 cursor-pointer'
                     : isOccupied
-                    ? 'bg-amber-50/40 border-amber-300/80 hover:border-amber-500'
+                    ? 'bg-amber-50/30 border-amber-300/60 cursor-not-allowed opacity-80'
                     : isReserved
-                    ? 'bg-purple-50/40 border-purple-300'
-                    : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 hover:border-stone-400 dark:hover:border-white/30'
-                } ${activeTab === 'floor' ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}`}
+                    ? 'bg-purple-50/30 border-purple-200 cursor-not-allowed opacity-80'
+                    : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 hover:border-emerald-500 dark:hover:border-emerald-500 cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+                }`}
               >
                 {/* Floating Corner Selection Badge (Separated from header content) */}
                 {isSelected && (

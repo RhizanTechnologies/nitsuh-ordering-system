@@ -87,7 +87,7 @@ export function WaiterPadView() {
       .then((data) => {
         setTables(data);
         const current = data.find((t: any) => t.tableNumber === waiterTable);
-        if (!current || current.status === 'OCCUPIED') {
+        if (!current || current.status !== 'AVAILABLE') {
           const firstAvail = data.find((t: any) => t.status === 'AVAILABLE');
           if (firstAvail) setWaiterTable(firstAvail.tableNumber);
         }
@@ -328,6 +328,11 @@ export function WaiterPadView() {
 
     if (!isTakeaway && (!waiterTable || !selectedTableObj)) {
       showError('Please select a valid dining table for Dine-In orders before sending.');
+      return;
+    }
+
+    if (!isTakeaway && selectedTableObj.status !== 'AVAILABLE') {
+      showError(`Table "${waiterTable}" is currently seated. Please select an open table.`);
       return;
     }
 
@@ -1458,6 +1463,11 @@ export function WaiterPadView() {
         tables={tables}
         selectedTable={waiterTable}
         onSelectTable={(tableNumber) => {
+          const tObj = tables.find((t: any) => t.tableNumber === tableNumber);
+          if (tObj && tObj.status !== 'AVAILABLE') {
+            showError(`Table "${tableNumber}" is seated. Please select an open table.`);
+            return;
+          }
           setWaiterTable(tableNumber);
           setOrderType('DINE_IN');
           setTableModalOpen(false);

@@ -112,7 +112,16 @@ export function PosView() {
       await Promise.all([
         fetchApi('/menu/categories').then(setCategories).catch(() => {}),
         fetchApi('/menu/items').then(setAllItems).catch(() => {}),
-        fetchApi('/menu/tables').then(setTables).catch(() => {}),
+        fetchApi('/menu/tables')
+          .then((tablesData) => {
+            setTables(tablesData);
+            const current = tablesData.find((t: any) => t.tableNumber === selectedTable);
+            if (!current || current.status !== 'AVAILABLE') {
+              const firstAvail = tablesData.find((t: any) => t.status === 'AVAILABLE');
+              if (firstAvail) setSelectedTable(firstAvail.tableNumber);
+            }
+          })
+          .catch(() => {}),
         fetchApi('/orders/waiter-slips')
           .then((data) => {
             setIncomingSlips(data);
@@ -541,6 +550,12 @@ export function PosView() {
       // New POS Order
       const isTakeaway = orderType === 'TAKEAWAY';
       const selectedTableObj = isTakeaway ? null : tables.find((t) => t.tableNumber === selectedTable);
+
+      if (!isTakeaway && selectedTableObj && selectedTableObj.status !== 'AVAILABLE') {
+        setErrorMessage(`Table "${selectedTable}" is already seated. Please select an open table.`);
+        setLoading(false);
+        return;
+      }
 
       const res = await fetchApi('/orders/pos', {
         method: 'POST',
