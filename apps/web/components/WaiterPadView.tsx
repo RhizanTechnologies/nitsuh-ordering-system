@@ -707,6 +707,7 @@ export function WaiterPadView() {
                         : order.status === 'READY'
                         ? 'Ready to Serve'
                         : order.status;
+                      const orderNote = order.notes || order.specialInstructions || order.items?.find((i: any) => i.specialInstructions)?.specialInstructions;
 
                       return (
                         <div
@@ -780,7 +781,7 @@ export function WaiterPadView() {
                                 <span className="truncate pr-2">
                                   <strong className="text-stone-900 mr-1.5">{it.quantity}x</strong>
                                   <span className="text-stone-800">{it.menuItem?.name || it.name || 'Item'}</span>
-                                  {it.specialInstructions && (
+                                  {it.specialInstructions && it.specialInstructions !== orderNote && (
                                     <span className="text-[10px] text-emerald-700 italic ml-1">
                                       &quot;{it.specialInstructions}&quot;
                                     </span>
@@ -794,10 +795,10 @@ export function WaiterPadView() {
                           </div>
 
                           {/* Order Note (shown once for the entire ticket) */}
-                          {order.notes && (
+                          {orderNote && (
                             <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
                               <MessageSquare className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                              <span>Note: <strong>{order.notes}</strong></span>
+                              <span>Note: <strong>{orderNote}</strong></span>
                             </div>
                           )}
 

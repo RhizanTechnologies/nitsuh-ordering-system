@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "pnpm --parallel run dev",
     "build": "pnpm --recursive run build",
+    "vercel-build": "pnpm --filter @cafe/api run prisma:push && pnpm --recursive run build",
     "postinstall": "pnpm --filter @cafe/api run prisma:generate && pnpm --filter @cafe/api run build",
     "lint": "pnpm --recursive run lint",
     "test": "pnpm --recursive run test",

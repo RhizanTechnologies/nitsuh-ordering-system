@@ -1600,32 +1600,39 @@ export function PosView() {
                         </div>
 
                         {/* Order Items */}
-                        <div className="mt-3 text-xs text-stone-600 space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
-                          {slip.items?.map((item: any) => (
-                            <div key={item.id} className="flex items-center justify-between">
-                              <span className="truncate pr-2">
-                                <strong className="text-stone-900 mr-1.5">{item.quantity}x</strong>
-                                <span className="text-stone-800">{item.menuItem?.name || item.name}</span>
-                                {item.specialInstructions && (
-                                  <span className="text-[10px] text-emerald-700 italic ml-1">
-                                    &quot;{item.specialInstructions}&quot;
-                                  </span>
-                                )}
-                              </span>
-                              <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
-                                {Number(item.subtotal || (item.unitPrice || item.price) * item.quantity).toFixed(2)} ETB
-                              </span>
-                            </div>
-                          ))}
-                        </div>
+                        {(() => {
+                          const slipNote = slip.notes || slip.specialInstructions || slip.items?.find((i: any) => i.specialInstructions)?.specialInstructions;
+                          return (
+                            <>
+                              <div className="mt-3 text-xs text-stone-600 space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
+                                {slip.items?.map((item: any) => (
+                                  <div key={item.id} className="flex items-center justify-between">
+                                    <span className="truncate pr-2">
+                                      <strong className="text-stone-900 mr-1.5">{item.quantity}x</strong>
+                                      <span className="text-stone-800">{item.menuItem?.name || item.name}</span>
+                                      {item.specialInstructions && item.specialInstructions !== slipNote && (
+                                        <span className="text-[10px] text-emerald-700 italic ml-1">
+                                          &quot;{item.specialInstructions}&quot;
+                                        </span>
+                                      )}
+                                    </span>
+                                    <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
+                                      {Number(item.subtotal || (item.unitPrice || item.price) * item.quantity).toFixed(2)} ETB
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
 
-                        {/* Order Note */}
-                        {slip.notes && (
-                          <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
-                            <FileText className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                            <span>Note: <strong>{slip.notes}</strong></span>
-                          </div>
-                        )}
+                              {/* Order Note */}
+                              {slipNote && (
+                                <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
+                                  <FileText className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                                  <span>Note: <strong>{slipNote}</strong></span>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
 
                       {/* Actions & Total */}
@@ -1800,30 +1807,38 @@ export function PosView() {
                         </div>
 
                         {/* Order Items: Clean unboxed typography matching Waiter */}
-                        <div className="mt-3 text-xs text-stone-600 space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
-                          {order.items?.map((itm: any) => (
-                            <div key={itm.id} className="flex items-center justify-between">
-                              <span className="truncate pr-2">
-                                <strong className="text-stone-900 mr-1.5">{itm.quantity}x</strong>
-                                <span className="text-stone-800">{itm.menuItem?.name || itm.name}</span>
-                                {itm.specialInstructions && (
-                                  <span className="text-[10px] text-emerald-700 italic ml-1">
-                                    &quot;{itm.specialInstructions}&quot;
-                                  </span>
-                                )}
-                              </span>
-                              <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
-                                {Number(itm.subtotal || (itm.unitPrice || itm.price) * itm.quantity).toFixed(2)} ETB
-                              </span>
-                            </div>
-                          ))}
-                          {order.notes && (
-                            <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
-                              <FileText className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                              <span>Note: <strong>{order.notes}</strong></span>
-                            </div>
-                          )}
-                        </div>
+                        {(() => {
+                          const activeOrderNote = order.notes || order.specialInstructions || order.items?.find((i: any) => i.specialInstructions)?.specialInstructions;
+                          return (
+                            <>
+                              <div className="mt-3 text-xs text-stone-600 space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
+                                {order.items?.map((itm: any) => (
+                                  <div key={itm.id} className="flex items-center justify-between">
+                                    <span className="truncate pr-2">
+                                      <strong className="text-stone-900 mr-1.5">{itm.quantity}x</strong>
+                                      <span className="text-stone-800">{itm.menuItem?.name || itm.name}</span>
+                                      {itm.specialInstructions && itm.specialInstructions !== activeOrderNote && (
+                                        <span className="text-[10px] text-emerald-700 italic ml-1">
+                                          &quot;{itm.specialInstructions}&quot;
+                                        </span>
+                                      )}
+                                    </span>
+                                    <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
+                                      {Number(itm.subtotal || (itm.unitPrice || itm.price) * itm.quantity).toFixed(2)} ETB
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {activeOrderNote && (
+                                <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
+                                  <FileText className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                                  <span>Note: <strong>{activeOrderNote}</strong></span>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
 
                       {/* Actions & Total Bill */}
