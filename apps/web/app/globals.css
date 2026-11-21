@@ -11,30 +11,149 @@
 :root,
 [data-theme="light"],
 .theme-light {
-  /* Warm Alabaster Bistro - Organic Culinary Canvas */
-  --bg-canvas: #F8F5EE;
-  --bg-canvas-subtle: #F2ECE2;
+  /* Clean Unified POS/Waiter/KDS Canvas & Palette */
+  --bg-canvas: #F8F9FA;
+  --bg-canvas-subtle: #F1F3F5;
   --bg-surface: #FFFFFF;
   --bg-surface-elevated: #FFFFFF;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #FBF9F4;
-  --bg-muted: #F2ECE2;
-  --bg-input: #FFFFFF;
-  --border-subtle: #E8E2D7;
-  --border-strong: #D6CCC0;
-  --text-primary: #1C1512;        /* Rich Roast Espresso */
-  --text-secondary: #524741;      /* Warm Roasted Mocha */
-  --text-muted: #8C7F78;          /* Muted Truffle */
-  --brand-crimson: #C11221;       /* Saturated Nitsuh Brand Crimson */
+  --bg-card-hover: #F8F9FA;
+  --bg-muted: #F1F3F5;
+  --bg-input: #F8F9FA;
+  --border-subtle: #E5E7EB;
+  --border-strong: #D1D5DB;
+  --text-primary: #18181B;        /* Crisp Charcoal */
+  --text-secondary: #52525B;      /* Balanced Slate */
+  --text-muted: #71717A;          /* Muted Neutral */
+  --brand-crimson: #C11221;
   --brand-crimson-hover: #A30F1C;
-  --brand-amber: #D97706;         /* Caramelized Honey */
+  --brand-emerald: #059669;       /* Fresh Primary Accent */
+  --brand-emerald-hover: #047857;
+  --brand-emerald-light: #ECFDF5;
+  --brand-emerald-text: #065F46;
+  --brand-emerald-border: #A7F3D0;
+  --brand-amber: #D97706;
   --brand-amber-hover: #B45309;
-  --brand-amber-glow: rgba(217, 119, 6, 0.08);
-  --brand-crimson-glow: rgba(193, 18, 33, 0.08);
-  --shadow-card: 0 4px 20px -2px rgba(60, 42, 28, 0.06), 0 1px 3px 0 rgba(60, 42, 28, 0.04);
-  --shadow-elevated: 0 12px 35px -5px rgba(60, 42, 28, 0.10), 0 2px 6px -1px rgba(60, 42, 28, 0.05);
-  --glass-header: rgba(248, 245, 238, 0.95);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --shadow-elevated: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --glass-header: rgba(255, 255, 255, 0.98);
   --glass-drawer: rgba(255, 255, 255, 0.98);
+}
+
+@layer components {
+  /* Centralized Page & Component Primitives for All Station Views */
+  .nitsuh-page {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', Outfit, system-ui, sans-serif;
+  }
+
+  .nitsuh-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  .nitsuh-badge-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    background-color: #ECFDF5;
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+  }
+
+  .nitsuh-badge-muted {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    background-color: #F4F4F5;
+    color: #52525B;
+    border: 1px solid #E4E4E7;
+  }
+
+  .nitsuh-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    background-color: #059669;
+    color: #FFFFFF;
+    font-weight: 800;
+    font-size: 0.75rem;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  .nitsuh-btn-primary:hover {
+    background-color: #047857;
+  }
+  .nitsuh-btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .nitsuh-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.75rem;
+    background-color: #F4F4F5;
+    color: #27272A;
+    font-weight: 700;
+    font-size: 0.75rem;
+    border: 1px solid #E4E4E7;
+    transition: all 0.15s ease;
+    cursor: pointer;
+  }
+  .nitsuh-btn-secondary:hover {
+    background-color: #E4E4E7;
+  }
+  .nitsuh-btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  .nitsuh-stat-card {
+    background-color: #F8F9FA;
+    border: 1px solid #E5E7EB;
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .nitsuh-input {
+    width: 100%;
+    background-color: #F8F9FA;
+    border: 1px solid #E5E7EB;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #18181B;
+    transition: all 0.15s ease;
+  }
+  .nitsuh-input:focus {
+    outline: none;
+    background-color: #FFFFFF;
+    border-color: #059669;
+  }
 }
 
 @layer base {

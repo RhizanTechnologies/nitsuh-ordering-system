@@ -411,13 +411,13 @@ export function ProductManagementView() {
   const addonMarginPercent = addonPriceNum > 0 ? (addonGrossProfit / addonPriceNum) * 100 : 0;
 
   return (
-    <div className="space-y-6 text-white">
+    <div className="space-y-5 text-stone-900 font-sans">
       {/* Top Action & Control Bar */}
-      <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-5 shadow-xl backdrop-blur-xl space-y-4">
+      <div className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-5 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-base font-black text-white flex items-center gap-2">
-              <Utensils className="w-5 h-5 text-amber-400" />
+              <Utensils className="w-5 h-5 text-emerald-600" />
               <span>Menu Products</span>
             </h2>
           </div>
@@ -425,7 +425,7 @@ export function ProductManagementView() {
           <div className="flex items-center gap-2">
             <button
               onClick={loadData}
-              className="p-2.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 rounded-2xl text-zinc-300 transition cursor-pointer"
+              className="p-2.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl text-stone-700 transition cursor-pointer"
               title="Refresh product list"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -433,7 +433,7 @@ export function ProductManagementView() {
             {activeTab === 'products' ? (
               <button
                 onClick={openAddModal}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 transition active:scale-95 cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Add Product</span>
@@ -441,7 +441,7 @@ export function ProductManagementView() {
             ) : (
               <button
                 onClick={openAddAddonModal}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 transition active:scale-95 cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Add Modifier</span>
@@ -456,7 +456,7 @@ export function ProductManagementView() {
             onClick={() => setActiveTab('products')}
             className={`px-4 py-2 rounded-2xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'products'
-                ? 'bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20'
+                ? 'bg-emerald-600 text-white font-black shadow-xs'
                 : 'bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-white/10'
             }`}
           >
@@ -473,7 +473,7 @@ export function ProductManagementView() {
             onClick={() => setActiveTab('addons')}
             className={`px-4 py-2 rounded-2xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'addons'
-                ? 'bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20'
+                ? 'bg-emerald-600 text-white font-black shadow-xs'
                 : 'bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-white/10'
             }`}
           >
@@ -489,7 +489,7 @@ export function ProductManagementView() {
 
         {/* Feedback Alert Toast */}
         {actionMessage && (
-          <div className="p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-2xl text-xs text-emerald-300 font-bold flex items-center justify-between animate-in fade-in backdrop-blur-xl">
+          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 font-bold flex items-center justify-between animate-in fade-in">
             <span>{actionMessage}</span>
             <button onClick={() => setActionMessage(null)} className="text-emerald-400 hover:text-white cursor-pointer">
               <X className="w-3.5 h-3.5" />
@@ -510,7 +510,7 @@ export function ProductManagementView() {
                   setSearch(e.target.value);
                   setSingleIndex(0);
                 }}
-                className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-2xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none transition shadow-inner"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-emerald-600 rounded-xl pl-10 pr-9 py-2 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none transition"
               />
               {search && (
                 <button
@@ -533,7 +533,7 @@ export function ProductManagementView() {
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border cursor-pointer ${
                   selectedCatId === ''
-                    ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-md'
+                    ? 'bg-emerald-600 text-white border-emerald-600 font-black shadow-xs'
                     : 'bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                 }`}
               >
@@ -548,7 +548,7 @@ export function ProductManagementView() {
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border flex items-center gap-1.5 cursor-pointer ${
                     selectedCatId === c.id
-                      ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-md'
+                      ? 'bg-emerald-600 text-white border-emerald-600 font-black shadow-xs'
                       : 'bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
@@ -573,7 +573,7 @@ export function ProductManagementView() {
               placeholder="Search add-ons..."
               value={addonSearch}
               onChange={(e) => setAddonSearch(e.target.value)}
-              className="w-full bg-white/[0.05] border border-white/10 focus:border-amber-500/50 rounded-2xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:outline-none transition shadow-inner"
+              className="w-full bg-stone-50 border border-stone-200 focus:border-emerald-600 rounded-xl pl-10 pr-9 py-2 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none transition"
             />
             {addonSearch && (
               <button
@@ -592,13 +592,13 @@ export function ProductManagementView() {
         <div className="space-y-4">
           {/* View Mode Switcher & Stats Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-stone-100/60 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 p-3 rounded-2xl">
-            <div className="flex items-center gap-1 bg-stone-200/80 dark:bg-white/[0.04] border border-stone-300/80 dark:border-white/10 p-1 rounded-xl w-fit">
+            <div className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-xl w-fit">
               <button
                 onClick={() => setViewMode('single')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                   viewMode === 'single'
-                    ? 'bg-amber-500 text-stone-950 font-black shadow-md'
-                    : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                    ? 'bg-emerald-600 text-white font-black shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900'
                 }`}
                 title="View one product per page with full recipe and margin details"
               >
@@ -609,8 +609,8 @@ export function ProductManagementView() {
                 onClick={() => setViewMode('list')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                   viewMode === 'list'
-                    ? 'bg-amber-500 text-stone-950 font-black shadow-md'
-                    : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                    ? 'bg-emerald-600 text-white font-black shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900'
                 }`}
                 title="View products in clean 1-per-row list"
               >
@@ -621,8 +621,8 @@ export function ProductManagementView() {
                 onClick={() => setViewMode('grid')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                   viewMode === 'grid'
-                    ? 'bg-amber-500 text-stone-950 font-black shadow-md'
-                    : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                    ? 'bg-emerald-600 text-white font-black shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900'
                 }`}
                 title="View products in responsive grid"
               >
@@ -634,7 +634,7 @@ export function ProductManagementView() {
             <div className="text-xs font-bold text-zinc-400">
               Showing <strong className="text-white font-black">{filteredItems.length}</strong> products
               {selectedCatId && (
-                <span> in <strong className="text-amber-400 font-black">{categories.find((c) => c.id === selectedCatId)?.name}</strong></span>
+                <span> in <strong className="text-emerald-600 font-black">{categories.find((c) => c.id === selectedCatId)?.name}</strong></span>
               )}
             </div>
           </div>
@@ -643,31 +643,31 @@ export function ProductManagementView() {
           {viewMode === 'single' && (
             <div>
               {filteredItems.length === 0 ? (
-                <div className="py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl">
+                <div className="py-16 text-center text-xs text-zinc-500 bg-white border border-stone-200/90 rounded-3xl">
                   No products found matching your search.
                 </div>
               ) : currentSingleItem ? (
-                <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl max-w-lg mx-auto space-y-6">
+                <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 shadow-xs max-w-lg mx-auto space-y-6">
                   {/* Stepper / Pagination Header */}
-                  <div className="flex items-center justify-between gap-2 pb-4 border-b border-white/10">
+                  <div className="flex items-center justify-between gap-2 pb-4 border-b border-stone-200">
                     <button
                       onClick={() => setSingleIndex((p) => Math.max(0, p - 1))}
                       disabled={safeSingleIndex === 0}
-                      className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white border border-white/10 flex items-center gap-1 transition cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-stone-700 border border-stone-200 flex items-center gap-1 transition cursor-pointer"
                     >
                       <ChevronLeft className="w-4 h-4" />
                       <span>Previous</span>
                     </button>
 
-                    <span className="text-xs font-bold text-zinc-400">
-                      <span className="text-amber-400 font-black">{safeSingleIndex + 1}</span> of{' '}
-                      <span className="text-white font-black">{filteredItems.length}</span>
+                    <span className="text-xs font-bold text-stone-500">
+                      <span className="text-emerald-700 font-black">{safeSingleIndex + 1}</span> of{' '}
+                      <span className="text-stone-900 font-black">{filteredItems.length}</span>
                     </span>
 
                     <button
                       onClick={() => setSingleIndex((p) => Math.min(filteredItems.length - 1, p + 1))}
                       disabled={safeSingleIndex >= filteredItems.length - 1}
-                      className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white border border-white/10 flex items-center gap-1 transition cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-stone-700 border border-stone-200 flex items-center gap-1 transition cursor-pointer"
                     >
                       <span>Next</span>
                       <ChevronRight className="w-4 h-4" />
@@ -676,7 +676,7 @@ export function ProductManagementView() {
 
                   {/* Clean Visual & Product Details */}
                   <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="w-52 h-52 sm:w-64 sm:h-64 rounded-3xl overflow-hidden bg-black/40 border border-white/10 shadow-2xl">
+                    <div className="w-52 h-52 sm:w-64 sm:h-64 rounded-3xl overflow-hidden bg-stone-100 border border-stone-200 shadow-xs">
                       <MenuImage
                         src={currentSingleItem.imageUrl}
                         alt={currentSingleItem.name}
@@ -686,23 +686,23 @@ export function ProductManagementView() {
                     </div>
 
                     <div className="space-y-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-amber-400 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 inline-block">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 inline-block">
                         {currentSingleItem.category?.name || 'General'}
                       </span>
-                      <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">
+                      <h2 className="text-2xl sm:text-3xl font-black text-stone-900 leading-tight">
                         {currentSingleItem.name}
                       </h2>
-                      <div className="text-2xl sm:text-3xl font-black text-amber-400">
-                        {Number(currentSingleItem.price || 0).toFixed(2)} <span className="text-base font-bold text-amber-500">ETB</span>
+                      <div className="text-2xl sm:text-3xl font-black text-stone-900">
+                        {Number(currentSingleItem.price || 0).toFixed(2)} <span className="text-base font-bold text-stone-500">ETB</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Clean Actions */}
-                  <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/10">
+                  <div className="flex items-center justify-center gap-3 pt-4 border-t border-stone-200">
                     <button
                       onClick={() => openEditModal(currentSingleItem)}
-                      className="flex-1 py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition cursor-pointer"
+                      className="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition cursor-pointer"
                     >
                       <Edit2 className="w-4 h-4 stroke-[2.5]" />
                       <span>Edit Product</span>
@@ -710,7 +710,7 @@ export function ProductManagementView() {
 
                     <button
                       onClick={() => handleDeleteProduct(currentSingleItem)}
-                      className="py-3 px-4 text-xs font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-2xl transition border border-rose-500/20 cursor-pointer flex items-center justify-center gap-1.5"
+                      className="py-2.5 px-4 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition border border-rose-200 cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       <Trash2 className="w-4 h-4" />
                       <span>Delete</span>
@@ -725,7 +725,7 @@ export function ProductManagementView() {
           {viewMode === 'list' && (
             <div className="space-y-2.5">
               {filteredItems.length === 0 ? (
-                <div className="py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl">
+                <div className="py-16 text-center text-xs text-stone-500 bg-white border border-stone-200/90 rounded-3xl">
                   No products found matching your search.
                 </div>
               ) : (
@@ -735,10 +735,10 @@ export function ProductManagementView() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-2xl p-3 sm:p-4 shadow-md backdrop-blur-xl flex items-center justify-between gap-4 transition"
+                      className="bg-white border border-stone-200/90 hover:border-emerald-500/30 rounded-2xl p-3 sm:p-4 shadow-xs flex items-center justify-between gap-4 transition"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-black/40 border border-white/10 shrink-0">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
                           <MenuImage
                             src={item.imageUrl}
                             alt={item.name}
@@ -748,10 +748,10 @@ export function ProductManagementView() {
                         </div>
 
                         <div className="min-w-0">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-0.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block mb-0.5">
                             {item.category?.name || 'General'}
                           </span>
-                          <h3 className="font-extrabold text-sm sm:text-base text-white truncate">
+                          <h3 className="font-extrabold text-sm sm:text-base text-stone-900 truncate">
                             {item.name}
                           </h3>
                         </div>
@@ -759,7 +759,7 @@ export function ProductManagementView() {
 
                       <div className="flex items-center gap-4 shrink-0">
                         <div className="text-right">
-                          <span className="text-sm sm:text-base font-black text-amber-400">
+                          <span className="text-sm sm:text-base font-black text-stone-900">
                             {price.toFixed(2)} ETB
                           </span>
                         </div>
@@ -767,14 +767,14 @@ export function ProductManagementView() {
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => openEditModal(item)}
-                            className="p-2 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-xl transition border border-white/10 cursor-pointer"
+                            className="p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl transition border border-stone-200 cursor-pointer"
                             title="Edit product"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(item)}
-                            className="p-2 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
+                            className="p-2 text-stone-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
                             title="Delete product"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -792,7 +792,7 @@ export function ProductManagementView() {
           {viewMode === 'grid' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {filteredItems.length === 0 ? (
-                <div className="col-span-full py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl">
+                <div className="col-span-full py-16 text-center text-xs text-stone-500 bg-white border border-stone-200/90 rounded-3xl">
                   No products found matching your search.
                 </div>
               ) : (
@@ -802,10 +802,10 @@ export function ProductManagementView() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-white/[0.04] border border-white/10 hover:border-amber-500/30 rounded-2xl sm:rounded-3xl p-3.5 shadow-md backdrop-blur-xl flex flex-col justify-between transition"
+                      className="bg-white border border-stone-200/90 hover:border-emerald-500/30 rounded-2xl sm:rounded-3xl p-3.5 shadow-xs flex flex-col justify-between transition"
                     >
                       <div>
-                        <div className="relative aspect-square rounded-2xl overflow-hidden bg-black/40 mb-3 border border-white/10">
+                        <div className="relative aspect-square rounded-2xl overflow-hidden bg-stone-100 mb-3 border border-stone-200">
                           <MenuImage
                             src={item.imageUrl}
                             alt={item.name}
@@ -814,28 +814,28 @@ export function ProductManagementView() {
                           />
                         </div>
 
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block mb-1">
                           {item.category?.name || 'General'}
                         </span>
-                        <h3 className="font-extrabold text-sm sm:text-base text-white truncate" title={item.name}>
+                        <h3 className="font-extrabold text-sm sm:text-base text-stone-900 truncate" title={item.name}>
                           {item.name}
                         </h3>
-                        <div className="text-base font-black text-amber-400 mt-1">
+                        <div className="text-base font-black text-stone-900 mt-1">
                           {price.toFixed(2)} ETB
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 pt-3 border-t border-white/10 mt-3">
+                      <div className="flex items-center gap-1.5 pt-3 border-t border-stone-200 mt-3">
                         <button
                           onClick={() => openEditModal(item)}
-                          className="flex-1 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 font-bold text-xs rounded-xl transition border border-white/10 cursor-pointer flex items-center justify-center gap-1"
+                          className="flex-1 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl transition border border-stone-200 cursor-pointer flex items-center justify-center gap-1"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                           <span>Edit</span>
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(item)}
-                          className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
+                          className="p-1.5 text-stone-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
                           title="Delete product"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -855,12 +855,12 @@ export function ProductManagementView() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredAddons.length === 0 ? (
-              <div className="col-span-full py-16 text-center text-xs text-zinc-500 bg-white/[0.03] border border-white/10 rounded-3xl p-6">
-                <Layers className="w-8 h-8 text-amber-500/40 mx-auto mb-2" />
-                <div className="font-bold text-white text-sm mb-1">No add-ons found</div>
+              <div className="col-span-full py-16 text-center text-xs text-stone-500 bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs">
+                <Layers className="w-8 h-8 text-emerald-600/40 mx-auto mb-2" />
+                <div className="font-bold text-stone-900 text-sm mb-1">No add-ons found</div>
                 <button
                   onClick={openAddAddonModal}
-                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs rounded-xl cursor-pointer mt-3"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl cursor-pointer mt-3 shadow-xs"
                 >
                   + Add Modifier
                 </button>
@@ -876,21 +876,21 @@ export function ProductManagementView() {
                 return (
                   <div
                     key={addon.id}
-                    className={`p-4 rounded-2xl border transition shadow-md backdrop-blur-xl flex items-center justify-between gap-3 ${
+                    className={`p-4 rounded-2xl border transition shadow-xs flex items-center justify-between gap-3 ${
                       addon.isActive
-                        ? 'bg-white/[0.04] border-white/10 hover:border-amber-500/30'
-                        : 'bg-white/[0.02] border-white/5 opacity-60'
+                        ? 'bg-white border-stone-200/90 hover:border-emerald-500/30'
+                        : 'bg-stone-50 border-stone-200/60 opacity-60'
                     }`}
                   >
                     <div>
-                      <h3 className="font-extrabold text-sm sm:text-base text-white">{addon.name}</h3>
-                      <span className="text-[10px] font-bold text-zinc-400">
+                      <h3 className="font-extrabold text-sm sm:text-base text-stone-900">{addon.name}</h3>
+                      <span className="text-[10px] font-bold text-stone-500">
                         {scopeLabel}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className="text-sm sm:text-base font-black text-amber-400 whitespace-nowrap">
+                      <span className="text-sm sm:text-base font-black text-stone-900 whitespace-nowrap">
                         +{Number(addon.price).toFixed(2)} ETB
                       </span>
 
@@ -898,8 +898,8 @@ export function ProductManagementView() {
                         onClick={() => handleToggleAddonActive(addon)}
                         className={`text-[10px] font-bold px-2 py-1 rounded-lg transition cursor-pointer ${
                           addon.isActive
-                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            : 'bg-stone-100 text-stone-500 border border-stone-200'
                         }`}
                       >
                         {addon.isActive ? 'Active' : 'Paused'}
@@ -907,14 +907,14 @@ export function ProductManagementView() {
 
                       <button
                         onClick={() => openEditAddonModal(addon)}
-                        className="p-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 rounded-lg transition border border-white/10 cursor-pointer"
+                        className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition border border-stone-200 cursor-pointer"
                         title="Edit add-on"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteAddon(addon)}
-                        className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
+                        className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                         title="Delete add-on"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -935,7 +935,7 @@ export function ProductManagementView() {
             <div className="flex items-center justify-between border-b border-stone-200 dark:border-white/10 pb-3">
               <div>
                 <h3 className="font-extrabold text-sm sm:text-base text-stone-900 dark:text-white flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-amber-500" />
+                  <Layers className="w-4 h-4 text-emerald-600" />
                   <span>{isEditingAddon ? 'Edit Kitchen Add-on' : 'Create Real Kitchen Add-on'}</span>
                 </h3>
                 <p className="text-[11px] text-stone-500 dark:text-zinc-400 mt-0.5">
@@ -953,7 +953,7 @@ export function ProductManagementView() {
             <form onSubmit={handleSaveAddon} className="space-y-4">
               {/* Add-on Name */}
               <div>
-                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Add-on Name *
                 </label>
                 <input
@@ -962,13 +962,13 @@ export function ProductManagementView() {
                   placeholder="e.g. Extra Mozzarella Cheese, Extra Beef Patty (100g)"
                   value={formAddonName}
                   onChange={(e) => setFormAddonName(e.target.value)}
-                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
+                  className="w-full bg-white border border-stone-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none"
                 />
               </div>
 
               {/* Selling Price */}
               <div>
-                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Extra Selling Price (ETB charged to guest) *
                 </label>
                 <input
@@ -979,13 +979,13 @@ export function ProductManagementView() {
                   placeholder="e.g. 35.00"
                   value={formAddonPrice}
                   onChange={(e) => setFormAddonPrice(e.target.value)}
-                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-black text-amber-600 dark:text-amber-400 placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
+                  className="w-full bg-white border border-stone-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl px-3 py-2 text-xs font-black text-stone-900 placeholder-stone-400 focus:outline-none"
                 />
               </div>
 
               {/* Scope Selector */}
               <div>
-                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Applicable Products Scope
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -1000,8 +1000,8 @@ export function ProductManagementView() {
                       onClick={() => setFormAddonTargetType(s.id as any)}
                       className={`py-2 px-3 rounded-xl text-xs font-bold transition border cursor-pointer ${
                         formAddonTargetType === s.id
-                          ? 'bg-amber-500 text-stone-950 border-amber-400 font-black shadow-xs'
-                          : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                          ? 'bg-emerald-600 text-white border-emerald-600 font-black shadow-xs'
+                          : 'bg-stone-50 border-stone-200 text-stone-600 hover:text-stone-900'
                       }`}
                     >
                       {s.label}
@@ -1013,16 +1013,16 @@ export function ProductManagementView() {
               {/* Category Dropdown if CATEGORY */}
               {formAddonTargetType === 'CATEGORY' && (
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                     Select Target Category
                   </label>
                   <select
                     value={formAddonCategoryId}
                     onChange={(e) => setFormAddonCategoryId(e.target.value)}
-                    className="w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
+                      <option key={c.id} value={c.id} className="bg-white text-stone-900">
                         {c.name}
                       </option>
                     ))}
@@ -1033,16 +1033,16 @@ export function ProductManagementView() {
               {/* Item Dropdown if ITEM */}
               {formAddonTargetType === 'ITEM' && (
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                     Select Target Product
                   </label>
                   <select
                     value={formAddonItemId}
                     onChange={(e) => setFormAddonItemId(e.target.value)}
-                    className="w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     {items.map((i) => (
-                      <option key={i.id} value={i.id} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
+                      <option key={i.id} value={i.id} className="bg-white text-stone-900">
                         {i.name} ({Number(i.price).toFixed(2)} ETB)
                       </option>
                     ))}
@@ -1051,18 +1051,18 @@ export function ProductManagementView() {
               )}
 
               {/* Linked Ingredient Selector */}
-              <div className="pt-2 border-t border-stone-200 dark:border-white/10">
-                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+              <div className="pt-2 border-t border-stone-200">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Linked Inventory Ingredient (for stock deduction)
                 </label>
                 <select
                   value={formAddonIngredientId}
                   onChange={(e) => setFormAddonIngredientId(e.target.value)}
-                  className="w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                  className="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
-                  <option value="" className="bg-white dark:bg-[#1e1a17] text-stone-500 dark:text-zinc-400">No stock deduction (price bump only)</option>
+                  <option value="" className="bg-white text-stone-500">No stock deduction (price bump only)</option>
                   {ingredientsPool.map((ing) => (
-                    <option key={ing.id} value={ing.id} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
+                    <option key={ing.id} value={ing.id} className="bg-white text-stone-900">
                       {ing.name} ({ing.category}) • Cost: {Number(ing.currentCostPerBaseUnit).toFixed(4)} ETB / {ing.baseUnit?.symbol || 'g'}
                     </option>
                   ))}
@@ -1072,7 +1072,7 @@ export function ProductManagementView() {
               {/* Portion Deduction Quantity */}
               {formAddonIngredientId && (
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                     Portion Deduction Quantity ({selectedIngredient?.baseUnit?.symbol || 'g'}) *
                   </label>
                   <div className="flex items-center gap-2">
@@ -1084,9 +1084,9 @@ export function ProductManagementView() {
                       placeholder="e.g. 40"
                       value={formAddonQty}
                       onChange={(e) => setFormAddonQty(e.target.value)}
-                      className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
+                      className="w-full bg-white border border-stone-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 placeholder-stone-400 focus:outline-none"
                     />
-                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-stone-100 dark:bg-white/10 px-3 py-2 rounded-xl">
+                    <span className="text-xs font-bold text-stone-700 bg-stone-100 px-3 py-2 rounded-xl">
                       {selectedIngredient?.baseUnit?.symbol || 'g'}
                     </span>
                   </div>
@@ -1094,50 +1094,45 @@ export function ProductManagementView() {
               )}
 
               {/* Live Financial Calculation Card */}
-              <div className="bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl p-3.5 space-y-2 text-xs">
-                <div className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 space-y-2 text-xs">
+                <div className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
                   Live Cost & Margin Analysis
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-white dark:bg-black/30 p-2 rounded-xl border border-stone-200 dark:border-white/5">
-                    <div className="text-[9px] text-stone-500 dark:text-zinc-400 uppercase font-bold">Selling Price</div>
-                    <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
+                  <div className="bg-white p-2 rounded-xl border border-stone-200">
+                    <div className="text-[9px] text-stone-500 uppercase font-bold">Selling Price</div>
+                    <div className="text-xs font-black text-stone-900 mt-0.5">
                       {addonPriceNum.toFixed(2)} ETB
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-black/30 p-2 rounded-xl border border-stone-200 dark:border-white/5">
-                    <div className="text-[9px] text-stone-500 dark:text-zinc-400 uppercase font-bold">Stock Cost</div>
-                    <div className="text-xs font-black text-rose-500 dark:text-rose-400 mt-0.5">
+                  <div className="bg-white p-2 rounded-xl border border-stone-200">
+                    <div className="text-[9px] text-stone-500 uppercase font-bold">Stock Cost</div>
+                    <div className="text-xs font-black text-rose-600 mt-0.5">
                       {addonEstimatedCost.toFixed(2)} ETB
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-black/30 p-2 rounded-xl border border-stone-200 dark:border-white/5">
-                    <div className="text-[9px] text-stone-500 dark:text-zinc-400 uppercase font-bold">Gross Margin</div>
-                    <div className={`text-xs font-black mt-0.5 ${addonMarginPercent >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                  <div className="bg-white p-2 rounded-xl border border-stone-200">
+                    <div className="text-[9px] text-stone-500 uppercase font-bold">Gross Margin</div>
+                    <div className={`text-xs font-black mt-0.5 ${addonMarginPercent >= 50 ? 'text-emerald-700' : 'text-stone-700'}`}>
                       {addonMarginPercent.toFixed(1)}%
                     </div>
                   </div>
                 </div>
-                {formAddonIngredientId && selectedIngredient && (
-                  <p className="text-[10px] text-stone-500 dark:text-zinc-400 italic text-center pt-1">
-                    Every order with this add-on will deduct exactly {addonQtyNum} {selectedIngredient.baseUnit?.symbol || 'g'} of {selectedIngredient.name} from Kitchen Store.
-                  </p>
-                )}
               </div>
 
               {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200 dark:border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200">
                 <button
                   type="button"
                   onClick={() => setAddonModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 hover:text-stone-900 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingAddon}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs shadow-xs transition disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   {savingAddon ? 'Saving...' : isEditingAddon ? 'Update Add-on' : 'Create Add-on'}
                 </button>
@@ -1161,15 +1156,15 @@ export function ProductManagementView() {
 
       {/* ADD / EDIT PRODUCT MODAL */}
       {productModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[32px] max-w-lg w-full p-6 shadow-2xl border border-stone-200 dark:border-white/15 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
-              <h3 className="text-base font-black text-stone-900 dark:text-white">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white text-stone-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-200/90 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+              <h3 className="text-base font-black text-stone-900">
                 {isEditing ? `Edit Product: ${formName}` : 'Add New Menu Product'}
               </h3>
               <button
                 onClick={() => setProductModalOpen(false)}
-                className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white transition cursor-pointer"
+                className="p-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-stone-500 hover:text-stone-900 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1177,27 +1172,27 @@ export function ProductManagementView() {
 
             <form onSubmit={handleSaveProduct} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Product Name (English / Amharic)</label>
+                <label className="block font-bold text-stone-700 mb-1">Product Name (English / Amharic)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Special Club Sandwich / ስፔሻል ክለብ ሳንድዊች"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
+                  className="w-full bg-white border border-stone-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 placeholder-stone-400 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Category</label>
+                  <label className="block font-bold text-stone-700 mb-1">Category</label>
                   <select
                     value={formCatId}
                     onChange={(e) => setFormCatId(e.target.value)}
-                    className="w-full bg-white dark:bg-[#161311] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none cursor-pointer"
+                    className="w-full bg-white border border-stone-300 focus:border-emerald-600 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 focus:outline-none cursor-pointer"
                   >
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">
+                      <option key={c.id} value={c.id} className="bg-white text-stone-900">
                         {c.name}
                       </option>
                     ))}
@@ -1205,7 +1200,7 @@ export function ProductManagementView() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Selling Price (ETB)</label>
+                  <label className="block font-bold text-stone-700 mb-1">Selling Price (ETB)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -1214,60 +1209,60 @@ export function ProductManagementView() {
                     placeholder="e.g. 750"
                     value={formPrice}
                     onChange={(e) => setFormPrice(e.target.value)}
-                    className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-black text-amber-600 dark:text-amber-400 placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
+                    className="w-full bg-white border border-stone-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl px-3 py-2.5 text-xs font-black text-stone-900 placeholder-stone-400 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Preparation Station</label>
+                  <label className="block font-bold text-stone-700 mb-1">Preparation Station</label>
                   <select
                     value={formPrepSection}
                     onChange={(e) => setFormPrepSection(e.target.value)}
-                    className="w-full bg-white dark:bg-[#161311] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none cursor-pointer"
+                    className="w-full bg-white border border-stone-300 focus:border-emerald-600 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 focus:outline-none cursor-pointer"
                   >
-                    <option value="HOT_KITCHEN" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Hot Kitchen (Burgers, Pastas, Eggs)</option>
-                    <option value="COLD_KITCHEN" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Cold Kitchen (Salads, Wraps)</option>
-                    <option value="BAR_COFFEE" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Bar & Coffee (Juices, Hot/Cold Drinks)</option>
-                    <option value="BAKERY" className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white">Bakery (Desserts, Tortas per Kg)</option>
+                    <option value="HOT_KITCHEN" className="bg-white text-stone-900">Hot Kitchen (Burgers, Pastas, Eggs)</option>
+                    <option value="COLD_KITCHEN" className="bg-white text-stone-900">Cold Kitchen (Salads, Wraps)</option>
+                    <option value="BAR_COFFEE" className="bg-white text-stone-900">Bar & Coffee (Juices, Hot/Cold Drinks)</option>
+                    <option value="BAKERY" className="bg-white text-stone-900">Bakery (Desserts, Tortas per Kg)</option>
                   </select>
                 </div>
 
                 <div className="flex flex-col justify-end">
-                  <label className="flex items-center gap-2 p-2.5 bg-stone-50 dark:bg-white/[0.04] rounded-xl border border-stone-200 dark:border-white/10 cursor-pointer">
+                  <label className="flex items-center gap-2 p-2.5 bg-stone-50 rounded-xl border border-stone-200 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formIsDirect}
                       onChange={(e) => setFormIsDirect(e.target.checked)}
-                      className="rounded text-amber-500 focus:ring-amber-500 bg-white dark:bg-black/40 border-stone-300 dark:border-white/20"
+                      className="rounded text-emerald-600 focus:ring-emerald-500 accent-emerald-600 bg-white border-stone-300"
                     />
-                    <span className="font-bold text-stone-750 dark:text-zinc-300 text-xs">Direct Retail (Soda/Water)</span>
+                    <span className="font-bold text-stone-700 text-xs">Direct Retail (Soda/Water)</span>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 dark:text-zinc-300 mb-1">Ingredients / Description</label>
+                <label className="block font-bold text-stone-700 mb-1">Ingredients / Description</label>
                 <textarea
                   rows={2}
                   placeholder="e.g. Double Beef, Double Cheese, Egg, House Mayo, tomato, onion, lettuce & Fries"
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
-                  className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl p-3 text-xs font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
+                  className="w-full bg-white border border-stone-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl p-3 text-xs font-medium text-stone-900 placeholder-stone-400 focus:outline-none"
                 />
               </div>
 
               {/* Product Photo Upload Section */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block font-bold text-stone-700 dark:text-zinc-300 text-xs uppercase tracking-wider">
+                  <label className="block font-bold text-stone-700 text-xs uppercase tracking-wider">
                     Product Photo (Upload File)
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowUrlFallback(!showUrlFallback)}
-                    className="text-[10px] font-semibold text-stone-500 dark:text-zinc-500 hover:text-amber-500 dark:hover:text-amber-400 transition cursor-pointer"
+                    className="text-[10px] font-semibold text-emerald-700 hover:underline transition cursor-pointer"
                   >
                     {showUrlFallback ? 'Hide URL link' : 'Or paste web link'}
                   </button>
@@ -1275,8 +1270,8 @@ export function ProductManagementView() {
 
                 {formImageUrl ? (
                   /* Image Preview Card */
-                  <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-white/15 bg-stone-50 dark:bg-black/40 p-3 flex items-center gap-4 group">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-stone-100 dark:bg-black/60 border border-stone-200 dark:border-white/10 flex-shrink-0 relative">
+                  <div className="relative rounded-2xl overflow-hidden border border-stone-200 bg-stone-50 p-3 flex items-center gap-4 group">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 flex-shrink-0 relative">
                       <img
                         src={formImageUrl}
                         alt="Product Preview"
@@ -1285,20 +1280,20 @@ export function ProductManagementView() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5">
-                        <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                      <div className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                        <Check className="w-4 h-4 text-emerald-600" />
                         <span>Photo Uploaded & Ready</span>
                       </div>
                       {imageSizeInfo && (
-                        <div className="text-[10px] text-stone-500 dark:text-zinc-400 mt-0.5 font-mono">{imageSizeInfo}</div>
+                        <div className="text-[10px] text-stone-500 mt-0.5 font-mono">{imageSizeInfo}</div>
                       )}
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-3 py-1 bg-stone-200 hover:bg-stone-300 dark:bg-white/10 dark:hover:bg-white/20 text-stone-900 dark:text-white rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1 bg-stone-200 hover:bg-stone-300 text-stone-900 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
                         >
-                          <UploadCloud className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                          <UploadCloud className="w-3.5 h-3.5 text-emerald-700" />
                           Change Photo
                         </button>
                         <button
@@ -1307,9 +1302,9 @@ export function ProductManagementView() {
                             setFormImageUrl('');
                             setImageSizeInfo(null);
                           }}
-                          className="px-3 py-1 bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-300 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
                         >
-                          <Trash2 className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
+                          <Trash2 className="w-3.5 h-3.5 text-rose-500" />
                           Remove
                         </button>
                       </div>
@@ -1321,20 +1316,20 @@ export function ProductManagementView() {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-stone-300 dark:border-white/20 hover:border-amber-500/50 bg-stone-50/50 hover:bg-stone-100/50 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] rounded-2xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center gap-2 group"
+                    className="border-2 border-dashed border-stone-300 hover:border-emerald-500 bg-stone-50/50 hover:bg-emerald-50/30 rounded-2xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center gap-2 group"
                   >
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
                       {uploadingImage ? (
-                        <RefreshCw className="w-6 h-6 animate-spin text-amber-500 dark:text-amber-400" />
+                        <RefreshCw className="w-6 h-6 animate-spin text-emerald-700" />
                       ) : (
                         <UploadCloud className="w-6 h-6" />
                       )}
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-stone-900 dark:text-white">
+                      <div className="text-xs font-bold text-stone-900">
                         {uploadingImage ? 'Optimizing & Processing Photo...' : 'Click to Upload Product Photo'}
                       </div>
-                      <p className="text-[11px] text-stone-500 dark:text-zinc-400 mt-0.5">
+                      <p className="text-[11px] text-stone-500 mt-0.5">
                         Choose photo file from your device (PNG, JPG, WebP) or drag here
                       </p>
                     </div>
@@ -1344,7 +1339,7 @@ export function ProductManagementView() {
                 {/* Optional Web URL Link Fallback (collapsed by default) */}
                 {showUrlFallback && (
                   <div className="pt-2 animate-in fade-in duration-150">
-                    <label className="block text-[10px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                    <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">
                       Web Image URL (Optional Fallback)
                     </label>
                     <input
@@ -1352,7 +1347,7 @@ export function ProductManagementView() {
                       placeholder="https://images.unsplash.com/..."
                       value={formImageUrl}
                       onChange={(e) => setFormImageUrl(e.target.value)}
-                      className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs font-medium text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none"
+                      className="w-full bg-white border border-stone-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl px-3 py-2 text-xs font-medium text-stone-900 placeholder-stone-400 focus:outline-none"
                     />
                   </div>
                 )}
@@ -1367,18 +1362,18 @@ export function ProductManagementView() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200 dark:border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200">
                 <button
                   type="button"
                   onClick={() => setProductModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 hover:text-stone-900 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingProduct}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs shadow-xs transition disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   {savingProduct ? 'Saving...' : isEditing ? 'Update Product' : 'Add Product'}
                 </button>

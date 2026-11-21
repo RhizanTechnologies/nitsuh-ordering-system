@@ -433,23 +433,23 @@ export function StaffManagementView() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'OWNER':
-        return { label: 'Owner / Executive', color: 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-500/40', icon: ShieldCheck };
+        return { label: 'Owner', color: 'bg-stone-100 text-stone-800 border-stone-200', icon: ShieldCheck };
       case 'MANAGER':
-        return { label: 'General Manager', color: 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-500/40', icon: LayoutGrid };
+        return { label: 'Manager', color: 'bg-emerald-50 text-emerald-800 border-emerald-200', icon: LayoutGrid };
       case 'CASHIER':
-        return { label: 'Cashier / POS', color: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40', icon: MonitorCheck };
+        return { label: 'Cashier', color: 'bg-emerald-50 text-emerald-800 border-emerald-200', icon: MonitorCheck };
       case 'WAITER':
-        return { label: 'Service Waiter', color: 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-500/40', icon: Smartphone };
+        return { label: 'Waiter', color: 'bg-emerald-50 text-emerald-800 border-emerald-200', icon: Smartphone };
       case 'KITCHEN_STAFF':
-        return { label: 'Kitchen Cook', color: 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/40', icon: ChefHat };
+        return { label: 'Cook', color: 'bg-stone-100 text-stone-800 border-stone-200', icon: ChefHat };
       case 'HEAD_CHEF':
-        return { label: 'Head Chef', color: 'bg-orange-100 dark:bg-orange-500/20 text-orange-800 dark:text-orange-300 border-orange-300 dark:border-orange-500/40', icon: ChefHat };
+        return { label: 'Head Chef', color: 'bg-stone-100 text-stone-800 border-stone-200', icon: ChefHat };
       case 'MAIN_STOREKEEPER':
-        return { label: 'Main Storekeeper', color: 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border-cyan-300 dark:border-cyan-500/40', icon: Boxes };
+        return { label: 'Storekeeper', color: 'bg-stone-100 text-stone-800 border-stone-200', icon: Boxes };
       case 'KITCHEN_STOREKEEPER':
-        return { label: 'Kitchen Storekeeper', color: 'bg-teal-100 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 border-teal-300 dark:border-teal-500/40', icon: Boxes };
+        return { label: 'Kitchen Store', color: 'bg-stone-100 text-stone-800 border-stone-200', icon: Boxes };
       default:
-        return { label: role, color: 'bg-stone-100 dark:bg-white/10 text-stone-800 dark:text-white border-stone-300 dark:border-white/20', icon: Users };
+        return { label: role, color: 'bg-stone-100 text-stone-800 border-stone-200', icon: Users };
     }
   };
 
@@ -485,8 +485,8 @@ export function StaffManagementView() {
   }, [resetRequests, isOwner]);
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 no-scrollbar">
-      <div className="max-w-7xl mx-auto space-y-6 pb-16">
+    <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 no-scrollbar bg-[#F8F9FA] text-stone-900 font-sans">
+      <div className="max-w-7xl mx-auto space-y-5 pb-16">
         {/* Toast Notification */}
       {successToast && (
         <div className="fixed top-20 right-5 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3 duration-200">
@@ -496,159 +496,131 @@ export function StaffManagementView() {
       )}
 
       {/* Main Header Card */}
-      <div className="bg-white dark:bg-[#161311] border border-stone-200/90 dark:border-white/10 rounded-3xl p-4 sm:p-6 lg:p-7 shadow-sm transition-colors">
+      <div className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 sm:mt-0 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 shadow-2xs">
               <Users className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white tracking-tight leading-tight">
-                  Staff & User Management
-                </h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0 shadow-2xs">
-                  {isOwner ? 'Owner Terminal' : 'Manager Console'}
-                </span>
-              </div>
-              <p className="text-xs text-stone-500 dark:text-zinc-400 font-medium mt-0.5">
-                Manage team profiles, station roles, and instant terminal PIN codes
-              </p>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight leading-tight">
+                Staff Management
+              </h1>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap shrink-0">
+                {isOwner ? 'Owner' : 'Manager'}
+              </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
-            <Button
-              variant="primary"
-              size="default"
+            <button
               onClick={handleOpenRegister}
-              className="flex-1 sm:flex-initial justify-center shadow-xs"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs shadow-xs transition cursor-pointer select-none"
             >
               <UserPlus className="w-4 h-4" />
-              <span className="whitespace-nowrap">+ Register New Staff</span>
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
+              <span className="whitespace-nowrap">Register Staff</span>
+            </button>
+            <button
               onClick={loadStaff}
               title="Refresh Staff List"
-              className="shrink-0"
+              className="inline-flex items-center justify-center p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 transition cursor-pointer shrink-0"
             >
               <RotateCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
+            </button>
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3 mt-5 pt-5 border-t border-stone-200/80 dark:border-white/10">
-          <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Total Registered</div>
-            <div className="text-xl font-black text-stone-900 dark:text-white mt-0.5">{totalStaff}</div>
-            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">{activeStaff} Active on Duty</div>
+        {/* Stats Row - Clean, simple, no clutter */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-4 pt-4 border-t border-stone-200/80">
+          <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
+            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Total Staff</div>
+            <div className="text-xl font-black text-stone-900 mt-0.5">{totalStaff}</div>
           </div>
 
-          <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Front of House</div>
-            <div className="text-xl font-black text-stone-900 dark:text-white mt-0.5">{frontOfHouse}</div>
-            <div className="text-[10px] text-stone-500 dark:text-zinc-400">Cashiers & Waiters</div>
+          <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
+            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Front of House</div>
+            <div className="text-xl font-black text-stone-900 mt-0.5">{frontOfHouse}</div>
           </div>
 
-          <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Kitchen & Chefs</div>
-            <div className="text-xl font-black text-stone-900 dark:text-white mt-0.5">{kitchenStaff}</div>
-            <div className="text-[10px] text-stone-500 dark:text-zinc-400">Cooks & Head Chefs</div>
+          <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
+            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Kitchen</div>
+            <div className="text-xl font-black text-stone-900 mt-0.5">{kitchenStaff}</div>
           </div>
 
-          <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Storekeepers</div>
-            <div className="text-xl font-black text-stone-900 dark:text-white mt-0.5">{storeStaff}</div>
-            <div className="text-[10px] text-stone-500 dark:text-zinc-400">Dual Store Inventory</div>
-          </div>
-
-          <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10 col-span-2 sm:col-span-1">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Internal Identifiers</div>
-            <div className="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">EMP-001+</div>
-            <div className="text-[10px] text-stone-500 dark:text-zinc-400">No Email / Phone Needed</div>
+          <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
+            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Storekeepers</div>
+            <div className="text-xl font-black text-stone-900 mt-0.5">{storeStaff}</div>
           </div>
         </div>
       </div>
 
       {/* Generated Credential Banner Alert */}
       {generatedCredentialAlert && (
-        <div className="bg-emerald-500/10 border-2 border-emerald-500/40 rounded-3xl p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-300">
-                New {generatedCredentialAlert.type} Generated for {generatedCredentialAlert.userName}
+              <div className="text-xs font-black uppercase text-emerald-900">
+                New {generatedCredentialAlert.type} for {generatedCredentialAlert.userName}
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="font-mono text-xl font-black bg-white dark:bg-black/30 px-3 py-1 rounded-xl border border-emerald-500/40 text-stone-900 dark:text-white tracking-widest select-all">
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="font-mono text-lg font-black bg-white px-2.5 py-0.5 rounded-lg border border-emerald-200 text-stone-900 select-all">
                   {generatedCredentialAlert.value}
-                </span>
-                <span className="text-[11px] text-stone-600 dark:text-zinc-400">
-                  (Communicate this credential to the employee)
                 </span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="primary"
-              size="sm"
+            <button
               onClick={() => {
                 navigator.clipboard.writeText(generatedCredentialAlert.value);
                 setCopiedAlertCredential(true);
                 setTimeout(() => setCopiedAlertCredential(false), 2000);
               }}
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
             >
-              {copiedAlertCredential ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-white" />}
-              <span>{copiedAlertCredential ? 'Copied!' : 'Copy Code'}</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+              {copiedAlertCredential ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>{copiedAlertCredential ? 'Copied' : 'Copy'}</span>
+            </button>
+            <button
               onClick={() => setGeneratedCredentialAlert(null)}
+              className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition cursor-pointer"
             >
               Dismiss
-            </Button>
+            </button>
           </div>
         </div>
       )}
 
       {/* Pending Reset Requests Section */}
       {visibleResetRequests.filter((r) => r.status === 'PENDING').length > 0 && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 animate-in fade-in duration-200">
+        <div className="bg-emerald-50/60 border border-emerald-200 rounded-3xl p-4 sm:p-5 shadow-xs space-y-3 animate-in fade-in duration-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
-                <ShieldAlert className="w-5 h-5" />
+              <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
+                <ShieldAlert className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-sm sm:text-base font-black text-stone-900 dark:text-white flex items-center gap-2">
+                <h2 className="text-sm font-black text-stone-900 flex items-center gap-2">
                   PIN & Password Reset Requests
-                  <Badge variant="warning">
+                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
                     {visibleResetRequests.filter((r) => r.status === 'PENDING').length} Pending
-                  </Badge>
+                  </span>
                 </h2>
-                <p className="text-[11px] text-stone-600 dark:text-zinc-400">
-                  Employees requesting new credentials from the login screen
-                </p>
               </div>
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
+            <button
               onClick={loadResetRequests}
+              className="p-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
             >
               <RotateCcw className={`w-3.5 h-3.5 ${loadingRequests ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
-            </Button>
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
             {visibleResetRequests
               .filter((r) => r.status === 'PENDING')
               .map((req) => {
@@ -656,57 +628,50 @@ export function StaffManagementView() {
                 return (
                   <div
                     key={req.id}
-                    className="bg-white dark:bg-[#1C1815] border border-amber-500/30 rounded-2xl p-4 shadow-xs space-y-3"
+                    className="bg-white border border-stone-200 rounded-2xl p-3.5 shadow-xs space-y-2.5"
                   >
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-xs font-black text-stone-900 dark:text-white">
+                        <div className="text-xs font-black text-stone-900">
                           {req.employeeName || req.user?.name || 'Staff Member'}
                         </div>
-                        <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-mono">
+                        <div className="text-[10px] text-stone-500 font-mono">
                           {req.employeeCode || req.user?.employeeCode || 'STAFF'} • {req.role || req.user?.role}
                         </div>
                       </div>
-                      <Badge variant="warning">Reset Needed</Badge>
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-stone-100 text-stone-700">
+                        {req.role}
+                      </span>
                     </div>
 
-                    <div className="text-[11px] bg-stone-50 dark:bg-white/[0.04] p-2.5 rounded-xl border border-stone-200/80 dark:border-white/10 text-stone-700 dark:text-zinc-300 italic">
-                      "{req.note || 'Forgot credentials / PIN'}"
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-1 border-t border-stone-100 dark:border-white/10">
+                    <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
                       {isManagementRole ? (
-                        <Button
-                          variant="primary"
-                          size="sm"
+                        <button
                           disabled={resolvingRequestId === req.id}
                           onClick={() => handleResolveRequest(req, 'GENERATE_PASSWORD')}
-                          className="flex-1"
+                          className="flex-1 py-1 px-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                         >
                           <Lock className="w-3.5 h-3.5" />
-                          <span>Generate Password</span>
-                        </Button>
+                          <span>Password</span>
+                        </button>
                       ) : (
-                        <Button
-                          variant="primary"
-                          size="sm"
+                        <button
                           disabled={resolvingRequestId === req.id}
                           onClick={() => handleResolveRequest(req, 'GENERATE_PIN')}
-                          className="flex-1"
+                          className="flex-1 py-1 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                         >
                           <KeyRound className="w-3.5 h-3.5" />
-                          <span>Generate New PIN</span>
-                        </Button>
+                          <span>Gen PIN</span>
+                        </button>
                       )}
 
-                      <Button
-                        variant="ghost"
-                        size="sm"
+                      <button
                         disabled={resolvingRequestId === req.id}
                         onClick={() => handleResolveRequest(req, 'DISMISS')}
+                        className="py-1 px-2 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg text-xs font-bold transition cursor-pointer"
                       >
                         Dismiss
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 );
@@ -718,56 +683,58 @@ export function StaffManagementView() {
       {/* Search & Role Filters Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-500" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
-            placeholder="Search by name, employee code (EMP-001), or role..."
+            placeholder="Search staff..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-600 focus:outline-none focus:border-amber-500 shadow-xs"
+            className="w-full bg-white border border-stone-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-600 shadow-xs"
           />
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {[
-            { id: 'ALL', label: 'All Roles' },
+            { id: 'ALL', label: 'All' },
             ...(isOwner ? [{ id: 'OWNER', label: 'Owner' }] : []),
             { id: 'CASHIER', label: 'Cashiers' },
             { id: 'WAITER', label: 'Waiters' },
             { id: 'KITCHEN_STAFF', label: 'Kitchen' },
-            { id: 'MAIN_STOREKEEPER', label: 'Storekeepers' },
+            { id: 'MAIN_STOREKEEPER', label: 'Store' },
             { id: 'MANAGER', label: 'Managers' },
           ].map((tab) => (
-            <Button
+            <button
               key={tab.id}
-              variant={roleFilter === tab.id ? 'primary' : 'secondary'}
-              size="sm"
               onClick={() => setRoleFilter(tab.id)}
-              className="shrink-0 whitespace-nowrap"
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                roleFilter === tab.id
+                  ? 'bg-emerald-600 text-white font-black shadow-xs'
+                  : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+              }`}
             >
               {tab.label}
-            </Button>
+            </button>
           ))}
 
-          <label className="flex items-center gap-1.5 text-xs font-bold text-stone-600 dark:text-zinc-400 ml-2 cursor-pointer flex-shrink-0 select-none">
+          <label className="flex items-center gap-1.5 text-xs font-bold text-stone-600 ml-2 cursor-pointer shrink-0 select-none">
             <input
               type="checkbox"
               checked={activeOnly}
               onChange={(e) => setActiveOnly(e.target.checked)}
-              className="rounded accent-amber-500"
+              className="rounded accent-emerald-600"
             />
-            <span>Active Only</span>
+            <span className="whitespace-nowrap">Active Only</span>
           </label>
         </div>
       </div>
 
       {/* Staff Grid */}
       {loading ? (
-        <div className="p-12 text-center text-xs font-bold text-stone-500 dark:text-zinc-400">
-          Loading Nitsuh staff database...
+        <div className="p-12 text-center text-xs font-bold text-stone-500">
+          Loading staff list...
         </div>
       ) : filteredStaff.length === 0 ? (
-        <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-8 text-center text-stone-500 dark:text-zinc-400">
+        <div className="bg-white border border-stone-200 rounded-3xl p-8 text-center text-stone-500">
           <p className="font-bold text-sm">No staff members found matching your search.</p>
         </div>
       ) : (
@@ -781,19 +748,14 @@ export function StaffManagementView() {
             return (
               <div
                 key={staff.id}
-                className={`bg-white dark:bg-[#161311] border rounded-3xl p-5 shadow-xs transition hover:shadow-md relative overflow-hidden flex flex-col justify-between ${
+                className={`bg-white border rounded-3xl p-4 sm:p-5 shadow-xs transition hover:shadow-md relative overflow-hidden flex flex-col justify-between ${
                   staff.role === 'OWNER'
-                    ? 'border-amber-400 dark:border-amber-500/60 ring-2 ring-amber-400/20 bg-gradient-to-b from-amber-50/40 via-white to-white dark:from-amber-950/20 dark:via-[#161311] dark:to-[#161311]'
+                    ? 'border-emerald-300 ring-2 ring-emerald-300/20 bg-emerald-50/20'
                     : staff.isActive
-                    ? 'border-stone-200/90 dark:border-white/10'
-                    : 'border-rose-300 dark:border-rose-900/40 bg-stone-50/50 dark:bg-stone-950/20 opacity-80'
+                    ? 'border-stone-200/90'
+                    : 'border-rose-200 bg-rose-50/30'
                 }`}
               >
-                {staff.role === 'OWNER' && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 text-[9px] font-black uppercase tracking-wider px-3 py-0.5 rounded-bl-xl shadow-xs">
-                    ★ Executive Owner
-                  </div>
-                )}
                 <div>
                   {/* Top: Avatar, Name, Code, and Status Badge */}
                   <div className="flex items-start justify-between gap-3">
@@ -802,22 +764,22 @@ export function StaffManagementView() {
                         <img
                           src={staff.avatarUrl}
                           alt={staff.name}
-                          className="w-12 h-12 rounded-2xl object-cover ring-2 ring-amber-400/30 flex-shrink-0"
+                          className="w-11 h-11 rounded-2xl object-cover ring-1 ring-stone-200 shrink-0"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-black text-base flex-shrink-0">
+                        <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center font-black text-base shrink-0">
                           {staff.name.charAt(0)}
                         </div>
                       )}
                       <div className="min-w-0">
-                        <h2 className="text-sm font-black text-stone-900 dark:text-white truncate">
+                        <h2 className="text-sm font-black text-stone-900 truncate">
                           {staff.name}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded-md bg-stone-100 dark:bg-white/[0.08] text-stone-700 dark:text-zinc-300 border border-stone-200 dark:border-white/10">
+                          <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
                             {staff.employeeCode || 'EMP-???'}
                           </span>
-                          <span className={`inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-md border ${roleInfo.color}`}>
+                          <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border ${roleInfo.color}`}>
                             <RoleIcon className="w-2.5 h-2.5" />
                             <span>{roleInfo.label}</span>
                           </span>
@@ -825,29 +787,29 @@ export function StaffManagementView() {
                       </div>
                     </div>
 
-                    {/* Status Toggle Switch (BUG-006) */}
+                    {/* Status Toggle Switch */}
                     <button
                       onClick={() => handleToggleStatus(staff)}
                       title={`Click to ${staff.isActive ? 'Deactivate' : 'Activate'}`}
-                      className={`text-[10px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs ${
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs ${
                         staff.isActive
-                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 hover:bg-emerald-100'
-                          : 'bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 hover:bg-rose-100'
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                          : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'
                       }`}
                     >
                       <span className={`w-2 h-2 rounded-full ${staff.isActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                      <span>{staff.isActive ? 'Active' : 'Deactivated'}</span>
+                      <span>{staff.isActive ? 'Active' : 'Locked'}</span>
                     </button>
                   </div>
 
                   {/* Terminal PIN Box */}
-                  <div className="mt-4 p-3 bg-stone-50 dark:bg-white/[0.03] rounded-2xl border border-stone-200/80 dark:border-white/10 flex items-center justify-between">
+                  <div className="mt-3.5 p-3 bg-stone-50 rounded-2xl border border-stone-200/80 flex items-center justify-between">
                     <div>
-                      <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1">
-                        <KeyRound className="w-3 h-3 text-amber-500" />
-                        <span>Touch Terminal PIN</span>
+                      <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
+                        <KeyRound className="w-3 h-3 text-emerald-600" />
+                        <span>Terminal PIN</span>
                       </div>
-                      <div className="font-mono text-base font-black text-stone-900 dark:text-white mt-0.5 tracking-widest">
+                      <div className="font-mono text-base font-black text-stone-900 mt-0.5 tracking-widest">
                         {isPinRevealed ? staff.pinCode : '••••'}
                       </div>
                     </div>
@@ -855,7 +817,7 @@ export function StaffManagementView() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => togglePinVisibility(staff.id)}
-                        className="p-1.5 rounded-xl hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-zinc-400 transition cursor-pointer"
+                        className="p-1.5 rounded-xl hover:bg-stone-200 text-stone-600 transition cursor-pointer"
                         title={isPinRevealed ? 'Hide PIN' : 'Reveal PIN'}
                       >
                         {isPinRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -863,68 +825,28 @@ export function StaffManagementView() {
 
                       <button
                         onClick={() => copyToClipboard(staff.pinCode, staff.id)}
-                        className="p-1.5 rounded-xl hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-zinc-400 transition cursor-pointer"
+                        className="p-1.5 rounded-xl hover:bg-stone-200 text-stone-600 transition cursor-pointer"
                         title="Copy PIN Code"
                       >
-                        {isCopied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                        {isCopied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
-
-                  {/* Workload Stats - Role Relevant (BUG-008) */}
-                  {staff.role === 'CASHIER' || staff.role === 'WAITER' || staff.role === 'OWNER' || staff.role === 'MANAGER' ? (
-                    <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
-                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">POS Sales</div>
-                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
-                          {staff._count?.ordersCreated || 0}
-                        </div>
-                      </div>
-                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
-                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Waiter Slips</div>
-                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
-                          {staff._count?.ordersWaitered || 0}
-                        </div>
-                      </div>
-                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
-                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Cash Shifts</div>
-                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
-                          {staff._count?.shifts || 0}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2 mt-3 text-center">
-                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
-                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Station Duty</div>
-                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
-                          {staff.isActive ? 'Active on Floor' : 'Off Duty'}
-                        </div>
-                      </div>
-                      <div className="p-2 rounded-xl bg-stone-100/60 dark:bg-white/[0.02]">
-                        <div className="text-[9px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Access Scope</div>
-                        <div className="text-xs font-black text-stone-900 dark:text-white mt-0.5">
-                          {staff.role.includes('STORE') ? 'Inventory & Ledger' : 'Kitchen KDS'}
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Bottom Card Actions */}
-                <div className="mt-4 pt-3 border-t border-stone-200/80 dark:border-white/10 flex items-center justify-between gap-1.5">
+                <div className="mt-4 pt-3 border-t border-stone-200/80 flex items-center justify-between gap-1.5">
                   <button
                     onClick={() => handleInstantGeneratePin(staff)}
-                    title="1-Click Auto-Generate New Unique PIN"
-                    className="py-1.5 px-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                    className="py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                   >
-                    <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <Sparkles className="w-3 h-3 text-emerald-600" />
                     <span>Gen PIN</span>
                   </button>
 
                   <button
                     onClick={() => handleOpenResetPin(staff)}
-                    className="flex-1 py-1.5 px-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                    className="flex-1 py-1.5 px-2 bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <KeyRound className="w-3 h-3" />
                     <span>Custom PIN</span>
@@ -932,7 +854,7 @@ export function StaffManagementView() {
 
                   <button
                     onClick={() => handleOpenEdit(staff)}
-                    className="py-1.5 px-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] dark:hover:bg-white/10 text-stone-700 dark:text-zinc-300 border border-stone-200 dark:border-white/10 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                    className="py-1.5 px-2 bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <Edit2 className="w-3 h-3" />
                     <span>Edit</span>
@@ -941,8 +863,7 @@ export function StaffManagementView() {
                   {(staff.role === 'OWNER' || staff.role === 'MANAGER') && (
                     <button
                       onClick={() => handleOpenPasswordModal(staff)}
-                      title="Reset Management Password"
-                      className="py-1.5 px-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                      className="py-1.5 px-2 bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Lock className="w-3 h-3" />
                       <span>Password</span>
@@ -952,8 +873,7 @@ export function StaffManagementView() {
                   {staff.role !== 'OWNER' && (
                     <button
                       onClick={() => handleArchiveStaff(staff)}
-                      title="Archive or remove departed employee"
-                      className="py-1.5 px-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                      className="py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -965,75 +885,34 @@ export function StaffManagementView() {
         </div>
       )}
 
-      {/* Role Security Reference Card */}
-      <div className="bg-white dark:bg-[#161311] border border-stone-200/90 dark:border-white/10 rounded-3xl p-5 sm:p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <ShieldAlert className="w-4 h-4 text-amber-500" />
-          <h2 className="text-sm font-black text-stone-900 dark:text-white uppercase tracking-wider">
-            Terminal Access & Role Security Matrix
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-          <div className="p-3 bg-stone-50 dark:bg-white/[0.02] rounded-2xl border border-stone-200/70 dark:border-white/10">
-            <span className="font-black text-emerald-700 dark:text-emerald-400">CASHIER / POS</span>
-            <p className="text-[11px] text-stone-600 dark:text-zinc-400 mt-1">
-              Terminal POS, cash opening/closing, table billing, fire waiter slips to kitchen.
-            </p>
-          </div>
-          <div className="p-3 bg-stone-50 dark:bg-white/[0.02] rounded-2xl border border-stone-200/70 dark:border-white/10">
-            <span className="font-black text-blue-700 dark:text-blue-400">SERVICE WAITER</span>
-            <p className="text-[11px] text-stone-600 dark:text-zinc-400 mt-1">
-              Waiter Pad device only. Table menu ordering, item notes, sends digital slips to cashier.
-            </p>
-          </div>
-          <div className="p-3 bg-stone-50 dark:bg-white/[0.02] rounded-2xl border border-stone-200/70 dark:border-white/10">
-            <span className="font-black text-orange-700 dark:text-orange-400">KITCHEN & HEAD CHEF</span>
-            <p className="text-[11px] text-stone-600 dark:text-zinc-400 mt-1">
-              Kitchen Display (KDS), cooking floor inventory, gram-level recipe creation.
-            </p>
-          </div>
-          <div className="p-3 bg-stone-50 dark:bg-white/[0.02] rounded-2xl border border-stone-200/70 dark:border-white/10">
-            <span className="font-black text-cyan-700 dark:text-cyan-400">DUAL STOREKEEPERS</span>
-            <p className="text-[11px] text-stone-600 dark:text-zinc-400 mt-1">
-              Main bulk warehouse & kitchen store, supplier purchase orders, transfer dispatches.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* ================= MODAL: REGISTER NEW STAFF ================= */}
       {isRegisterOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl relative my-8">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white border border-stone-200/90 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl relative my-8 text-stone-900">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <UserPlus className="w-5 h-5" />
                 </div>
-                <div>
-                  <h3 className="text-base font-black text-stone-900 dark:text-white">Register New Staff Member</h3>
-                  <p className="text-[11px] text-stone-500 dark:text-zinc-400">
-                    Creates terminal access credentials. No email or phone needed.
-                  </p>
-                </div>
+                <h3 className="text-base font-black text-stone-900">Register Staff Member</h3>
               </div>
               <button
                 onClick={() => setIsRegisterOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-stone-500 dark:text-zinc-400"
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {modalError && (
-              <div className="mt-4 p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 text-xs font-bold rounded-2xl">
+              <div className="mt-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-2xl">
                 {modalError}
               </div>
             )}
 
             <form onSubmit={handleRegisterSubmit} className="space-y-4 mt-4">
               <div>
-                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-bold text-stone-700 mb-1">
                   Employee Full Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1042,19 +921,19 @@ export function StaffManagementView() {
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="flex items-center min-h-[20px] text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="flex items-center min-h-[20px] text-xs font-bold text-stone-700 mb-1">
                     Role & Station <span className="text-rose-500 ml-0.5">*</span>
                   </label>
                   <select
                     value={formRole}
                     onChange={(e) => setFormRole(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-[#201B17] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="WAITER">Waiter / Order Pad</option>
                     <option value="CASHIER">Cashier / POS</option>
@@ -1067,7 +946,7 @@ export function StaffManagementView() {
                 </div>
 
                 <div>
-                  <label className="flex items-center min-h-[20px] text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="flex items-center min-h-[20px] text-xs font-bold text-stone-700 mb-1">
                     Employee Code (Optional)
                   </label>
                   <input
@@ -1075,20 +954,20 @@ export function StaffManagementView() {
                     placeholder="Auto (e.g. EMP-010)"
                     value={formEmployeeCode}
                     onChange={(e) => setFormEmployeeCode(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 uppercase"
+                    className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-600 uppercase"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300">
+                  <label className="block text-xs font-bold text-stone-700">
                     4-Digit Quick Touch PIN <span className="text-rose-500">*</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => setFormPin(generateRandomPin())}
-                    className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-bold text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <Sparkles className="w-3 h-3" />
                     <span>Generate Random PIN</span>
@@ -1101,13 +980,13 @@ export function StaffManagementView() {
                   value={formPin}
                   onChange={(e) => setFormPin(e.target.value.replace(/\D/g, ''))}
                   required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-sm font-mono font-black text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 tracking-widest text-center"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm font-mono font-black text-stone-900 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 tracking-widest text-center"
                 />
               </div>
 
               {formRole === 'MANAGER' && (
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     Management Password (Optional)
                   </label>
                   <input
@@ -1115,7 +994,7 @@ export function StaffManagementView() {
                     placeholder="Defaults to nitsuh123"
                     value={formPassword}
                     onChange={(e) => setFormPassword(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-600"
                   />
                 </div>
               )}
@@ -1128,18 +1007,18 @@ export function StaffManagementView() {
                 label="Staff Profile Photo / Avatar"
               />
 
-              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-stone-200 dark:border-white/10">
+              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-stone-200">
                 <button
                   type="button"
                   onClick={() => setIsRegisterOpen(false)}
-                  className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] dark:hover:bg-white/10 text-stone-700 dark:text-zinc-300 rounded-2xl text-xs font-bold cursor-pointer"
+                  className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-xs rounded-2xl shadow-lg shadow-amber-500/25 cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {formSubmitting ? 'Registering...' : 'Register Staff Member'}
                 </button>
@@ -1151,30 +1030,30 @@ export function StaffManagementView() {
 
       {/* ================= MODAL: RESET PIN ================= */}
       {isResetPinOpen && selectedStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white border border-stone-200/90 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-stone-900">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <KeyRound className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-stone-900 dark:text-white">Reset Staff PIN</h3>
-                  <p className="text-[11px] text-stone-500 dark:text-zinc-400">
+                  <h3 className="text-sm font-black text-stone-900">Reset Staff PIN</h3>
+                  <p className="text-[11px] text-stone-500">
                     For {selectedStaff.name} ({selectedStaff.employeeCode})
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsResetPinOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-stone-500 dark:text-zinc-400"
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {modalError && (
-              <div className="mt-3 p-2.5 bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 text-xs font-bold rounded-2xl">
+              <div className="mt-3 p-2.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-2xl">
                 {modalError}
               </div>
             )}
@@ -1182,13 +1061,13 @@ export function StaffManagementView() {
             <form onSubmit={handleResetPinSubmit} className="space-y-4 mt-4">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300">
+                  <label className="block text-xs font-bold text-stone-700">
                     New 4-Digit PIN
                   </label>
                   <button
                     type="button"
                     onClick={() => setNewPin(generateRandomPin())}
-                    className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-bold text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <Sparkles className="w-3 h-3" />
                     <span>Random</span>
@@ -1200,22 +1079,22 @@ export function StaffManagementView() {
                   value={newPin}
                   onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
                   required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-3 text-lg font-mono font-black text-stone-900 dark:text-white tracking-widest text-center focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-lg font-mono font-black text-stone-900 tracking-widest text-center focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
                 <button
                   type="button"
                   onClick={() => setIsResetPinOpen(false)}
-                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] text-stone-700 dark:text-zinc-300 rounded-2xl text-xs font-bold"
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {formSubmitting ? 'Saving...' : 'Update PIN'}
                 </button>
@@ -1227,27 +1106,27 @@ export function StaffManagementView() {
 
       {/* ================= MODAL: EDIT PROFILE ================= */}
       {isEditOpen && selectedStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative my-8">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
-              <h3 className="text-sm font-black text-stone-900 dark:text-white">Edit Staff Profile</h3>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white border border-stone-200/90 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative my-8 text-stone-900">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+              <h3 className="text-sm font-black text-stone-900">Edit Staff Profile</h3>
               <button
                 onClick={() => setIsEditOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-stone-500 dark:text-zinc-400"
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {modalError && (
-              <div className="mt-3 p-2.5 bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 text-xs font-bold rounded-2xl">
+              <div className="mt-3 p-2.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-2xl">
                 {modalError}
               </div>
             )}
 
             <form onSubmit={handleEditSubmit} className="space-y-3.5 mt-4">
               <div>
-                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-bold text-stone-700 mb-1">
                   Full Name
                 </label>
                 <input
@@ -1255,13 +1134,13 @@ export function StaffManagementView() {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-600"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     Employee Code
                   </label>
                   <input
@@ -1269,18 +1148,18 @@ export function StaffManagementView() {
                     value={editCode}
                     onChange={(e) => setEditCode(e.target.value)}
                     required
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 uppercase font-mono font-bold"
+                    className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-600 uppercase font-mono font-bold"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     Role
                   </label>
                   <select
                     value={editRole}
                     onChange={(e) => setEditRole(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-[#201B17] border border-stone-300 dark:border-white/10 rounded-2xl px-3 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="WAITER">Service Waiter</option>
                     <option value="CASHIER">Cashier / POS</option>
@@ -1301,18 +1180,18 @@ export function StaffManagementView() {
                 label="Update Staff Photo / Avatar"
               />
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(false)}
-                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] text-stone-700 dark:text-zinc-300 rounded-2xl text-xs font-bold"
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {formSubmitting ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -1324,27 +1203,27 @@ export function StaffManagementView() {
 
       {/* ================= MODAL: RESET PASSWORD ================= */}
       {isPasswordModalOpen && selectedStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
-              <h3 className="text-sm font-black text-stone-900 dark:text-white">Reset Manager Password</h3>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white border border-stone-200/90 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-stone-900">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+              <h3 className="text-sm font-black text-stone-900">Reset Manager Password</h3>
               <button
                 onClick={() => setIsPasswordModalOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-stone-500 dark:text-zinc-400"
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {modalError && (
-              <div className="mt-3 p-2.5 bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 text-xs font-bold rounded-2xl">
+              <div className="mt-3 p-2.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-2xl">
                 {modalError}
               </div>
             )}
 
             <form onSubmit={handlePasswordSubmit} className="space-y-4 mt-4">
               <div>
-                <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-bold text-stone-700 mb-1">
                   New Password (min 6 chars)
                 </label>
                 <input
@@ -1353,22 +1232,22 @@ export function StaffManagementView() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
                 <button
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}
-                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.05] text-stone-700 dark:text-zinc-300 rounded-2xl text-xs font-bold"
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {formSubmitting ? 'Updating...' : 'Set Password'}
                 </button>

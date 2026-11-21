@@ -421,44 +421,44 @@ export function InventoryView() {
   ) || [];
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#FAF7F2] dark:bg-[#0D0B0A] text-stone-900 dark:text-white transition-colors">
+    <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#F8F9FA] text-stone-900 font-sans transition-colors">
       {/* Top Inventory Header */}
-      <div className="bg-white/95 dark:bg-[#12100E]/95 backdrop-blur-xl border-b border-stone-200 dark:border-white/10 px-4 sm:px-6 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 flex-shrink-0">
+      <div className="bg-white border-b border-stone-200/90 px-4 sm:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 flex-shrink-0 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-stone-950 font-black flex items-center justify-center shadow-xs flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-black flex items-center justify-center shadow-xs flex-shrink-0">
             <Boxes className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-extrabold text-stone-900 dark:text-white font-heading tracking-wide">
-              {isHeadChefOnly ? 'Kitchen Pantry Stock & Requisitions' : 'Dual-Store Inventory & Recipe Engine'}
+            <h2 className="text-sm sm:text-base font-black text-stone-900 tracking-tight">
+              {isHeadChefOnly ? 'Kitchen Pantry Stock' : 'Inventory & Stock'}
             </h2>
           </div>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 bg-stone-100 border border-stone-200 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('balances')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
               activeTab === 'balances'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
+                ? 'bg-emerald-600 text-white font-black shadow-xs'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
             }`}
           >
-            Store Balances
+            Balances
           </button>
 
           <button
             onClick={() => setActiveTab('catalog')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'catalog'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
+                ? 'bg-emerald-600 text-white font-black shadow-xs'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
             }`}
           >
             <Boxes className="w-3.5 h-3.5" />
-            <span>Stock Catalog (CRUD)</span>
-            <span className="bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+            <span>Catalog</span>
+            <span className="bg-stone-200 text-stone-700 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
               {rawIngredients.length}
             </span>
           </button>
@@ -467,8 +467,8 @@ export function InventoryView() {
             onClick={() => setActiveTab('transfers')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'transfers'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
+                ? 'bg-emerald-600 text-white font-black shadow-xs'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
             }`}
           >
             <ArrowRightLeft className="w-3.5 h-3.5" />
@@ -485,12 +485,12 @@ export function InventoryView() {
               onClick={() => setActiveTab('recipes')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'recipes'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                  : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
+                  ? 'bg-emerald-600 text-white font-black shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
               }`}
             >
               <ChefHat className="w-3.5 h-3.5" />
-              Recipe Studio
+              Recipes
             </button>
           )}
 
@@ -499,12 +499,12 @@ export function InventoryView() {
               onClick={() => setActiveTab('purchases')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'purchases'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
-                  : 'text-stone-600 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-white/5'
+                  ? 'bg-emerald-600 text-white font-black shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
               }`}
             >
               <Truck className="w-3.5 h-3.5" />
-              Suppliers & POs
+              Suppliers
             </button>
           )}
 
@@ -513,12 +513,12 @@ export function InventoryView() {
               onClick={() => setActiveTab('wastage')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'wastage'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-lg shadow-amber-500/20'
-                  : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5'
+                  ? 'bg-emerald-600 text-white font-black shadow-xs'
+                  : 'text-stone-700 hover:text-stone-950 hover:bg-stone-200/50'
               }`}
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Wastage Log
+              Wastage
             </button>
           )}
 
@@ -526,12 +526,12 @@ export function InventoryView() {
             onClick={() => setActiveTab('ledger')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'ledger'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-lg shadow-amber-500/20'
-                : 'text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5'
+                ? 'bg-emerald-600 text-white font-black shadow-xs'
+                : 'text-stone-700 hover:text-stone-950 hover:bg-stone-200/50'
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            Audit Ledger
+            Ledger
           </button>
         </div>
       </div>
@@ -579,7 +579,7 @@ export function InventoryView() {
                     {isOwnerOrManager && (
                       <button
                         onClick={handleOpenCreateStockItem}
-                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold rounded-xl text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5"
                       >
                         <Plus className="w-3.5 h-3.5 stroke-[3]" />
                         <span>New Stock Item</span>
@@ -597,7 +597,7 @@ export function InventoryView() {
                     {!isHeadChefOnly && (
                       <button
                         onClick={() => setPurchaseModalOpen(true)}
-                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold rounded-xl text-xs shadow-xs transition cursor-pointer"
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition cursor-pointer"
                       >
                         Receive Bulk PO
                       </button>
@@ -647,7 +647,7 @@ export function InventoryView() {
 
             {/* PENDING KITCHEN CONFIRMATION BANNER (For Head Chef) */}
             {isKitchenChef && pendingKitchenReceipts.length > 0 && (
-              <div className="bg-amber-50 dark:bg-gradient-to-r dark:from-amber-950/40 dark:via-zinc-900/90 dark:to-amber-950/40 border border-amber-300 dark:border-amber-500/40 p-4 rounded-3xl shadow-md backdrop-blur-xl animate-in fade-in">
+              <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-3xl shadow-xs animate-in fade-in">
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-amber-200 dark:border-white/10">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-black animate-bounce shadow-md shadow-amber-500/30">
@@ -713,13 +713,13 @@ export function InventoryView() {
 
             {/* Mobile Store Balances View Switcher (BUG-014) */}
             {!isHeadChefOnly && (
-              <div className="flex lg:hidden items-center gap-1.5 p-1 bg-stone-100 dark:bg-white/[0.05] rounded-2xl border border-stone-200 dark:border-white/10">
+              <div className="flex lg:hidden items-center gap-1.5 p-1 bg-stone-100 rounded-2xl border border-stone-200">
                 <button
                   onClick={() => setMobileBalanceTab('ALL')}
                   className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
                     mobileBalanceTab === 'ALL'
-                      ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                      : 'text-stone-600 dark:text-zinc-400'
+                      ? 'bg-emerald-600 text-white font-black shadow-xs'
+                      : 'text-stone-600'
                   }`}
                 >
                   All Stores
@@ -728,8 +728,8 @@ export function InventoryView() {
                   onClick={() => setMobileBalanceTab('MAIN')}
                   className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
                     mobileBalanceTab === 'MAIN'
-                      ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                      : 'text-stone-600 dark:text-zinc-400'
+                      ? 'bg-emerald-600 text-white font-black shadow-xs'
+                      : 'text-stone-600'
                   }`}
                 >
                   Main Store
@@ -738,8 +738,8 @@ export function InventoryView() {
                   onClick={() => setMobileBalanceTab('KITCHEN')}
                   className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
                     mobileBalanceTab === 'KITCHEN'
-                      ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                      : 'text-stone-600 dark:text-zinc-400'
+                      ? 'bg-emerald-600 text-white font-black shadow-xs'
+                      : 'text-stone-600'
                   }`}
                 >
                   Kitchen Store
@@ -775,7 +775,7 @@ export function InventoryView() {
                       )}
                       <button
                         onClick={() => setPurchaseModalOpen(true)}
-                        className="text-xs font-extrabold text-zinc-950 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 px-3 py-1.5 rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+                        className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
                       >
                         <Truck className="w-3.5 h-3.5" />
                         <span>PO Delivery</span>
@@ -998,7 +998,7 @@ export function InventoryView() {
                   {isOwnerOrManager && (
                     <button
                       onClick={handleOpenCreateStockItem}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
                     >
                       <Plus className="w-4 h-4 stroke-[3]" />
                       <span>New Stock Item</span>
@@ -1041,7 +1041,7 @@ export function InventoryView() {
                       placeholder="Search stock items by name, SKU, or category..."
                       value={catalogSearch}
                       onChange={(e) => setCatalogSearch(e.target.value)}
-                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                     />
                   </div>
                   <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
@@ -1052,8 +1052,8 @@ export function InventoryView() {
                         onClick={() => setCatalogCategory(cat)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                           catalogCategory === cat
-                            ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                            : 'bg-stone-100 dark:bg-white/[0.05] text-stone-700 dark:text-zinc-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-200/60 dark:hover:bg-white/[0.08] border border-stone-200 dark:border-white/5'
+                            ? 'bg-emerald-600 text-white font-black shadow-xs'
+                            : 'bg-stone-100 text-stone-700 hover:text-stone-950 hover:bg-stone-200/60 border border-stone-200'
                         }`}
                       >
                         {cat}
@@ -1077,7 +1077,7 @@ export function InventoryView() {
                     {isOwnerOrManager && (
                       <button
                         onClick={handleOpenCreateStockItem}
-                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-bold rounded-xl text-xs transition"
+                        className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl text-xs transition"
                       >
                         + Create Stock Item
                       </button>
@@ -1223,7 +1223,7 @@ export function InventoryView() {
                 {isMainStorekeeper && (
                   <button
                     onClick={() => setSendDirectModalOpen(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold rounded-2xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5 text-stone-950" />
                     <span>Direct Send to Kitchen</span>
@@ -1268,7 +1268,7 @@ export function InventoryView() {
                       {t.status === 'REQUESTED' && isMainStorekeeper && (
                         <button
                           onClick={() => handleDispatch(t.id)}
-                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-extrabold rounded-xl text-xs transition shadow-xs cursor-pointer"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-xs cursor-pointer"
                         >
                           Approve & Dispatch
                         </button>
@@ -1348,7 +1348,7 @@ export function InventoryView() {
                         }
                         setRecipeModalOpen(true);
                       }}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
                     >
                       <Plus className="w-4 h-4 stroke-[3]" />
                       <span>+ Add / Build Recipe</span>
@@ -1375,7 +1375,7 @@ export function InventoryView() {
                       placeholder="Search dishes to configure..."
                       value={recipeDishSearch}
                       onChange={(e) => setRecipeDishSearch(e.target.value)}
-                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                     />
                   </div>
 
@@ -1385,8 +1385,8 @@ export function InventoryView() {
                       onClick={() => setRecipeDishFilter('ALL')}
                       className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
                         recipeDishFilter === 'ALL'
-                          ? 'bg-amber-500 text-stone-950 font-black'
-                          : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                          ? 'bg-emerald-600 text-white font-black'
+                          : 'bg-stone-100 text-stone-600 hover:text-stone-950'
                       }`}
                     >
                       All ({menuItems.length})
@@ -1395,8 +1395,8 @@ export function InventoryView() {
                       onClick={() => setRecipeDishFilter('MISSING')}
                       className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
                         recipeDishFilter === 'MISSING'
-                          ? 'bg-amber-500 text-stone-950 font-black'
-                          : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                          ? 'bg-emerald-600 text-white font-black'
+                          : 'bg-stone-100 text-stone-600 hover:text-stone-950'
                       }`}
                     >
                       Needs Recipe ({itemsWithoutRecipe.length})
@@ -1405,8 +1405,8 @@ export function InventoryView() {
                       onClick={() => setRecipeDishFilter('CONFIGURED')}
                       className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition whitespace-nowrap cursor-pointer ${
                         recipeDishFilter === 'CONFIGURED'
-                          ? 'bg-amber-500 text-stone-950 font-black'
-                          : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                          ? 'bg-emerald-600 text-white font-black'
+                          : 'bg-stone-100 text-stone-600 hover:text-stone-950'
                       }`}
                     >
                       Configured ({itemsWithRecipe.length})
@@ -1430,7 +1430,7 @@ export function InventoryView() {
                             onClick={() => setSelectedRecipeItem(item)}
                             className={`w-full p-2.5 rounded-2xl text-left flex items-center justify-between transition cursor-pointer ${
                               isSelected
-                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black shadow-xs'
+                                ? 'bg-emerald-600 text-white font-black shadow-xs'
                                 : 'bg-stone-50 dark:bg-white/[0.02] hover:bg-stone-100 dark:hover:bg-white/[0.05] text-stone-900 dark:text-white border border-stone-200 dark:border-white/5'
                             }`}
                           >
@@ -1493,7 +1493,7 @@ export function InventoryView() {
                           {isOwnerOrManager && (
                             <button
                               onClick={() => setRecipeModalOpen(true)}
-                              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
                             >
                               <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
                               <span>{selectedRecipeItem.recipe?.ingredients?.length > 0 ? 'Edit Recipe Grams' : '+ Add Recipe Now'}</span>
@@ -1605,7 +1605,7 @@ export function InventoryView() {
                             {isOwnerOrManager && (
                               <button
                                 onClick={() => setRecipeModalOpen(true)}
-                                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-2xl text-xs transition shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-xs cursor-pointer inline-flex items-center gap-1.5"
                               >
                                 <Plus className="w-4 h-4 stroke-[3]" />
                                 <span>+ Add Recipe for {selectedRecipeItem.name}</span>
@@ -1646,7 +1646,7 @@ export function InventoryView() {
                 </button>
                 <button
                   onClick={() => setPurchaseModalOpen(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-2xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <Truck className="w-4 h-4" />
                   <span>Record Supplier Bulk Delivery</span>
@@ -1699,7 +1699,7 @@ export function InventoryView() {
                   value={wasteIngredientId}
                   onChange={(e) => setWasteIngredientId(e.target.value)}
                   required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 >
                   <option value="" className="bg-white dark:bg-[#1C1815] text-stone-500 dark:text-zinc-400">Select ingredient...</option>
                   {kitchenStoreLoc?.balances?.map((b: any) => (
@@ -1721,7 +1721,7 @@ export function InventoryView() {
                   value={wasteQuantity}
                   onChange={(e) => setWasteQuantity(e.target.value)}
                   required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
@@ -1732,7 +1732,7 @@ export function InventoryView() {
                 <select
                   value={wasteReason}
                   onChange={(e) => setWasteReason(e.target.value)}
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 >
                   <option value="Overcooked / Burnt dish" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Overcooked / Burnt dish</option>
                   <option value="Accidental Spillage" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Accidental Spillage</option>
@@ -1754,7 +1754,7 @@ export function InventoryView() {
                     value={customWasteReason}
                     onChange={(e) => setCustomWasteReason(e.target.value)}
                     required
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                   />
                 </div>
               )}
@@ -1817,8 +1817,8 @@ export function InventoryView() {
                       onClick={() => setLedgerTypeFilter(f.id)}
                       className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition cursor-pointer text-xs ${
                         ledgerTypeFilter === f.id
-                          ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                          : 'bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 text-stone-700 dark:text-zinc-400 hover:text-stone-950 dark:hover:text-white'
+                          ? 'bg-emerald-600 text-white font-black shadow-xs'
+                          : 'bg-stone-100 border border-stone-200 text-stone-700 hover:text-stone-950'
                       }`}
                     >
                       {f.label}
@@ -1827,13 +1827,13 @@ export function InventoryView() {
                 </div>
 
                 <div className="relative min-w-[200px]">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-500" />
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                   <input
                     type="text"
                     placeholder="Search ingredient, #order..."
                     value={ledgerSearch}
                     onChange={(e) => setLedgerSearch(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-white/[0.04] border border-stone-300 dark:border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 border border-stone-300 rounded-xl pl-8 pr-3 py-1.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                   />
                 </div>
               </div>
@@ -1948,7 +1948,7 @@ export function InventoryView() {
                   onChange={(e) => setAdjustQuantity(e.target.value)}
                   required
                   autoFocus
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
@@ -1961,7 +1961,7 @@ export function InventoryView() {
                   placeholder="e.g. Physical inventory count correction"
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
@@ -1996,14 +1996,11 @@ export function InventoryView() {
           <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-2xl shadow-2xl text-stone-900 dark:text-white space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <Send className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Deliver Batch of Stock to Kitchen</h3>
-                  <div className="text-xs text-stone-500 dark:text-zinc-400">
-                    Select stock items, type delivery quantities, and send the full batch to the Kitchen in one click
-                  </div>
+                  <h3 className="text-base font-bold text-stone-900 font-heading">Deliver Batch to Kitchen</h3>
                 </div>
               </div>
               <button
@@ -2022,7 +2019,7 @@ export function InventoryView() {
                 placeholder="Search main store stock (e.g. Flour, Milk, Beef, Sugar)..."
                 value={sendSearch}
                 onChange={(e) => setSendSearch(e.target.value)}
-                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
               />
             </div>
 
@@ -2076,7 +2073,7 @@ export function InventoryView() {
                               }))
                             }
                             className={`w-32 bg-white dark:bg-black/40 border rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 dark:text-white text-right focus:outline-none transition ${
-                              hasQty ? 'border-amber-500 text-amber-800 dark:text-amber-300' : 'border-stone-300 dark:border-white/10 focus:border-amber-500'
+                              hasQty ? 'border-amber-500 text-amber-800 dark:text-amber-300' : 'border-stone-300 dark:border-white/10 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600'
                             }`}
                           />
                           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-stone-400 dark:text-zinc-500 pointer-events-none">
@@ -2133,7 +2130,7 @@ export function InventoryView() {
                 placeholder="Delivery Notes / Instructions (e.g. Morning kitchen prep batch)..."
                 value={sendNotes}
                 onChange={(e) => setSendNotes(e.target.value)}
-                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
               />
 
               <div className="flex items-center justify-end gap-2 pt-1">
@@ -2150,7 +2147,7 @@ export function InventoryView() {
                     sendSubmitting ||
                     Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length === 0
                   }
-                  className="px-5 py-2.5 bg-gradient-to-r from-amber-500 via-orange-500 to-[#C11221] hover:brightness-110 text-stone-950 font-black rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                 >
                   <Send className="w-3.5 h-3.5 stroke-[3]" />
                   <span>
@@ -2173,14 +2170,11 @@ export function InventoryView() {
           <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-2xl shadow-2xl text-stone-900 dark:text-white space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <Sliders className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Configure Low-Stock Alert Cutoffs</h3>
-                  <div className="text-xs text-stone-500 dark:text-zinc-400">
-                    Owner Settings: Set custom minimum thresholds to alert Head Chef and Main Storekeeper when stock drops
-                  </div>
+                  <h3 className="text-base font-bold text-stone-900 font-heading">Low-Stock Alert Cutoffs</h3>
                 </div>
               </div>
               <button
@@ -2198,7 +2192,7 @@ export function InventoryView() {
                 placeholder="Search ingredients to set alert cutoffs..."
                 value={thresholdSearch}
                 onChange={(e) => setThresholdSearch(e.target.value)}
-                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
               />
             </div>
 
@@ -2248,7 +2242,7 @@ export function InventoryView() {
                                   [ing.id]: { ...state, kitchen: e.target.value },
                                 }))
                               }
-                              className="w-20 bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-800 dark:text-amber-400 focus:outline-none focus:border-amber-500"
+                              className="w-20 bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-800 dark:text-amber-400 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                             />
                             <span className="text-[10px] text-stone-500 dark:text-zinc-500">{unitSymbol}</span>
                           </div>
@@ -2267,7 +2261,7 @@ export function InventoryView() {
                                   [ing.id]: { ...state, main: e.target.value },
                                 }))
                               }
-                              className="w-20 bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-800 dark:text-amber-400 focus:outline-none focus:border-amber-500"
+                              className="w-20 bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-2 py-1 text-xs font-bold text-amber-800 dark:text-amber-400 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                             />
                             <span className="text-[10px] text-stone-500 dark:text-zinc-500">{unitSymbol}</span>
                           </div>
@@ -2277,7 +2271,7 @@ export function InventoryView() {
                           type="button"
                           disabled={isSaving}
                           onClick={() => handleSaveThreshold(ing.id)}
-                          className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-stone-950 font-black text-xs rounded-xl shadow-xs transition self-end sm:self-center cursor-pointer disabled:opacity-50"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition self-end sm:self-center cursor-pointer disabled:opacity-50"
                         >
                           {isSaving ? '...' : 'Save'}
                         </button>
@@ -2400,7 +2394,7 @@ export function InventoryView() {
                   value={supName}
                   onChange={(e) => setSupName(e.target.value)}
                   placeholder="e.g. Oromia Coffee Farmers Union, Horizon Foods..."
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
@@ -2414,7 +2408,7 @@ export function InventoryView() {
                     value={supContact}
                     onChange={(e) => setSupContact(e.target.value)}
                     placeholder="e.g. Abebe K."
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                   />
                 </div>
                 <div>
@@ -2426,7 +2420,7 @@ export function InventoryView() {
                     value={supPhone}
                     onChange={(e) => setSupPhone(e.target.value)}
                     placeholder="e.g. +251 91 123 4567"
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                   />
                 </div>
               </div>
@@ -2440,7 +2434,7 @@ export function InventoryView() {
                   value={supEmail}
                   onChange={(e) => setSupEmail(e.target.value)}
                   placeholder="e.g. orders@supplier.et"
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
@@ -2453,7 +2447,7 @@ export function InventoryView() {
                   value={supAddress}
                   onChange={(e) => setSupAddress(e.target.value)}
                   placeholder="e.g. Merkato Block 4, Addis Ababa"
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
@@ -2468,7 +2462,7 @@ export function InventoryView() {
                 <button
                   type="submit"
                   disabled={supSubmitting}
-                  className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black rounded-2xl text-xs shadow-xs transition cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-2xl text-xs shadow-xs transition cursor-pointer disabled:opacity-50"
                 >
                   {supSubmitting ? 'Saving...' : 'Register Supplier'}
                 </button>
