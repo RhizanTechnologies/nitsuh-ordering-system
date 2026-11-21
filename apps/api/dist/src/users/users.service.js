@@ -51,8 +51,13 @@ let UsersService = class UsersService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async getAllUsers() {
+    async getAllUsers(requesterRole) {
+        const where = {};
+        if (requesterRole === 'MANAGER') {
+            where.role = { not: client_1.UserRole.OWNER };
+        }
         return this.prisma.user.findMany({
+            where,
             select: {
                 id: true,
                 name: true,
@@ -75,7 +80,7 @@ let UsersService = class UsersService {
             orderBy: [{ role: 'asc' }, { name: 'asc' }],
         });
     }
-    async getUserById(id) {
+    async getUserById(id, requesterRole) {
         const user = await this.prisma.user.findUnique({
             where: { id },
             select: {
@@ -93,6 +98,9 @@ let UsersService = class UsersService {
         });
         if (!user) {
             throw new common_1.NotFoundException(`User with ID ${id} not found`);
+        }
+        if (requesterRole === 'MANAGER' && user.role === client_1.UserRole.OWNER) {
+            throw new common_1.ForbiddenException('Managers cannot view Owner account details');
         }
         return user;
     }
@@ -168,8 +176,11 @@ let UsersService = class UsersService {
         }
         return user;
     }
-    async updateUser(id, dto, updaterId) {
-        const existing = await this.getUserById(id);
+    async updateUser(id, dto, updaterId, updaterRole) {
+        const existing = await this.getUserById(id, updaterRole);
+        if (updaterRole === 'MANAGER' && existing.role === client_1.UserRole.OWNER) {
+            throw new common_1.ForbiddenException('Managers cannot modify Owner accounts');
+        }
         const updateData = {};
         if (dto.name !== undefined) {
             const trimmed = dto.name.trim();
@@ -218,7 +229,11 @@ let UsersService = class UsersService {
         });
         return updated;
     }
-    async resetPin(id, newPin, modifierId) {
+    async resetPin(id, newPin, modifierId, modifierRole) {
+        const existing = await this.getUserById(id, modifierRole);
+        if (modifierRole === 'MANAGER' && existing.role === client_1.UserRole.OWNER) {
+            throw new common_1.ForbiddenException('Managers cannot reset Owner PIN');
+        }
         const trimmedPin = newPin?.trim();
         if (!trimmedPin || !/^\d{4,6}$/.test(trimmedPin)) {
             throw new common_1.BadRequestException('PIN code must be between 4 and 6 digits');
@@ -269,11 +284,14 @@ let UsersService = class UsersService {
         });
         return { message: `Password successfully updated for ${updated.name}` };
     }
-    async toggleStatus(id, requesterId) {
+    async toggleStatus(id, requesterId, requesterRole) {
         if (id === requesterId) {
             throw new common_1.BadRequestException('You cannot deactivate your own account while logged in');
         }
-        const user = await this.getUserById(id);
+        const user = await this.getUserById(id, requesterRole);
+        if (requesterRole === 'MANAGER' && user.role === client_1.UserRole.OWNER) {
+            throw new common_1.ForbiddenException('Managers cannot toggle Owner status');
+        }
         const newStatus = !user.isActive;
         const updated = await this.prisma.user.update({
             where: { id },
@@ -288,11 +306,11 @@ let UsersService = class UsersService {
         });
         return updated;
     }
-    async deleteUser(id, requesterId) {
+    async deleteUser(id, requesterId, requesterRole) {
         if (id === requesterId) {
             throw new common_1.BadRequestException('You cannot delete or archive your own account');
         }
-        const user = await this.getUserById(id);
+        const user = await this.getUserById(id, requesterRole);
         if (user.role === client_1.UserRole.OWNER) {
             throw new common_1.BadRequestException('Owner account cannot be deleted or archived');
         }
@@ -439,11 +457,15 @@ let UsersService = class UsersService {
             message: `Reset request logged for ${user.name}. Your Shift Manager or Owner can generate your new credentials in Staff Management.`,
         };
     }
-    async getResetRequests() {
+    async getResetRequests(requesterRole) {
+        const where = {
+            action: 'CREDENTIAL_RESET_REQUEST',
+        };
+        if (requesterRole === 'MANAGER') {
+            where.user = { role: { not: client_1.UserRole.OWNER } };
+        }
         const logs = await this.prisma.auditLog.findMany({
-            where: {
-                action: 'CREDENTIAL_RESET_REQUEST',
-            },
+            where,
             orderBy: { createdAt: 'desc' },
             take: 40,
             include: {
@@ -504,6 +526,9 @@ let UsersService = class UsersService {
         const targetUser = log.user;
         if (!targetUser) {
             throw new common_1.NotFoundException('Associated staff member not found');
+        }
+        if (resolver.role === 'MANAGER' && targetUser.role === client_1.UserRole.OWNER) {
+            throw new common_1.ForbiddenException('Managers cannot resolve Owner credentials');
         }
         if (action === 'GENERATE_PIN') {
             let genPin = '';
@@ -573,6 +598,9 @@ let UsersService = class UsersService {
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         if (!user)
             throw new common_1.NotFoundException('Staff member not found');
+        if (resolver.role === 'MANAGER' && user.role === client_1.UserRole.OWNER) {
+            throw new common_1.ForbiddenException('Managers cannot generate PINs for Owner accounts');
+        }
         let genPin = '';
         let isUnique = false;
         let attempts = 0;

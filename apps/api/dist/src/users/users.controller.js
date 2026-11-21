@@ -24,7 +24,7 @@ let UsersController = class UsersController {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
             throw new common_1.ForbiddenException('Only Owner and General Manager can access User Management');
         }
-        return this.usersService.getAllUsers();
+        return this.usersService.getAllUsers(req.user.role);
     }
     async createUser(req, dto) {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
@@ -36,19 +36,19 @@ let UsersController = class UsersController {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER' && req.user.id !== id) {
             throw new common_1.ForbiddenException('Unauthorized to view this user');
         }
-        return this.usersService.getUserById(id);
+        return this.usersService.getUserById(id, req.user.role);
     }
     async updateUser(req, id, dto) {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
             throw new common_1.ForbiddenException('Only Owner and General Manager can modify staff profiles');
         }
-        return this.usersService.updateUser(id, dto, req.user.id);
+        return this.usersService.updateUser(id, dto, req.user.id, req.user.role);
     }
     async resetPin(req, id, body) {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
             throw new common_1.ForbiddenException('Only Owner and General Manager can reset staff PIN codes');
         }
-        return this.usersService.resetPin(id, body.pinCode, req.user.id);
+        return this.usersService.resetPin(id, body.pinCode, req.user.id, req.user.role);
     }
     async resetPassword(req, id, body) {
         if (req.user.role !== 'OWNER') {
@@ -60,13 +60,13 @@ let UsersController = class UsersController {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
             throw new common_1.ForbiddenException('Only Owner and General Manager can toggle staff status');
         }
-        return this.usersService.toggleStatus(id, req.user.id);
+        return this.usersService.toggleStatus(id, req.user.id, req.user.role);
     }
     async deleteUser(req, id) {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
             throw new common_1.ForbiddenException('Only Owner and General Manager can delete or archive staff');
         }
-        return this.usersService.deleteUser(id, req.user.id);
+        return this.usersService.deleteUser(id, req.user.id, req.user.role);
     }
     async terminalResetPin(body) {
         return this.usersService.managerOverrideResetPin(body.managerCredential, body.targetUserId, body.newPin);
@@ -78,7 +78,7 @@ let UsersController = class UsersController {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
             throw new common_1.ForbiddenException('Only Owner and General Manager can view reset requests');
         }
-        return this.usersService.getResetRequests();
+        return this.usersService.getResetRequests(req.user.role);
     }
     async resolveResetRequest(req, id, body) {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
@@ -87,6 +87,7 @@ let UsersController = class UsersController {
         return this.usersService.resolveResetRequest(id, body.action, {
             id: req.user.id,
             name: req.user.name,
+            role: req.user.role,
         });
     }
     async generatePinForUser(req, id) {
@@ -96,6 +97,7 @@ let UsersController = class UsersController {
         return this.usersService.generateRandomPinForUser(id, {
             id: req.user.id,
             name: req.user.name,
+            role: req.user.role,
         });
     }
     async selfChangeCredentials(req, body) {

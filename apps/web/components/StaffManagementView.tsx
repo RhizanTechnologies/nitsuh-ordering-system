@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { fetchApi } from '@/lib/api';
 import {
@@ -70,6 +70,7 @@ interface ResetRequest {
 
 export function StaffManagementView() {
   const { currentUser } = useAppStore();
+  const isOwner = currentUser?.role === 'OWNER';
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -189,6 +190,10 @@ export function StaffManagementView() {
   };
 
   const handleInstantGeneratePin = async (staff: StaffMember) => {
+    if (!isOwner && staff.role === 'OWNER') {
+      alert('Managers cannot alter Owner credentials.');
+      return;
+    }
     try {
       const res = await fetchApi(`/users/${staff.id}/generate-pin`, {
         method: 'POST',
@@ -264,6 +269,10 @@ export function StaffManagementView() {
   };
 
   const handleOpenResetPin = (staff: StaffMember) => {
+    if (!isOwner && staff.role === 'OWNER') {
+      alert('Managers cannot alter Owner credentials.');
+      return;
+    }
     setSelectedStaff(staff);
     setNewPin(generateRandomPin());
     setModalError(null);
@@ -298,6 +307,10 @@ export function StaffManagementView() {
   };
 
   const handleOpenEdit = (staff: StaffMember) => {
+    if (!isOwner && staff.role === 'OWNER') {
+      alert('Managers cannot edit Owner profiles.');
+      return;
+    }
     setSelectedStaff(staff);
     setEditName(staff.name);
     setEditRole(staff.role);
@@ -336,6 +349,10 @@ export function StaffManagementView() {
   };
 
   const handleToggleStatus = async (staff: StaffMember) => {
+    if (!isOwner && staff.role === 'OWNER') {
+      alert('Managers cannot alter Owner status.');
+      return;
+    }
     if (staff.id === currentUser?.id) {
       alert('You cannot deactivate your own active session!');
       return;
@@ -370,6 +387,10 @@ export function StaffManagementView() {
   };
 
   const handleOpenPasswordModal = (staff: StaffMember) => {
+    if (!isOwner && staff.role === 'OWNER') {
+      alert('Managers cannot reset Owner password.');
+      return;
+    }
     setSelectedStaff(staff);
     setNewPassword('');
     setModalError(null);
@@ -432,25 +453,36 @@ export function StaffManagementView() {
     }
   };
 
-  // Filtered staff
-  const filteredStaff = staffList.filter((s) => {
-    if (activeOnly && !s.isActive) return false;
-    if (roleFilter !== 'ALL' && s.role !== roleFilter) return false;
-    if (searchTerm) {
-      const q = searchTerm.toLowerCase();
-      const matchName = s.name.toLowerCase().includes(q);
-      const matchCode = s.employeeCode?.toLowerCase().includes(q);
-      const matchRole = s.role.toLowerCase().includes(q);
-      return matchName || matchCode || matchRole;
-    }
-    return true;
-  });
+  // Visible staff (Managers must NEVER see Owner information or accounts)
+  const visibleStaffList = useMemo(() => {
+    return staffList.filter((s) => isOwner || s.role !== 'OWNER');
+  }, [staffList, isOwner]);
 
-  const totalStaff = staffList.length;
-  const activeStaff = staffList.filter((s) => s.isActive).length;
-  const frontOfHouse = staffList.filter((s) => s.role === 'CASHIER' || s.role === 'WAITER').length;
-  const kitchenStaff = staffList.filter((s) => s.role === 'KITCHEN_STAFF' || s.role === 'HEAD_CHEF').length;
-  const storeStaff = staffList.filter((s) => s.role === 'MAIN_STOREKEEPER' || s.role === 'KITCHEN_STOREKEEPER').length;
+  // Filtered staff
+  const filteredStaff = useMemo(() => {
+    return visibleStaffList.filter((s) => {
+      if (activeOnly && !s.isActive) return false;
+      if (roleFilter !== 'ALL' && s.role !== roleFilter) return false;
+      if (searchTerm) {
+        const q = searchTerm.toLowerCase();
+        const matchName = s.name.toLowerCase().includes(q);
+        const matchCode = s.employeeCode?.toLowerCase().includes(q);
+        const matchRole = s.role.toLowerCase().includes(q);
+        return matchName || matchCode || matchRole;
+      }
+      return true;
+    });
+  }, [visibleStaffList, activeOnly, roleFilter, searchTerm]);
+
+  const totalStaff = visibleStaffList.length;
+  const activeStaff = visibleStaffList.filter((s) => s.isActive).length;
+  const frontOfHouse = visibleStaffList.filter((s) => s.role === 'CASHIER' || s.role === 'WAITER').length;
+  const kitchenStaff = visibleStaffList.filter((s) => s.role === 'KITCHEN_STAFF' || s.role === 'HEAD_CHEF').length;
+  const storeStaff = visibleStaffList.filter((s) => s.role === 'MAIN_STOREKEEPER' || s.role === 'KITCHEN_STOREKEEPER').length;
+
+  const visibleResetRequests = useMemo(() => {
+    return resetRequests.filter((r) => isOwner || r.role !== 'OWNER');
+  }, [resetRequests, isOwner]);
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 no-scrollbar">
@@ -464,38 +496,43 @@ export function StaffManagementView() {
       )}
 
       {/* Main Header Card */}
-      <div className="bg-white dark:bg-[#161311] border border-stone-200/90 dark:border-white/10 rounded-3xl p-5 sm:p-7 shadow-sm transition-colors">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white tracking-tight flex items-center gap-2">
+      <div className="bg-white dark:bg-[#161311] border border-stone-200/90 dark:border-white/10 rounded-3xl p-4 sm:p-6 lg:p-7 shadow-sm transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 sm:mt-0 shadow-xs">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white tracking-tight leading-tight">
                   Staff & User Management
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                    {currentUser?.role === 'OWNER' ? 'Owner Terminal' : 'Manager Console'}
-                  </span>
                 </h1>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap shrink-0 shadow-2xs">
+                  {isOwner ? 'Owner Terminal' : 'Manager Console'}
+                </span>
               </div>
+              <p className="text-xs text-stone-500 dark:text-zinc-400 font-medium mt-0.5">
+                Manage team profiles, station roles, and instant terminal PIN codes
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
             <Button
               variant="primary"
               size="default"
               onClick={handleOpenRegister}
+              className="flex-1 sm:flex-initial justify-center shadow-xs"
             >
               <UserPlus className="w-4 h-4" />
-              <span>+ Register New Staff</span>
+              <span className="whitespace-nowrap">+ Register New Staff</span>
             </Button>
             <Button
               variant="secondary"
               size="icon"
               onClick={loadStaff}
               title="Refresh Staff List"
+              className="shrink-0"
             >
               <RotateCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
@@ -503,27 +540,27 @@ export function StaffManagementView() {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-5 border-t border-stone-200/80 dark:border-white/10">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3 mt-5 pt-5 border-t border-stone-200/80 dark:border-white/10">
           <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Total Registered</div>
+            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Total Registered</div>
             <div className="text-xl font-black text-stone-900 dark:text-white mt-0.5">{totalStaff}</div>
             <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">{activeStaff} Active on Duty</div>
           </div>
 
           <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Front of House</div>
+            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Front of House</div>
             <div className="text-xl font-black text-stone-900 dark:text-white mt-0.5">{frontOfHouse}</div>
             <div className="text-[10px] text-stone-500 dark:text-zinc-400">Cashiers & Waiters</div>
           </div>
 
           <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Kitchen & Chefs</div>
+            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Kitchen & Chefs</div>
             <div className="text-xl font-black text-stone-900 dark:text-white mt-0.5">{kitchenStaff}</div>
             <div className="text-[10px] text-stone-500 dark:text-zinc-400">Cooks & Head Chefs</div>
           </div>
 
           <div className="bg-stone-50 dark:bg-white/[0.03] p-3 rounded-2xl border border-stone-200/80 dark:border-white/10">
-            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase">Storekeepers</div>
+            <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Storekeepers</div>
             <div className="text-xl font-black text-stone-900 dark:text-white mt-0.5">{storeStaff}</div>
             <div className="text-[10px] text-stone-500 dark:text-zinc-400">Dual Store Inventory</div>
           </div>
@@ -582,7 +619,7 @@ export function StaffManagementView() {
       )}
 
       {/* Pending Reset Requests Section */}
-      {resetRequests.filter((r) => r.status === 'PENDING').length > 0 && (
+      {visibleResetRequests.filter((r) => r.status === 'PENDING').length > 0 && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 animate-in fade-in duration-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -593,7 +630,7 @@ export function StaffManagementView() {
                 <h2 className="text-sm sm:text-base font-black text-stone-900 dark:text-white flex items-center gap-2">
                   PIN & Password Reset Requests
                   <Badge variant="warning">
-                    {resetRequests.filter((r) => r.status === 'PENDING').length} Pending
+                    {visibleResetRequests.filter((r) => r.status === 'PENDING').length} Pending
                   </Badge>
                 </h2>
                 <p className="text-[11px] text-stone-600 dark:text-zinc-400">
@@ -612,7 +649,7 @@ export function StaffManagementView() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
-            {resetRequests
+            {visibleResetRequests
               .filter((r) => r.status === 'PENDING')
               .map((req) => {
                 const isManagementRole = req.role === 'OWNER' || req.role === 'MANAGER';
@@ -694,6 +731,7 @@ export function StaffManagementView() {
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {[
             { id: 'ALL', label: 'All Roles' },
+            ...(isOwner ? [{ id: 'OWNER', label: 'Owner' }] : []),
             { id: 'CASHIER', label: 'Cashiers' },
             { id: 'WAITER', label: 'Waiters' },
             { id: 'KITCHEN_STAFF', label: 'Kitchen' },
@@ -705,6 +743,7 @@ export function StaffManagementView() {
               variant={roleFilter === tab.id ? 'primary' : 'secondary'}
               size="sm"
               onClick={() => setRoleFilter(tab.id)}
+              className="shrink-0 whitespace-nowrap"
             >
               {tab.label}
             </Button>

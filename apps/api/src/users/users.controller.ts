@@ -24,7 +24,7 @@ export class UsersController {
     if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
       throw new ForbiddenException('Only Owner and General Manager can access User Management');
     }
-    return this.usersService.getAllUsers();
+    return this.usersService.getAllUsers(req.user.role);
   }
 
   // Register new staff member (No email/phone required)
@@ -44,7 +44,7 @@ export class UsersController {
     if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER' && req.user.id !== id) {
       throw new ForbiddenException('Unauthorized to view this user');
     }
-    return this.usersService.getUserById(id);
+    return this.usersService.getUserById(id, req.user.role);
   }
 
   // Update staff profile
@@ -58,7 +58,7 @@ export class UsersController {
     if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
       throw new ForbiddenException('Only Owner and General Manager can modify staff profiles');
     }
-    return this.usersService.updateUser(id, dto, req.user.id);
+    return this.usersService.updateUser(id, dto, req.user.id, req.user.role);
   }
 
   // Reset 4-digit PIN for staff member
@@ -72,7 +72,7 @@ export class UsersController {
     if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
       throw new ForbiddenException('Only Owner and General Manager can reset staff PIN codes');
     }
-    return this.usersService.resetPin(id, body.pinCode, req.user.id);
+    return this.usersService.resetPin(id, body.pinCode, req.user.id, req.user.role);
   }
 
   // Reset manager password
@@ -96,7 +96,7 @@ export class UsersController {
     if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
       throw new ForbiddenException('Only Owner and General Manager can toggle staff status');
     }
-    return this.usersService.toggleStatus(id, req.user.id);
+    return this.usersService.toggleStatus(id, req.user.id, req.user.role);
   }
 
   // Delete or archive staff member (BUG-007)
@@ -106,7 +106,7 @@ export class UsersController {
     if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
       throw new ForbiddenException('Only Owner and General Manager can delete or archive staff');
     }
-    return this.usersService.deleteUser(id, req.user.id);
+    return this.usersService.deleteUser(id, req.user.id, req.user.role);
   }
 
   // Terminal Forgotten PIN Reset (Called from Login Screen)
@@ -142,7 +142,7 @@ export class UsersController {
     if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER') {
       throw new ForbiddenException('Only Owner and General Manager can view reset requests');
     }
-    return this.usersService.getResetRequests();
+    return this.usersService.getResetRequests(req.user.role);
   }
 
   // Manager & Owner: Resolve reset request (generate new PIN / password or dismiss)
@@ -159,6 +159,7 @@ export class UsersController {
     return this.usersService.resolveResetRequest(id, body.action, {
       id: req.user.id,
       name: req.user.name,
+      role: req.user.role,
     });
   }
 
@@ -172,6 +173,7 @@ export class UsersController {
     return this.usersService.generateRandomPinForUser(id, {
       id: req.user.id,
       name: req.user.name,
+      role: req.user.role,
     });
   }
 

@@ -19,8 +19,15 @@ export interface UpdateUserDto {
 export declare class UsersService {
     private prisma;
     constructor(prisma: PrismaService);
-    getAllUsers(): Promise<{
+    getAllUsers(requesterRole?: string): Promise<{
         id: string;
+        name: string;
+        employeeCode: string;
+        email: string;
+        pinCode: string;
+        role: import("@prisma/client").$Enums.UserRole;
+        isActive: boolean;
+        avatarUrl: string;
         createdAt: Date;
         updatedAt: Date;
         _count: {
@@ -28,6 +35,9 @@ export declare class UsersService {
             ordersWaitered: number;
             shifts: number;
         };
+    }[]>;
+    getUserById(id: string, requesterRole?: string): Promise<{
+        id: string;
         name: string;
         employeeCode: string;
         email: string;
@@ -35,22 +45,22 @@ export declare class UsersService {
         role: import("@prisma/client").$Enums.UserRole;
         isActive: boolean;
         avatarUrl: string;
-    }[]>;
-    getUserById(id: string): Promise<{
-        id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
-        employeeCode: string;
-        email: string;
-        pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
-        isActive: boolean;
-        avatarUrl: string;
     }>;
     createUser(dto: CreateUserDto, creatorId?: string): Promise<{
         id: string;
+        name: string;
+        employeeCode: string;
+        email: string;
+        pinCode: string;
+        role: import("@prisma/client").$Enums.UserRole;
+        isActive: boolean;
+        avatarUrl: string;
         createdAt: Date;
+    }>;
+    updateUser(id: string, dto: UpdateUserDto, updaterId?: string, updaterRole?: string): Promise<{
+        id: string;
         name: string;
         employeeCode: string;
         email: string;
@@ -58,37 +68,27 @@ export declare class UsersService {
         role: import("@prisma/client").$Enums.UserRole;
         isActive: boolean;
         avatarUrl: string;
-    }>;
-    updateUser(id: string, dto: UpdateUserDto, updaterId?: string): Promise<{
-        id: string;
         updatedAt: Date;
-        name: string;
-        employeeCode: string;
-        email: string;
-        pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
-        isActive: boolean;
-        avatarUrl: string;
     }>;
-    resetPin(id: string, newPin: string, modifierId?: string): Promise<{
+    resetPin(id: string, newPin: string, modifierId?: string, modifierRole?: string): Promise<{
         id: string;
-        updatedAt: Date;
         name: string;
         employeeCode: string;
         pinCode: string;
         role: import("@prisma/client").$Enums.UserRole;
+        updatedAt: Date;
     }>;
     resetPassword(id: string, newPass: string, modifierId?: string): Promise<{
         message: string;
     }>;
-    toggleStatus(id: string, requesterId: string): Promise<{
+    toggleStatus(id: string, requesterId: string, requesterRole?: string): Promise<{
         id: string;
         name: string;
         employeeCode: string;
         role: import("@prisma/client").$Enums.UserRole;
         isActive: boolean;
     }>;
-    deleteUser(id: string, requesterId: string): Promise<{
+    deleteUser(id: string, requesterId: string, requesterRole?: string): Promise<{
         message: string;
     }>;
     managerOverrideResetPin(managerCred: string, targetUserId: string, newPin: string): Promise<{
@@ -116,7 +116,7 @@ export declare class UsersService {
         message: string;
         alreadyPending?: undefined;
     }>;
-    getResetRequests(): Promise<{
+    getResetRequests(requesterRole?: string): Promise<{
         id: string;
         userId: string;
         user: {
@@ -142,6 +142,7 @@ export declare class UsersService {
     resolveResetRequest(requestId: string, action: 'GENERATE_PIN' | 'GENERATE_PASSWORD' | 'DISMISS', resolver: {
         id: string;
         name: string;
+        role?: string;
     }): Promise<{
         success: boolean;
         message: string;
@@ -156,6 +157,7 @@ export declare class UsersService {
     generateRandomPinForUser(userId: string, resolver: {
         id: string;
         name: string;
+        role?: string;
     }): Promise<{
         success: boolean;
         pinCode: string;
