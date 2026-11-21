@@ -156,15 +156,19 @@ export default function TablesPage() {
     setFormLoading(true);
     setError(null);
     try {
+      const payload: any = {
+        tableNumber: tableNumber.trim(),
+        capacity: parseInt(capacity, 10) || 4,
+      };
+      const currentTable = tablesList.find((t) => t.id === editingTableId);
+      if (currentTable?.status !== 'OCCUPIED') {
+        payload.status = status;
+      }
       await fetchApi(`/menu/tables/${editingTableId}`, {
         method: 'PATCH',
-        body: JSON.stringify({
-          tableNumber: tableNumber.trim(),
-          capacity: parseInt(capacity, 10) || 4,
-          status,
-        }),
+        body: JSON.stringify(payload),
       });
-      setSuccessMsg(`Table updated successfully!`);
+      setSuccessMsg(`Table "${tableNumber}" updated successfully!`);
       setEditingTableId(null);
       loadTables();
     } catch (err: any) {
@@ -253,15 +257,15 @@ export default function TablesPage() {
           </div>
         )}
 
-        {/* Add / Edit Form Card */}
-        {(showAddForm || editingTableId) && (
-          <div className="p-5 bg-white rounded-3xl border border-stone-200/90 shadow-xs">
+        {/* Add Form Card (Only for creating new table) */}
+        {showAddForm && (
+          <div className="p-5 bg-white rounded-3xl border border-stone-200/90 shadow-xs animate-in fade-in slide-in-from-top-2">
             <h3 className="text-sm font-black text-stone-900 mb-3 flex items-center gap-2">
-              {showAddForm ? <Plus className="w-4 h-4 text-emerald-600" /> : <Edit3 className="w-4 h-4 text-emerald-600" />}
-              <span>{showAddForm ? 'Add New Dining Table' : 'Edit Table Details'}</span>
+              <Plus className="w-4 h-4 text-emerald-600" />
+              <span>Add New Dining Table</span>
             </h3>
 
-            <form onSubmit={showAddForm ? handleSaveAdd : handleSaveEdit} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <form onSubmit={handleSaveAdd} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Table Name / Number *
@@ -271,8 +275,9 @@ export default function TablesPage() {
                   value={tableNumber}
                   onChange={(e) => setTableNumber(e.target.value)}
                   placeholder="e.g. T07 - Balcony"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 bg-stone-50 text-stone-900 placeholder-stone-400"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 bg-stone-50 text-stone-900 placeholder-stone-400 font-bold"
                   required
+                  autoFocus
                 />
               </div>
 
@@ -311,17 +316,14 @@ export default function TablesPage() {
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="flex-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>{formLoading ? 'Saving...' : showAddForm ? 'Create Table' : 'Save Changes'}</span>
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>{formLoading ? 'Creating...' : 'Create Table'}</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setEditingTableId(null);
-                  }}
+                  onClick={() => setShowAddForm(false)}
                   className="py-2 px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   Cancel
@@ -354,6 +356,110 @@ export default function TablesPage() {
         {/* Floor Plan Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredTables.map((t) => {
+            const isEditing = editingTableId === t.id;
+
+            if (isEditing) {
+              return (
+                <div
+                  key={t.id}
+                  className="p-4 rounded-3xl border-2 border-emerald-500 bg-white transition-all shadow-md relative flex flex-col justify-between animate-in fade-in"
+                >
+                  <form onSubmit={handleSaveEdit} className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                      <div className="flex items-center gap-1.5 text-xs font-black text-emerald-800">
+                        <Edit3 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Edit Table Details</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditingTableId(null)}
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition text-xs font-bold cursor-pointer"
+                        title="Cancel"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-stone-600 uppercase mb-1">
+                        Table Name / Number *
+                      </label>
+                      <input
+                        type="text"
+                        value={tableNumber}
+                        onChange={(e) => setTableNumber(e.target.value)}
+                        placeholder="e.g. T06 - VIP Lounge"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 bg-stone-50 text-stone-900 placeholder-stone-400 font-bold"
+                        required
+                        autoFocus
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-stone-600 uppercase mb-1">
+                        Guest Capacity
+                      </label>
+                      <select
+                        value={capacity}
+                        onChange={(e) => setCapacity(e.target.value)}
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 bg-stone-50 text-stone-900 cursor-pointer font-medium"
+                      >
+                        <option value="2">2 Guests (Couples)</option>
+                        <option value="4">4 Guests (Standard)</option>
+                        <option value="6">6 Guests (Family)</option>
+                        <option value="8">8 Guests (Large Group)</option>
+                        <option value="12">12+ Guests (VIP Hall)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-stone-600 uppercase mb-1">
+                        Table Status
+                      </label>
+                      {t.status === 'OCCUPIED' ? (
+                        <div className="text-[11px] font-bold text-rose-700 bg-rose-50 px-3 py-2 rounded-xl border border-rose-200">
+                          Occupied (Settle bill to clear)
+                        </div>
+                      ) : (
+                        <select
+                          value={status}
+                          onChange={(e) => setStatus(e.target.value as any)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 bg-stone-50 text-stone-900 cursor-pointer font-medium"
+                        >
+                          <option value="AVAILABLE">Available</option>
+                          <option value="RESERVED">Reserved</option>
+                        </select>
+                      )}
+                    </div>
+
+                    {error && editingTableId === t.id && (
+                      <div className="p-2 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-[11px] font-medium">
+                        {error}
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
+                      <button
+                        type="submit"
+                        disabled={formLoading}
+                        className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>{formLoading ? 'Saving...' : 'Save Changes'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingTableId(null)}
+                        className="py-2 px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              );
+            }
+
             const isOccupied = t.status === 'OCCUPIED';
             const isReserved = t.status === 'RESERVED';
 
