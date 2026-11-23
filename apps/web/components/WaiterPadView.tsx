@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useAppStore } from '@/lib/store';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useAppStore, CartItem } from '@/lib/store';
 import { fetchApi, getSocket } from '@/lib/api';
 import { calculatePrepTime } from '@/lib/timer-utils';
 import { playReadyChime } from '@/lib/audio';
@@ -32,6 +32,7 @@ import {
   Drumstick,
   MapPin,
   Utensils,
+  Edit3,
 } from 'lucide-react';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { Button, Badge } from '@/components/ui';
@@ -49,6 +50,7 @@ export function WaiterPadView() {
     setWaiterCustomerName,
     waiterSpecialNotes,
     setWaiterSpecialNotes,
+    setWaiterCart,
     clearWaiterCart,
   } = useAppStore();
 
@@ -65,6 +67,24 @@ export function WaiterPadView() {
   const [sending, setSending] = useState(false);
   const [sentOrderNumber, setSentOrderNumber] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Editing existing draft or appending to active order
+  const [editingDraftOrder, setEditingDraftOrder] = useState<{
+    id: string;
+    orderNumber: string;
+    tableNumber: string;
+  } | null>(null);
+
+  const [appendingOrder, setAppendingOrder] = useState<{
+    id: string;
+    orderNumber: string;
+    tableNumber: string;
+  } | null>(null);
+
+  const editingDraftOrderRef = useRef(editingDraftOrder);
+  editingDraftOrderRef.current = editingDraftOrder;
+  const appendingOrderRef = useRef(appendingOrder);
+  appendingOrderRef.current = appendingOrder;
 
   const showError = (msg: string) => {
     setErrorMessage(msg);
@@ -86,10 +106,12 @@ export function WaiterPadView() {
     fetchApi('/menu/tables')
       .then((data) => {
         setTables(data);
-        const current = data.find((t: any) => t.tableNumber === waiterTable);
-        if (!current || current.status !== 'AVAILABLE') {
-          const firstAvail = data.find((t: any) => t.status === 'AVAILABLE');
-          if (firstAvail) setWaiterTable(firstAvail.tableNumber);
+        if (!editingDraftOrderRef.current && !appendingOrderRef.current) {
+          const current = data.find((t: any) => t.tableNumber === waiterTable);
+          if (!current || current.status !== 'AVAILABLE') {
+            const firstAvail = data.find((t: any) => t.status === 'AVAILABLE');
+            if (firstAvail) setWaiterTable(firstAvail.tableNumber);
+          }
         }
       })
       .catch(() => {});
@@ -121,10 +143,12 @@ export function WaiterPadView() {
 
     socket.on('tables:updated', (updated: any[]) => {
       setTables(updated);
-      const current = updated.find((t: any) => t.tableNumber === waiterTable);
-      if (!current || current.status === 'OCCUPIED') {
-        const firstAvail = updated.find((t: any) => t.status === 'AVAILABLE');
-        if (firstAvail) setWaiterTable(firstAvail.tableNumber);
+      if (!editingDraftOrderRef.current && !appendingOrderRef.current) {
+        const current = updated.find((t: any) => t.tableNumber === waiterTable);
+        if (!current || current.status === 'OCCUPIED') {
+          const firstAvail = updated.find((t: any) => t.status === 'AVAILABLE');
+          if (firstAvail) setWaiterTable(firstAvail.tableNumber);
+        }
       }
     });
 
@@ -320,6 +344,88 @@ export function WaiterPadView() {
     setSelectedDetailItem(null);
   };
 
+  const handleLoadDraftForEditing = (order: any, tableNumber?: string) => {
+    const tblNum = tableNumber || order.table?.tableNumber || waiterTable;
+    setWaiterTable(tblNum);
+    setOrderType('DINE_IN');
+    setEditingDraftOrder({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      tableNumber: tblNum,
+    });
+    setAppendingOrder(null);
+
+    const cartItems: CartItem[] = (order.items || []).map((it: any) => ({
+      menuItemId: it.menuItemId || it.id,
+      name: it.menuItem?.name || it.name || 'Item',
+      price: Number(it.unitPrice || it.price || it.menuItem?.price || 0),
+      imageUrl: it.menuItem?.imageUrl,
+      quantity: it.quantity,
+      tip: Number(it.tip || 0),
+      specialInstructions: it.specialInstructions,
+      selectedAddonIds: it.selectedAddonIds || [],
+      selectedAddons: it.selectedAddons || [],
+    }));
+    setWaiterCart(cartItems);
+    setWaiterSpecialNotes(order.notes || order.specialInstructions || '');
+    setActiveTab('menu');
+  };
+
+  const handleStartAppendToOrder = (order: any, tableNumber?: string) => {
+    const tblNum = tableNumber || order.table?.tableNumber || waiterTable;
+    setWaiterTable(tblNum);
+    setOrderType('DINE_IN');
+    setAppendingOrder({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      tableNumber: tblNum,
+    });
+    setEditingDraftOrder(null);
+    clearWaiterCart();
+    setActiveTab('menu');
+  };
+
+  const handleCancelEditOrAppend = () => {
+    setEditingDraftOrder(null);
+    setAppendingOrder(null);
+    clearWaiterCart();
+  };
+
+  const handleSelectTable = (tableNumber: string, tableObj?: any) => {
+    const tObj = tableObj || tables.find((t: any) => t.tableNumber === tableNumber);
+    setTableModalOpen(false);
+
+    if (tObj && tObj.status === 'OCCUPIED') {
+      let activeOrder = activeOrders.find(
+        (o: any) =>
+          (o.tableId === tObj.id || o.table?.tableNumber === tableNumber) &&
+          ['DRAFT_NOTE', 'CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'].includes(o.status) &&
+          o.paymentStatus !== 'PAID'
+      );
+      if (!activeOrder && tObj.orders && tObj.orders.length > 0) {
+        activeOrder = tObj.orders[0];
+      }
+
+      if (activeOrder) {
+        if (activeOrder.status === 'DRAFT_NOTE') {
+          // If not fired to kitchen yet: edit the order (add or remove items)
+          handleLoadDraftForEditing(activeOrder, tableNumber);
+          return;
+        } else {
+          // Already fired to kitchen: allow adding more items to the seated table
+          handleStartAppendToOrder(activeOrder, tableNumber);
+          return;
+        }
+      }
+    }
+
+    // Normal available table selection
+    setEditingDraftOrder(null);
+    setAppendingOrder(null);
+    setWaiterTable(tableNumber);
+    setOrderType('DINE_IN');
+  };
+
   const handleSendToCashier = async () => {
     if (waiterCart.length === 0) return;
 
@@ -331,40 +437,92 @@ export function WaiterPadView() {
       return;
     }
 
-    if (!isTakeaway && selectedTableObj.status !== 'AVAILABLE') {
-      showError(`Table "${waiterTable}" is currently seated. Please select an open table.`);
+    if (!isTakeaway && !editingDraftOrder && !appendingOrder && selectedTableObj.status !== 'AVAILABLE') {
+      showError(`Table "${waiterTable}" is currently seated. Please select an open table, or tap it to edit or append items.`);
       return;
     }
 
     setSending(true);
 
     try {
-      const res = await fetchApi('/orders/waiter-note', {
-        method: 'POST',
-        body: JSON.stringify({
-          waiterId: currentUser?.id || 'w01-waiter',
-          orderType,
-          tableId: selectedTableObj ? selectedTableObj.id : null,
-          customerName: isTakeaway
-            ? (takeawayCustomer.trim() || 'Takeaway Customer')
-            : (waiterCustomerName.trim() || 'Table Guest'),
-          notes: waiterSpecialNotes.trim() || undefined,
-          items: waiterCart.map((i) => ({
-            menuItemId: i.menuItemId,
-            quantity: i.quantity,
-            tip: i.tip || 0,
-            specialInstructions: i.specialInstructions || undefined,
-            selectedAddonIds: i.selectedAddonIds || [],
-            selectedAddons: i.selectedAddons || [],
-          })),
-        }),
-      });
+      if (editingDraftOrder) {
+        // Edit existing draft note: replace items and update notes
+        const res = await fetchApi(`/orders/${editingDraftOrder.id}/draft-note`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            notes: waiterSpecialNotes.trim() || undefined,
+            items: waiterCart.map((i) => ({
+              menuItemId: i.menuItemId,
+              quantity: i.quantity,
+              tip: i.tip || 0,
+              specialInstructions: i.specialInstructions || undefined,
+              selectedAddonIds: i.selectedAddonIds || [],
+              selectedAddons: i.selectedAddons || [],
+            })),
+          }),
+        });
 
-      setSentOrderNumber(res.orderNumber);
-      clearWaiterCart();
-      setShowMobileDrawer(false);
-      loadActiveOrders();
-      setTimeout(() => setSentOrderNumber(null), 6000);
+        setSentOrderNumber(res?.orderNumber || editingDraftOrder.orderNumber);
+        setEditingDraftOrder(null);
+        clearWaiterCart();
+        setShowMobileDrawer(false);
+        loadActiveOrders();
+        loadTables();
+        setTimeout(() => setSentOrderNumber(null), 6000);
+      } else if (appendingOrder) {
+        // Append extra items to active kitchen ticket
+        const res = await fetchApi(`/orders/${appendingOrder.id}/append-items`, {
+          method: 'POST',
+          body: JSON.stringify({
+            actorUserId: currentUser?.id,
+            items: waiterCart.map((i) => ({
+              menuItemId: i.menuItemId,
+              quantity: i.quantity,
+              tip: i.tip || 0,
+              specialInstructions: i.specialInstructions || undefined,
+              selectedAddonIds: i.selectedAddonIds || [],
+              selectedAddons: i.selectedAddons || [],
+            })),
+          }),
+        });
+
+        setSentOrderNumber(res?.orderNumber || appendingOrder.orderNumber);
+        setAppendingOrder(null);
+        clearWaiterCart();
+        setShowMobileDrawer(false);
+        loadActiveOrders();
+        loadTables();
+        setTimeout(() => setSentOrderNumber(null), 6000);
+      } else {
+        // New waiter order note
+        const res = await fetchApi('/orders/waiter-note', {
+          method: 'POST',
+          body: JSON.stringify({
+            waiterId: currentUser?.id || 'w01-waiter',
+            orderType,
+            tableId: selectedTableObj ? selectedTableObj.id : null,
+            customerName: isTakeaway
+              ? (takeawayCustomer.trim() || 'Takeaway Customer')
+              : (waiterCustomerName.trim() || 'Table Guest'),
+            notes: waiterSpecialNotes.trim() || undefined,
+            items: waiterCart.map((i) => ({
+              menuItemId: i.menuItemId,
+              quantity: i.quantity,
+              tip: i.tip || 0,
+              specialInstructions: i.specialInstructions || undefined,
+              selectedAddonIds: i.selectedAddonIds || [],
+              selectedAddons: i.selectedAddons || [],
+            })),
+          }),
+        });
+
+        setSentOrderNumber(res.orderNumber);
+        clearWaiterCart();
+        setShowMobileDrawer(false);
+        loadActiveOrders();
+        loadTables();
+        setTimeout(() => setSentOrderNumber(null), 6000);
+      }
     } catch (err: any) {
       showError(`Error sending order note: ${err.message}`);
     } finally {
@@ -448,7 +606,38 @@ export function WaiterPadView() {
 
 
 
-      {/* MAIN LAYOUT */}
+      {/* Active Edit/Append Banner */}
+      {editingDraftOrder && (
+        <div className="bg-amber-400 text-amber-950 px-4 py-2 flex items-center justify-between text-xs font-bold shadow-xs z-20 flex-shrink-0 border-b border-amber-500/30">
+          <div className="flex items-center gap-2">
+            <Edit3 className="w-4 h-4 text-amber-950" />
+            <span>Editing Draft Note #{editingDraftOrder.orderNumber} for Table {editingDraftOrder.tableNumber} — Add, remove, or adjust quantities</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleCancelEditOrAppend}
+            className="px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-950 rounded-lg text-xs font-black shadow-xs cursor-pointer"
+          >
+            Cancel Edit
+          </button>
+        </div>
+      )}
+
+      {appendingOrder && (
+        <div className="bg-emerald-600 text-white px-4 py-2 flex items-center justify-between text-xs font-bold shadow-xs z-20 flex-shrink-0 border-b border-emerald-700/30">
+          <div className="flex items-center gap-2">
+            <Plus className="w-4 h-4 text-white" />
+            <span>Adding Items to Table {appendingOrder.tableNumber} (Order #{appendingOrder.orderNumber}) — Active Kitchen Ticket</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleCancelEditOrAppend}
+            className="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-black shadow-xs cursor-pointer"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
       <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
         {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Seamlessly merged with unified background) */}
         {activeTab === 'menu' && (
@@ -809,21 +998,47 @@ export function WaiterPadView() {
                           )}
 
                           {/* Actions */}
-                          <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between">
+                          <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between gap-2 flex-wrap">
                             <span className="text-xs font-bold text-stone-900">
                               {Number(order.totalAmount || 0).toFixed(2)} ETB
                             </span>
 
-                            {isReady && (
-                              <Button
-                                variant="success"
-                                size="sm"
-                                onClick={() => handleMarkServed(order.id)}
-                              >
-                                <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                <span>Mark Served</span>
-                              </Button>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {isDraft && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleLoadDraftForEditing(order)}
+                                  className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 flex items-center gap-1.5 transition cursor-pointer"
+                                  title="Edit note items before cashier fires to kitchen"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                                  <span>Edit Note</span>
+                                </button>
+                              )}
+
+                              {!isDraft && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartAppendToOrder(order)}
+                                  className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 flex items-center gap-1.5 transition cursor-pointer"
+                                  title="Add more items to this active kitchen ticket"
+                                >
+                                  <Plus className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>+ Add Items</span>
+                                </button>
+                              )}
+
+                              {isReady && (
+                                <Button
+                                  variant="success"
+                                  size="sm"
+                                  onClick={() => handleMarkServed(order.id)}
+                                >
+                                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                  <span>Mark Served</span>
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -930,6 +1145,57 @@ export function WaiterPadView() {
               </button>
             )}
           </div>
+
+          {/* Mode Banner for Editing Draft or Appending to Table */}
+          {editingDraftOrder && (
+            <div className="p-3 bg-amber-50 border-b border-amber-200 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-amber-200 text-amber-900 flex items-center justify-center flex-shrink-0">
+                  <Edit3 className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-black text-amber-950 truncate">
+                    Editing Draft #{editingDraftOrder.orderNumber}
+                  </div>
+                  <div className="text-[10px] text-amber-800 font-semibold truncate">
+                    Table {editingDraftOrder.tableNumber} • Add/remove items
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCancelEditOrAppend}
+                className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 transition flex-shrink-0 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {appendingOrder && (
+            <div className="p-3 bg-emerald-50 border-b border-emerald-200 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-emerald-200 text-emerald-900 flex items-center justify-center flex-shrink-0">
+                  <Plus className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-black text-emerald-950 truncate">
+                    Adding to #{appendingOrder.orderNumber}
+                  </div>
+                  <div className="text-[10px] text-emerald-800 font-semibold truncate">
+                    Table {appendingOrder.tableNumber} • Select items to add
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCancelEditOrAppend}
+                className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-emerald-300 text-emerald-900 hover:bg-emerald-100 transition flex-shrink-0 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
 
           {/* Cart Item List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-2.5 no-scrollbar">
@@ -1060,7 +1326,11 @@ export function WaiterPadView() {
               <Send className="w-4 h-4" />
               <span>
                 {sending
-                  ? 'Sending Order Note...'
+                  ? 'Processing...'
+                  : editingDraftOrder
+                  ? `Update Order Note #${editingDraftOrder.orderNumber}`
+                  : appendingOrder
+                  ? `Send Additional Items (Table ${appendingOrder.tableNumber})`
                   : isCurrentTableOccupied
                   ? `Append to Table ${waiterTable || ''} (Active Bill)`
                   : 'Send Note to Cashier (Paperless)'}
@@ -1224,6 +1494,43 @@ export function WaiterPadView() {
               />
             </div>
 
+            {/* Mode Banner in Mobile Drawer */}
+            {editingDraftOrder && (
+              <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Edit3 className="w-4 h-4 text-amber-700 flex-shrink-0" />
+                  <div className="text-xs font-black text-amber-950 truncate">
+                    Editing Draft #{editingDraftOrder.orderNumber}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCancelEditOrAppend}
+                  className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            {appendingOrder && (
+              <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Plus className="w-4 h-4 text-emerald-700 flex-shrink-0" />
+                  <div className="text-xs font-black text-emerald-950 truncate">
+                    Adding to #{appendingOrder.orderNumber}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCancelEditOrAppend}
+                  className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-emerald-300 text-emerald-900 cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
             <div className="flex-1 overflow-y-auto py-2 space-y-2 max-h-64 no-scrollbar">
               {waiterCart.map((item) => (
                 <div
@@ -1285,7 +1592,11 @@ export function WaiterPadView() {
                 <Send className="w-4 h-4 text-white" />
                 <span>
                   {sending
-                    ? 'Sending...'
+                    ? 'Processing...'
+                    : editingDraftOrder
+                    ? `Update Order Note #${editingDraftOrder.orderNumber}`
+                    : appendingOrder
+                    ? `Send Additional Items (Table ${appendingOrder.tableNumber})`
                     : isCurrentTableOccupied
                     ? `Append Round to Table ${waiterTable} (Active Bill)`
                     : 'Confirm & Send to Cashier'}
@@ -1462,15 +1773,8 @@ export function WaiterPadView() {
         onClose={() => setTableModalOpen(false)}
         tables={tables}
         selectedTable={waiterTable}
-        onSelectTable={(tableNumber) => {
-          const tObj = tables.find((t: any) => t.tableNumber === tableNumber);
-          if (tObj && tObj.status !== 'AVAILABLE') {
-            showError(`Table "${tableNumber}" is seated. Please select an open table.`);
-            return;
-          }
-          setWaiterTable(tableNumber);
-          setOrderType('DINE_IN');
-          setTableModalOpen(false);
+        onSelectTable={(tableNumber, tableObj) => {
+          handleSelectTable(tableNumber, tableObj);
         }}
         onTablesUpdated={setTables}
       />

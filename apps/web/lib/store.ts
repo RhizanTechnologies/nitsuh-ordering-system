@@ -99,6 +99,7 @@ interface AppState {
   setWaiterTable: (table: string) => void;
   setWaiterCustomerName: (name: string) => void;
   setWaiterSpecialNotes: (notes: string) => void;
+  setWaiterCart: (cart: CartItem[]) => void;
   clearWaiterCart: () => void;
   setWaiterSlipsCount: (count: number) => void;
 }
@@ -292,6 +293,7 @@ export const useAppStore = create<AppState>((set) => ({
   setWaiterTable: (table) => set({ waiterTable: table }),
   setWaiterCustomerName: (name) => set({ waiterCustomerName: name }),
   setWaiterSpecialNotes: (notes) => set({ waiterSpecialNotes: notes }),
+  setWaiterCart: (cart) => set({ waiterCart: cart }),
   clearWaiterCart: () => set({ waiterCart: [], waiterSpecialNotes: '' }),
   setWaiterSlipsCount: (count) => set({ waiterSlipsCount: count }),
 }));

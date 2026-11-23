@@ -36,6 +36,24 @@ let OrdersController = class OrdersController {
             throw new common_1.BadRequestException(err?.message || 'Failed to create waiter draft note');
         }
     }
+    async updateWaiterDraftNotePut(id, body) {
+        try {
+            return await this.ordersService.updateWaiterDraftNote(id, body);
+        }
+        catch (err) {
+            console.error('ERROR in updateWaiterDraftNotePut:', err);
+            throw new common_1.BadRequestException(err?.message || 'Failed to update waiter draft note');
+        }
+    }
+    async updateWaiterDraftNotePatch(id, body) {
+        try {
+            return await this.ordersService.updateWaiterDraftNote(id, body);
+        }
+        catch (err) {
+            console.error('ERROR in updateWaiterDraftNotePatch:', err);
+            throw new common_1.BadRequestException(err?.message || 'Failed to update waiter draft note');
+        }
+    }
     async createPosOrder(body) {
         return this.ordersService.createPosOrder(body);
     }
@@ -94,6 +112,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "createWaiterDraftNote", null);
+__decorate([
+    (0, common_1.Put)(':id/draft-note'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "updateWaiterDraftNotePut", null);
+__decorate([
+    (0, common_1.Patch)(':id/draft-note'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "updateWaiterDraftNotePatch", null);
 __decorate([
     (0, common_1.Post)('pos'),
     __param(0, (0, common_1.Body)()),

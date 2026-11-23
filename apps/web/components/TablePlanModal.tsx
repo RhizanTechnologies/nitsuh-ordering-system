@@ -23,7 +23,7 @@ interface TablePlanModalProps {
   onClose: () => void;
   tables: any[];
   selectedTable?: string;
-  onSelectTable?: (tableNumber: string) => void;
+  onSelectTable?: (tableNumber: string, tableObj?: any) => void;
   onTablesUpdated?: (tables: any[]) => void;
 }
 
@@ -385,15 +385,11 @@ export function TablePlanModal({
                 key={t.id}
                 onClick={() => {
                   if (activeTab === 'floor' && onSelectTable) {
-                    if (isOccupied) {
-                      setError(`Table "${t.tableNumber}" is currently seated with an active bill. Please select an available Open table.`);
-                      return;
-                    }
                     if (isReserved) {
                       setError(`Table "${t.tableNumber}" is currently reserved. Please select an available Open table.`);
                       return;
                     }
-                    onSelectTable(t.tableNumber);
+                    onSelectTable(t.tableNumber, t);
                     onClose();
                   }
                 }}
@@ -401,7 +397,7 @@ export function TablePlanModal({
                   isSelected
                     ? 'border-emerald-600 ring-2 ring-emerald-500/30 bg-emerald-50/50 cursor-pointer'
                     : isOccupied
-                    ? 'bg-amber-50/30 border-amber-300/60 cursor-not-allowed opacity-80'
+                    ? 'bg-amber-50/40 border-amber-300 hover:border-amber-500 cursor-pointer hover:scale-[1.01] active:scale-[0.98]'
                     : isReserved
                     ? 'bg-purple-50/30 border-purple-200 cursor-not-allowed opacity-80'
                     : 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/10 hover:border-emerald-500 dark:hover:border-emerald-500 cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
@@ -445,27 +441,34 @@ export function TablePlanModal({
                         ? `Active: ${t.orders[0].orderNumber} (${Number(t.orders[0].totalAmount).toFixed(2)} ETB)`
                         : 'Occupied'}
                     </span>
-                    <button
-                      type="button"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        try {
-                          await fetchApi(`/menu/tables/${t.id}`, {
-                            method: 'PATCH',
-                            body: JSON.stringify({ status: 'AVAILABLE' }),
-                          });
-                          setSuccessMsg(`Table ${t.tableNumber} is now Open.`);
-                          await refreshTables();
-                          setTimeout(() => setSuccessMsg(null), 2500);
-                        } catch (err: any) {
-                          setError(err.message || 'Failed to release table');
-                        }
-                      }}
-                      className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-200/70 hover:bg-emerald-600 hover:text-white text-amber-900 transition flex-shrink-0 cursor-pointer"
-                      title="Clear table and set to Open"
-                    >
-                      Free Table
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-200/80 text-amber-900 whitespace-nowrap">
+                        {hasActiveOrder && t.orders[0].status === 'DRAFT_NOTE' ? 'Edit Note' : 'Add Order'}
+                      </span>
+                      {isOwnerOrManager && (
+                        <button
+                          type="button"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              await fetchApi(`/menu/tables/${t.id}`, {
+                                method: 'PATCH',
+                                body: JSON.stringify({ status: 'AVAILABLE' }),
+                              });
+                              setSuccessMsg(`Table ${t.tableNumber} is now Open.`);
+                              await refreshTables();
+                              setTimeout(() => setSuccessMsg(null), 2500);
+                            } catch (err: any) {
+                              setError(err.message || 'Failed to release table');
+                            }
+                          }}
+                          className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 hover:bg-emerald-600 hover:text-white text-amber-900 transition flex-shrink-0 cursor-pointer"
+                          title="Clear table and set to Open"
+                        >
+                          Free
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
 

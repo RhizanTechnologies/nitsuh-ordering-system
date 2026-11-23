@@ -45,6 +45,58 @@ export class OrdersController {
     }
   }
 
+  @Put(':id/draft-note')
+  async updateWaiterDraftNotePut(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      waiterId?: string;
+      tableId?: string;
+      customerName?: string;
+      notes?: string;
+      items: {
+        menuItemId: string;
+        quantity: number;
+        specialInstructions?: string;
+        selectedAddonIds?: string[];
+        selectedAddons?: any[];
+      }[];
+    },
+  ) {
+    try {
+      return await this.ordersService.updateWaiterDraftNote(id, body);
+    } catch (err: any) {
+      console.error('ERROR in updateWaiterDraftNotePut:', err);
+      throw new BadRequestException(err?.message || 'Failed to update waiter draft note');
+    }
+  }
+
+  @Patch(':id/draft-note')
+  async updateWaiterDraftNotePatch(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      waiterId?: string;
+      tableId?: string;
+      customerName?: string;
+      notes?: string;
+      items: {
+        menuItemId: string;
+        quantity: number;
+        specialInstructions?: string;
+        selectedAddonIds?: string[];
+        selectedAddons?: any[];
+      }[];
+    },
+  ) {
+    try {
+      return await this.ordersService.updateWaiterDraftNote(id, body);
+    } catch (err: any) {
+      console.error('ERROR in updateWaiterDraftNotePatch:', err);
+      throw new BadRequestException(err?.message || 'Failed to update waiter draft note');
+    }
+  }
+
   @Post('pos')
   async createPosOrder(
     @Body()

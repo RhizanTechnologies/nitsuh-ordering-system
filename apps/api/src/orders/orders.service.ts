@@ -327,9 +327,276 @@ export class OrdersService {
       }
     }
 
+    // Update table status to OCCUPIED and broadcast table update so waiters and cashiers see the table occupied immediately
+    if (resolvedTableId) {
+      try {
+        await this.prisma.diningTable.update({
+          where: { id: resolvedTableId },
+          data: { status: TableStatus.OCCUPIED },
+        });
+        const allTables = await this.prisma.diningTable.findMany({
+          orderBy: { tableNumber: 'asc' },
+          include: {
+            orders: {
+              where: {
+                status: { in: ['DRAFT_NOTE', 'CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] },
+                paymentStatus: { not: PaymentStatus.PAID },
+              },
+              select: { id: true, orderNumber: true, totalAmount: true, status: true, paymentStatus: true },
+            },
+          },
+        });
+        this.eventsGateway.broadcastTablesUpdated(allTables);
+      } catch (tableErr) {
+        console.error('Failed to update table status to OCCUPIED:', tableErr);
+      }
+    }
+
     // Broadcast live event to Cashier screen!
     this.eventsGateway.broadcastWaiterNote(order);
     return order;
+  }
+
+  // 1b. Waiter edits an existing draft note before it is fired to kitchen
+  async updateWaiterDraftNote(
+    orderId: string,
+    data: {
+      waiterId?: string;
+      tableId?: string;
+      customerName?: string;
+      notes?: string;
+      items: {
+        menuItemId: string;
+        quantity: number;
+        specialInstructions?: string;
+        selectedAddonIds?: string[];
+        selectedAddons?: any[];
+      }[];
+    },
+  ) {
+    const existing = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true, table: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Order with id ${orderId} not found`);
+    }
+
+    if (existing.status !== OrderStatus.DRAFT_NOTE) {
+      throw new BadRequestException(
+        'This order has already been fired to the kitchen. You can append new items, but cannot edit already-fired items.',
+      );
+    }
+
+    // Resolve table
+    let resolvedTableId = data.tableId !== undefined ? data.tableId : existing.tableId;
+    if (resolvedTableId && !isUuid(resolvedTableId)) {
+      try {
+        const table = await this.prisma.diningTable.findFirst({
+          where: {
+            OR: [
+              { tableNumber: resolvedTableId },
+              { tableNumber: { startsWith: resolvedTableId } },
+            ],
+          },
+        });
+        resolvedTableId = table ? table.id : existing.tableId;
+      } catch (_) {
+        resolvedTableId = existing.tableId;
+      }
+    }
+
+    // Fetch items with price and recipes to compute subtotal and portion cost snapshot
+    const itemIds = data.items.map((i) => i.menuItemId);
+    const menuItems = await this.prisma.menuItem.findMany({
+      where: { id: { in: itemIds } },
+      include: {
+        recipe: {
+          include: {
+            ingredients: {
+              include: { ingredient: true },
+            },
+          },
+        },
+        directIngredient: true,
+      },
+    });
+
+    // Fetch any referenced addons
+    const allAddonIds: string[] = [];
+    for (const itm of data.items) {
+      if (Array.isArray(itm.selectedAddonIds)) {
+        allAddonIds.push(...itm.selectedAddonIds);
+      }
+      if (Array.isArray(itm.selectedAddons)) {
+        for (const a of itm.selectedAddons) {
+          if (a?.id) allAddonIds.push(a.id);
+        }
+      }
+    }
+    const dbAddons =
+      allAddonIds.length > 0
+        ? await this.prisma.menuItemAddon.findMany({
+            where: { id: { in: Array.from(new Set(allAddonIds)) } },
+            include: { ingredient: { include: { baseUnit: true } }, unit: true },
+          })
+        : [];
+
+    let subtotal = 0;
+    let totalTip = 0;
+    const orderItemsCreate = data.items.map((cartItem) => {
+      const mi = menuItems.find((m) => m.id === cartItem.menuItemId);
+      if (!mi) throw new NotFoundException(`Item not found`);
+
+      const selectedAddonsSnapshot: any[] = [];
+      let addonsPriceTotal = 0;
+      let addonsCostTotal = 0;
+
+      const itemAddonIds = [
+        ...(cartItem.selectedAddonIds || []),
+        ...(cartItem.selectedAddons?.map((a: any) => a.id) || []),
+      ];
+      const uniqueAddonIds = Array.from(new Set(itemAddonIds.filter(Boolean)));
+
+      for (const addonId of uniqueAddonIds) {
+        const addon = dbAddons.find((a) => a.id === addonId);
+        if (addon) {
+          const aPrice = Number(addon.price);
+          const aQty = Number(addon.quantity || 0);
+          const aCost = addon.ingredient
+            ? Number(addon.ingredient.currentCostPerBaseUnit) * aQty
+            : 0;
+
+          addonsPriceTotal += aPrice;
+          addonsCostTotal += aCost;
+          selectedAddonsSnapshot.push({
+            id: addon.id,
+            name: addon.name,
+            price: aPrice,
+            ingredientId: addon.ingredientId,
+            ingredientName: addon.ingredient?.name,
+            quantity: aQty,
+            unitSymbol: addon.ingredient?.baseUnit?.symbol || addon.unit?.symbol || 'g',
+            costAtSale: Number(aCost.toFixed(4)),
+          });
+        }
+      }
+
+      const unitPrice = Number(mi.price) + addonsPriceTotal;
+      const tipPerItem = Number((cartItem as any).tip || 0);
+      const lineSubtotal = unitPrice * cartItem.quantity;
+      const lineTip = tipPerItem * cartItem.quantity;
+      subtotal += lineSubtotal;
+      totalTip += lineTip;
+
+      let costPerPortion = 0;
+      if (mi.isDirectSale && mi.directIngredient) {
+        costPerPortion = Number(mi.directIngredient.currentCostPerBaseUnit);
+      } else if (mi.recipe) {
+        for (const ri of mi.recipe.ingredients) {
+          costPerPortion += Number(ri.ingredient.currentCostPerBaseUnit) * Number(ri.quantity);
+        }
+      }
+      costPerPortion += addonsCostTotal;
+
+      return {
+        menuItemId: mi.id,
+        quantity: cartItem.quantity,
+        unitPrice: unitPrice,
+        tip: tipPerItem,
+        subtotal: lineSubtotal,
+        specialInstructions: cartItem.specialInstructions,
+        status: ItemPrepStatus.PENDING,
+        costAtSale: Number(costPerPortion.toFixed(4)),
+        selectedAddons: selectedAddonsSnapshot.length > 0 ? selectedAddonsSnapshot : undefined,
+      };
+    });
+
+    const discountAmount = Number(existing.discount || 0);
+    const taxableAmount = Math.max(0, subtotal - discountAmount);
+    const tax = taxableAmount > 0 ? Number(((taxableAmount * 0.15) / 1.15).toFixed(2)) : 0;
+    const totalAmount = taxableAmount + totalTip;
+
+    // Replace items transactionally
+    await this.prisma.$transaction(async (tx) => {
+      await tx.orderItem.deleteMany({ where: { orderId } });
+      for (const item of orderItemsCreate) {
+        await tx.orderItem.create({
+          data: {
+            orderId,
+            ...item,
+          },
+        });
+      }
+    });
+
+    const updatePayload: any = {
+      subtotal,
+      tip: totalTip,
+      tax,
+      totalAmount,
+      customerName: data.customerName || existing.customerName,
+      tableId: resolvedTableId,
+    };
+    if (data.notes !== undefined) {
+      updatePayload.notes = data.notes || null;
+    }
+
+    let updated;
+    try {
+      updated = await this.prisma.order.update({
+        where: { id: orderId },
+        data: updatePayload,
+        include: {
+          table: true,
+          waiter: { select: { id: true, name: true } },
+          cashier: { select: { id: true, name: true } },
+          items: { include: { menuItem: true } },
+        },
+      });
+    } catch (_) {
+      delete updatePayload.notes;
+      updated = await this.prisma.order.update({
+        where: { id: orderId },
+        data: updatePayload,
+        include: {
+          table: true,
+          waiter: { select: { id: true, name: true } },
+          cashier: { select: { id: true, name: true } },
+          items: { include: { menuItem: true } },
+        },
+      });
+    }
+
+    // Ensure table is occupied
+    if (resolvedTableId) {
+      try {
+        await this.prisma.diningTable.update({
+          where: { id: resolvedTableId },
+          data: { status: TableStatus.OCCUPIED },
+        });
+        const allTables = await this.prisma.diningTable.findMany({
+          orderBy: { tableNumber: 'asc' },
+          include: {
+            orders: {
+              where: {
+                status: { in: ['DRAFT_NOTE', 'CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] },
+                paymentStatus: { not: PaymentStatus.PAID },
+              },
+              select: { id: true, orderNumber: true, totalAmount: true, status: true, paymentStatus: true },
+            },
+          },
+        });
+        this.eventsGateway.broadcastTablesUpdated(allTables);
+      } catch (tableErr) {
+        console.error('Failed to update table status in updateWaiterDraftNote:', tableErr);
+      }
+    }
+
+    this.eventsGateway.broadcastWaiterNote(updated);
+    this.eventsGateway.broadcastOrderUpdated(updated);
+    return updated;
   }
 
   // 2. Cashier Confirms & Fires Order to Kitchen (or direct POS entry)
@@ -1244,6 +1511,28 @@ export class OrdersService {
           payments: true,
         },
       });
+    }
+
+    if (updated.tableId) {
+      try {
+        await this.prisma.diningTable.update({
+          where: { id: updated.tableId },
+          data: { status: TableStatus.OCCUPIED },
+        });
+        const allTables = await this.prisma.diningTable.findMany({
+          orderBy: { tableNumber: 'asc' },
+          include: {
+            orders: {
+              where: {
+                status: { in: ['DRAFT_NOTE', 'CONFIRMED', 'IN_PREPARATION', 'READY', 'SERVED'] },
+                paymentStatus: { not: PaymentStatus.PAID },
+              },
+              select: { id: true, orderNumber: true, totalAmount: true, status: true, paymentStatus: true },
+            },
+          },
+        });
+        this.eventsGateway.broadcastTablesUpdated(allTables);
+      } catch (_) {}
     }
 
     if (order.status === OrderStatus.DRAFT_NOTE) {
