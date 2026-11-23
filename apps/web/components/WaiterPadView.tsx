@@ -86,6 +86,10 @@ export function WaiterPadView() {
   const appendingOrderRef = useRef(appendingOrder);
   appendingOrderRef.current = appendingOrder;
 
+  // In-App Tip Modal
+  const [tipModal, setTipModal] = useState<{ itemId: string; name: string } | null>(null);
+  const [customTipValue, setCustomTipValue] = useState('15');
+
   const showError = (msg: string) => {
     setErrorMessage(msg);
     setTimeout(() => setErrorMessage(null), 6000);
@@ -1246,15 +1250,10 @@ export function WaiterPadView() {
                     ) : (
                       <button
                         onClick={() => {
-                          const val = window.prompt(`Enter custom server tip for "${item.name}" (ETB):`, '15');
-                          if (val !== null && val.trim() !== '') {
-                            const parsed = parseFloat(val);
-                            if (!isNaN(parsed) && parsed >= 0) {
-                              setWaiterItemTip(item.menuItemId, parsed);
-                            }
-                          }
+                          setCustomTipValue('15');
+                          setTipModal({ itemId: item.menuItemId, name: item.name });
                         }}
-                        className="text-[9px] font-bold text-stone-600 hover:text-emerald-700 transition cursor-pointer"
+                        className="text-[9px] font-bold text-emerald-800 hover:bg-emerald-100 border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 rounded transition cursor-pointer"
                       >
                         + Tip
                       </button>
@@ -1778,6 +1777,68 @@ export function WaiterPadView() {
         }}
         onTablesUpdated={setTables}
       />
+
+      {/* In-App Tip Modal */}
+      {tipModal && (
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white border border-stone-200 rounded-3xl p-6 w-full max-w-xs shadow-2xl text-stone-900 space-y-4 animate-in zoom-in-95 duration-150">
+            <div>
+              <h3 className="text-base font-black text-stone-900">Add Server Tip</h3>
+              <p className="text-xs text-stone-500 mt-0.5 truncate">{tipModal.name}</p>
+            </div>
+            <div className="flex gap-1.5">
+              {['10', '15', '20', '30'].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setCustomTipValue(preset)}
+                  className={`flex-1 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                    customTipValue === preset
+                      ? 'bg-emerald-600 text-white border-emerald-600 font-black'
+                      : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                  }`}
+                >
+                  +{preset}
+                </button>
+              ))}
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="any"
+                value={customTipValue}
+                onChange={(e) => setCustomTipValue(e.target.value)}
+                className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-600"
+                placeholder="Custom tip amount (ETB)"
+              />
+              <span className="absolute right-3.5 top-2 text-xs font-bold text-stone-400">ETB</span>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
+              <button
+                type="button"
+                onClick={() => setTipModal(null)}
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const parsed = parseFloat(customTipValue);
+                  if (!isNaN(parsed) && parsed >= 0) {
+                    setWaiterItemTip(tipModal.itemId, parsed);
+                  }
+                  setTipModal(null);
+                }}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs shadow-xs transition cursor-pointer"
+              >
+                Apply Tip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -24,11 +24,11 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
   const total = Number(order.totalAmount || 0);
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[32px] max-w-sm w-full p-5 shadow-2xl relative border border-stone-200 dark:border-white/15">
+    <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-white text-stone-900 rounded-3xl max-w-sm w-full p-5 shadow-2xl relative border border-stone-200">
         {/* Modal Controls */}
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-200 dark:border-white/10 print:hidden">
-          <span className="text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-200 print:hidden">
+          <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">
             Customer Receipt
           </span>
           <div className="flex items-center gap-2">

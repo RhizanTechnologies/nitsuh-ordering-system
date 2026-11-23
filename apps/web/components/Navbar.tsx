@@ -299,6 +299,17 @@ export function Navbar() {
               <span>Inventory</span>
             </Link>
             <Link
+              href="/products"
+              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                pathname === '/products'
+                  ? 'bg-emerald-600 text-white shadow-xs font-black'
+                  : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
+              }`}
+            >
+              <Utensils className="w-3 h-3" />
+              <span>Menu</span>
+            </Link>
+            <Link
               href="/tables"
               className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 pathname === '/tables'

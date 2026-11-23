@@ -138,39 +138,32 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[28px] max-w-xl w-full p-6 shadow-2xl border border-stone-200 dark:border-white/15 space-y-4 max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-white text-stone-900 rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-stone-200 space-y-4 max-h-[92vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-200 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 p-0.5 shadow-xs flex-shrink-0">
-              <div className="w-full h-full rounded-[14px] bg-stone-50 dark:bg-[#161311] flex items-center justify-center text-amber-500 dark:text-amber-400">
-                <Boxes className="w-5 h-5" />
-              </div>
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+              <Boxes className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-black text-stone-900 dark:text-white">
-                {isEditing ? `Edit Stock Item: ${item?.name}` : 'Create New Stock Item / Ingredient'}
+              <h3 className="text-base font-black text-stone-900">
+                {isEditing ? `Edit: ${item?.name}` : 'New Stock Item'}
               </h3>
-              <p className="text-xs text-stone-500 dark:text-zinc-400">
-                {isEditing
-                  ? 'Update unit pricing, category classification and low-stock cutoffs'
-                  : 'Register a raw ingredient, retail item, or consumable in dual inventory'}
-              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] rounded-xl transition text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white cursor-pointer"
+            className="p-2 bg-stone-100 hover:bg-stone-200 rounded-xl transition text-stone-500 hover:text-stone-900 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {error && (
-          <div className="p-3 bg-rose-500/15 border border-rose-500/40 rounded-2xl text-xs text-rose-300 flex items-center justify-between flex-shrink-0">
+          <div className="p-3 bg-rose-50 border border-rose-300 rounded-2xl text-xs text-rose-700 flex items-center justify-between flex-shrink-0 font-medium">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="p-1 hover:bg-rose-500/20 rounded-lg text-rose-400">
+            <button onClick={() => setError(null)} className="p-1 hover:bg-rose-100 rounded-lg text-rose-600">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -181,22 +174,22 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
           {/* Item Name & SKU */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2 space-y-1">
-              <label className="text-[11px] font-bold text-stone-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
                 <span>Stock Item Name</span>
-                <span className="text-amber-500">*</span>
+                <span className="text-emerald-600">*</span>
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Arabica Coffee Beans (Yirgacheffe)"
+                placeholder="e.g. Arabica Coffee Beans"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-stone-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Hash className="w-3 h-3 text-stone-500 dark:text-zinc-400" />
+              <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Hash className="w-3 h-3 text-stone-500" />
                 <span>SKU Code</span>
               </label>
               <input
@@ -204,7 +197,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                 placeholder="Auto-generate"
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
-                className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500 uppercase"
+                className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 uppercase"
               />
             </div>
           </div>
@@ -212,21 +205,21 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
           {/* Category & Measurement Unit */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-stone-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Tag className="w-3 h-3 text-amber-500 dark:text-amber-400" />
+              <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Tag className="w-3 h-3 text-emerald-600" />
                 <span>Category</span>
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               >
                 {CATEGORIES.map((c) => (
-                  <option key={c} value={c} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
+                  <option key={c} value={c}>
                     {c}
                   </option>
                 ))}
-                <option value="CUSTOM" className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">+ Custom Category...</option>
+                <option value="CUSTOM">+ Custom Category...</option>
               </select>
               {category === 'CUSTOM' && (
                 <input
@@ -234,24 +227,24 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                   placeholder="Enter custom category name..."
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value)}
-                  className="w-full mt-2 bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  className="w-full mt-2 bg-white border border-stone-300 rounded-2xl px-3.5 py-2 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                 />
               )}
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-stone-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Layers className="w-3 h-3 text-amber-500 dark:text-amber-400" />
+              <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Layers className="w-3 h-3 text-emerald-600" />
                 <span>Base Measurement Unit</span>
-                <span className="text-amber-500">*</span>
+                <span className="text-emerald-600">*</span>
               </label>
               <select
                 value={baseUnitId}
                 onChange={(e) => setBaseUnitId(e.target.value)}
-                className="w-full bg-white dark:bg-[#1e1a17] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+                className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               >
                 {units.map((u) => (
-                  <option key={u.id} value={u.id} className="bg-white dark:bg-[#1e1a17] text-stone-900 dark:text-white">
+                  <option key={u.id} value={u.id}>
                     {u.name} ({u.symbol}) • {u.type}
                   </option>
                 ))}
@@ -261,13 +254,13 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
 
           {/* Unit Cost Valuation */}
           <div className="space-y-1">
-            <label className="text-[11px] font-bold text-stone-700 dark:text-zinc-300 uppercase tracking-wider flex items-center justify-between">
+            <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <DollarSign className="w-3 h-3 text-amber-500 dark:text-amber-400" />
-                <span>Current Valuation Cost per Base Unit (ETB)</span>
-                <span className="text-amber-500">*</span>
+                <DollarSign className="w-3 h-3 text-emerald-600" />
+                <span>Cost per Base Unit (ETB)</span>
+                <span className="text-emerald-600">*</span>
               </span>
-              <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold lowercase">
+              <span className="text-[10px] text-emerald-700 font-bold lowercase">
                 per {selectedUnit?.symbol || 'unit'}
               </span>
             </label>
@@ -279,26 +272,23 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                 placeholder="0.00"
                 value={costPerUnit}
                 onChange={(e) => setCostPerUnit(e.target.value)}
-                className="w-full bg-white dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-4 pr-16 py-2.5 text-xs font-black text-amber-600 dark:text-amber-400 placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-white border border-stone-300 rounded-2xl pl-4 pr-16 py-2.5 text-xs font-black text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-500 dark:text-zinc-400">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-500">
                 ETB / {selectedUnit?.symbol || 'unit'}
               </span>
             </div>
-            <p className="text-[10px] text-stone-500 dark:text-zinc-500">
-              Used to calculate Recipe COGS, dish food cost, and balance asset valuations.
-            </p>
           </div>
 
           {/* Reorder Threshold Alerts */}
-          <div className="p-3.5 bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-stone-900 dark:text-white">
-              <Sliders className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+          <div className="p-3.5 bg-stone-50 border border-stone-200 rounded-2xl space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
+              <Sliders className="w-3.5 h-3.5 text-emerald-600" />
               <span>Low-Stock Alert Cutoffs</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] text-stone-600 dark:text-zinc-400 uppercase font-bold">
+                <label className="text-[10px] text-stone-600 uppercase font-bold">
                   Main Warehouse Alert (&le;)
                 </label>
                 <div className="flex items-center gap-2">
@@ -307,14 +297,14 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                     step="any"
                     value={reorderThresholdMain}
                     onChange={(e) => setReorderThresholdMain(e.target.value)}
-                    className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-white border border-stone-300 rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
-                  <span className="text-xs font-bold text-stone-500 dark:text-zinc-400">{selectedUnit?.symbol}</span>
+                  <span className="text-xs font-bold text-stone-500">{selectedUnit?.symbol}</span>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] text-stone-600 dark:text-zinc-400 uppercase font-bold">
+                <label className="text-[10px] text-stone-600 uppercase font-bold">
                   Kitchen Store Alert (&le;)
                 </label>
                 <div className="flex items-center gap-2">
@@ -323,9 +313,9 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                     step="any"
                     value={reorderThresholdKitchen}
                     onChange={(e) => setReorderThresholdKitchen(e.target.value)}
-                    className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-white border border-stone-300 rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
-                  <span className="text-xs font-bold text-stone-500 dark:text-zinc-400">{selectedUnit?.symbol}</span>
+                  <span className="text-xs font-bold text-stone-500">{selectedUnit?.symbol}</span>
                 </div>
               </div>
             </div>
@@ -333,17 +323,17 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
 
           {/* Initial Opening Stock (Create mode only) */}
           {!isEditing && (
-            <div className="p-3.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl space-y-3">
+            <div className="p-3.5 bg-emerald-50/50 border border-emerald-200/70 rounded-2xl space-y-3">
               <div className="flex items-center justify-between">
-                <div className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                  <Boxes className="w-3.5 h-3.5" />
+                <div className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                  <Boxes className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Opening Stock Balances (Optional)</span>
                 </div>
-                <span className="text-[10px] text-amber-700 dark:text-amber-400/80 font-semibold">Initial On-Hand Quantity</span>
+                <span className="text-[10px] text-emerald-700 font-semibold">Initial On-Hand Quantity</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] text-stone-600 dark:text-zinc-400 uppercase font-bold">Main Store Opening Qty</label>
+                  <label className="text-[10px] text-stone-600 uppercase font-bold">Main Store Opening Qty</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -351,14 +341,14 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                       placeholder="0"
                       value={initialMainStock}
                       onChange={(e) => setInitialMainStock(e.target.value)}
-                      className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                      className="w-full bg-white border border-stone-300 rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     />
-                    <span className="text-xs font-bold text-stone-500 dark:text-zinc-400">{selectedUnit?.symbol}</span>
+                    <span className="text-xs font-bold text-stone-500">{selectedUnit?.symbol}</span>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-stone-600 dark:text-zinc-400 uppercase font-bold">Kitchen Store Opening Qty</label>
+                  <label className="text-[10px] text-stone-600 uppercase font-bold">Kitchen Store Opening Qty</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -366,9 +356,9 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                       placeholder="0"
                       value={initialKitchenStock}
                       onChange={(e) => setInitialKitchenStock(e.target.value)}
-                      className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+                      className="w-full bg-white border border-stone-300 rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     />
-                    <span className="text-xs font-bold text-stone-500 dark:text-zinc-400">{selectedUnit?.symbol}</span>
+                    <span className="text-xs font-bold text-stone-500">{selectedUnit?.symbol}</span>
                   </div>
                 </div>
               </div>
@@ -376,19 +366,19 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-200 dark:border-white/10 flex-shrink-0">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-200 flex-shrink-0">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/15 text-stone-700 dark:text-white font-bold rounded-xl text-xs transition cursor-pointer"
+              className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <Check className="w-4 h-4 stroke-[3]" />
               <span>{submitting ? 'Saving...' : isEditing ? 'Update Stock Item' : 'Create Stock Item'}</span>

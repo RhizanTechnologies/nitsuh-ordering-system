@@ -164,34 +164,34 @@ export function StaffAvatarUploader({
     <div className="space-y-2.5">
       {/* Section Header */}
       <div className="flex items-center justify-between">
-        <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300">
+        <label className="block text-xs font-bold text-stone-700">
           {label}
         </label>
         {isCustomUpload && (
-          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/20">
+          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/20">
             <Check className="w-3 h-3" /> Custom Photo
           </span>
         )}
       </div>
 
       {/* Main Avatar Card (Preview + Controls) */}
-      <div className="bg-stone-50 dark:bg-[#1A1614] border border-stone-200 dark:border-white/10 rounded-2xl p-3 sm:p-3.5 flex items-center gap-3.5">
+      <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3 sm:p-3.5 flex items-center gap-3.5">
         {/* Large Avatar Preview */}
         <div className="relative flex-shrink-0">
           {value ? (
             <img
               src={value}
               alt={staffName || 'Staff Avatar'}
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border-2 border-amber-500/50 shadow-md shadow-amber-500/15"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border-2 border-emerald-500/50 shadow-md shadow-emerald-500/10"
             />
           ) : (
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-black text-xl">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-500/30 flex items-center justify-center font-black text-xl">
               {staffName ? staffName.charAt(0).toUpperCase() : '?'}
             </div>
           )}
 
           {isCustomUpload && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs">
+            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-xs">
               <Sparkles className="w-3 h-3" />
             </div>
           )}
@@ -200,15 +200,15 @@ export function StaffAvatarUploader({
         {/* Current status info & quick actions */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-stone-900 dark:text-white truncate">
+            <span className="text-xs font-black text-stone-900 truncate">
               {staffName ? staffName : 'Profile Image'}
             </span>
-            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-stone-200 dark:bg-white/10 text-stone-600 dark:text-zinc-300">
+            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-stone-200 text-stone-600">
               {isCustomUpload ? 'Uploaded Photo' : isPreset ? 'Stock Preset' : 'Custom URL'}
             </span>
           </div>
 
-          <p className="text-[11px] text-stone-500 dark:text-zinc-400 truncate mt-0.5">
+          <p className="text-[11px] text-stone-500 truncate mt-0.5">
             {customSizeInfo || (isCustomUpload ? 'Square profile photo optimized for terminals' : 'Used for touch POS badges, waiter pad & receipts')}
           </p>
 
@@ -216,7 +216,7 @@ export function StaffAvatarUploader({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500 flex items-center gap-1 cursor-pointer"
+              className="text-[11px] font-bold text-emerald-700 hover:text-emerald-600 flex items-center gap-1 cursor-pointer"
             >
               <Upload className="w-3 h-3" />
               <span>Change Photo</span>
@@ -224,7 +224,7 @@ export function StaffAvatarUploader({
 
             {isCustomUpload && (
               <>
-                <span className="text-stone-300 dark:text-zinc-700">•</span>
+                <span className="text-stone-300">•</span>
                 <button
                   type="button"
                   onClick={handleResetToPreset}
@@ -240,14 +240,14 @@ export function StaffAvatarUploader({
       </div>
 
       {/* Tabs for Upload Method */}
-      <div className="flex border-b border-stone-200 dark:border-white/10 text-xs font-bold overflow-x-auto no-scrollbar">
+      <div className="flex border-b border-stone-200 text-xs font-bold overflow-x-auto no-scrollbar">
         <button
           type="button"
           onClick={() => setActiveTab('upload')}
           className={`py-2 px-3 flex items-center gap-1.5 border-b-2 cursor-pointer transition ${
             activeTab === 'upload'
-              ? 'border-amber-500 text-stone-900 dark:text-amber-300'
-              : 'border-transparent text-stone-500 dark:text-zinc-400 hover:text-stone-800 dark:hover:text-white'
+              ? 'border-emerald-600 text-emerald-800 font-black'
+              : 'border-transparent text-stone-500 hover:text-stone-800'
           }`}
         >
           <Upload className="w-3.5 h-3.5" />
@@ -259,8 +259,8 @@ export function StaffAvatarUploader({
           onClick={() => setActiveTab('presets')}
           className={`py-2 px-3 flex items-center gap-1.5 border-b-2 cursor-pointer transition ${
             activeTab === 'presets'
-              ? 'border-amber-500 text-stone-900 dark:text-amber-300'
-              : 'border-transparent text-stone-500 dark:text-zinc-400 hover:text-stone-800 dark:hover:text-white'
+              ? 'border-emerald-600 text-emerald-800 font-black'
+              : 'border-transparent text-stone-500 hover:text-stone-800'
           }`}
         >
           <ImageIcon className="w-3.5 h-3.5" />
@@ -272,8 +272,8 @@ export function StaffAvatarUploader({
           onClick={() => setActiveTab('url')}
           className={`py-2 px-3 flex items-center gap-1.5 border-b-2 cursor-pointer transition ${
             activeTab === 'url'
-              ? 'border-amber-500 text-stone-900 dark:text-amber-300'
-              : 'border-transparent text-stone-500 dark:text-zinc-400 hover:text-stone-800 dark:hover:text-white'
+              ? 'border-emerald-600 text-emerald-800 font-black'
+              : 'border-transparent text-stone-500 hover:text-stone-800'
           }`}
         >
           <Link2 className="w-3.5 h-3.5" />
@@ -308,12 +308,12 @@ export function StaffAvatarUploader({
             onDrop={handleDrop}
             className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 text-center transition-all ${
               isDragging
-                ? 'border-amber-500 bg-amber-500/10 scale-[0.99]'
-                : 'border-stone-300 dark:border-white/15 bg-stone-50/50 dark:bg-white/[0.02] hover:border-amber-500/50'
+                ? 'border-emerald-500 bg-emerald-50/50 scale-[0.99]'
+                : 'border-stone-300 bg-stone-50/50 hover:border-emerald-500/50'
             }`}
           >
             <div className="flex flex-col items-center justify-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 {processing ? (
                   <RefreshCw className="w-5 h-5 animate-spin" />
                 ) : (
@@ -322,10 +322,10 @@ export function StaffAvatarUploader({
               </div>
 
               <div className="space-y-0.5">
-                <p className="text-xs font-bold text-stone-800 dark:text-zinc-200">
+                <p className="text-xs font-bold text-stone-800">
                   {processing ? 'Optimizing photo...' : 'Drag & drop staff photo here, or'}
                 </p>
-                <p className="text-[10px] text-stone-500 dark:text-zinc-400">
+                <p className="text-[10px] text-stone-500">
                   PNG, JPG, WebP • Auto-crops to center square for badge & receipts
                 </p>
               </div>
@@ -336,7 +336,7 @@ export function StaffAvatarUploader({
                   type="button"
                   disabled={processing}
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>Choose Photo</span>
@@ -346,7 +346,7 @@ export function StaffAvatarUploader({
                   type="button"
                   disabled={processing}
                   onClick={() => cameraInputRef.current?.click()}
-                  className="px-3.5 py-1.5 bg-stone-200 hover:bg-stone-300 dark:bg-white/10 dark:hover:bg-white/15 text-stone-800 dark:text-zinc-200 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-3.5 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   title="Take photo using mobile or laptop camera"
                 >
                   <Camera className="w-3.5 h-3.5" />
@@ -357,7 +357,7 @@ export function StaffAvatarUploader({
           </div>
 
           {uploadError && (
-            <div className="flex items-center gap-1.5 text-xs text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-3 py-2 rounded-xl border border-rose-500/20">
+            <div className="flex items-center gap-1.5 text-xs text-rose-600 bg-rose-50 px-3 py-2 rounded-xl border border-rose-200">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{uploadError}</span>
             </div>
@@ -368,7 +368,7 @@ export function StaffAvatarUploader({
       {/* TAB CONTENT: Stock Presets */}
       {activeTab === 'presets' && (
         <div className="space-y-2">
-          <p className="text-[11px] text-stone-500 dark:text-zinc-400">
+          <p className="text-[11px] text-stone-500">
             Choose from standard cafe role avatars:
           </p>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
@@ -383,7 +383,7 @@ export function StaffAvatarUploader({
                   }}
                   className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer transition border-2 ${
                     isSelected
-                      ? 'border-amber-500 ring-2 ring-amber-400/50 scale-105'
+                      ? 'border-emerald-600 ring-2 ring-emerald-500/50 scale-105'
                       : 'border-transparent opacity-70 hover:opacity-100 hover:scale-102'
                   }`}
                 >
@@ -393,8 +393,8 @@ export function StaffAvatarUploader({
                     className="w-full h-full object-cover"
                   />
                   {isSelected && (
-                    <div className="absolute inset-0 bg-amber-500/20 flex items-center justify-center">
-                      <div className="w-4 h-4 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-emerald-600/20 flex items-center justify-center">
+                      <div className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center">
                         <Check className="w-2.5 h-2.5 font-black stroke-[3]" />
                       </div>
                     </div>
@@ -409,7 +409,7 @@ export function StaffAvatarUploader({
       {/* TAB CONTENT: Direct URL */}
       {activeTab === 'url' && (
         <form onSubmit={handleApplyUrl} className="space-y-2">
-          <p className="text-[11px] text-stone-500 dark:text-zinc-400">
+          <p className="text-[11px] text-stone-500">
             Paste a link to any existing online photo (Unsplash, company intranet, etc.):
           </p>
           <div className="flex items-center gap-2">
@@ -418,12 +418,12 @@ export function StaffAvatarUploader({
               placeholder="https://example.com/staff-photo.jpg"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              className="flex-1 bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-amber-500"
+              className="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2 text-xs text-stone-900 focus:outline-none focus:border-emerald-600"
             />
             <button
               type="submit"
               disabled={!urlInput.trim()}
-              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-xl shadow-xs transition disabled:opacity-40 cursor-pointer"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition disabled:opacity-40 cursor-pointer"
             >
               Apply
             </button>

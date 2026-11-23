@@ -100,6 +100,11 @@ export function PosView() {
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'day_before' | '3_days' | 'all'>('today');
 
+  // In-App Modern Dialog States
+  const [tipModal, setTipModal] = useState<{ itemId: string; name: string } | null>(null);
+  const [customTipValue, setCustomTipValue] = useState('15');
+  const [rejectSlipConfirm, setRejectSlipConfirm] = useState<string | null>(null);
+
   const loadActiveOrders = () => {
     return fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY,SERVED,COMPLETED&limit=250')
       .then(setActiveOrders)
@@ -661,18 +666,23 @@ export function PosView() {
   };
 
   // Reject Waiter Slip
-  const handleRejectWaiterSlip = async (slipId: string) => {
-    if (!confirm('Reject this waiter note?')) return;
+  const handleRejectWaiterSlip = (slipId: string) => {
+    setRejectSlipConfirm(slipId);
+  };
+
+  const executeRejectWaiterSlip = async () => {
+    if (!rejectSlipConfirm) return;
     try {
-      await fetchApi(`/orders/${slipId}/status`, {
+      await fetchApi(`/orders/${rejectSlipConfirm}/status`, {
         method: 'PATCH',
         body: JSON.stringify({
           status: 'CANCELLED',
           actorUserId: currentUser?.id || 'c01-cashier',
         }),
       });
-      setIncomingSlips((prev) => prev.filter((s) => s.id !== slipId));
+      setIncomingSlips((prev) => prev.filter((s) => s.id !== rejectSlipConfirm));
       setWaiterSlipsCount(Math.max(0, incomingSlips.length - 1));
+      setRejectSlipConfirm(null);
     } catch (e: any) {
       showError(e.message || 'Error rejecting slip');
     }
@@ -1006,15 +1016,10 @@ export function PosView() {
                     ) : (
                       <button
                         onClick={() => {
-                          const val = window.prompt(`Enter custom server tip for "${item.name}" (ETB):`, '15');
-                          if (val !== null && val.trim() !== '') {
-                            const parsed = parseFloat(val);
-                            if (!isNaN(parsed) && parsed >= 0) {
-                              setItemTip(item.menuItemId, parsed);
-                            }
-                          }
+                          setCustomTipValue('15');
+                          setTipModal({ itemId: item.menuItemId, name: item.name });
                         }}
-                        className="text-[9px] font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 bg-stone-100 dark:bg-white/[0.04] px-1.5 py-0.5 rounded transition cursor-pointer"
+                        className="text-[9px] font-bold text-emerald-800 hover:bg-emerald-100 border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 rounded transition cursor-pointer"
                         title="Add custom tip"
                       >
                         + Tip
@@ -2302,6 +2307,101 @@ export function PosView() {
         onClose={() => setReceiptModalOpen(false)}
         order={lastCompletedOrder}
       />
+
+      {/* Reject Slip Confirmation Modal */}
+      {rejectSlipConfirm && (
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white border border-stone-200 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-stone-900 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center">
+              <X className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-stone-900">Reject Waiter Note?</h3>
+              <p className="text-xs text-stone-500 mt-1">
+                This will cancel the incoming note slip and remove it from the firing queue.
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
+              <button
+                type="button"
+                onClick={() => setRejectSlipConfirm(null)}
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeRejectWaiterSlip}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-xl text-xs shadow-xs transition cursor-pointer"
+              >
+                Reject Note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Tip Input Modal */}
+      {tipModal && (
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white border border-stone-200 rounded-3xl p-6 w-full max-w-xs shadow-2xl text-stone-900 space-y-4 animate-in zoom-in-95 duration-150">
+            <div>
+              <h3 className="text-base font-black text-stone-900">Add Server Tip</h3>
+              <p className="text-xs text-stone-500 mt-0.5 truncate">{tipModal.name}</p>
+            </div>
+            <div className="flex gap-1.5">
+              {['10', '15', '20', '30'].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setCustomTipValue(preset)}
+                  className={`flex-1 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                    customTipValue === preset
+                      ? 'bg-emerald-600 text-white border-emerald-600 font-black'
+                      : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                  }`}
+                >
+                  +{preset}
+                </button>
+              ))}
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="any"
+                value={customTipValue}
+                onChange={(e) => setCustomTipValue(e.target.value)}
+                className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-600"
+                placeholder="Custom tip amount (ETB)"
+              />
+              <span className="absolute right-3.5 top-2 text-xs font-bold text-stone-400">ETB</span>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
+              <button
+                type="button"
+                onClick={() => setTipModal(null)}
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const parsed = parseFloat(customTipValue);
+                  if (!isNaN(parsed) && parsed >= 0) {
+                    setItemTip(tipModal.itemId, parsed);
+                  }
+                  setTipModal(null);
+                }}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs shadow-xs transition cursor-pointer"
+              >
+                Apply Tip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

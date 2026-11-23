@@ -138,24 +138,24 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-white border border-stone-200 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-stone-200 dark:border-white/10">
+        <div className="flex items-center justify-between pb-3.5 border-b border-stone-200">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+            <div className="p-2 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-500/20">
               <KeyRound className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-black text-stone-900 dark:text-white">Profile Security</h3>
-              <p className="text-[11px] text-stone-500 dark:text-zinc-400">
+              <h3 className="text-base font-black text-stone-900">Profile Security</h3>
+              <p className="text-[11px] text-stone-500">
                 Change credentials for {currentUser.name}
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 text-stone-500 dark:text-zinc-400 cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -163,20 +163,20 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
 
         {/* Tab switch if manager/owner, or subtitle for operational staff */}
         {isManagement ? (
-          <div className="flex border-b border-stone-200 dark:border-white/10 mt-3 bg-stone-100/60 dark:bg-white/[0.03] rounded-xl p-1">
+          <div className="flex border border-stone-200 mt-3 bg-stone-100/70 rounded-2xl p-1">
             <button
               type="button"
               onClick={() => {
                 setActiveTab('password');
                 setError(null);
               }}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'password'
-                  ? 'bg-white dark:bg-white/10 text-stone-950 dark:text-white shadow-xs font-black'
-                  : 'text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                  ? 'bg-white text-emerald-800 shadow-xs border border-emerald-500/20 font-black'
+                  : 'text-stone-500 hover:text-stone-900'
               }`}
             >
-              <Lock className="w-3.5 h-3.5 text-amber-500" />
+              <Lock className="w-3.5 h-3.5 text-emerald-600" />
               <span>Password</span>
             </button>
             <button
@@ -185,36 +185,36 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                 setActiveTab('pin');
                 setError(null);
               }}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'pin'
-                  ? 'bg-white dark:bg-white/10 text-stone-950 dark:text-white shadow-xs font-black'
-                  : 'text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white'
+                  ? 'bg-white text-emerald-800 shadow-xs border border-emerald-500/20 font-black'
+                  : 'text-stone-500 hover:text-stone-900'
               }`}
             >
-              <KeyRound className="w-3.5 h-3.5 text-amber-500" />
+              <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
               <span>Terminal PIN</span>
             </button>
           </div>
         ) : (
-          <div className="mt-3 text-[11px] text-stone-600 dark:text-zinc-400">
+          <div className="mt-3 text-[11px] text-stone-600">
             Enter your current 4-digit PIN to choose a new PIN code for terminal authentication.
           </div>
         )}
 
         {/* Error Alert */}
         {error && (
-          <div className="mt-3 p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 rounded-2xl text-xs font-bold text-center">
+          <div className="mt-3 p-2.5 bg-rose-50 border border-rose-300 text-rose-700 rounded-2xl text-xs font-bold text-center">
             {error}
           </div>
         )}
 
         {/* Success Alert */}
         {successMsg ? (
-          <div className="mt-4 p-5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 rounded-2xl text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+          <div className="mt-4 p-5 bg-emerald-50 border border-emerald-300 rounded-2xl text-center space-y-2">
+            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
               <Check className="w-5 h-5 stroke-[3]" />
             </div>
-            <div className="text-xs font-black text-emerald-800 dark:text-emerald-300">{successMsg}</div>
+            <div className="text-xs font-black text-emerald-800">{successMsg}</div>
           </div>
         ) : (
           <>
@@ -223,7 +223,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
               <form onSubmit={handlePinSubmit} className="space-y-3.5 mt-3.5">
                 {currentUser.role !== 'OWNER' && (
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
                       Current 4-Digit PIN
                     </label>
                     <Input
@@ -239,7 +239,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     New 4-Digit PIN
                   </label>
                   <Input
@@ -254,7 +254,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     Confirm New PIN
                   </label>
                   <Input
@@ -268,7 +268,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
                   <Button
                     type="button"
                     variant="ghost"
@@ -277,14 +277,13 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                   >
                     Cancel
                   </Button>
-                  <Button
+                  <button
                     type="submit"
-                    variant="primary"
-                    size="default"
                     disabled={submitting}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
                   >
                     {submitting ? 'Updating...' : 'Update PIN'}
-                  </Button>
+                  </button>
                 </div>
               </form>
             )}
@@ -293,7 +292,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
             {activeTab === 'password' && (
               <form onSubmit={handlePasswordSubmit} className="space-y-3.5 mt-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     Current Password
                   </label>
                   <Input
@@ -306,7 +305,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     New Password
                   </label>
                   <Input
@@ -319,7 +318,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
                     Confirm New Password
                   </label>
                   <Input
@@ -335,14 +334,14 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[11px] font-bold text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-white flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-bold text-stone-500 hover:text-stone-900 flex items-center gap-1 cursor-pointer"
                   >
-                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5 text-stone-500" /> : <Eye className="w-3.5 h-3.5 text-stone-500" />}
                     <span>{showPassword ? 'Hide password' : 'Show password'}</span>
                   </button>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200 dark:border-white/10">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
                   <Button
                     type="button"
                     variant="ghost"
@@ -351,14 +350,13 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                   >
                     Cancel
                   </Button>
-                  <Button
+                  <button
                     type="submit"
-                    variant="primary"
-                    size="default"
                     disabled={submitting}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
                   >
                     {submitting ? 'Updating...' : 'Update Password'}
-                  </Button>
+                  </button>
                 </div>
               </form>
             )}

@@ -15,6 +15,9 @@ import {
   History,
   Send,
   CheckCircle,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
   FileSpreadsheet,
   PlusCircle,
   Truck,
@@ -47,6 +50,19 @@ export function InventoryView() {
   const [ledgerSearch, setLedgerSearch] = useState('');
   const [alerts, setAlerts] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
+
+  // In-App Toast State (Replacing native browser alert)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast((curr) => (curr?.message === message ? null : curr));
+    }, 4000);
+  };
+
+  // Rejection Modal State (Replacing window.prompt)
+  const [rejectModal, setRejectModal] = useState<{ id: string; reason: string } | null>(null);
+  const [rejecting, setRejecting] = useState(false);
 
   // Raw Stock Items Catalog (CRUD) State
   const [rawIngredients, setRawIngredients] = useState<any[]>([]);
@@ -149,7 +165,7 @@ export function InventoryView() {
     if (!adjustIngredient || !adjustQuantity) return;
     const qtyNum = parseFloat(adjustQuantity);
     if (isNaN(qtyNum) || qtyNum <= 0) {
-      alert('Please enter a valid positive quantity');
+      showToast('Please enter a valid positive quantity', 'error');
       return;
     }
 
@@ -160,8 +176,9 @@ export function InventoryView() {
     const currentQty = Number(currentBalanceObj?.quantity || 0);
 
     if (adjustMode === 'REMOVE' && qtyNum > currentQty) {
-      alert(
-        `Cannot remove ${qtyNum} ${adjustIngredient.baseUnit?.symbol || 'units'}. Current available balance is only ${currentQty} ${adjustIngredient.baseUnit?.symbol || 'units'}. Stock balance cannot be negative.`
+      showToast(
+        `Cannot remove ${qtyNum} ${adjustIngredient.baseUnit?.symbol || 'units'}. Current balance is ${currentQty} ${adjustIngredient.baseUnit?.symbol || 'units'}.`,
+        'error',
       );
       return;
     }
@@ -181,9 +198,10 @@ export function InventoryView() {
         }),
       });
       setAdjustModalOpen(false);
+      showToast('Stock balance adjusted successfully!', 'success');
       loadData();
     } catch (err: any) {
-      alert(`Error adjusting stock: ${err.message}`);
+      showToast(`Error adjusting stock: ${err.message}`, 'error');
     } finally {
       setAdjustSubmitting(false);
     }
@@ -197,7 +215,7 @@ export function InventoryView() {
       .filter((i) => !isNaN(i.quantity) && i.quantity > 0);
 
     if (activeItems.length === 0) {
-      alert('Please enter a delivery quantity for at least one item.');
+      showToast('Please enter a delivery quantity for at least one item.', 'error');
       return;
     }
 
@@ -215,9 +233,10 @@ export function InventoryView() {
       setBatchQuantities({});
       setSendNotes('');
       setSendSearch('');
+      showToast('Batch delivery dispatched to kitchen!', 'success');
       loadData();
     } catch (err: any) {
-      alert(`Error dispatching batch to kitchen: ${err.message}`);
+      showToast(`Error dispatching batch to kitchen: ${err.message}`, 'error');
     } finally {
       setSendSubmitting(false);
     }
@@ -233,31 +252,39 @@ export function InventoryView() {
           receivedItems: [],
         }),
       });
+      showToast('Delivery received and added to Kitchen Store!', 'success');
       loadData();
     } catch (e: any) {
-      alert(`Error confirming receipt: ${e.message}`);
+      showToast(`Error confirming receipt: ${e.message}`, 'error');
     }
   };
 
   // Kitchen Chef rejects incoming transfer -> returns stock back to Main Store
-  const handleRejectKitchenReceipt = async (transferId: string) => {
-    const reason = window.prompt(
-      'Enter reason for rejecting this delivery (e.g. damaged goods, quantity mismatch, wrong items):',
-      'Quantity mismatch / damaged goods',
-    );
-    if (reason === null) return;
+  const handleRejectKitchenReceipt = (transferId: string) => {
+    setRejectModal({
+      id: transferId,
+      reason: 'Quantity mismatch / damaged goods',
+    });
+  };
 
+  const executeRejectKitchenReceipt = async () => {
+    if (!rejectModal) return;
+    setRejecting(true);
     try {
-      await fetchApi(`/inventory/transfers/${transferId}/reject`, {
+      await fetchApi(`/inventory/transfers/${rejectModal.id}/reject`, {
         method: 'POST',
         body: JSON.stringify({
           rejectedById: currentUser?.id,
-          reason: reason.trim() || 'Rejected by Head Chef',
+          reason: rejectModal.reason.trim() || 'Rejected by Head Chef',
         }),
       });
+      showToast('Delivery rejected and returned to Main Store.', 'success');
+      setRejectModal(null);
       loadData();
     } catch (e: any) {
-      alert(`Error rejecting delivery: ${e.message}`);
+      showToast(`Error rejecting delivery: ${e.message}`, 'error');
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -293,9 +320,10 @@ export function InventoryView() {
           reorderThresholdKitchen: parseFloat(data.kitchen) || 0,
         }),
       });
+      showToast('Threshold updated successfully!', 'success');
       loadData();
     } catch (e: any) {
-      alert(`Error updating threshold: ${e.message}`);
+      showToast(`Error updating threshold: ${e.message}`, 'error');
     } finally {
       setSavingThresholdId(null);
     }
@@ -310,9 +338,10 @@ export function InventoryView() {
           dispatchedItems: [],
         }),
       });
+      showToast('Transfer dispatched to kitchen!', 'success');
       loadData();
     } catch (e: any) {
-      alert(`Error dispatching transfer: ${e.message}`);
+      showToast(`Error dispatching transfer: ${e.message}`, 'error');
     }
   };
 
@@ -332,6 +361,7 @@ export function InventoryView() {
         }),
       });
       setNewSupplierModalOpen(false);
+      showToast(`Supplier "${supName}" registered successfully!`, 'success');
       setSupName('');
       setSupContact('');
       setSupPhone('');
@@ -339,7 +369,7 @@ export function InventoryView() {
       setSupAddress('');
       loadData();
     } catch (err: any) {
-      alert(err.message || 'Failed to create supplier');
+      showToast(err.message || 'Failed to create supplier', 'error');
     } finally {
       setSupSubmitting(false);
     }
@@ -364,11 +394,12 @@ export function InventoryView() {
         }),
       });
       setWasteQuantity('');
+      showToast('Wastage record submitted successfully!', 'success');
       setWasteSuccess(true);
       setTimeout(() => setWasteSuccess(false), 3000);
       loadData();
     } catch (err: any) {
-      alert(`Error recording wastage: ${err.message}`);
+      showToast(`Error recording wastage: ${err.message}`, 'error');
     }
   };
 
@@ -394,11 +425,11 @@ export function InventoryView() {
       const res = await fetchApi(`/inventory/ingredients/${deleteConfirmItem.id}`, {
         method: 'DELETE',
       });
-      alert(res?.message || 'Stock item deleted successfully');
+      showToast(res?.message || 'Stock item deleted successfully', 'success');
       setDeleteConfirmItem(null);
       loadData();
     } catch (err: any) {
-      alert(`Error deleting stock item: ${err.message}`);
+      showToast(`Error deleting stock item: ${err.message}`, 'error');
     } finally {
       setDeletingItem(false);
     }
@@ -2322,29 +2353,25 @@ export function InventoryView() {
 
       {/* DELETE / ARCHIVE STOCK ITEM CONFIRMATION DIALOG */}
       {deleteConfirmItem && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-stone-900 dark:text-white space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
-                <Trash2 className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-black text-stone-900 dark:text-white">Delete Stock Item?</h3>
-                <div className="text-xs text-stone-500 dark:text-zinc-400">{deleteConfirmItem.name}</div>
-              </div>
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white border border-stone-200 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-stone-900 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center flex-shrink-0">
+              <Trash2 className="w-6 h-6" />
             </div>
 
-            <p className="text-xs text-stone-600 dark:text-zinc-300 leading-relaxed">
-              Are you sure you want to remove <strong className="text-stone-900 dark:text-white">{deleteConfirmItem.name}</strong> ({deleteConfirmItem.sku || 'No SKU'})?
-              If this stock item is linked to existing dishes or recipes, it will be safely <strong className="text-amber-700 dark:text-amber-400">archived</strong> to preserve your cost histories and order records.
-            </p>
+            <div>
+              <h3 className="text-base font-black text-stone-900">Delete Stock Item</h3>
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                Are you sure you want to delete <strong className="text-stone-800 font-bold">&quot;{deleteConfirmItem.name}&quot;</strong>?
+              </p>
+            </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-200 dark:border-white/10">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
               <button
                 type="button"
                 onClick={() => setDeleteConfirmItem(null)}
                 disabled={deletingItem}
-                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/15 text-stone-700 dark:text-white font-bold rounded-xl text-xs transition cursor-pointer"
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -2352,32 +2379,94 @@ export function InventoryView() {
                 type="button"
                 onClick={executeDeleteStockItem}
                 disabled={deletingItem}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-950/40 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>{deletingItem ? 'Deleting...' : 'Confirm Delete'}</span>
+                <span>{deletingItem ? 'Deleting...' : 'Delete'}</span>
               </button>
             </div>
           </div>
         </div>
       )}
-      {/* REGISTER SUPPLIER MODAL (BUG-016) */}
+
+      {/* REJECT KITCHEN RECEIPT MODAL */}
+      {rejectModal && (
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white border border-stone-200 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-stone-900 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-base font-black text-stone-900">Reject Delivery</h3>
+              <p className="text-xs text-stone-500 mt-1">
+                Enter the reason for rejecting this delivery (damaged, quantity mismatch):
+              </p>
+            </div>
+
+            <input
+              type="text"
+              value={rejectModal.reason}
+              onChange={(e) => setRejectModal({ ...rejectModal, reason: e.target.value })}
+              className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600"
+              placeholder="e.g. Quantity mismatch, damaged packages..."
+            />
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
+              <button
+                type="button"
+                onClick={() => setRejectModal(null)}
+                disabled={rejecting}
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeRejectKitchenReceipt}
+                disabled={rejecting}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <span>{rejecting ? 'Rejecting...' : 'Confirm Rejection'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating In-App Toast */}
+      {toast && (
+        <div
+          className={`fixed bottom-5 right-5 z-[120] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold border transition-all animate-in slide-in-from-bottom duration-200 ${
+            toast.type === 'error'
+              ? 'bg-rose-50 text-rose-900 border-rose-200'
+              : 'bg-emerald-50 text-emerald-900 border-emerald-200'
+          }`}
+        >
+          {toast.type === 'error' ? (
+            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      )}
+      {/* REGISTER SUPPLIER MODAL */}
       {newSupplierModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/15 rounded-3xl p-6 w-full max-w-md shadow-2xl text-stone-900 dark:text-white space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white border border-stone-200 rounded-3xl p-6 w-full max-w-md shadow-2xl text-stone-900 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-500/20 flex items-center justify-center">
                   <Truck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black">Register New Supplier</h3>
-                  <div className="text-xs text-stone-500 dark:text-zinc-400">Vendor directory for bulk purchase receipts</div>
+                  <h3 className="text-base font-black text-stone-900">Register New Supplier</h3>
                 </div>
               </div>
               <button
                 onClick={() => setNewSupplierModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-white/10 text-stone-400"
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-400 hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -2385,7 +2474,7 @@ export function InventoryView() {
 
             <form onSubmit={handleCreateSupplier} className="space-y-3.5">
               <div>
-                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Supplier / Vendor Name *
                 </label>
                 <input
@@ -2393,14 +2482,14 @@ export function InventoryView() {
                   required
                   value={supName}
                   onChange={(e) => setSupName(e.target.value)}
-                  placeholder="e.g. Oromia Coffee Farmers Union, Horizon Foods..."
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs font-bold text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                  placeholder="e.g. Oromia Coffee Farmers Union"
+                  className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                     Contact Person
                   </label>
                   <input
@@ -2408,11 +2497,11 @@ export function InventoryView() {
                     value={supContact}
                     onChange={(e) => setSupContact(e.target.value)}
                     placeholder="e.g. Abebe K."
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                    className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                     Phone Number
                   </label>
                   <input
@@ -2420,13 +2509,13 @@ export function InventoryView() {
                     value={supPhone}
                     onChange={(e) => setSupPhone(e.target.value)}
                     placeholder="e.g. +251 91 123 4567"
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                    className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Email (Optional)
                 </label>
                 <input
@@ -2434,12 +2523,12 @@ export function InventoryView() {
                   value={supEmail}
                   onChange={(e) => setSupEmail(e.target.value)}
                   placeholder="e.g. orders@supplier.et"
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                  className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Warehouse / Physical Address
                 </label>
                 <input
@@ -2447,22 +2536,22 @@ export function InventoryView() {
                   value={supAddress}
                   onChange={(e) => setSupAddress(e.target.value)}
                   placeholder="e.g. Merkato Block 4, Addis Ababa"
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                  className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200 dark:border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200">
                 <button
                   type="button"
                   onClick={() => setNewSupplierModalOpen(false)}
-                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-300 font-bold rounded-2xl text-xs transition cursor-pointer"
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-2xl text-xs transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={supSubmitting}
-                  className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-2xl text-xs shadow-xs transition cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-xs shadow-xs transition cursor-pointer disabled:opacity-50"
                 >
                   {supSubmitting ? 'Saving...' : 'Register Supplier'}
                 </button>

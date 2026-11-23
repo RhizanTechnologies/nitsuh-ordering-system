@@ -50,13 +50,13 @@ export function PaymentModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#161311] text-stone-900 dark:text-white rounded-[32px] max-w-md w-full p-6 shadow-2xl border border-stone-200 dark:border-white/15 space-y-4">
+    <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-white text-stone-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-200">
           <div>
-            <h3 className="text-base font-black text-stone-900 dark:text-white">Process Customer Tender</h3>
-            <p className="text-xs text-stone-500 dark:text-zinc-400">Order Subtotal: {orderTotal.toFixed(2)} ETB</p>
+            <h3 className="text-base font-black text-stone-900">Process Tender</h3>
+            <p className="text-xs text-stone-500">Order Subtotal: {orderTotal.toFixed(2)} ETB</p>
           </div>
           <Button
             variant="secondary"
@@ -68,33 +68,33 @@ export function PaymentModal({
         </div>
 
         {errorMsg && (
-          <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 rounded-xl text-xs font-semibold">
+          <div className="p-3 bg-rose-50 border border-rose-300 text-rose-700 rounded-2xl text-xs font-semibold">
             {errorMsg}
           </div>
         )}
 
         {/* Big Total Banner */}
-        <div className="bg-stone-50 dark:bg-white/[0.04] border border-stone-200/90 dark:border-white/10 p-4 rounded-2xl text-center">
-          <div className="text-[11px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Amount To Pay</div>
-          <div className="text-3xl font-black text-amber-700 dark:text-amber-400 mt-0.5 tracking-tight">
+        <div className="bg-emerald-50/60 border border-emerald-200 p-4 rounded-2xl text-center">
+          <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">Amount To Pay</div>
+          <div className="text-3xl font-black text-emerald-800 mt-0.5 tracking-tight">
             {totalPayable.toFixed(2)} ETB
           </div>
           {tipNumber > 0 && (
-            <div className="text-[11px] text-amber-800 dark:text-amber-300 font-bold mt-1">
-              Base: {orderTotal.toFixed(2)} ETB + Custom Tip: {tipNumber.toFixed(2)} ETB
+            <div className="text-[11px] text-emerald-700 font-bold mt-1">
+              Base: {orderTotal.toFixed(2)} ETB + Tip: {tipNumber.toFixed(2)} ETB
             </div>
           )}
         </div>
 
         {/* Custom Tip Input */}
         <div>
-          <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5 flex items-center justify-between">
+          <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1.5 flex items-center justify-between">
             <span className="flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              Custom Server Tip / Gratuity (ETB)
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              Server Tip / Gratuity (ETB)
             </span>
             {tipNumber > 0 && (
-              <span className="text-amber-700 dark:text-amber-400 font-black">+{tipNumber.toFixed(2)} ETB</span>
+              <span className="text-emerald-700 font-black">+{tipNumber.toFixed(2)} ETB</span>
             )}
           </label>
           <div className="relative">
@@ -104,7 +104,7 @@ export function PaymentModal({
               step="any"
               value={customTip}
               onChange={(e) => setCustomTip(e.target.value)}
-              placeholder="Enter custom tip amount (e.g. 25 ETB)..."
+              placeholder="Enter tip amount..."
               className="pr-16"
             />
             {customTip && (
@@ -122,8 +122,8 @@ export function PaymentModal({
 
         {/* Ethiopian Payment Tender */}
         <div>
-          <label className="block text-[11px] font-bold text-stone-600 dark:text-zinc-400 uppercase mb-1.5">
-            Payment Tender
+          <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1.5">
+            Payment Method
           </label>
           <div className="grid grid-cols-3 gap-2">
             <button
@@ -132,7 +132,7 @@ export function PaymentModal({
               className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition cursor-pointer ${
                 paymentMethod === 'CASH'
                   ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-950 font-bold shadow-xs'
-                  : 'bg-stone-50 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-300 border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.08]'
+                  : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
               }`}
             >
               <Banknote className="w-5 h-5 text-emerald-600" />
@@ -145,7 +145,7 @@ export function PaymentModal({
               className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition cursor-pointer ${
                 paymentMethod === 'MOBILE_PAY'
                   ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-950 font-bold shadow-xs'
-                  : 'bg-stone-50 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-300 border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.08]'
+                  : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
               }`}
             >
               <Smartphone className="w-5 h-5 text-sky-600" />
@@ -158,7 +158,7 @@ export function PaymentModal({
               className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition cursor-pointer ${
                 paymentMethod === 'BANK_TRANSFER'
                   ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-950 font-bold shadow-xs'
-                  : 'bg-stone-50 dark:bg-white/[0.04] text-stone-700 dark:text-zinc-300 border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.08]'
+                  : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
               }`}
             >
               <CreditCard className="w-5 h-5 text-purple-600" />
@@ -169,9 +169,9 @@ export function PaymentModal({
 
         {/* Transaction Reference ID for Electronic Payments (Telebirr, CBE) */}
         {paymentMethod !== 'CASH' && (
-          <div className="bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl p-3 space-y-1.5">
+          <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-stone-600 dark:text-zinc-300 font-bold">
+              <span className="text-stone-700 font-bold">
                 {paymentMethod === 'MOBILE_PAY'
                   ? 'Telebirr Transaction ID (Optional)'
                   : 'CBE Reference / Slip Number (Optional)'}
@@ -188,11 +188,11 @@ export function PaymentModal({
 
         {/* Optional Cash Tender for Change Calculation */}
         {paymentMethod === 'CASH' && (
-          <div className="bg-stone-50 dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 rounded-2xl p-3 space-y-1.5">
+          <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-stone-500 dark:text-zinc-400 font-bold">Cash Received (Optional)</span>
+              <span className="text-stone-500 font-bold">Cash Received (Optional)</span>
               {cashReceivedNumber >= totalPayable && (
-                <span className="text-emerald-600 dark:text-emerald-400 font-black text-xs">
+                <span className="text-emerald-700 font-black text-xs">
                   Change: {change.toFixed(2)} ETB
                 </span>
               )}
@@ -209,7 +209,7 @@ export function PaymentModal({
         )}
 
         {/* Submit Actions */}
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200 dark:border-white/10">
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-200">
           <Button
             variant="secondary"
             size="default"
@@ -225,7 +225,7 @@ export function PaymentModal({
             className="flex-1"
           >
             <Check className="w-4 h-4 stroke-[3]" />
-            <span>{processing ? 'Processing...' : 'Settle Payment & Print Slip'}</span>
+            <span>{processing ? 'Processing...' : 'Settle Payment'}</span>
           </Button>
         </div>
       </div>
