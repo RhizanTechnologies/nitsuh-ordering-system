@@ -1302,15 +1302,15 @@ export function InventoryView() {
                             <div className="min-w-0 flex-1 mr-2">
                               <div className="text-xs font-bold truncate">{item.name}</div>
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className={`text-[9px] ${isSelected ? 'text-stone-950 font-semibold' : 'text-stone-500 dark:text-zinc-400'}`}>
+                                <span className={`text-[9px] font-semibold ${isSelected ? 'text-white/80' : 'text-stone-500 dark:text-zinc-400'}`}>
                                   {item.category?.name || 'Dish'}
                                 </span>
                                 {hasRecipe ? (
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-stone-950/20 text-stone-950' : 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30'}`}>
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-white/20 text-white border border-white/30' : 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30'}`}>
                                     ✓ {item.recipe.ingredients.length} items
                                   </span>
                                 ) : (
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-stone-950/20 text-stone-950' : 'bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30'}`}>
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md ${isSelected ? 'bg-white/20 text-white border border-white/30' : 'bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30'}`}>
                                     + Add Recipe
                                   </span>
                                 )}
