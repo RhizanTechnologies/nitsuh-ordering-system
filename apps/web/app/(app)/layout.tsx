@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { isRouteAllowed, getDefaultRouteForRole } from '@/lib/route-guard';
 import { Navbar } from '@/components/Navbar';
+import { getSocket } from '@/lib/api';
 import { ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function ProtectedAppLayout({
@@ -52,10 +53,30 @@ export default function ProtectedAppLayout({
     }
   }, [hydrated, currentUser, isAllowed, fallbackRoute, router]);
 
+  // Real-time account status enforcement: if Owner disables account, kill session immediately
+  useEffect(() => {
+    if (!currentUser) return;
+    const socket = getSocket();
+    const handleStatusChanged = (data: { userId: string; isActive: boolean }) => {
+      if (data?.userId === currentUser.id && !data.isActive) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cafe_token');
+          localStorage.removeItem('cafe_user');
+          window.location.href = '/login?disabled=true';
+        }
+      }
+    };
+
+    socket.on('user:status_changed', handleStatusChanged);
+    return () => {
+      socket.off('user:status_changed', handleStatusChanged);
+    };
+  }, [currentUser]);
+
   if (!hydrated || !currentUser) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] text-stone-900 flex flex-col items-center justify-center p-4 transition-colors">
-        <Loader2 className="w-8 h-8 text-amber-500 animate-spin mb-3" />
+        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mb-3" />
         <p className="text-xs font-semibold text-stone-600 tracking-wider font-heading">
           Verifying station credentials...
         </p>

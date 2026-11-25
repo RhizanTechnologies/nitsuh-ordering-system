@@ -29,8 +29,8 @@ export declare class InventoryController {
         } & {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
-            ingredientId: string;
             locationId: string;
+            ingredientId: string;
             reservedQuantity: import("@prisma/client/runtime/library").Decimal;
             lastUpdatedAt: Date;
         })[];
@@ -41,6 +41,12 @@ export declare class InventoryController {
         type: import("@prisma/client").$Enums.LocationType;
     })[]>;
     getAlerts(role?: string): Promise<({
+        location: {
+            id: string;
+            createdAt: Date;
+            name: string;
+            type: import("@prisma/client").$Enums.LocationType;
+        };
         ingredient: {
             baseUnit: {
                 symbol: string;
@@ -62,17 +68,11 @@ export declare class InventoryController {
             reorderThresholdMain: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdKitchen: import("@prisma/client/runtime/library").Decimal;
         };
-        location: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            type: import("@prisma/client").$Enums.LocationType;
-        };
     } & {
         id: string;
         quantity: import("@prisma/client/runtime/library").Decimal;
-        ingredientId: string;
         locationId: string;
+        ingredientId: string;
         reservedQuantity: import("@prisma/client/runtime/library").Decimal;
         lastUpdatedAt: Date;
     })[]>;
@@ -131,11 +131,11 @@ export declare class InventoryController {
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
-        sourceLocationId: string;
-        destLocationId: string;
         transferNumber: string;
         dispatchedAt: Date | null;
         receivedAt: Date | null;
+        sourceLocationId: string;
+        destLocationId: string;
         requestedById: string;
         approvedById: string | null;
     })[]>;
@@ -188,11 +188,11 @@ export declare class InventoryController {
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
-        sourceLocationId: string;
-        destLocationId: string;
         transferNumber: string;
         dispatchedAt: Date | null;
         receivedAt: Date | null;
+        sourceLocationId: string;
+        destLocationId: string;
         requestedById: string;
         approvedById: string | null;
     }>;
@@ -247,11 +247,11 @@ export declare class InventoryController {
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
-        sourceLocationId: string;
-        destLocationId: string;
         transferNumber: string;
         dispatchedAt: Date | null;
         receivedAt: Date | null;
+        sourceLocationId: string;
+        destLocationId: string;
         requestedById: string;
         approvedById: string | null;
     }>;
@@ -328,11 +328,11 @@ export declare class InventoryController {
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
-        sourceLocationId: string;
-        destLocationId: string;
         transferNumber: string;
         dispatchedAt: Date | null;
         receivedAt: Date | null;
+        sourceLocationId: string;
+        destLocationId: string;
         requestedById: string;
         approvedById: string | null;
     }>;
@@ -385,11 +385,11 @@ export declare class InventoryController {
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
-        sourceLocationId: string;
-        destLocationId: string;
         transferNumber: string;
         dispatchedAt: Date | null;
         receivedAt: Date | null;
+        sourceLocationId: string;
+        destLocationId: string;
         requestedById: string;
         approvedById: string | null;
     }>;
@@ -475,11 +475,11 @@ export declare class InventoryController {
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
-        sourceLocationId: string;
-        destLocationId: string;
         transferNumber: string;
         dispatchedAt: Date | null;
         receivedAt: Date | null;
+        sourceLocationId: string;
+        destLocationId: string;
         requestedById: string;
         approvedById: string | null;
     }>;
@@ -492,10 +492,10 @@ export declare class InventoryController {
         id: string;
         createdAt: Date;
         quantity: import("@prisma/client/runtime/library").Decimal;
-        transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+        ingredientId: string;
         sourceLocationId: string | null;
         destLocationId: string | null;
-        ingredientId: string;
+        transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
         unitCost: import("@prisma/client/runtime/library").Decimal;
         totalCost: import("@prisma/client/runtime/library").Decimal;
         referenceId: string | null;
@@ -507,18 +507,6 @@ export declare class InventoryController {
             id: string;
             name: string;
             role: import("@prisma/client").$Enums.UserRole;
-        };
-        sourceLocation: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            type: import("@prisma/client").$Enums.LocationType;
-        };
-        destLocation: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            type: import("@prisma/client").$Enums.LocationType;
         };
         ingredient: {
             baseUnit: {
@@ -541,14 +529,26 @@ export declare class InventoryController {
             reorderThresholdMain: import("@prisma/client/runtime/library").Decimal;
             reorderThresholdKitchen: import("@prisma/client/runtime/library").Decimal;
         };
+        sourceLocation: {
+            id: string;
+            createdAt: Date;
+            name: string;
+            type: import("@prisma/client").$Enums.LocationType;
+        };
+        destLocation: {
+            id: string;
+            createdAt: Date;
+            name: string;
+            type: import("@prisma/client").$Enums.LocationType;
+        };
     } & {
         id: string;
         createdAt: Date;
         quantity: import("@prisma/client/runtime/library").Decimal;
-        transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+        ingredientId: string;
         sourceLocationId: string | null;
         destLocationId: string | null;
-        ingredientId: string;
+        transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
         unitCost: import("@prisma/client/runtime/library").Decimal;
         totalCost: import("@prisma/client/runtime/library").Decimal;
         referenceId: string | null;
@@ -564,9 +564,9 @@ export declare class InventoryController {
         createdAt: Date;
         name: string;
         email: string | null;
-        address: string | null;
-        phone: string | null;
         contactPerson: string | null;
+        phone: string | null;
+        address: string | null;
     })[]>;
     createSupplier(body: {
         name: string;
@@ -579,9 +579,9 @@ export declare class InventoryController {
         createdAt: Date;
         name: string;
         email: string | null;
-        address: string | null;
-        phone: string | null;
         contactPerson: string | null;
+        phone: string | null;
+        address: string | null;
     }>;
     recordPurchaseReceipt(body: {
         supplierId: string;
@@ -613,9 +613,9 @@ export declare class InventoryController {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
             ingredientId: string;
+            unitId: string;
             unitCost: import("@prisma/client/runtime/library").Decimal;
             totalCost: import("@prisma/client/runtime/library").Decimal;
-            unitId: string;
             purchaseOrderId: string;
         })[];
         supplier: {
@@ -623,9 +623,9 @@ export declare class InventoryController {
             createdAt: Date;
             name: string;
             email: string | null;
-            address: string | null;
-            phone: string | null;
             contactPerson: string | null;
+            phone: string | null;
+            address: string | null;
         };
     } & {
         id: string;
@@ -650,12 +650,12 @@ export declare class InventoryController {
         }[];
     }): Promise<{
         menuItem: {
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string;
             categoryId: string;
-            description: string | null;
             price: import("@prisma/client/runtime/library").Decimal;
             isDirectSale: boolean;
             directIngredientId: string | null;
@@ -719,8 +719,8 @@ export declare class InventoryController {
         balance: {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
-            ingredientId: string;
             locationId: string;
+            ingredientId: string;
             reservedQuantity: import("@prisma/client/runtime/library").Decimal;
             lastUpdatedAt: Date;
         };
@@ -728,10 +728,10 @@ export declare class InventoryController {
             id: string;
             createdAt: Date;
             quantity: import("@prisma/client/runtime/library").Decimal;
-            transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
+            ingredientId: string;
             sourceLocationId: string | null;
             destLocationId: string | null;
-            ingredientId: string;
+            transactionType: import("@prisma/client").$Enums.InventoryTransactionType;
             unitCost: import("@prisma/client/runtime/library").Decimal;
             totalCost: import("@prisma/client/runtime/library").Decimal;
             referenceId: string | null;
@@ -804,11 +804,11 @@ export declare class InventoryController {
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
-        sourceLocationId: string;
-        destLocationId: string;
         transferNumber: string;
         dispatchedAt: Date | null;
         receivedAt: Date | null;
+        sourceLocationId: string;
+        destLocationId: string;
         requestedById: string;
         approvedById: string | null;
     }>;
@@ -823,8 +823,8 @@ export declare class InventoryController {
         } & {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
-            ingredientId: string;
             locationId: string;
+            ingredientId: string;
             reservedQuantity: import("@prisma/client/runtime/library").Decimal;
             lastUpdatedAt: Date;
         })[];
@@ -906,8 +906,8 @@ export declare class InventoryController {
         } & {
             id: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
-            ingredientId: string;
             locationId: string;
+            ingredientId: string;
             reservedQuantity: import("@prisma/client/runtime/library").Decimal;
             lastUpdatedAt: Date;
         })[];

@@ -95,6 +95,14 @@ export function LoginScreen() {
   // Load active staff profiles for the dropdown
   useEffect(() => {
     loadStaffProfiles();
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('disabled') === 'true') {
+        setError('Your account has been disabled by the Owner. Your session has ended.');
+        window.history.replaceState({}, '', '/login');
+      }
+    }
   }, []);
 
   const selectedStaff = visibleStaffList.find((s) => s.id === selectedStaffId);

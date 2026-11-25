@@ -40,6 +40,9 @@ let EventsGateway = class EventsGateway {
     broadcastTransferUpdated(transfer) {
         this.server?.emit(shared_types_1.SocketEvents.STOCK_TRANSFER_UPDATED, transfer);
     }
+    broadcastUserStatus(userId, isActive) {
+        this.server?.emit('user:status_changed', { userId, isActive });
+    }
     broadcastInventoryUpdated() {
         this.server?.emit('inventory:updated');
     }

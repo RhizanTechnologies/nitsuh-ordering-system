@@ -31,6 +31,9 @@ import {
   BarChart3,
   X,
   Trash2,
+  UserX,
+  UserCheck,
+  Ban,
 } from 'lucide-react';
 import { StaffAvatarUploader, AVATAR_PRESETS } from './StaffAvatarUploader';
 import { Button, Badge, Input, Card } from '@/components/ui';
@@ -98,7 +101,7 @@ export function StaffManagementView() {
   // Search & Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
-  const [activeOnly, setActiveOnly] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'DISABLED'>('ALL');
 
   // Revealed PIN codes
   const [revealedPins, setRevealedPins] = useState<Record<string, boolean>>({});
@@ -363,25 +366,36 @@ export function StaffManagementView() {
       triggerToast('Managers cannot alter Owner status.', 'error');
       return;
     }
+    if (!isOwner && staff.role === 'MANAGER' && staff.id !== currentUser?.id) {
+      triggerToast('Only the Owner can disable or enable Manager accounts.', 'error');
+      return;
+    }
     if (staff.id === currentUser?.id) {
-      triggerToast('You cannot deactivate your own active session!', 'error');
+      triggerToast('You cannot disable your own active account!', 'error');
       return;
     }
 
-    const action = staff.isActive ? 'deactivate' : 'activate';
+    const willDisable = staff.isActive;
     setConfirmModal({
-      title: `${staff.isActive ? 'Deactivate' : 'Activate'} Staff Member`,
-      description: `Are you sure you want to ${action} ${staff.name}? ${staff.isActive ? 'They will not be able to log in to active terminals.' : 'They will regain access to system terminals.'}`,
-      confirmText: staff.isActive ? 'Deactivate' : 'Activate',
-      isDanger: staff.isActive,
+      title: willDisable ? 'Disable Staff Member' : 'Enable Staff Member',
+      description: willDisable
+        ? `Are you sure you want to disable ${staff.name}? They will immediately be locked out of the website and cannot log into any station. All profile information, PIN code, and past history are preserved.`
+        : `Enable website access for ${staff.name}? Their existing PIN and credentials will immediately work again.`,
+      confirmText: willDisable ? 'Disable Access' : 'Enable Access',
+      isDanger: willDisable,
       onConfirm: async () => {
         setConfirmModal(null);
         try {
           await fetchApi(`/users/${staff.id}/toggle-status`, { method: 'PATCH' });
-          triggerToast(`${staff.name} is now ${staff.isActive ? 'inactive (locked out)' : 'active'}`, 'success');
+          triggerToast(
+            willDisable
+              ? `${staff.name} is now disabled (locked out of website). Profile information is preserved.`
+              : `${staff.name} is now active and can access the website.`,
+            'success',
+          );
           loadStaff();
         } catch (err: any) {
-          triggerToast(err.message || 'Failed to toggle status', 'error');
+          triggerToast(err.message || 'Failed to update staff status', 'error');
         }
       },
     });
@@ -486,7 +500,8 @@ export function StaffManagementView() {
   // Filtered staff
   const filteredStaff = useMemo(() => {
     return visibleStaffList.filter((s) => {
-      if (activeOnly && !s.isActive) return false;
+      if (statusFilter === 'ACTIVE' && !s.isActive) return false;
+      if (statusFilter === 'DISABLED' && s.isActive) return false;
       if (roleFilter !== 'ALL' && s.role !== roleFilter) return false;
       if (searchTerm) {
         const q = searchTerm.toLowerCase();
@@ -497,10 +512,11 @@ export function StaffManagementView() {
       }
       return true;
     });
-  }, [visibleStaffList, activeOnly, roleFilter, searchTerm]);
+  }, [visibleStaffList, statusFilter, roleFilter, searchTerm]);
 
   const totalStaff = visibleStaffList.length;
   const activeStaff = visibleStaffList.filter((s) => s.isActive).length;
+  const disabledStaff = visibleStaffList.filter((s) => !s.isActive).length;
   const frontOfHouse = visibleStaffList.filter((s) => s.role === 'CASHIER' || s.role === 'WAITER').length;
   const kitchenStaff = visibleStaffList.filter((s) => s.role === 'KITCHEN_STAFF' || s.role === 'HEAD_CHEF').length;
   const storeStaff = visibleStaffList.filter((s) => s.role === 'MAIN_STOREKEEPER' || s.role === 'KITCHEN_STOREKEEPER').length;
@@ -575,26 +591,26 @@ export function StaffManagementView() {
           </div>
         </div>
 
-        {/* Stats Row - Clean, simple, no clutter */}
+        {/* Stats Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-4 pt-4 border-t border-stone-200/80">
           <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
             <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Total Staff</div>
             <div className="text-xl font-black text-stone-900 mt-0.5">{totalStaff}</div>
           </div>
 
-          <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
-            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Front of House</div>
-            <div className="text-xl font-black text-stone-900 mt-0.5">{frontOfHouse}</div>
+          <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-3">
+            <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Active Staff</div>
+            <div className="text-xl font-black text-emerald-800 mt-0.5">{activeStaff}</div>
+          </div>
+
+          <div className="bg-rose-50/60 border border-rose-200/80 rounded-2xl p-3">
+            <div className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Disabled Staff</div>
+            <div className="text-xl font-black text-rose-800 mt-0.5">{disabledStaff}</div>
           </div>
 
           <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
-            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Kitchen</div>
-            <div className="text-xl font-black text-stone-900 mt-0.5">{kitchenStaff}</div>
-          </div>
-
-          <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
-            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Storekeepers</div>
-            <div className="text-xl font-black text-stone-900 mt-0.5">{storeStaff}</div>
+            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Kitchen & Store</div>
+            <div className="text-xl font-black text-stone-900 mt-0.5">{kitchenStaff + storeStaff}</div>
           </div>
         </div>
       </div>
@@ -725,22 +741,45 @@ export function StaffManagementView() {
         </div>
       )}
 
-      {/* Search & Role Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
-          <input
-            type="text"
-            placeholder="Search staff..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white border border-stone-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-600 shadow-xs"
-          />
+      {/* Search & Status/Role Filters Bar */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 flex-1 flex-wrap">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+            <input
+              type="text"
+              placeholder="Search staff..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white border border-stone-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-600 shadow-xs"
+            />
+          </div>
+
+          {/* Status Filter: All / Active / Disabled */}
+          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-2xl border border-stone-200 shrink-0">
+            {[
+              { id: 'ALL', label: `All (${totalStaff})` },
+              { id: 'ACTIVE', label: `Active (${activeStaff})` },
+              { id: 'DISABLED', label: `Disabled (${disabledStaff})` },
+            ].map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setStatusFilter(s.id as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                  statusFilter === s.id
+                    ? 'bg-white text-stone-950 font-black shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {[
-            { id: 'ALL', label: 'All' },
+            { id: 'ALL', label: 'All Roles' },
             ...(isOwner ? [{ id: 'OWNER', label: 'Owner' }] : []),
             { id: 'CASHIER', label: 'Cashiers' },
             { id: 'WAITER', label: 'Waiters' },
@@ -760,16 +799,6 @@ export function StaffManagementView() {
               {tab.label}
             </button>
           ))}
-
-          <label className="flex items-center gap-1.5 text-xs font-bold text-stone-600 ml-2 cursor-pointer shrink-0 select-none">
-            <input
-              type="checkbox"
-              checked={activeOnly}
-              onChange={(e) => setActiveOnly(e.target.checked)}
-              className="rounded accent-emerald-600"
-            />
-            <span className="whitespace-nowrap">Active Only</span>
-          </label>
         </div>
       </div>
 
@@ -832,20 +861,41 @@ export function StaffManagementView() {
                       </div>
                     </div>
 
-                    {/* Status Toggle Switch */}
-                    <button
-                      onClick={() => handleToggleStatus(staff)}
-                      title={`Click to ${staff.isActive ? 'Deactivate' : 'Activate'}`}
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs ${
-                        staff.isActive
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
-                          : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${staff.isActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                      <span>{staff.isActive ? 'Active' : 'Locked'}</span>
-                    </button>
+                    {/* Status Badge */}
+                    {staff.pinCode?.startsWith('ARC-') ? (
+                      <span className="text-[10px] font-black px-2.5 py-1 rounded-xl bg-stone-100 text-stone-600 border border-stone-200 flex items-center gap-1.5 shadow-xs">
+                        <span className="w-2 h-2 rounded-full bg-stone-400" />
+                        <span>Archived</span>
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleToggleStatus(staff)}
+                        title={
+                          staff.id === currentUser?.id
+                            ? 'Your active account'
+                            : staff.isActive
+                            ? 'Click to Disable Access'
+                            : 'Click to Enable Access'
+                        }
+                        className={`text-[10px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs ${
+                          staff.isActive
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-100'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${staff.isActive ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`} />
+                        <span>{staff.isActive ? 'Active' : 'Disabled'}</span>
+                      </button>
+                    )}
                   </div>
+
+                  {/* Informative banner if account is disabled */}
+                  {!staff.isActive && !staff.pinCode?.startsWith('ARC-') && (
+                    <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-800 text-[11px] font-semibold flex items-center gap-1.5">
+                      <UserX className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                      <span>Disabled — Cannot use website. Profile & PIN preserved.</span>
+                    </div>
+                  )}
 
                   {/* Terminal PIN Box */}
                   <div className="mt-3.5 p-3 bg-stone-50 rounded-2xl border border-stone-200/80 flex items-center justify-between">
@@ -915,10 +965,37 @@ export function StaffManagementView() {
                     </button>
                   )}
 
+                  {/* Dedicated Enable/Disable Access Button */}
+                  {staff.id !== currentUser?.id && (isOwner || (staff.role !== 'OWNER' && staff.role !== 'MANAGER')) && (
+                    <button
+                      onClick={() => handleToggleStatus(staff)}
+                      className={`py-1.5 px-2 rounded-xl text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer border ${
+                        staff.isActive
+                          ? 'bg-stone-100 hover:bg-rose-50 text-stone-700 hover:text-rose-700 border-stone-200 hover:border-rose-300'
+                          : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-xs'
+                      }`}
+                      title={staff.isActive ? 'Disable user from using the website' : 'Enable website access'}
+                    >
+                      {staff.isActive ? (
+                        <>
+                          <UserX className="w-3 h-3" />
+                          <span>Disable</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="w-3 h-3" />
+                          <span>Enable</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Archive Button */}
                   {staff.role !== 'OWNER' && (
                     <button
                       onClick={() => handleArchiveStaff(staff)}
-                      className="py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                      className="py-1.5 px-2 bg-stone-100 hover:bg-rose-50 text-stone-600 hover:text-rose-700 border border-stone-200 hover:border-rose-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                      title="Archive Staff Member"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>

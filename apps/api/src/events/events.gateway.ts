@@ -55,6 +55,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server?.emit(SocketEvents.STOCK_TRANSFER_UPDATED, transfer);
   }
 
+  // Broadcast user active/disabled status change to instantly terminate live sessions
+  broadcastUserStatus(userId: string, isActive: boolean) {
+    this.server?.emit('user:status_changed', { userId, isActive });
+  }
+
   // Broadcast inventory and ingredient catalog update
   broadcastInventoryUpdated() {
     this.server?.emit('inventory:updated');

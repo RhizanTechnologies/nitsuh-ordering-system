@@ -45,11 +45,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
+const events_gateway_1 = require("../events/events.gateway");
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcryptjs"));
 let UsersService = class UsersService {
-    constructor(prisma) {
+    constructor(prisma, eventsGateway) {
         this.prisma = prisma;
+        this.eventsGateway = eventsGateway;
     }
     async getAllUsers(requesterRole) {
         const where = {};
@@ -286,11 +288,14 @@ let UsersService = class UsersService {
     }
     async toggleStatus(id, requesterId, requesterRole) {
         if (id === requesterId) {
-            throw new common_1.BadRequestException('You cannot deactivate your own account while logged in');
+            throw new common_1.BadRequestException('You cannot disable your own active account while logged in');
         }
         const user = await this.getUserById(id, requesterRole);
         if (requesterRole === 'MANAGER' && user.role === client_1.UserRole.OWNER) {
-            throw new common_1.ForbiddenException('Managers cannot toggle Owner status');
+            throw new common_1.ForbiddenException('Managers cannot alter Owner status');
+        }
+        if (requesterRole === 'MANAGER' && user.role === client_1.UserRole.MANAGER) {
+            throw new common_1.ForbiddenException('Managers cannot disable other Managers. Only the Owner can manage management accounts.');
         }
         const newStatus = !user.isActive;
         const updated = await this.prisma.user.update({
@@ -304,6 +309,7 @@ let UsersService = class UsersService {
                 isActive: true,
             },
         });
+        this.eventsGateway.broadcastUserStatus(id, newStatus);
         return updated;
     }
     async deleteUser(id, requesterId, requesterRole) {
@@ -726,6 +732,7 @@ let UsersService = class UsersService {
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        events_gateway_1.EventsGateway])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

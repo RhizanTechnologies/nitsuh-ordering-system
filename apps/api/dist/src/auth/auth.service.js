@@ -66,8 +66,11 @@ let AuthService = class AuthService {
                 ],
             },
         });
-        if (!user || !user.isActive) {
-            throw new common_1.UnauthorizedException('Invalid identifier or inactive account');
+        if (!user) {
+            throw new common_1.UnauthorizedException('Invalid identifier or password');
+        }
+        if (!user.isActive) {
+            throw new common_1.UnauthorizedException('This account has been disabled by the Owner. Please contact management.');
         }
         const matches = await bcrypt.compare(pass, user.passwordHash);
         if (!matches) {
@@ -93,6 +96,12 @@ let AuthService = class AuthService {
         };
     }
     async loginWithPin(pin, userId) {
+        if (userId) {
+            const targetUser = await this.prisma.user.findUnique({ where: { id: userId } });
+            if (targetUser && !targetUser.isActive) {
+                throw new common_1.UnauthorizedException('This staff account is currently disabled. Please contact the Owner.');
+            }
+        }
         const whereClause = { pinCode: pin, isActive: true };
         if (userId) {
             whereClause.id = userId;
@@ -101,6 +110,12 @@ let AuthService = class AuthService {
             where: whereClause,
         });
         if (!user) {
+            const disabledWithPin = await this.prisma.user.findFirst({
+                where: { pinCode: pin, isActive: false },
+            });
+            if (disabledWithPin) {
+                throw new common_1.UnauthorizedException('This account has been disabled by the Owner. Please contact management.');
+            }
             throw new common_1.UnauthorizedException(userId ? 'Incorrect PIN for the selected employee' : 'Invalid employee PIN');
         }
         if (user.role === 'OWNER' || user.role === 'MANAGER') {

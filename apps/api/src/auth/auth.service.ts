@@ -26,8 +26,12 @@ export class AuthService {
       },
     });
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Invalid identifier or inactive account');
+    if (!user) {
+      throw new UnauthorizedException('Invalid identifier or password');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('This account has been disabled by the Owner. Please contact management.');
     }
 
     const matches = await bcrypt.compare(pass, user.passwordHash);
@@ -57,6 +61,13 @@ export class AuthService {
 
   // Fast 4-6 digit touch PIN switch with optional specific employee targeting
   async loginWithPin(pin: string, userId?: string) {
+    if (userId) {
+      const targetUser = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (targetUser && !targetUser.isActive) {
+        throw new UnauthorizedException('This staff account is currently disabled. Please contact the Owner.');
+      }
+    }
+
     const whereClause: any = { pinCode: pin, isActive: true };
     if (userId) {
       whereClause.id = userId;
@@ -67,6 +78,12 @@ export class AuthService {
     });
 
     if (!user) {
+      const disabledWithPin = await this.prisma.user.findFirst({
+        where: { pinCode: pin, isActive: false },
+      });
+      if (disabledWithPin) {
+        throw new UnauthorizedException('This account has been disabled by the Owner. Please contact management.');
+      }
       throw new UnauthorizedException(
         userId ? 'Incorrect PIN for the selected employee' : 'Invalid employee PIN',
       );

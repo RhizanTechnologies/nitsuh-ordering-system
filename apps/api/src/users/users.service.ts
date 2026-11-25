@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { EventsGateway } from '../events/events.gateway';
 import { UserRole, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
@@ -23,7 +24,10 @@ export interface UpdateUserDto {
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventsGateway: EventsGateway,
+  ) {}
 
   // List all staff with station workload stats
   async getAllUsers(requesterRole?: string) {
@@ -303,15 +307,18 @@ export class UsersService {
     return { message: `Password successfully updated for ${updated.name}` };
   }
 
-  // Toggle active status
+  // Toggle active status (Owner can disable anyone except self; Manager cannot alter Owner or other Managers)
   async toggleStatus(id: string, requesterId: string, requesterRole?: string) {
     if (id === requesterId) {
-      throw new BadRequestException('You cannot deactivate your own account while logged in');
+      throw new BadRequestException('You cannot disable your own active account while logged in');
     }
 
     const user = await this.getUserById(id, requesterRole);
     if (requesterRole === 'MANAGER' && user.role === UserRole.OWNER) {
-      throw new ForbiddenException('Managers cannot toggle Owner status');
+      throw new ForbiddenException('Managers cannot alter Owner status');
+    }
+    if (requesterRole === 'MANAGER' && user.role === UserRole.MANAGER) {
+      throw new ForbiddenException('Managers cannot disable other Managers. Only the Owner can manage management accounts.');
     }
     const newStatus = !user.isActive;
 
@@ -326,6 +333,9 @@ export class UsersService {
         isActive: true,
       },
     });
+
+    // Broadcast status change immediately to terminate live web sessions
+    this.eventsGateway.broadcastUserStatus(id, newStatus);
 
     return updated;
   }
