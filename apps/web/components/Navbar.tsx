@@ -76,7 +76,7 @@ export function Navbar() {
   const handleLogout = () => {
     setProfileOpen(false);
     logout();
-    router.push('/login');
+    router.replace('/login');
   };
 
   const navLinkClass = (path: string) => `

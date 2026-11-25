@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { isRouteAllowed, getDefaultRouteForRole } from '@/lib/route-guard';
 import { Navbar } from '@/components/Navbar';
-import { getSocket } from '@/lib/api';
+import { fetchApi, getSocket } from '@/lib/api';
 import { ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function ProtectedAppLayout({
@@ -53,9 +53,23 @@ export default function ProtectedAppLayout({
     }
   }, [hydrated, currentUser, isAllowed, fallbackRoute, router]);
 
-  // Real-time account status enforcement: if Owner disables account, kill session immediately
+  // Real-time + per-navigation account status enforcement
   useEffect(() => {
-    if (!currentUser) return;
+    if (!hydrated || !currentUser) return;
+
+    let cancelled = false;
+    fetchApi('/auth/me')
+      .then((freshUser) => {
+        if (!cancelled && freshUser && !freshUser.isActive) {
+          localStorage.removeItem('cafe_token');
+          localStorage.removeItem('cafe_user');
+          window.location.href = '/login?disabled=true';
+        }
+      })
+      .catch(() => {
+        // 401 is already handled in fetchApi (clears storage & redirects to /login)
+      });
+
     const socket = getSocket();
     const handleStatusChanged = (data: { userId: string; isActive: boolean }) => {
       if (data?.userId === currentUser.id && !data.isActive) {
@@ -69,9 +83,10 @@ export default function ProtectedAppLayout({
 
     socket.on('user:status_changed', handleStatusChanged);
     return () => {
+      cancelled = true;
       socket.off('user:status_changed', handleStatusChanged);
     };
-  }, [currentUser]);
+  }, [hydrated, currentUser, pathname]);
 
   if (!hydrated || !currentUser) {
     return (

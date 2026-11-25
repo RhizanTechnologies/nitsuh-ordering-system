@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Put, Body, Param, Query, Patch, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query, Patch, BadRequestException, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { OrdersService } from './orders.service';
 import { OrderStatus, OrderType, PaymentMethod } from '@cafe/shared-types';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('orders')
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}

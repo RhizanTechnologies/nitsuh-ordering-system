@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { InventoryService } from './inventory.service';
 import { LocationType } from '@cafe/shared-types';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('inventory')
 export class InventoryController {
   constructor(private inventoryService: InventoryService) {}

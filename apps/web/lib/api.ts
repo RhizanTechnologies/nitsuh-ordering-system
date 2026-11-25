@@ -43,14 +43,17 @@ export async function fetchApi(endpoint: string, options?: RequestInit) {
   });
 
   if (res.status === 401) {
+    const err = await res.json().catch(() => ({ message: 'Unauthorized' }));
+    const isDisabled =
+      typeof err?.message === 'string' &&
+      err.message.toLowerCase().includes('not active');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('cafe_token');
       localStorage.removeItem('cafe_user');
       if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+        window.location.href = isDisabled ? '/login?disabled=true' : '/login';
       }
     }
-    const err = await res.json().catch(() => ({ message: 'Unauthorized' }));
     throw new Error(err.message || 'Session expired or unauthorized');
   }
 

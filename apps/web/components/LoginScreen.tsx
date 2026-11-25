@@ -6,11 +6,12 @@ import { useAppStore } from '@/lib/store';
 import { getDefaultRouteForRole } from '@/lib/route-guard';
 import { fetchApi } from '@/lib/api';
 import { NitsuhLogo } from '@/components/NitsuhLogo';
-import { Lock, KeyRound, ArrowRight, UserCircle, Check, HelpCircle, Sparkles, X, ShieldAlert, ChevronDown } from 'lucide-react';
+import { Lock, KeyRound, ArrowRight, UserCircle, Check, HelpCircle, Sparkles, X, ShieldAlert, ChevronDown, Loader2 } from 'lucide-react';
 
 export function LoginScreen() {
   const router = useRouter();
-  const { login } = useAppStore();
+  const { login, logout } = useAppStore();
+  const [checkingSession, setCheckingSession] = useState(true);
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -92,18 +93,62 @@ export function LoginScreen() {
       });
   };
 
-  // Load active staff profiles for the dropdown
+  // Redirect already-logged-in users away from /login (including on Back button / bfcache)
   useEffect(() => {
-    loadStaffProfiles();
+    let active = true;
 
-    if (typeof window !== 'undefined') {
+    const verifyAndRedirectOrLoad = async () => {
+      if (typeof window === 'undefined') return;
+
       const params = new URLSearchParams(window.location.search);
       if (params.get('disabled') === 'true') {
+        logout();
         setError('Your account has been disabled by the Owner. Your session has ended.');
         window.history.replaceState({}, '', '/login');
+        if (active) {
+          setCheckingSession(false);
+          loadStaffProfiles();
+        }
+        return;
       }
-    }
-  }, []);
+
+      const storedToken = localStorage.getItem('cafe_token');
+      const storedUser = localStorage.getItem('cafe_user');
+
+      if (storedToken && storedUser) {
+        try {
+          const me = await fetchApi('/auth/me');
+          if (active && me && me.isActive !== false) {
+            login(storedToken, me);
+            router.replace(getDefaultRouteForRole(me.role));
+            return;
+          }
+        } catch {
+          // 401/invalid token already cleared in fetchApi
+        }
+      }
+
+      if (active) {
+        setCheckingSession(false);
+        loadStaffProfiles();
+      }
+    };
+
+    verifyAndRedirectOrLoad();
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setCheckingSession(true);
+        verifyAndRedirectOrLoad();
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      active = false;
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, [login, logout, router]);
 
   const selectedStaff = visibleStaffList.find((s) => s.id === selectedStaffId);
 
@@ -211,7 +256,7 @@ export function LoginScreen() {
 
       login(res.accessToken, res.user);
       const targetRoute = getDefaultRouteForRole(res.user.role);
-      router.push(targetRoute);
+      router.replace(targetRoute);
     } catch (err: any) {
       setError(err.message || 'Incorrect PIN for selected employee');
       setPin('');
@@ -233,7 +278,7 @@ export function LoginScreen() {
 
       login(res.accessToken, res.user);
       const targetRoute = getDefaultRouteForRole(res.user.role);
-      router.push(targetRoute);
+      router.replace(targetRoute);
     } catch (err: any) {
       setError(err.message || 'Invalid Employee Code, Email or Password');
     } finally {
@@ -279,6 +324,17 @@ export function LoginScreen() {
       setForgotSubmitting(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-[#F8F9FA] text-stone-900 flex flex-col items-center justify-center p-4">
+        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mb-3" />
+        <p className="text-xs font-semibold text-stone-600 tracking-wider font-heading">
+          Checking active session...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-stone-900 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
