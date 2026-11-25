@@ -37,9 +37,14 @@ export function ProductManagementView() {
   const [search, setSearch] = useState('');
   const [selectedCatId, setSelectedCatId] = useState<string>('');
 
-  // View Mode: 'single' (1 product per page) | 'list' (1 product per row) | 'grid'
-  const [viewMode, setViewMode] = useState<'single' | 'list' | 'grid'>('single');
+  // View Mode: 'grid' | 'list'
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [singleIndex, setSingleIndex] = useState(0);
+
+  // Category Management Modal
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [savingCat, setSavingCat] = useState(false);
 
   // Modals
   const [recipeModalOpen, setRecipeModalOpen] = useState(false);
@@ -251,6 +256,52 @@ export function ProductManagementView() {
     }
   };
 
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    setSavingCat(true);
+    try {
+      await fetchApi('/menu/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name: newCatName.trim() }),
+      });
+      const createdName = newCatName.trim();
+      setNewCatName('');
+      setCategoryModalOpen(false);
+      showToast(`Category "${createdName}" created successfully!`, 'success');
+      loadData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to create category', 'error');
+    } finally {
+      setSavingCat(false);
+    }
+  };
+
+  const handleDeleteCategory = (cat: any) => {
+    if (cat._count?.menuItems > 0 || cat._count?.addons > 0) {
+      showToast(
+        `Cannot delete "${cat.name}" because it has ${cat._count?.menuItems || 0} items assigned. Reassign items first.`,
+        'error',
+      );
+      return;
+    }
+    setConfirmModal({
+      title: 'Delete Category',
+      description: `Are you sure you want to delete category "${cat.name}"?`,
+      confirmText: 'Delete Category',
+      isDanger: true,
+      onConfirm: async () => {
+        try {
+          await fetchApi(`/menu/categories/${cat.id}`, { method: 'DELETE' });
+          showToast(`Category "${cat.name}" deleted.`, 'success');
+          loadData();
+        } catch (err: any) {
+          showToast(err.message || 'Failed to delete category', 'error');
+        }
+      },
+    });
+  };
+
   const handleDeleteAddon = (addon: any) => {
     setConfirmModal({
       title: 'Delete Add-on',
@@ -299,39 +350,6 @@ export function ProductManagementView() {
       return matchSearch && matchCat;
     });
   }, [items, search, selectedCatId]);
-
-  const safeSingleIndex =
-    filteredItems.length > 0
-      ? Math.min(Math.max(0, singleIndex), filteredItems.length - 1)
-      : 0;
-  const currentSingleItem = filteredItems[safeSingleIndex];
-
-  // Keyboard navigation for 1 Product Per Page view
-  useEffect(() => {
-    if (activeTab !== 'products' || viewMode !== 'single') return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        ['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName) ||
-        recipeModalOpen ||
-        productModalOpen ||
-        addonModalOpen
-      ) {
-        return;
-      }
-
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        setSingleIndex((prev) => Math.max(0, prev - 1));
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        setSingleIndex((prev) => Math.min(filteredItems.length - 1, prev + 1));
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab, viewMode, filteredItems.length, recipeModalOpen, productModalOpen, addonModalOpen]);
 
   const filteredAddons = useMemo(() => {
     const q = addonSearch.trim().toLowerCase();
@@ -541,13 +559,23 @@ export function ProductManagementView() {
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
             {activeTab === 'products' ? (
-              <button
-                onClick={openAddModal}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
-              >
-                <Plus className="w-4 h-4 stroke-[3]" />
-                <span>Add Product</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCategoryModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-800 font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+                  title="Create or manage product categories"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>+ Category</span>
+                </button>
+                <button
+                  onClick={openAddModal}
+                  className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 stroke-[3]" />
+                  <span>Add Product</span>
+                </button>
+              </div>
             ) : (
               <button
                 onClick={openAddAddonModal}
@@ -670,6 +698,14 @@ export function ProductManagementView() {
                   </span>
                 </button>
               ))}
+              <button
+                onClick={() => setCategoryModalOpen(true)}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border border-dashed border-emerald-400 text-emerald-700 hover:bg-emerald-50 flex items-center gap-1 cursor-pointer shrink-0"
+                title="Add new category"
+              >
+                <Plus className="w-3 h-3 stroke-[3]" />
+                <span>+ Category</span>
+              </button>
             </div>
           </div>
         )}
@@ -697,36 +733,12 @@ export function ProductManagementView() {
         )}
       </div>
 
-      {/* TAB 1 CONTENT: PRODUCTS STUDIO (1 PER PAGE / 1 PER ROW / GRID) */}
+      {/* TAB 1 CONTENT: PRODUCTS STUDIO (GRID / LIST) */}
       {activeTab === 'products' && (
         <div className="space-y-4">
           {/* View Mode Switcher & Stats Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-stone-100/60 border border-stone-200/80 p-3 rounded-2xl">
             <div className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-xl w-fit">
-              <button
-                onClick={() => setViewMode('single')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  viewMode === 'single'
-                    ? 'bg-emerald-600 text-white font-black shadow-xs'
-                    : 'text-stone-600 hover:text-stone-900'
-                }`}
-                title="View one product per page with full recipe and margin details"
-              >
-                <Square className="w-3.5 h-3.5" />
-                <span>1 Product Per Page</span>
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  viewMode === 'list'
-                    ? 'bg-emerald-600 text-white font-black shadow-xs'
-                    : 'text-stone-600 hover:text-stone-900'
-                }`}
-                title="View products in clean 1-per-row list"
-              >
-                <LayoutList className="w-3.5 h-3.5" />
-                <span>1 Per Row (List)</span>
-              </button>
               <button
                 onClick={() => setViewMode('grid')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
@@ -739,6 +751,18 @@ export function ProductManagementView() {
                 <LayoutGrid className="w-3.5 h-3.5" />
                 <span>Grid</span>
               </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  viewMode === 'list'
+                    ? 'bg-emerald-600 text-white font-black shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+                title="View products in clean 1-per-row list"
+              >
+                <LayoutList className="w-3.5 h-3.5" />
+                <span>List (1 Per Row)</span>
+              </button>
             </div>
 
             <div className="text-xs font-bold text-zinc-400">
@@ -749,89 +773,7 @@ export function ProductManagementView() {
             </div>
           </div>
 
-          {/* VIEW MODE 1: 1 PRODUCT PER PAGE (CLEAN SHOWCASE) */}
-          {viewMode === 'single' && (
-            <div>
-              {filteredItems.length === 0 ? (
-                <div className="py-16 text-center text-xs text-zinc-500 bg-white border border-stone-200/90 rounded-3xl">
-                  No products found matching your search.
-                </div>
-              ) : currentSingleItem ? (
-                <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 shadow-xs max-w-lg mx-auto space-y-6">
-                  {/* Stepper / Pagination Header */}
-                  <div className="flex items-center justify-between gap-2 pb-4 border-b border-stone-200">
-                    <button
-                      onClick={() => setSingleIndex((p) => Math.max(0, p - 1))}
-                      disabled={safeSingleIndex === 0}
-                      className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-stone-700 border border-stone-200 flex items-center gap-1 transition cursor-pointer"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                      <span>Previous</span>
-                    </button>
-
-                    <span className="text-xs font-bold text-stone-500">
-                      <span className="text-emerald-700 font-black">{safeSingleIndex + 1}</span> of{' '}
-                      <span className="text-stone-900 font-black">{filteredItems.length}</span>
-                    </span>
-
-                    <button
-                      onClick={() => setSingleIndex((p) => Math.min(filteredItems.length - 1, p + 1))}
-                      disabled={safeSingleIndex >= filteredItems.length - 1}
-                      className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-stone-700 border border-stone-200 flex items-center gap-1 transition cursor-pointer"
-                    >
-                      <span>Next</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Clean Visual & Product Details */}
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="w-52 h-52 sm:w-64 sm:h-64 rounded-3xl overflow-hidden bg-stone-100 border border-stone-200 shadow-xs">
-                      <MenuImage
-                        src={currentSingleItem.imageUrl}
-                        alt={currentSingleItem.name}
-                        categoryName={currentSingleItem.category?.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 inline-block">
-                        {currentSingleItem.category?.name || 'General'}
-                      </span>
-                      <h2 className="text-2xl sm:text-3xl font-black text-stone-900 leading-tight">
-                        {currentSingleItem.name}
-                      </h2>
-                      <div className="text-2xl sm:text-3xl font-black text-stone-900">
-                        {Number(currentSingleItem.price || 0).toFixed(2)} <span className="text-base font-bold text-stone-500">ETB</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Clean Actions */}
-                  <div className="flex items-center justify-center gap-3 pt-4 border-t border-stone-200">
-                    <button
-                      onClick={() => openEditModal(currentSingleItem)}
-                      className="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition cursor-pointer"
-                    >
-                      <Edit2 className="w-4 h-4 stroke-[2.5]" />
-                      <span>Edit Product</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteProduct(currentSingleItem)}
-                      className="py-2.5 px-4 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition border border-rose-200 cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          )}
-
-          {/* VIEW MODE 2: 1 PER ROW (CLEAN LIST VIEW) */}
+          {/* VIEW MODE 1: 1 PER ROW (CLEAN LIST VIEW) */}
           {viewMode === 'list' && (
             <div className="space-y-2.5">
               {filteredItems.length === 0 ? (
@@ -1483,6 +1425,125 @@ export function ProductManagementView() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Modal: Category Management */}
+      {categoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white border border-stone-200 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-stone-900">Manage Categories</h3>
+                  <p className="text-[11px] text-stone-500 font-medium">Add, review, or organize menu categories</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setCategoryModalOpen(false)}
+                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Quick Add Form */}
+            <form onSubmit={handleCreateCategory} className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">
+                  New Category Name
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Add-ons, Combo Meals, Desserts..."
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    className="flex-1 bg-stone-50 border border-stone-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-xl px-3 py-2 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none transition"
+                  />
+                  <button
+                    type="submit"
+                    disabled={savingCat || !newCatName.trim()}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition disabled:opacity-50 cursor-pointer shrink-0"
+                  >
+                    {savingCat ? 'Adding...' : '+ Add'}
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            {/* Quick Suggestions for Missing Categories */}
+            {!categories.some((c) => c.name.toLowerCase().includes('add-on') || c.name.toLowerCase().includes('addon')) && (
+              <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-2xl flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold text-amber-900">
+                  💡 Tip: Add an "Add-ons" category for extras & toppings.
+                </span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setSavingCat(true);
+                    try {
+                      await fetchApi('/menu/categories', {
+                        method: 'POST',
+                        body: JSON.stringify({ name: 'Add-ons' }),
+                      });
+                      showToast('Category "Add-ons" created!', 'success');
+                      loadData();
+                    } catch (e: any) {
+                      showToast(e.message || 'Failed to add', 'error');
+                    } finally {
+                      setSavingCat(false);
+                    }
+                  }}
+                  className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] font-black shrink-0 cursor-pointer"
+                >
+                  Create "Add-ons"
+                </button>
+              </div>
+            )}
+
+            {/* Existing Categories List */}
+            <div className="space-y-2 pt-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                Active Categories ({categories.length})
+              </span>
+              <div className="max-h-56 overflow-y-auto divide-y divide-stone-100 rounded-2xl border border-stone-200 bg-stone-50/50 p-1">
+                {categories.map((c) => (
+                  <div key={c.id} className="p-2.5 flex items-center justify-between text-xs hover:bg-white rounded-xl transition">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-stone-900">{c.name}</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-stone-200/80 text-stone-700">
+                        {c._count?.menuItems || 0} products
+                      </span>
+                    </div>
+                    {(c._count?.menuItems || 0) === 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCategory(c)}
+                        className="p-1 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        title="Delete empty category"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-stone-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setCategoryModalOpen(false)}
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold text-stone-700 transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

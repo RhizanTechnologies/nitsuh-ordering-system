@@ -207,6 +207,15 @@ export default function TablesPage() {
 
   // Open modern in-app confirmation modal for deleting table
   const handleDelete = (tableId: string, name: string) => {
+    const table = tablesList.find((t) => t.id === tableId);
+    const hasActiveOrders = activeOrders.some((o) => o.tableId === tableId);
+    if (table?.status === 'OCCUPIED' || hasActiveOrders) {
+      showToast(
+        `Cannot delete table "${name}" while it is occupied. Please release or settle the table before deleting.`,
+        'error',
+      );
+      return;
+    }
     setDeleteModal({ id: tableId, name });
   };
 
@@ -599,8 +608,16 @@ export default function TablesPage() {
                     </button>
                     <button
                       onClick={() => handleDelete(t.id, t.tableNumber)}
-                      className="p-1.5 text-stone-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                      title="Delete table"
+                      className={`p-1.5 rounded-lg transition cursor-pointer ${
+                        t.status === 'OCCUPIED'
+                          ? 'text-stone-300 hover:text-rose-500 hover:bg-rose-50/50'
+                          : 'text-stone-500 hover:text-rose-600 hover:bg-rose-50'
+                      }`}
+                      title={
+                        t.status === 'OCCUPIED'
+                          ? 'Occupied table cannot be deleted (release or settle first)'
+                          : 'Delete table'
+                      }
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

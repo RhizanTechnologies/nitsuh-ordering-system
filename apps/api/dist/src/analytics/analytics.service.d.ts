@@ -11,6 +11,7 @@ export declare class AnalyticsService {
             wastageCost: number;
             expenses: number;
             grossProfit: number;
+            grossMarginPercent: number;
             netProfit: number;
             netMarginPercent: number;
             pendingOrders: number;
@@ -18,6 +19,16 @@ export declare class AnalyticsService {
             readyOrders: number;
             availableTables: string;
             customerSatisfactionScore: number;
+        };
+        qualityMetrics: {
+            satisfactionScore: number;
+            completedOrdersCount: number;
+            cancelledOrdersCount: number;
+            recentCancellations: {
+                orderNumber: string;
+                reason: string;
+                time: Date;
+            }[];
         };
         stockValuation: {
             mainStoreValuation: number;
@@ -29,14 +40,25 @@ export declare class AnalyticsService {
             count: number;
             revenue: number;
             imageUrl: string;
+            cogs: number;
         }[];
         weeklyTrend: {
             day: string;
+            label: string;
+            revenue: number;
+            profit: number;
+            cogs: number;
             coffee: number;
             food: number;
             tea: number;
             total: number;
+            orders: number;
         }[];
+        chartMeta: {
+            peakBadge: string;
+            peakAmount: number;
+            peakPeriod: string;
+        };
         recentTransactions: {
             id: string;
             orderNumber: string;

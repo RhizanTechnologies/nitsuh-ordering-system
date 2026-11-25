@@ -600,10 +600,12 @@ export class InventoryService {
     });
   }
 
-  // 8. Get Immutable Transaction Ledger
-  async getLedger(limit = 50) {
-    return this.prisma.inventoryTransaction.findMany({
-      take: limit,
+  // 8. Get Immutable Transaction Ledger (with pagination and total count)
+  async getLedger(limit?: number, page = 1) {
+    const total = await this.prisma.inventoryTransaction.count();
+    
+    // If limit is 0 or undefined, return all
+    const queryOptions: any = {
       include: {
         ingredient: { include: { baseUnit: true } },
         sourceLocation: true,
@@ -611,7 +613,22 @@ export class InventoryService {
         user: { select: { id: true, name: true, role: true } },
       },
       orderBy: { createdAt: 'desc' },
-    });
+    };
+
+    if (limit && limit > 0) {
+      queryOptions.take = limit;
+      queryOptions.skip = (page - 1) * limit;
+    }
+
+    const data = await this.prisma.inventoryTransaction.findMany(queryOptions);
+
+    return {
+      data,
+      total,
+      page,
+      limit: limit || total,
+      totalPages: limit && limit > 0 ? Math.ceil(total / limit) : 1,
+    };
   }
 
   // 9. Suppliers Management

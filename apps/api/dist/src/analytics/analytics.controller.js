@@ -14,14 +14,16 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnalyticsController = void 0;
 const common_1 = require("@nestjs/common");
+const passport_1 = require("@nestjs/passport");
 const analytics_service_1 = require("./analytics.service");
 let AnalyticsController = class AnalyticsController {
     constructor(analyticsService) {
         this.analyticsService = analyticsService;
     }
     async getDashboard(timeframe, role) {
-        if (role && role !== 'OWNER') {
-            throw new common_1.ForbiddenException('Executive profit and financial analytics are strictly restricted to the Owner.');
+        const norm = role?.trim().toUpperCase();
+        if (norm && norm !== 'OWNER' && norm !== 'MANAGER' && norm !== 'ADMIN') {
+            throw new common_1.ForbiddenException('Executive profit and financial analytics are strictly restricted to the Owner and Management.');
         }
         return this.analyticsService.getExecutiveDashboard(timeframe);
     }
@@ -36,6 +38,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AnalyticsController.prototype, "getDashboard", null);
 exports.AnalyticsController = AnalyticsController = __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('analytics'),
     __metadata("design:paramtypes", [analytics_service_1.AnalyticsService])
 ], AnalyticsController);

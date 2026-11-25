@@ -33,6 +33,8 @@ import {
   MapPin,
   Utensils,
   Edit3,
+  Loader2,
+  Layers,
 } from 'lucide-react';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { Button, Badge } from '@/components/ui';
@@ -60,7 +62,8 @@ export function WaiterPadView() {
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [allItems, setAllItems] = useState<any[]>([]);
-  const [groupFilter, setGroupFilter] = useState<'ALL' | 'BURGER' | 'PIZZA' | 'CHICKEN' | 'FRIES' | 'DRINKS' | 'COFFEE' | 'BAKERY' | 'FASTING'>('ALL');
+  const [loadingMenu, setLoadingMenu] = useState(true);
+  const [groupFilter, setGroupFilter] = useState<string>('ALL');
   const [tables, setTables] = useState<any[]>([]);
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
   const [search, setSearch] = useState('');
@@ -128,12 +131,16 @@ export function WaiterPadView() {
   };
 
   useEffect(() => {
-    fetchApi('/menu/categories').then((cats) => {
-      setCategories(cats);
-    });
-
-    fetchApi('/menu/items').then((items) => {
-      setAllItems(items);
+    setLoadingMenu(true);
+    Promise.all([
+      fetchApi('/menu/categories').then((cats) => {
+        setCategories(cats || []);
+      }).catch(() => {}),
+      fetchApi('/menu/items').then((items) => {
+        setAllItems(items || []);
+      }).catch(() => {})
+    ]).finally(() => {
+      setLoadingMenu(false);
     });
 
     loadTables();
@@ -267,14 +274,21 @@ export function WaiterPadView() {
     return allItems.filter((item) => {
       const catName = item.category?.name || '';
 
-      if (groupFilter === 'FASTING' && !isFastingItem(item)) return false;
-      if (groupFilter === 'BURGER' && !isBurger(catName, item.name)) return false;
-      if (groupFilter === 'PIZZA' && !isPizza(catName, item.name)) return false;
-      if (groupFilter === 'CHICKEN' && !isChicken(catName, item.name)) return false;
-      if (groupFilter === 'FRIES' && !isFries(catName, item.name)) return false;
-      if (groupFilter === 'COFFEE' && !isCoffee(catName, item.name)) return false;
-      if (groupFilter === 'DRINKS' && !isDrinks(catName)) return false;
-      if (groupFilter === 'BAKERY' && !isBakery(catName)) return false;
+      if (groupFilter !== 'ALL') {
+        const isCatMatch = item.categoryId === groupFilter || item.category?.id === groupFilter || catName.toLowerCase() === groupFilter.toLowerCase();
+        if (categories.some((c) => c.id === groupFilter)) {
+          if (!isCatMatch) return false;
+        } else {
+          if (groupFilter === 'FASTING' && !isFastingItem(item)) return false;
+          if (groupFilter === 'BURGER' && !isBurger(catName, item.name)) return false;
+          if (groupFilter === 'PIZZA' && !isPizza(catName, item.name)) return false;
+          if (groupFilter === 'CHICKEN' && !isChicken(catName, item.name)) return false;
+          if (groupFilter === 'FRIES' && !isFries(catName, item.name)) return false;
+          if (groupFilter === 'COFFEE' && !isCoffee(catName, item.name)) return false;
+          if (groupFilter === 'DRINKS' && !isDrinks(catName)) return false;
+          if (groupFilter === 'BAKERY' && !isBakery(catName)) return false;
+        }
+      }
 
       if (selectedCategory && !query && item.categoryId !== selectedCategory) {
         return false;
@@ -289,7 +303,7 @@ export function WaiterPadView() {
 
       return true;
     });
-  }, [allItems, groupFilter, selectedCategory, search]);
+  }, [allItems, groupFilter, selectedCategory, search, categories]);
 
   const totalWaiterItems = waiterCart.reduce((sum, item) => sum + item.quantity, 0);
   const totalWaiterBase = waiterCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -571,17 +585,47 @@ export function WaiterPadView() {
   const selectedTableObj = tables.find((t) => t.tableNumber === waiterTable);
   const isCurrentTableOccupied = orderType === 'DINE_IN' && selectedTableObj?.status === 'OCCUPIED';
 
-  const categoryCards = [
-    { id: 'ALL', label: 'All Menu', icon: LayoutGrid },
-    { id: 'BURGER', label: 'Burger', icon: Sandwich },
-    { id: 'CHICKEN', label: 'Chicken', icon: Drumstick },
-    { id: 'PIZZA', label: 'Pizza', icon: Pizza },
-    { id: 'FRIES', label: 'Fries', icon: Sparkles },
-    { id: 'DRINKS', label: 'Drink', icon: CupSoda },
-    { id: 'COFFEE', label: 'Coffee', icon: Coffee },
-    { id: 'BAKERY', label: 'Dessert', icon: Cake },
-    { id: 'FASTING', label: 'Fasting', icon: Leaf },
-  ];
+  const getCategoryIcon = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes('burger')) return Sandwich;
+    if (n.includes('chicken') || n.includes('meat') || n.includes('beef')) return Drumstick;
+    if (n.includes('pizza')) return Pizza;
+    if (n.includes('fries') || n.includes('snack') || n.includes('side')) return Sparkles;
+    if (n.includes('drink') || n.includes('beverage') || n.includes('soda') || n.includes('juice') || n.includes('water')) return CupSoda;
+    if (n.includes('coffee') || n.includes('tea') || n.includes('latte')) return Coffee;
+    if (n.includes('dessert') || n.includes('cake') || n.includes('bakery')) return Cake;
+    if (n.includes('fasting') || n.includes('salad') || n.includes('vegan')) return Leaf;
+    if (n.includes('addon') || n.includes('add-on') || n.includes('extra') || n.includes('modifier')) return Layers;
+    return Utensils;
+  };
+
+  const dynamicCategoryCards = useMemo(() => {
+    const cards: Array<{ id: string; label: string; icon: any }> = [
+      { id: 'ALL', label: 'All Menu', icon: LayoutGrid },
+    ];
+    if (categories && categories.length > 0) {
+      for (const c of categories) {
+        cards.push({
+          id: c.id,
+          label: c.name,
+          icon: getCategoryIcon(c.name),
+        });
+      }
+    } else {
+      // Fallback default set if categories API hasn't loaded yet
+      cards.push(
+        { id: 'BURGER', label: 'Burger', icon: Sandwich },
+        { id: 'CHICKEN', label: 'Chicken', icon: Drumstick },
+        { id: 'PIZZA', label: 'Pizza', icon: Pizza },
+        { id: 'FRIES', label: 'Fries', icon: Sparkles },
+        { id: 'DRINKS', label: 'Drink', icon: CupSoda },
+        { id: 'COFFEE', label: 'Coffee', icon: Coffee },
+        { id: 'BAKERY', label: 'Dessert', icon: Cake },
+        { id: 'FASTING', label: 'Fasting', icon: Leaf },
+      );
+    }
+    return cards;
+  }, [categories]);
 
   return (
     <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-[#F8F9FA] text-stone-900">
@@ -646,7 +690,7 @@ export function WaiterPadView() {
         {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Seamlessly merged with unified background) */}
         {activeTab === 'menu' && (
           <aside className="w-16 sm:w-20 md:w-24 bg-[#F8F9FA] border-r border-stone-200/70 py-2 sm:py-3 px-1 sm:px-1.5 space-y-1.5 overflow-y-auto no-scrollbar flex-shrink-0 z-10 flex flex-col pb-24 lg:pb-4">
-            {categoryCards.map((cat) => {
+            {dynamicCategoryCards.map((cat) => {
               const isActive = groupFilter === cat.id;
               const Icon = cat.icon;
 
@@ -788,7 +832,7 @@ export function WaiterPadView() {
               <div className="flex items-center justify-between pb-2 mb-3 border-b border-stone-200">
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm sm:text-base font-extrabold text-stone-900">
-                    {categoryCards.find((c) => c.id === groupFilter)?.label || 'All Menu'}
+                    {dynamicCategoryCards.find((c) => c.id === groupFilter)?.label || 'All Menu'}
                   </h2>
                   <span className="text-xs bg-stone-200 text-stone-700 px-2 py-0.5 rounded-full font-bold">
                     {filteredItems.length} items
@@ -796,8 +840,19 @@ export function WaiterPadView() {
                 </div>
               </div>
 
+              {/* Loading State Spinner */}
+              {loadingMenu && (
+                <div className="bg-white border border-stone-200 rounded-2xl p-12 text-center my-4 shadow-xs flex flex-col items-center justify-center animate-in fade-in">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-3">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  </div>
+                  <h4 className="text-sm font-bold text-stone-900">Loading menu items...</h4>
+                  <p className="text-xs text-stone-500 mt-0.5">Fetching latest cafe menu & categories</p>
+                </div>
+              )}
+
               {/* Empty State */}
-              {filteredItems.length === 0 && (
+              {!loadingMenu && filteredItems.length === 0 && (
                 <div className="bg-white border border-stone-200 rounded-2xl p-8 sm:p-10 text-center my-4 shadow-xs">
                   <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-3 text-stone-400">
                     <Utensils className="w-6 h-6" />

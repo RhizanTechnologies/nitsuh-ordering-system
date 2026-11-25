@@ -21,10 +21,18 @@ import {
 import { fetchApi, getSocket } from '@/lib/api';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { ChangeCredentialsModal } from '@/components/ChangeCredentialsModal';
+import { canRoleAccessPage } from '@/lib/permissions';
 
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const [, setPermissionsVer] = useState(0);
+
+  useEffect(() => {
+    const handleUpdate = () => setPermissionsVer((v) => v + 1);
+    window.addEventListener('nitsuh_permissions_updated', handleUpdate);
+    return () => window.removeEventListener('nitsuh_permissions_updated', handleUpdate);
+  }, []);
   const {
     currentUser,
     logout,
@@ -81,11 +89,24 @@ export function Navbar() {
 
   const navLinkClass = (path: string) => `
     flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer font-sans ${
-      pathname === path
+      pathname === path || (path === '/dashboard' && pathname === '/profit')
         ? 'bg-emerald-600 text-white font-black shadow-xs'
         : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 font-semibold'
     }
   `;
+
+  const allNavItems: Array<{ page: 'profit' | 'staff' | 'products' | 'inventory' | 'tables' | 'pos' | 'kds' | 'waiter'; path: string; label: string; icon: any }> = [
+    { page: 'profit', path: '/dashboard', label: 'Profit', icon: BarChart3 },
+    { page: 'staff', path: '/staff', label: 'Staff', icon: Users },
+    { page: 'inventory', path: '/inventory', label: 'Stock', icon: Boxes },
+    { page: 'products', path: '/products', label: 'Menu', icon: Utensils },
+    { page: 'tables', path: '/tables', label: 'Tables', icon: LayoutGrid },
+    { page: 'pos', path: '/pos', label: 'POS', icon: MonitorCheck },
+    { page: 'kds', path: '/kds', label: 'KDS', icon: ChefHat },
+    { page: 'waiter', path: '/waiter', label: 'Waiter', icon: Smartphone },
+  ];
+
+  const allowedNavItems = allNavItems.filter((item) => canRoleAccessPage(role, item.page));
 
   return (
     <>
@@ -98,74 +119,17 @@ export function Navbar() {
 
           {/* Center: ROLE STATION OR OWNER/MANAGER TABS */}
           <div className="hidden md:flex items-center">
-            {/* HEAD CHEF & KITCHEN KEEPER DUAL ACCESS */}
-            {(role === 'HEAD_CHEF' || role === 'KITCHEN_STOREKEEPER') && (
+            {allowedNavItems.length > 1 && (
               <nav className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-full">
-                <Link href="/kds" className={navLinkClass('/kds')}>
-                  <ChefHat className="w-3.5 h-3.5" />
-                  <span>Kitchen Display</span>
-                </Link>
-                {isOwnerOrManager && (
-                  <Link href="/staff" className={navLinkClass('/staff')} title="Staff & User Management">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>Staff</span>
-                  </Link>
-                )}
-                <Link href="/inventory" className={navLinkClass('/inventory')}>
-                  <Boxes className="w-3.5 h-3.5" />
-                  <span>Stock</span>
-                </Link>
-                <Link href="/products" className={navLinkClass('/products')} title="Menu Products & Recipe Studio">
-                  <Utensils className="w-3.5 h-3.5" />
-                  <span>Menu</span>
-                </Link>
-              </nav>
-            )}
-
-            {/* OWNER & MANAGER DESKTOP MANAGEMENT TABS */}
-            {isOwnerOrManager && (
-              <nav className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-full">
-                {role === 'OWNER' && (
-                  <Link href="/dashboard" className={navLinkClass('/dashboard')}>
-                    <BarChart3 className="w-3.5 h-3.5" />
-                    <span>Analytics</span>
-                  </Link>
-                )}
-
-                <Link href="/staff" className={navLinkClass('/staff')} title="Staff & User Management">
-                  <Users className="w-3.5 h-3.5" />
-                  <span>Staff</span>
-                </Link>
-
-                <Link href="/inventory" className={navLinkClass('/inventory')}>
-                  <Boxes className="w-3.5 h-3.5" />
-                  <span>Stock</span>
-                </Link>
-
-                <Link href="/products" className={navLinkClass('/products')} title="Menu Products & Recipe Studio">
-                  <Utensils className="w-3.5 h-3.5" />
-                  <span>Menu</span>
-                </Link>
-
-                <Link href="/tables" className={navLinkClass('/tables')} title="Configure & Manage Dining Tables">
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                  <span>Tables</span>
-                </Link>
-
-                <Link href="/pos" className={navLinkClass('/pos')}>
-                  <MonitorCheck className="w-3.5 h-3.5" />
-                  <span>POS</span>
-                </Link>
-
-                <Link href="/kds" className={navLinkClass('/kds')}>
-                  <ChefHat className="w-3.5 h-3.5" />
-                  <span>KDS</span>
-                </Link>
-
-                <Link href="/waiter" className={navLinkClass('/waiter')}>
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span>Waiter Pad</span>
-                </Link>
+                {allowedNavItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link key={item.path} href={item.path} className={navLinkClass(item.path)}>
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
               </nav>
             )}
           </div>
@@ -260,99 +224,27 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* OWNER & MANAGER MOBILE SUB-NAVBAR (Scrollable on small screens) */}
-        {isOwnerOrManager && (
+        {/* DYNAMIC ROLE STATION MOBILE SUB-NAVBAR (Scrollable on small screens) */}
+        {allowedNavItems.length > 1 && (
           <div className="md:hidden flex items-center gap-1 overflow-x-auto pt-2 pb-0.5 no-scrollbar border-t border-stone-200 mt-2">
-            {role === 'OWNER' && (
-              <Link
-                href="/dashboard"
-                className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  pathname === '/dashboard'
-                    ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
-                }`}
-              >
-                <BarChart3 className="w-3 h-3" />
-                <span>Profit</span>
-              </Link>
-            )}
-            <Link
-              href="/staff"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                pathname === '/staff'
-                  ? 'bg-emerald-600 text-white shadow-xs font-black'
-                  : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              <Users className="w-3 h-3" />
-              <span>Staff</span>
-            </Link>
-            <Link
-              href="/inventory"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                pathname === '/inventory'
-                  ? 'bg-emerald-600 text-white shadow-xs font-black'
-                  : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              <Boxes className="w-3 h-3" />
-              <span>Inventory</span>
-            </Link>
-            <Link
-              href="/products"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                pathname === '/products'
-                  ? 'bg-emerald-600 text-white shadow-xs font-black'
-                  : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              <Utensils className="w-3 h-3" />
-              <span>Menu</span>
-            </Link>
-            <Link
-              href="/tables"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                pathname === '/tables'
-                  ? 'bg-emerald-600 text-white shadow-xs font-black'
-                  : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              <LayoutGrid className="w-3 h-3" />
-              <span>Tables</span>
-            </Link>
-            <Link
-              href="/pos"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                pathname === '/pos'
-                  ? 'bg-emerald-600 text-white shadow-xs font-black'
-                  : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              <MonitorCheck className="w-3 h-3" />
-              <span>POS</span>
-            </Link>
-            <Link
-              href="/kds"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                pathname === '/kds'
-                  ? 'bg-emerald-600 text-white shadow-xs font-black'
-                  : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              <ChefHat className="w-3 h-3" />
-              <span>KDS</span>
-            </Link>
-            <Link
-              href="/waiter"
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                pathname === '/waiter'
-                  ? 'bg-emerald-600 text-white shadow-xs font-black'
-                  : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
-              }`}
-            >
-              <Smartphone className="w-3 h-3" />
-              <span>Waiter</span>
-            </Link>
+            {allowedNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.path || (item.path === '/dashboard' && pathname === '/profit');
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                    isActive
+                      ? 'bg-emerald-600 text-white shadow-xs font-black'
+                      : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
+                  }`}
+                >
+                  <Icon className="w-3 h-3" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </div>
         )}
       </header>

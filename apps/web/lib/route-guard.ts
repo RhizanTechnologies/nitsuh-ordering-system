@@ -1,3 +1,5 @@
+import { canRoleAccessPage } from '@/lib/permissions';
+
 export type UserRole =
   | 'OWNER'
   | 'MANAGER'
@@ -20,7 +22,13 @@ export const STATION_ROUTES: RouteConfig[] = [
   {
     path: '/dashboard',
     label: 'Analytics & Profit',
-    allowedRoles: ['OWNER'], // Strictly restricted to OWNER; Manager cannot see financial profit
+    allowedRoles: ['OWNER'], // Strictly restricted to OWNER by default; Manager cannot see financial profit
+    icon: 'BarChart3',
+  },
+  {
+    path: '/profit',
+    label: 'Profit & Margins',
+    allowedRoles: ['OWNER'],
     icon: 'BarChart3',
   },
   {
@@ -93,9 +101,30 @@ export function isRouteAllowed(path: string, role?: UserRole | null): boolean {
   // If user is OWNER, allow all station routes
   if (role === 'OWNER') return true;
 
-  // Manager is strictly prohibited from seeing profit & financial analytics
-  if (role === 'MANAGER' && (path === '/dashboard' || path.startsWith('/dashboard/'))) {
-    return false;
+  // Dynamic role permission check configured by Owner in Staff Management
+  if (path === '/dashboard' || path.startsWith('/dashboard/') || path === '/profit' || path.startsWith('/profit/')) {
+    return canRoleAccessPage(role, 'profit');
+  }
+  if (path === '/staff' || path.startsWith('/staff/')) {
+    return canRoleAccessPage(role, 'staff');
+  }
+  if (path === '/inventory' || path.startsWith('/inventory/')) {
+    return canRoleAccessPage(role, 'inventory');
+  }
+  if (path === '/products' || path.startsWith('/products/')) {
+    return canRoleAccessPage(role, 'products');
+  }
+  if (path === '/tables' || path.startsWith('/tables/')) {
+    return canRoleAccessPage(role, 'tables');
+  }
+  if (path === '/pos' || path.startsWith('/pos/')) {
+    return canRoleAccessPage(role, 'pos');
+  }
+  if (path === '/kds' || path.startsWith('/kds/')) {
+    return canRoleAccessPage(role, 'kds');
+  }
+  if (path === '/waiter' || path.startsWith('/waiter/')) {
+    return canRoleAccessPage(role, 'waiter');
   }
 
   const matchedRoute = STATION_ROUTES.find(
@@ -108,5 +137,5 @@ export function isRouteAllowed(path: string, role?: UserRole | null): boolean {
 
 export function getAllowedRoutesForRole(role?: UserRole | null): RouteConfig[] {
   if (!role) return [];
-  return STATION_ROUTES.filter((route) => route.allowedRoles.includes(role));
+  return STATION_ROUTES.filter((route) => isRouteAllowed(route.path, role));
 }

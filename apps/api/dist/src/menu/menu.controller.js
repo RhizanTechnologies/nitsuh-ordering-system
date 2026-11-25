@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MenuController = void 0;
 const common_1 = require("@nestjs/common");
+const passport_1 = require("@nestjs/passport");
 const menu_service_1 = require("./menu.service");
 let MenuController = class MenuController {
     constructor(menuService) {
@@ -21,6 +22,12 @@ let MenuController = class MenuController {
     }
     async getCategories() {
         return this.menuService.getCategories();
+    }
+    async createCategory(body) {
+        return this.menuService.createCategory(body);
+    }
+    async deleteCategory(id) {
+        return this.menuService.deleteCategory(id);
     }
     async getItems(categoryId) {
         return this.menuService.getMenuItems(categoryId);
@@ -70,6 +77,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MenuController.prototype, "getCategories", null);
+__decorate([
+    (0, common_1.Post)('categories'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MenuController.prototype, "createCategory", null);
+__decorate([
+    (0, common_1.Delete)('categories/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MenuController.prototype, "deleteCategory", null);
 __decorate([
     (0, common_1.Get)('items'),
     __param(0, (0, common_1.Query)('categoryId')),
@@ -164,6 +185,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MenuController.prototype, "deleteAddon", null);
 exports.MenuController = MenuController = __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('menu'),
     __metadata("design:paramtypes", [menu_service_1.MenuService])
 ], MenuController);

@@ -29,14 +29,27 @@ import {
   Boxes,
   LayoutGrid,
   BarChart3,
+  Utensils,
   X,
   Trash2,
   UserX,
   UserCheck,
   Ban,
+  SlidersHorizontal,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 import { StaffAvatarUploader, AVATAR_PRESETS } from './StaffAvatarUploader';
 import { Button, Badge, Input, Card } from '@/components/ui';
+import {
+  AppRole,
+  AppPage,
+  AppCapability,
+  RoleConfig,
+  getRolePermissions,
+  saveRolePermissions,
+  DEFAULT_ROLE_PERMISSIONS,
+} from '@/lib/permissions';
 
 interface StaffMember {
   id: string;
@@ -72,6 +85,35 @@ interface ResetRequest {
   credentialType?: 'PIN' | 'PASSWORD';
 }
 
+const ALL_ROLES: Array<{ role: AppRole; label: string; description: string; icon: any }> = [
+  { role: 'OWNER', label: 'Owner / General Director', description: 'Complete system authority and full financial profit analytics', icon: ShieldCheck },
+  { role: 'MANAGER', label: 'Operations Manager', description: 'Floor supervision, staff administration, menu and stock oversight', icon: LayoutGrid },
+  { role: 'CASHIER', label: 'Cashier Station', description: 'POS checkout, table bills, settlement and payment processing', icon: MonitorCheck },
+  { role: 'WAITER', label: 'Floor Waiter', description: 'Table order taking, customer service, sending kitchen tickets', icon: Smartphone },
+  { role: 'HEAD_CHEF', label: 'Head Chef', description: 'Kitchen line monitoring, menu recipes, kitchen inventory oversight', icon: ChefHat },
+  { role: 'KITCHEN_STAFF', label: 'Kitchen Line Cook', description: 'KDS station preparation, marking orders prepared and ready', icon: ChefHat },
+  { role: 'MAIN_STOREKEEPER', label: 'Main Storekeeper', description: 'Raw material procurement, main warehouse stock, transfers', icon: Boxes },
+  { role: 'KITCHEN_STOREKEEPER', label: 'Kitchen Storekeeper', description: 'Kitchen store stock receiving, batch transfers, and wastage logs', icon: Boxes },
+];
+
+const AVAILABLE_PAGES: Array<{ id: AppPage; label: string; icon: any }> = [
+  { id: 'profit', label: 'Profit & Analytics', icon: BarChart3 },
+  { id: 'staff', label: 'Staff Management', icon: Users },
+  { id: 'products', label: 'Menu Studio', icon: Utensils },
+  { id: 'inventory', label: 'Stock & Inventory', icon: Boxes },
+  { id: 'tables', label: 'Dining Tables', icon: LayoutGrid },
+  { id: 'pos', label: 'POS Terminal', icon: MonitorCheck },
+  { id: 'kds', label: 'Kitchen Display', icon: ChefHat },
+  { id: 'waiter', label: 'Waiter Order Pad', icon: Smartphone },
+];
+
+const AVAILABLE_CAPABILITIES: Array<{ id: AppCapability; label: string; description: string }> = [
+  { id: 'cancel_orders', label: 'Cancel Placed Orders', description: 'Permits voiding or cancelling orders from active lists' },
+  { id: 'apply_discounts', label: 'Apply Bill Discounts', description: 'Allows cashier discounts and manual bill price modifications' },
+  { id: 'adjust_stock', label: 'Adjust / Receive Stock', description: 'Allows recording wastage, purchases and direct stock adjustments' },
+  { id: 'reset_pins', label: 'Reset Staff Credentials', description: 'Permits issuing new PIN codes or passwords to staff members' },
+];
+
 export function StaffManagementView() {
   const { currentUser } = useAppStore();
   const isOwner = currentUser?.role === 'OWNER';
@@ -102,6 +144,68 @@ export function StaffManagementView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'DISABLED'>('ALL');
+
+  // View Tab: Staff Directory vs Role Permissions Matrix
+  const [viewTab, setViewTab] = useState<'staff' | 'permissions'>('staff');
+  const [rolePermissions, setRolePermissions] = useState<Record<AppRole, RoleConfig>>(() => getRolePermissions());
+  const [isSavingPerms, setIsSavingPerms] = useState(false);
+
+  const toggleRolePage = (r: AppRole, page: AppPage) => {
+    if (r === 'OWNER') return; // Owner always has all pages
+    setRolePermissions((prev) => {
+      const currentPages = prev[r]?.pages || [];
+      const updatedPages = currentPages.includes(page)
+        ? currentPages.filter((p) => p !== page)
+        : [...currentPages, page];
+      return {
+        ...prev,
+        [r]: {
+          ...prev[r],
+          pages: updatedPages,
+        },
+      };
+    });
+  };
+
+  const toggleRoleCapability = (r: AppRole, cap: AppCapability) => {
+    if (r === 'OWNER') return; // Owner always has all capabilities
+    setRolePermissions((prev) => {
+      const currentCaps = prev[r]?.capabilities || [];
+      const updatedCaps = currentCaps.includes(cap)
+        ? currentCaps.filter((c) => c !== cap)
+        : [...currentCaps, cap];
+      return {
+        ...prev,
+        [r]: {
+          ...prev[r],
+          capabilities: updatedCaps,
+        },
+      };
+    });
+  };
+
+  const handleSaveRolePermissions = () => {
+    setIsSavingPerms(true);
+    saveRolePermissions(rolePermissions);
+    setTimeout(() => {
+      setIsSavingPerms(false);
+      triggerToast('Role permissions saved successfully! Changes are active.', 'success');
+    }, 200);
+  };
+
+  const handleResetRolePermissions = () => {
+    setConfirmModal({
+      title: 'Reset Role Permissions',
+      description: 'Are you sure you want to revert all role permissions and page accesses to system defaults?',
+      confirmText: 'Reset to Defaults',
+      isDanger: true,
+      onConfirm: () => {
+        setRolePermissions(DEFAULT_ROLE_PERMISSIONS);
+        saveRolePermissions(DEFAULT_ROLE_PERMISSIONS);
+        triggerToast('Role permissions reset to default configuration.', 'success');
+      },
+    });
+  };
 
   // Revealed PIN codes
   const [revealedPins, setRevealedPins] = useState<Record<string, boolean>>({});
@@ -613,9 +717,42 @@ export function StaffManagementView() {
             <div className="text-xl font-black text-stone-900 mt-0.5">{kitchenStaff + storeStaff}</div>
           </div>
         </div>
+
+        {/* Tab Selector for Owner */}
+        {isOwner && (
+          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-stone-200/80">
+            <button
+              type="button"
+              onClick={() => setViewTab('staff')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                viewTab === 'staff'
+                  ? 'bg-emerald-600 text-white shadow-xs font-black'
+                  : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Staff Directory</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewTab('permissions')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                viewTab === 'permissions'
+                  ? 'bg-emerald-600 text-white shadow-xs font-black'
+                  : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>Role Permissions & Page Access Matrix</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Generated Credential Banner Alert */}
+      {/* VIEW TAB 1: STAFF DIRECTORY */}
+      {viewTab === 'staff' && (
+        <>
+          {/* Generated Credential Banner Alert */}
       {generatedCredentialAlert && (
         <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-3">
@@ -996,6 +1133,213 @@ export function StaffManagementView() {
               </div>
             );
           })}
+        </div>
+      )}
+      </>
+      )}
+
+      {/* VIEW TAB 2: ROLE PERMISSIONS & ACCESS MATRIX */}
+      {viewTab === 'permissions' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Header Card for Permissions Matrix */}
+          <div className="bg-white border border-stone-200/90 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <SlidersHorizontal className="w-4 h-4" />
+                </span>
+                <h2 className="text-base sm:text-lg font-black text-stone-900 font-heading">
+                  Role Permissions & Station Page Access Matrix
+                </h2>
+              </div>
+              <p className="text-xs text-stone-500 mt-1 max-w-2xl leading-relaxed">
+                Choose which station pages and operational functions each role is authorized to access. Changes update immediately across all terminal stations, navigation tabs, and route guards.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              <button
+                type="button"
+                onClick={handleResetRolePermissions}
+                className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+              >
+                Reset to Defaults
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveRolePermissions}
+                disabled={isSavingPerms}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Check className="w-4 h-4" />
+                <span>{isSavingPerms ? 'Saving Changes...' : 'Save Permissions'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Matrix Cards for Roles */}
+          <div className="space-y-4">
+            {ALL_ROLES.map(({ role, label, description, icon: RoleIcon }) => {
+              const isOwnerRole = role === 'OWNER';
+              const cfg = rolePermissions[role] || DEFAULT_ROLE_PERMISSIONS[role];
+              const activePages = cfg.pages || [];
+              const activeCaps = cfg.capabilities || [];
+
+              return (
+                <div
+                  key={role}
+                  className={`bg-white border rounded-3xl p-5 shadow-xs transition ${
+                    isOwnerRole ? 'border-emerald-300 bg-emerald-50/20' : 'border-stone-200/90'
+                  }`}
+                >
+                  {/* Role Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-stone-100 gap-2">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border ${
+                          isOwnerRole
+                            ? 'bg-emerald-600 text-white border-emerald-700'
+                            : 'bg-stone-100 text-stone-700 border-stone-200'
+                        }`}
+                      >
+                        <RoleIcon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-black text-stone-900">{label}</h3>
+                          <span className="font-mono text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 border border-stone-200">
+                            {role}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-stone-500 mt-0.5">{description}</p>
+                      </div>
+                    </div>
+
+                    {isOwnerRole && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 whitespace-nowrap self-start sm:self-auto">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                        Full System Authority (Permanent)
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Accessible Pages Checkbox Strip */}
+                  <div className="mt-3.5">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-stone-500 mb-2 flex items-center justify-between">
+                      <span>Accessible Station Pages</span>
+                      <span className="text-[10px] font-bold text-stone-400">
+                        {isOwnerRole ? 'All 8 Pages' : `${activePages.length} of ${AVAILABLE_PAGES.length} Enabled`}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+                      {AVAILABLE_PAGES.map((page) => {
+                        const PageIcon = page.icon;
+                        const isChecked = isOwnerRole || activePages.includes(page.id);
+
+                        return (
+                          <button
+                            key={page.id}
+                            type="button"
+                            disabled={isOwnerRole}
+                            onClick={() => toggleRolePage(role, page.id)}
+                            className={`p-2.5 rounded-2xl border text-left flex flex-col justify-between transition cursor-pointer select-none ${
+                              isChecked
+                                ? 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-2xs'
+                                : 'bg-stone-50 border-stone-200 text-stone-400 hover:border-stone-300'
+                            } ${isOwnerRole ? 'cursor-default opacity-90' : ''}`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <PageIcon
+                                className={`w-3.5 h-3.5 ${
+                                  isChecked ? 'text-emerald-700' : 'text-stone-400'
+                                }`}
+                              />
+                              {isChecked ? (
+                                <CheckSquare className="w-3.5 h-3.5 text-emerald-700" />
+                              ) : (
+                                <Square className="w-3.5 h-3.5 text-stone-300" />
+                              )}
+                            </div>
+                            <span
+                              className={`text-[11px] font-extrabold truncate ${
+                                isChecked ? 'text-stone-900' : 'text-stone-400'
+                              }`}
+                            >
+                              {page.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Operational Capabilities Checkbox Strip */}
+                  <div className="mt-4 pt-3 border-t border-stone-100">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-stone-500 mb-2">
+                      Operational Capabilities & Actions
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                      {AVAILABLE_CAPABILITIES.map((cap) => {
+                        const isChecked = isOwnerRole || activeCaps.includes(cap.id);
+
+                        return (
+                          <button
+                            key={cap.id}
+                            type="button"
+                            disabled={isOwnerRole}
+                            onClick={() => toggleRoleCapability(role, cap.id)}
+                            className={`p-2.5 rounded-2xl border text-left flex items-start gap-2.5 transition cursor-pointer select-none ${
+                              isChecked
+                                ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 shadow-2xs'
+                                : 'bg-stone-50 border-stone-200 text-stone-400 hover:border-stone-300'
+                            } ${isOwnerRole ? 'cursor-default opacity-90' : ''}`}
+                          >
+                            <div className="mt-0.5 shrink-0">
+                              {isChecked ? (
+                                <CheckSquare className="w-4 h-4 text-emerald-700" />
+                              ) : (
+                                <Square className="w-4 h-4 text-stone-300" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div
+                                className={`text-xs font-bold ${
+                                  isChecked ? 'text-stone-900' : 'text-stone-500'
+                                }`}
+                              >
+                                {cap.label}
+                              </div>
+                              <div className="text-[10px] text-stone-400 mt-0.5 leading-tight">
+                                {cap.description}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Bottom Save Bar */}
+          <div className="bg-white border border-stone-200/90 rounded-3xl p-4 shadow-xs flex items-center justify-between">
+            <span className="text-xs font-bold text-stone-600">
+              💡 Changes apply immediately for all current & future sessions upon saving.
+            </span>
+            <button
+              type="button"
+              onClick={handleSaveRolePermissions}
+              disabled={isSavingPerms}
+              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Check className="w-4 h-4" />
+              <span>{isSavingPerms ? 'Saving Changes...' : 'Save All Changes'}</span>
+            </button>
+          </div>
         </div>
       )}
 

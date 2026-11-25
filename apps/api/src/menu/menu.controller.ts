@@ -12,6 +12,24 @@ export class MenuController {
     return this.menuService.getCategories();
   }
 
+  @Post('categories')
+  async createCategory(
+    @Body()
+    body: {
+      name: string;
+      displayOrder?: number;
+      iconName?: string;
+      badgeColor?: string;
+    },
+  ) {
+    return this.menuService.createCategory(body);
+  }
+
+  @Delete('categories/:id')
+  async deleteCategory(@Param('id') id: string) {
+    return this.menuService.deleteCategory(id);
+  }
+
   @Get('items')
   async getItems(@Query('categoryId') categoryId?: string) {
     return this.menuService.getMenuItems(categoryId);

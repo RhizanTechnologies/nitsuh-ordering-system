@@ -41,6 +41,8 @@ import { useAppStore } from '@/lib/store';
 export function AnalyticsView() {
   const { currentUser } = useAppStore();
   const [data, setData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year'>('day');
   const [activeOwnerTab, setActiveOwnerTab] = useState<'analytics' | 'products'>('analytics');
 
@@ -50,11 +52,24 @@ export function AnalyticsView() {
   const chartTooltipText = '#1C1512';
   const chartTooltipBorder = '#D6CCC0';
 
-  useEffect(() => {
+  const loadData = () => {
+    setLoading(true);
+    setError(null);
     const roleParam = currentUser?.role ? `&role=${currentUser.role}` : '';
-    fetchApi(`/analytics/dashboard?timeframe=${timeframe}${roleParam}`).then((res) => {
-      setData(res);
-    });
+    fetchApi(`/analytics/dashboard?timeframe=${timeframe}${roleParam}`)
+      .then((res) => {
+        setData(res);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load analytics dashboard:', err);
+        setError(err.message || 'Failed to load executive analytics');
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    loadData();
   }, [timeframe, currentUser?.role]);
 
   const handleExportCSV = () => {
@@ -80,17 +95,46 @@ export function AnalyticsView() {
     document.body.removeChild(link);
   };
 
-  if (!data) {
+  if (loading && !data) {
     return (
-      <div className="flex-1 min-h-[400px] flex items-center justify-center bg-[#F8F9FA] text-stone-900 font-sans">
-        <div className="text-xs font-bold text-emerald-600 animate-pulse">
-          Loading analytics...
+      <div className="flex-1 min-h-[400px] flex flex-col items-center justify-center bg-[#F8F9FA] text-stone-900 font-sans p-6">
+        <div className="w-10 h-10 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <div className="text-sm font-bold text-stone-700">Loading Profit & Financial Analytics...</div>
+        <p className="text-xs text-stone-500 mt-1">Aggregating real-time orders, recipe COGS & expenses</p>
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="flex-1 min-h-[400px] flex flex-col items-center justify-center bg-[#F8F9FA] text-stone-900 font-sans p-6">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-3xl max-w-md w-full text-center space-y-3">
+          <div className="w-10 h-10 bg-rose-100 text-rose-700 rounded-2xl flex items-center justify-center mx-auto">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div className="text-sm font-black text-rose-900">Failed to load financial data</div>
+          <p className="text-xs text-rose-700 font-medium">{error}</p>
+          <button
+            onClick={loadData}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+          >
+            <span>Retry Connection</span>
+          </button>
         </div>
       </div>
     );
   }
 
-  const { kpis, stockValuation, topDishes, weeklyTrend, recentTransactions, settings } = data;
+  const {
+    kpis = {} as any,
+    stockValuation = {} as any,
+    topDishes = [],
+    weeklyTrend = [],
+    recentTransactions = [],
+    chartMeta = {} as any,
+    qualityMetrics = {} as any,
+    settings = {} as any,
+  } = data || {};
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 no-scrollbar bg-[#F8F9FA] text-stone-900 font-sans">
@@ -240,16 +284,17 @@ export function AnalyticsView() {
               <div className="lg:col-span-2 bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-sm font-bold text-stone-900">Sales Trend Breakdown</h3>
+                    <h3 className="text-sm font-bold text-stone-900">Revenue & Profit Breakdown</h3>
+                    <p className="text-[11px] text-stone-500 font-semibold mt-0.5">Real-time revenue, gross/net profit & ingredient COGS</p>
                   </div>
                   <div className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
-                    Peak: Friday 24,450 ETB
+                    {chartMeta?.peakBadge || 'No peak recorded'}
                   </div>
                 </div>
 
                 <div className="h-64 w-full min-h-[256px] relative">
                   <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={240}>
-                    <LineChart data={weeklyTrend}>
+                    <LineChart data={weeklyTrend || []}>
                       <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} />
                       <XAxis dataKey="day" stroke={chartAxisStroke} fontSize={12} fontWeight={600} tickLine={false} />
                       <YAxis stroke={chartAxisStroke} fontSize={12} fontWeight={600} tickLine={false} />
@@ -263,29 +308,30 @@ export function AnalyticsView() {
                           fontWeight: 600,
                           boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                         }}
+                        formatter={(val: any, name: string) => [`${Number(val || 0).toFixed(2)} ETB`, name]}
                       />
                       <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
                       <Line
                         type="monotone"
-                        dataKey="coffee"
-                        name="Coffee"
+                        dataKey="revenue"
+                        name="Total Revenue"
                         stroke="#059669"
                         strokeWidth={2.5}
                         dot={{ r: 3 }}
                       />
                       <Line
                         type="monotone"
-                        dataKey="food"
-                        name="Mains & Food"
-                        stroke="#C11221"
+                        dataKey="profit"
+                        name="Net Profit"
+                        stroke="#2563EB"
                         strokeWidth={2.5}
                         dot={{ r: 3 }}
                       />
                       <Line
                         type="monotone"
-                        dataKey="tea"
-                        name="Tea"
-                        stroke="#0284C7"
+                        dataKey="cogs"
+                        name="Production COGS"
+                        stroke="#E11D48"
                         strokeWidth={2.5}
                         dot={{ r: 3 }}
                       />
@@ -294,44 +340,51 @@ export function AnalyticsView() {
                 </div>
               </div>
 
-              {/* Quality Score & Complaints Box */}
+              {/* Quality Score & Service Status Box */}
               <div className="bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold uppercase text-stone-600 flex items-center gap-1.5">
-                      ★ Satisfaction Score
+                      ★ Service Quality
                     </span>
-                    <span className="text-xs text-stone-500 font-bold">2/98 Complaints</span>
+                    <span className="text-xs text-stone-500 font-bold">
+                      {qualityMetrics?.cancelledOrdersCount ?? 0} cancelled / {qualityMetrics?.completedOrdersCount ?? 0} served
+                    </span>
                   </div>
 
                   <div className="my-4 text-center">
                     <div className="inline-flex items-center justify-center w-28 h-28 rounded-full border-4 border-dashed border-emerald-500 bg-emerald-50 text-3xl font-black text-emerald-700 shadow-xs">
-                      98
+                      {qualityMetrics?.satisfactionScore ?? 100}%
                     </div>
-                    <p className="text-xs font-black text-stone-900 mt-2">Excellent Rating</p>
+                    <p className="text-xs font-black text-stone-900 mt-2">
+                      {(qualityMetrics?.satisfactionScore ?? 100) >= 90
+                        ? 'Excellent Rating'
+                        : (qualityMetrics?.satisfactionScore ?? 100) >= 75
+                        ? 'Good Rating'
+                        : 'Needs Attention'}
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-2 border-t border-stone-200 pt-3">
-                  <div className="p-2.5 bg-stone-50 border border-stone-200 rounded-2xl flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-stone-500" />
-                      <span className="text-stone-800 font-bold">Wrong Menu (1)</span>
+                  {qualityMetrics?.recentCancellations?.length > 0 ? (
+                    qualityMetrics.recentCancellations.map((c: any, i: number) => (
+                      <div key={i} className="p-2.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 truncate">
+                          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                          <span className="text-rose-900 font-bold truncate">#{c.orderNumber}: {c.reason}</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full shrink-0">
+                          Cancelled
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-2 text-xs text-emerald-800 font-bold">
+                      <span className="text-emerald-600 font-black">✓</span>
+                      <span>100% smooth fulfillment (no recent cancellations)</span>
                     </div>
-                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      Resolved
-                    </span>
-                  </div>
-
-                  <div className="p-2.5 bg-stone-50 border border-stone-200 rounded-2xl flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-stone-500" />
-                      <span className="text-stone-800 font-bold">Late Service (1)</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      Solved
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

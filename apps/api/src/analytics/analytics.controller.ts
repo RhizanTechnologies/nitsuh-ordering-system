@@ -12,8 +12,9 @@ export class AnalyticsController {
     @Query('timeframe') timeframe?: 'day' | 'week' | 'month' | 'year',
     @Query('role') role?: string,
   ) {
-    if (role && role !== 'OWNER') {
-      throw new ForbiddenException('Executive profit and financial analytics are strictly restricted to the Owner.');
+    const norm = role?.trim().toUpperCase();
+    if (norm && norm !== 'OWNER' && norm !== 'MANAGER' && norm !== 'ADMIN') {
+      throw new ForbiddenException('Executive profit and financial analytics are strictly restricted to the Owner and Management.');
     }
     return this.analyticsService.getExecutiveDashboard(timeframe);
   }

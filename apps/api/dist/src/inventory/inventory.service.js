@@ -494,9 +494,9 @@ let InventoryService = class InventoryService {
             orderBy: { createdAt: 'desc' },
         });
     }
-    async getLedger(limit = 50) {
-        return this.prisma.inventoryTransaction.findMany({
-            take: limit,
+    async getLedger(limit, page = 1) {
+        const total = await this.prisma.inventoryTransaction.count();
+        const queryOptions = {
             include: {
                 ingredient: { include: { baseUnit: true } },
                 sourceLocation: true,
@@ -504,7 +504,19 @@ let InventoryService = class InventoryService {
                 user: { select: { id: true, name: true, role: true } },
             },
             orderBy: { createdAt: 'desc' },
-        });
+        };
+        if (limit && limit > 0) {
+            queryOptions.take = limit;
+            queryOptions.skip = (page - 1) * limit;
+        }
+        const data = await this.prisma.inventoryTransaction.findMany(queryOptions);
+        return {
+            data,
+            total,
+            page,
+            limit: limit || total,
+            totalPages: limit && limit > 0 ? Math.ceil(total / limit) : 1,
+        };
     }
     async getSuppliers() {
         return this.prisma.supplier.findMany({
@@ -591,6 +603,7 @@ let InventoryService = class InventoryService {
                         },
                     });
                 }
+                const supplierLabel = po.supplier?.name ? `Supplier: ${po.supplier.name}` : `PO ${po.poNumber}`;
                 await tx.inventoryTransaction.create({
                     data: {
                         transactionType: shared_types_1.InventoryTransactionType.PURCHASE_RECEIPT,
@@ -600,7 +613,7 @@ let InventoryService = class InventoryService {
                         unitCost: unitCostPerGram,
                         totalCost: item.totalCost,
                         referenceId: po.poNumber,
-                        reason: `Goods receipt from supplier: ${po.poNumber}`,
+                        reason: `Goods receipt from ${po.supplier?.name || 'supplier'} (${po.poNumber})`,
                         userId: buyerId,
                     },
                 });

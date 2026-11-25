@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrdersController = void 0;
 const common_1 = require("@nestjs/common");
+const passport_1 = require("@nestjs/passport");
 const orders_service_1 = require("./orders.service");
 let OrdersController = class OrdersController {
     constructor(ordersService) {
@@ -184,6 +185,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "recordPayment", null);
 exports.OrdersController = OrdersController = __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('orders'),
     __metadata("design:paramtypes", [orders_service_1.OrdersService])
 ], OrdersController);

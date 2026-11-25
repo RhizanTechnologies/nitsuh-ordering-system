@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InventoryController = void 0;
 const common_1 = require("@nestjs/common");
+const passport_1 = require("@nestjs/passport");
 const inventory_service_1 = require("./inventory.service");
 const shared_types_1 = require("@cafe/shared-types");
 let InventoryController = class InventoryController {
@@ -60,8 +61,10 @@ let InventoryController = class InventoryController {
     async recordWastage(body) {
         return this.inventoryService.recordWastage(body.userId, body.ingredientId, body.quantity, body.reason);
     }
-    async getLedger(limit) {
-        return this.inventoryService.getLedger(limit ? parseInt(limit, 10) : 50);
+    async getLedger(limit, page) {
+        const lim = limit !== undefined ? parseInt(limit, 10) : undefined;
+        const pg = page ? parseInt(page, 10) : 1;
+        return this.inventoryService.getLedger(lim, pg);
     }
     async getSuppliers() {
         return this.inventoryService.getSuppliers();
@@ -177,8 +180,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)('ledger'),
     __param(0, (0, common_1.Query)('limit')),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], InventoryController.prototype, "getLedger", null);
 __decorate([
@@ -257,6 +261,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InventoryController.prototype, "deleteIngredient", null);
 exports.InventoryController = InventoryController = __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('inventory'),
     __metadata("design:paramtypes", [inventory_service_1.InventoryService])
 ], InventoryController);

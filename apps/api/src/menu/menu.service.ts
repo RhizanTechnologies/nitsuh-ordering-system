@@ -14,8 +14,55 @@ export class MenuService {
       where: { isActive: true },
       orderBy: { displayOrder: 'asc' },
       include: {
-        _count: { select: { menuItems: true } },
+        _count: { select: { menuItems: true, addons: true } },
       },
+    });
+  }
+
+  async createCategory(data: { name: string; displayOrder?: number; iconName?: string; badgeColor?: string }) {
+    if (!data.name || !data.name.trim()) {
+      throw new BadRequestException('Category name is required');
+    }
+    const name = data.name.trim();
+    const existing = await this.prisma.category.findUnique({ where: { name } });
+    if (existing) {
+      if (!existing.isActive) {
+        return this.prisma.category.update({
+          where: { id: existing.id },
+          data: { isActive: true, displayOrder: data.displayOrder ?? existing.displayOrder },
+        });
+      }
+      throw new BadRequestException(`Category "${name}" already exists`);
+    }
+
+    const count = await this.prisma.category.count();
+    return this.prisma.category.create({
+      data: {
+        name,
+        displayOrder: data.displayOrder !== undefined ? data.displayOrder : count + 1,
+        iconName: data.iconName || 'utensils',
+        badgeColor: data.badgeColor || 'bg-emerald-700',
+        isActive: true,
+      },
+      include: {
+        _count: { select: { menuItems: true, addons: true } },
+      },
+    });
+  }
+
+  async deleteCategory(id: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+      include: { _count: { select: { menuItems: true } } },
+    });
+    if (!category) throw new NotFoundException('Category not found');
+    if (category._count.menuItems > 0) {
+      throw new BadRequestException(`Cannot delete category "${category.name}" with ${category._count.menuItems} assigned products. Reassign them first.`);
+    }
+
+    return this.prisma.category.update({
+      where: { id },
+      data: { isActive: false },
     });
   }
 
@@ -350,9 +397,10 @@ export class MenuService {
       throw new NotFoundException('Table not found');
     }
 
-    if (table.orders.length > 0) {
+    if (table.status === 'OCCUPIED' || table.orders.length > 0) {
+      const activeOrderNum = table.orders[0]?.orderNumber;
       throw new BadRequestException(
-        `Cannot delete table ${table.tableNumber}: active order ${table.orders[0].orderNumber} is assigned. Please settle or cancel it first.`,
+        `Cannot delete table "${table.tableNumber}" while it is occupied${activeOrderNum ? ` (active order #${activeOrderNum})` : ''}. Please release or settle the table before deleting.`,
       );
     }
 

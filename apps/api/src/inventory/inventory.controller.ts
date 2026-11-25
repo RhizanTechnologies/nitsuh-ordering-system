@@ -123,8 +123,10 @@ export class InventoryController {
   }
 
   @Get('ledger')
-  async getLedger(@Query('limit') limit?: string) {
-    return this.inventoryService.getLedger(limit ? parseInt(limit, 10) : 50);
+  async getLedger(@Query('limit') limit?: string, @Query('page') page?: string) {
+    const lim = limit !== undefined ? parseInt(limit, 10) : undefined;
+    const pg = page ? parseInt(page, 10) : 1;
+    return this.inventoryService.getLedger(lim, pg);
   }
 
   @Get('suppliers')

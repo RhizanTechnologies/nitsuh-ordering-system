@@ -45,7 +45,22 @@ export function InventoryView() {
   const [transfers, setTransfers] = useState<any[]>([]);
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [selectedRecipeItem, setSelectedRecipeItem] = useState<any | null>(null);
-  const [ledger, setLedger] = useState<any[]>([]);
+  const [ledgerData, setLedgerData] = useState<{
+    data: any[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }>({
+    data: [],
+    total: 0,
+    page: 1,
+    limit: 25,
+    totalPages: 1,
+  });
+  const [ledgerPage, setLedgerPage] = useState(1);
+  const [ledgerLimit, setLedgerLimit] = useState(25);
+  const [loadingLedger, setLoadingLedger] = useState(false);
   const [ledgerTypeFilter, setLedgerTypeFilter] = useState('ALL');
   const [ledgerSearch, setLedgerSearch] = useState('');
   const [alerts, setAlerts] = useState<any[]>([]);
@@ -128,12 +143,32 @@ export function InventoryView() {
   const [wasteSubmitting, setWasteSubmitting] = useState(false);
   const [wasteSuccess, setWasteSuccess] = useState(false);
 
+  const loadLedger = (page = ledgerPage, limit = ledgerLimit) => {
+    setLoadingLedger(true);
+    fetchApi(`/inventory/ledger?page=${page}&limit=${limit}`)
+      .then((res) => {
+        if (Array.isArray(res)) {
+          setLedgerData({
+            data: res,
+            total: res.length,
+            page: 1,
+            limit: res.length,
+            totalPages: 1,
+          });
+        } else if (res && Array.isArray(res.data)) {
+          setLedgerData(res);
+        }
+      })
+      .catch((err) => console.error('Failed to load ledger:', err))
+      .finally(() => setLoadingLedger(false));
+  };
+
   const loadData = () => {
     const roleParam = currentUser?.role ? `?role=${currentUser.role}` : '';
     fetchApi(`/inventory/balances${roleParam}`).then(setLocations);
     fetchApi(`/inventory/transfers${roleParam}`).then(setTransfers);
     fetchApi(`/inventory/alerts${roleParam}`).then(setAlerts);
-    fetchApi('/inventory/ledger').then(setLedger);
+    loadLedger(ledgerPage, ledgerLimit);
     fetchApi('/inventory/suppliers').then(setSuppliers);
     fetchApi('/inventory/ingredients').then((ings) => setRawIngredients(ings || []));
     fetchApi('/inventory/units').then((u) => setUnits(u || []));
@@ -150,6 +185,10 @@ export function InventoryView() {
   useEffect(() => {
     loadData();
   }, [currentUser?.role]);
+
+  useEffect(() => {
+    loadLedger(ledgerPage, ledgerLimit);
+  }, [ledgerPage, ledgerLimit]);
 
   // Handle Quick Stock Adjust (Add or Remove stock directly)
   const handleOpenAdjust = (ingredient: any, locationType: 'MAIN_STORE' | 'KITCHEN_STORE', mode: 'ADD' | 'REMOVE') => {
@@ -1737,7 +1776,8 @@ export function InventoryView() {
 
         {/* TAB 6: IMMUTABLE AUDIT LEDGER (CARD FORMAT) */}
         {activeTab === 'ledger' && (() => {
-          const filteredLedger = ledger.filter((row) => {
+          const list = ledgerData?.data || [];
+          const filteredLedger = list.filter((row: any) => {
             if (ledgerTypeFilter !== 'ALL') {
               if (ledgerTypeFilter === 'TRANSFER') {
                 if (!row.transactionType.includes('TRANSFER')) return false;
@@ -1755,13 +1795,21 @@ export function InventoryView() {
             return true;
           });
 
+          const startIdx = ledgerData.total > 0 ? (ledgerData.page - 1) * ledgerData.limit + 1 : 0;
+          const endIdx = Math.min(ledgerData.page * ledgerData.limit, ledgerData.total);
+
           return (
             <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
                 <div>
                   <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Immutable Inventory Transaction Ledger</h3>
+                  <p className="text-[11px] text-stone-500 font-medium">Permanent blockchain-like audit trail of every stock event</p>
                 </div>
-                <span className="text-xs font-bold text-amber-800 dark:text-amber-400">{filteredLedger.length} of {ledger.length} entries</span>
+                <div className="text-right">
+                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 px-3 py-1 rounded-full">
+                    {ledgerData.total > 0 ? `Showing ${startIdx}–${endIdx} of ${ledgerData.total} entries` : '0 entries'}
+                  </span>
+                </div>
               </div>
 
               {/* Filter Strip: Type buttons & Search Input */}
@@ -1803,69 +1851,122 @@ export function InventoryView() {
 
               {/* Transaction Cards Grid (Card Format) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredLedger.map((row) => (
-                  <div
-                    key={row.id}
-                    className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col justify-between gap-2.5 transition shadow-xs"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span
-                          className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
-                            row.transactionType === 'PRODUCTION_CONSUMPTION'
-                              ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30'
-                              : row.transactionType === 'WASTAGE'
-                              ? 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30'
-                              : row.transactionType === 'TRANSFER_RECEIVE'
-                              ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30'
-                              : row.transactionType === 'TRANSFER_DISPATCH'
-                              ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30'
-                              : row.transactionType === 'PURCHASE_RECEIPT'
-                              ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30'
-                              : 'bg-stone-200 dark:bg-zinc-800 text-stone-700 dark:text-zinc-300 border border-stone-300 dark:border-white/10'
-                          }`}
-                        >
-                          {row.transactionType.replace(/_/g, ' ')}
-                        </span>
-                        <span className="text-[10px] text-stone-500 dark:text-zinc-500">
-                          {new Date(row.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-
-                      <div className="font-bold text-xs text-stone-900 dark:text-white truncate">{row.ingredient?.name}</div>
-
-                      <div className="text-[11px] text-stone-600 dark:text-zinc-400 mt-1 flex items-center justify-between">
-                        <span>Quantity:</span>
-                        <span className="font-bold text-amber-800 dark:text-amber-400">
-                          {Number(row.quantity).toLocaleString()} {row.ingredient?.baseUnit?.symbol}
-                        </span>
-                      </div>
-
-                      <div className="text-[10px] text-stone-500 dark:text-zinc-500 truncate mt-1">
-                        Reason:{' '}
-                        <span className="font-medium text-stone-700 dark:text-zinc-300">
-                          {(() => {
-                            let text = row.reason || row.referenceId || 'N/A';
-                            // Clean up redundant technical codes if supplier/item info is present
-                            if (text.includes('Goods receipt from supplier:')) {
-                              text = text.replace(/Goods receipt from supplier:\s*PO-\d{4}-\d+/i, 'Goods Receipt (Purchase Order)');
-                            }
-                            return text;
-                          })()}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-stone-200 dark:border-white/5 flex items-center justify-between text-[11px]">
-                      <span className="text-stone-500 dark:text-zinc-400">
-                        By <strong className="font-bold text-stone-800 dark:text-zinc-200">{row.user?.name || 'Staff'}</strong>
-                      </span>
-                      <span className="font-black text-stone-900 dark:text-white">
-                        {Number(row.totalCost).toFixed(2)} ETB
-                      </span>
-                    </div>
+                {filteredLedger.length === 0 ? (
+                  <div className="col-span-full py-12 text-center text-xs text-stone-500 bg-stone-50 rounded-2xl border border-stone-200">
+                    No ledger transactions found matching filters.
                   </div>
-                ))}
+                ) : (
+                  filteredLedger.map((row: any) => (
+                    <div
+                      key={row.id}
+                      className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col justify-between gap-2.5 transition shadow-xs"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span
+                            className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                              row.transactionType === 'PRODUCTION_CONSUMPTION'
+                                ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30'
+                                : row.transactionType === 'WASTAGE'
+                                ? 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30'
+                                : row.transactionType === 'TRANSFER_RECEIVE'
+                                ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30'
+                                : row.transactionType === 'TRANSFER_DISPATCH'
+                                ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30'
+                                : row.transactionType === 'PURCHASE_RECEIPT'
+                                ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30'
+                                : 'bg-stone-200 dark:bg-zinc-800 text-stone-700 dark:text-zinc-300 border border-stone-300 dark:border-white/10'
+                            }`}
+                          >
+                            {row.transactionType.replace(/_/g, ' ')}
+                          </span>
+                          <span className="text-[10px] text-stone-500 dark:text-zinc-500">
+                            {new Date(row.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+
+                        <div className="font-bold text-xs text-stone-900 dark:text-white truncate">{row.ingredient?.name}</div>
+
+                        <div className="text-[11px] text-stone-600 dark:text-zinc-400 mt-1 flex items-center justify-between">
+                          <span>Quantity:</span>
+                          <span className="font-bold text-amber-800 dark:text-amber-400">
+                            {Number(row.quantity).toLocaleString()} {row.ingredient?.baseUnit?.symbol}
+                          </span>
+                        </div>
+
+                        <div className="text-[10px] text-stone-500 dark:text-zinc-500 truncate mt-1">
+                          Reason:{' '}
+                          <span className="font-medium text-stone-700 dark:text-zinc-300">
+                            {(() => {
+                              let text = row.reason || row.referenceId || 'N/A';
+                              if (text.includes('Goods receipt from supplier:')) {
+                                text = text.replace(/Goods receipt from supplier:\s*PO-\d{4}-\d+/i, 'Goods Receipt (Purchase Order)');
+                              }
+                              return text;
+                            })()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-stone-200 dark:border-white/5 flex items-center justify-between text-[11px]">
+                        <span className="text-stone-500 dark:text-zinc-400">
+                          By <strong className="font-bold text-stone-800 dark:text-zinc-200">{row.user?.name || 'Staff'}</strong>
+                        </span>
+                        <span className="font-black text-stone-900 dark:text-white">
+                          {Number(row.totalCost).toFixed(2)} ETB
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="pt-4 border-t border-stone-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 text-stone-600 dark:text-stone-400 font-medium">
+                  <span>Show per page:</span>
+                  <div className="flex items-center gap-1">
+                    {[25, 50, 100].map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          setLedgerLimit(size);
+                          setLedgerPage(1);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
+                          ledgerLimit === size
+                            ? 'bg-emerald-600 text-white font-black shadow-xs'
+                            : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setLedgerPage((p) => Math.max(1, p - 1))}
+                    disabled={ledgerPage <= 1 || loadingLedger}
+                    className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
+                  >
+                    <span>← Previous</span>
+                  </button>
+
+                  <span className="font-bold text-stone-800 dark:text-stone-200 px-2">
+                    Page <strong className="text-emerald-700">{ledgerPage}</strong> of{' '}
+                    <strong>{ledgerData.totalPages || 1}</strong>
+                  </span>
+
+                  <button
+                    onClick={() => setLedgerPage((p) => Math.min(ledgerData.totalPages || 1, p + 1))}
+                    disabled={ledgerPage >= (ledgerData.totalPages || 1) || loadingLedger}
+                    className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
+                  >
+                    <span>Next →</span>
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -2009,18 +2110,21 @@ export function InventoryView() {
                 .map((b: any) => {
                   const qtyVal = batchQuantities[b.ingredient.id] || '';
                   const hasQty = parseFloat(qtyVal) > 0;
+                  const isExceeded = hasQty && parseFloat(qtyVal) > b.quantity;
                   const unitSymbol = b.ingredient.baseUnit?.symbol || 'units';
 
                   return (
                     <div
                       key={b.ingredient.id}
                       className={`p-3 rounded-2xl border transition-all ${
-                        hasQty
+                        isExceeded
+                          ? 'bg-rose-50/90 dark:bg-rose-950/20 border-rose-400 dark:border-rose-600/40 shadow-xs'
+                          : hasQty
                           ? 'bg-emerald-50/70 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/40 shadow-xs'
                           : 'bg-stone-50 dark:bg-white/[0.03] border-stone-200 dark:border-white/10 hover:bg-stone-100/70 dark:hover:bg-white/[0.05]'
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="text-xs font-bold text-stone-900 dark:text-white truncate" title={b.ingredient.name}>
@@ -2036,9 +2140,14 @@ export function InventoryView() {
                               {b.quantity} {unitSymbol}
                             </span>
                           </div>
+                          {isExceeded && (
+                            <div className="text-[10px] font-black text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1">
+                              <span>⚠️ Requested amount exceeds available store balance ({b.quantity} {unitSymbol})</span>
+                            </div>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
                           <div className="relative flex items-center">
                             <input
                               type="number"
@@ -2054,7 +2163,9 @@ export function InventoryView() {
                                 }))
                               }
                               className={`w-28 sm:w-32 bg-white dark:bg-black/30 border rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold text-right focus:outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                                hasQty
+                                isExceeded
+                                  ? 'border-rose-500 text-rose-800 dark:text-rose-300 ring-1 ring-rose-500/30'
+                                  : hasQty
                                   ? 'border-emerald-500 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-500/30'
                                   : 'border-stone-300 dark:border-white/10 text-stone-900 dark:text-white placeholder-stone-400 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600'
                               }`}
@@ -2125,23 +2236,32 @@ export function InventoryView() {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={
-                    sendSubmitting ||
-                    Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length === 0
-                  }
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
-                >
-                  <Send className="w-3.5 h-3.5 stroke-[3]" />
-                  <span>
-                    {sendSubmitting
-                      ? 'Dispatching Batch...'
-                      : `Deliver Batch to Kitchen (${
-                          Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length
-                        } items)`}
-                  </span>
-                </button>
+                {(() => {
+                  const hasAnyBatchExceeded = Object.entries(batchQuantities).some(([ingId, q]) => {
+                    const num = parseFloat(q);
+                    if (!num || num <= 0) return false;
+                    const balance = mainStoreLoc?.balances?.find((bal: any) => bal.ingredient.id === ingId);
+                    return balance ? num > balance.quantity : false;
+                  });
+                  const validCount = Object.entries(batchQuantities).filter(([_, q]) => parseFloat(q) > 0).length;
+
+                  return (
+                    <button
+                      type="submit"
+                      disabled={sendSubmitting || hasAnyBatchExceeded || validCount === 0}
+                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    >
+                      <Send className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>
+                        {sendSubmitting
+                          ? 'Dispatching Batch...'
+                          : hasAnyBatchExceeded
+                          ? 'Exceeds Stock Balance'
+                          : `Deliver Batch to Kitchen (${validCount} items)`}
+                      </span>
+                    </button>
+                  );
+                })()}
               </div>
             </form>
           </div>
