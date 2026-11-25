@@ -1188,16 +1188,16 @@ export function InventoryView() {
           return (
             <div className="space-y-4">
               {/* Recipe Studio Top Banner with Quick Actions */}
-              <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div>
-                  <h3 className="text-base font-black text-stone-900 dark:text-white flex items-center gap-2 font-heading">
-                    <ChefHat className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <h3 className="text-sm sm:text-base font-black text-stone-900 dark:text-white flex items-center gap-2 font-heading">
+                    <ChefHat className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>Culinary Recipe Studio & Costing Engine</span>
                   </h3>
                 </div>
 
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <div className="flex items-center gap-2 bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 px-3 py-1.5 rounded-2xl text-xs">
+                <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+                  <div className="flex items-center gap-2 bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 px-2.5 sm:px-3 py-1.5 rounded-2xl text-[11px] sm:text-xs">
                     <span className="text-stone-600 dark:text-zinc-400">Configured:</span>
                     <strong className="text-emerald-700 dark:text-emerald-400 font-bold">{itemsWithRecipe.length}</strong>
                     <span className="text-stone-300 dark:text-zinc-600">|</span>
@@ -1213,7 +1213,7 @@ export function InventoryView() {
                         }
                         setRecipeModalOpen(true);
                       }}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                      className="px-3.5 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
                     >
                       <Plus className="w-4 h-4 stroke-[3]" />
                       <span>+ Add / Build Recipe</span>
@@ -1223,9 +1223,9 @@ export function InventoryView() {
               </div>
 
               {/* Main Grid: Left Dish Picker & Right Recipe Canvas */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Left: Dish Selector with Search & Filter Tabs */}
-                <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-3">
+                <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-4 sm:p-5 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider font-heading">
                       Select Dish ({filteredDishes.length})
@@ -1325,29 +1325,29 @@ export function InventoryView() {
                 </div>
 
                 {/* Right 2 cols: Exact Recipe Gram Breakdown (Card Format) */}
-                <div className="lg:col-span-2 bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
+                <div className="lg:col-span-2 bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-4 sm:p-6 shadow-xs flex flex-col justify-between">
                   {selectedRecipeItem ? (
                     <div>
-                      <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-200 dark:border-white/10 gap-3 flex-wrap">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-black text-stone-900 dark:text-white font-heading">{selectedRecipeItem.name}</h3>
-                            {selectedRecipeItem.recipe?.ingredients?.length > 0 ? (
-                              <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-full">
-                                Recipe Configured
-                              </span>
-                            ) : (
-                              <span className="text-[10px] font-bold bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 px-2 py-0.5 rounded-full">
-                                No Recipe Set
-                              </span>
-                            )}
-                          </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-stone-200 dark:border-white/10 gap-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-base sm:text-lg font-black text-stone-900 dark:text-white font-heading break-words">
+                            {selectedRecipeItem.name}
+                          </h3>
+                          {selectedRecipeItem.recipe?.ingredients?.length > 0 ? (
+                            <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-full whitespace-nowrap">
+                              Recipe Configured
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold bg-amber-100 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 px-2 py-0.5 rounded-full whitespace-nowrap">
+                              No Recipe Set
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            <div className="text-xs text-stone-500 dark:text-zinc-400 uppercase font-semibold">Selling Price</div>
-                            <div className="text-xl font-extrabold text-amber-800 dark:text-amber-400">
+                        <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
+                          <div className="text-left sm:text-right">
+                            <div className="text-[10px] sm:text-xs text-stone-500 dark:text-zinc-400 uppercase font-semibold">Selling Price</div>
+                            <div className="text-lg sm:text-xl font-extrabold text-amber-800 dark:text-amber-400">
                               {Number(selectedRecipeItem.price).toFixed(2)} ETB
                             </div>
                           </div>
@@ -1355,7 +1355,7 @@ export function InventoryView() {
                           {isOwnerOrManager && (
                             <button
                               onClick={() => setRecipeModalOpen(true)}
-                              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                              className="px-3.5 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
                             >
                               <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
                               <span>{selectedRecipeItem.recipe?.ingredients?.length > 0 ? 'Edit Recipe Grams' : '+ Add Recipe Now'}</span>
@@ -1366,35 +1366,35 @@ export function InventoryView() {
 
                       {/* Margin Banner - Only Owner sees Gross Profit and Margin % Analysis */}
                       {isOwner ? (
-                        <div className="grid grid-cols-3 gap-3 mb-6 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 p-4 rounded-2xl">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 mb-6 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 p-3 sm:p-4 rounded-2xl">
                           <div>
                             <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Portion Food Cost</div>
-                            <div className="text-base font-extrabold text-[#C11221]">
+                            <div className="text-sm sm:text-base font-extrabold text-[#C11221] break-words">
                               {selectedRecipeItem.costPerPortion?.toFixed(4) || '0.00'} ETB
                             </div>
                           </div>
                           <div>
                             <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Gross Margin</div>
-                            <div className="text-base font-extrabold text-amber-800 dark:text-amber-400">
+                            <div className="text-sm sm:text-base font-extrabold text-amber-800 dark:text-amber-400 break-words">
                               {selectedRecipeItem.grossProfitEstimate?.toFixed(2) || '0.00'} ETB
                             </div>
                           </div>
-                          <div>
+                          <div className="col-span-2 sm:col-span-1">
                             <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Target Margin %</div>
-                            <div className="text-base font-extrabold text-emerald-700 dark:text-emerald-400">
+                            <div className="text-sm sm:text-base font-extrabold text-emerald-700 dark:text-emerald-400">
                               {selectedRecipeItem.marginPercent?.toFixed(1) || 0}%
                             </div>
                           </div>
                         </div>
                       ) : (
-                        <div className="mb-6 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 p-4 rounded-2xl flex items-center justify-between">
+                        <div className="mb-6 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div>
                             <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Standard Production Yield</div>
-                            <div className="text-sm font-extrabold text-stone-900 dark:text-white mt-0.5">
+                            <div className="text-xs sm:text-sm font-extrabold text-stone-900 dark:text-white mt-0.5">
                               {selectedRecipeItem.recipe?.yieldPortions || 1} Portion(s) per recipe batch
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-left sm:text-right">
                             <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Kitchen Section</div>
                             <div className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase mt-0.5">
                               {selectedRecipeItem.prepSection?.replace('_', ' ') || 'HOT KITCHEN'}
@@ -1405,14 +1405,14 @@ export function InventoryView() {
 
                       {/* Ingredients Requirements (Card Format) */}
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                           <h4 className="text-xs font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider font-heading">
                             Production Ingredient Requirements ({selectedRecipeItem.recipe?.ingredients?.length || 0} items)
                           </h4>
                           {isOwnerOrManager && selectedRecipeItem.recipe?.ingredients?.length > 0 && (
                             <button
                               onClick={() => setRecipeModalOpen(true)}
-                              className="text-[11px] font-bold text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 flex items-center gap-1 cursor-pointer"
+                              className="text-[11px] font-bold text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 flex items-center gap-1 cursor-pointer self-start sm:self-auto"
                             >
                               <Plus className="w-3 h-3" />
                               <span>Add More Ingredients</span>
@@ -1421,7 +1421,7 @@ export function InventoryView() {
                         </div>
 
                         {selectedRecipeItem.isDirectSale ? (
-                          <div className="p-5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl text-xs text-amber-900 dark:text-amber-300">
+                          <div className="p-4 sm:p-5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl text-xs text-amber-900 dark:text-amber-300">
                             This item is a <strong>direct retail sale</strong> (bottled drink). Deducts directly from stock upon sale.
                           </div>
                         ) : selectedRecipeItem.recipe?.ingredients?.length > 0 ? (
