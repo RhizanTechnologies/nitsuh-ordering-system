@@ -120,11 +120,12 @@ export function InventoryView() {
   const isOwnerOrManager = role === 'OWNER' || role === 'MANAGER';
   const isOwner = role === 'OWNER';
 
-  // Wastage form state
-  const [wasteIngredientId, setWasteIngredientId] = useState('');
-  const [wasteQuantity, setWasteQuantity] = useState('');
+  // Wastage form state (Supports multi-item batch selection)
+  const [wasteQuantities, setWasteQuantities] = useState<Record<string, string>>({});
+  const [wasteSearch, setWasteSearch] = useState('');
   const [wasteReason, setWasteReason] = useState('Spoilage / Expired');
   const [customWasteReason, setCustomWasteReason] = useState('');
+  const [wasteSubmitting, setWasteSubmitting] = useState(false);
   const [wasteSuccess, setWasteSuccess] = useState(false);
 
   const loadData = () => {
@@ -377,29 +378,40 @@ export function InventoryView() {
 
   const handleRecordWastage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!wasteIngredientId || !wasteQuantity) return;
+    const activeEntries = Object.entries(wasteQuantities).filter(([_, q]) => parseFloat(q) > 0);
+    if (activeEntries.length === 0) {
+      showToast('Please enter quantity for at least one ingredient to record wastage', 'error');
+      return;
+    }
+
+    setWasteSubmitting(true);
     try {
       const finalReason =
         wasteReason === 'Other'
           ? customWasteReason.trim() || 'Other wastage'
           : wasteReason;
 
-      await fetchApi('/inventory/wastage', {
-        method: 'POST',
-        body: JSON.stringify({
-          userId: currentUser.id || 'k01-storekeeper',
-          ingredientId: wasteIngredientId,
-          quantity: parseFloat(wasteQuantity),
-          reason: finalReason,
-        }),
-      });
-      setWasteQuantity('');
-      showToast('Wastage record submitted successfully!', 'success');
+      for (const [ingredientId, quantityStr] of activeEntries) {
+        await fetchApi('/inventory/wastage', {
+          method: 'POST',
+          body: JSON.stringify({
+            userId: currentUser.id || 'k01-storekeeper',
+            ingredientId,
+            quantity: parseFloat(quantityStr),
+            reason: finalReason,
+          }),
+        });
+      }
+
+      setWasteQuantities({});
+      showToast(`Successfully recorded wastage for ${activeEntries.length} item(s)!`, 'success');
       setWasteSuccess(true);
       setTimeout(() => setWasteSuccess(false), 3000);
       loadData();
     } catch (err: any) {
       showToast(`Error recording wastage: ${err.message}`, 'error');
+    } finally {
+      setWasteSubmitting(false);
     }
   };
 
@@ -1532,92 +1544,193 @@ export function InventoryView() {
           </div>
         )}
 
-        {/* TAB 5: KITCHEN WASTAGE LOGGER */}
+        {/* TAB 5: KITCHEN WASTAGE LOGGER (MULTI-ITEM BATCH SELECTION) */}
         {activeTab === 'wastage' && (
-          <div className="max-w-xl mx-auto bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs">
-            <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading mb-4">Record Kitchen Wastage & Spoilage</h3>
+          <div className="max-w-3xl mx-auto bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-4 sm:p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 gap-2">
+              <div>
+                <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">
+                  Record Kitchen Wastage & Spoilage
+                </h3>
+              </div>
+              <div className="text-xs text-stone-500 dark:text-zinc-400">
+                {Object.entries(wasteQuantities).filter(([_, q]) => parseFloat(q) > 0).length} ingredient(s) selected
+              </div>
+            </div>
 
             {wasteSuccess && (
-              <div className="mb-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 p-3 rounded-2xl text-xs font-bold text-emerald-800 dark:text-emerald-400">
-                Wastage recorded successfully in the ledger!
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 p-3 rounded-2xl text-xs font-bold text-emerald-800 dark:text-emerald-400">
+                Wastage recorded successfully in the audit ledger!
               </div>
             )}
 
             <form onSubmit={handleRecordWastage} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                  Kitchen Ingredient
-                </label>
-                <select
-                  value={wasteIngredientId}
-                  onChange={(e) => setWasteIngredientId(e.target.value)}
-                  required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
-                >
-                  <option value="" className="bg-white dark:bg-[#1C1815] text-stone-500 dark:text-zinc-400">Select ingredient...</option>
-                  {kitchenStoreLoc?.balances?.map((b: any) => (
-                    <option key={b.ingredient.id} value={b.ingredient.id} className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white font-bold">
-                      {b.ingredient.name} (Available: {b.quantity} {b.ingredient.baseUnit.symbol})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                  Quantity to Waste (in grams / ml / pcs)
-                </label>
+              {/* Search Kitchen Ingredients */}
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-400" />
                 <input
-                  type="number"
-                  step="any"
-                  placeholder="e.g. 200"
-                  value={wasteQuantity}
-                  onChange={(e) => setWasteQuantity(e.target.value)}
-                  required
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                  type="text"
+                  placeholder="Filter kitchen ingredients..."
+                  value={wasteSearch}
+                  onChange={(e) => setWasteSearch(e.target.value)}
+                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                  Reason for Wastage
-                </label>
-                <select
-                  value={wasteReason}
-                  onChange={(e) => setWasteReason(e.target.value)}
-                  className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
-                >
-                  <option value="Overcooked / Burnt dish" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Overcooked / Burnt dish</option>
-                  <option value="Accidental Spillage" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Accidental Spillage</option>
-                  <option value="Expired / Past fresh date" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Expired / Past fresh date</option>
-                  <option value="Quality check failure" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Quality check failure</option>
-                  <option value="Customer Return" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Customer Return</option>
-                  <option value="Other" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Other (Specify below)</option>
-                </select>
+              {/* Ingredients List with Number Inputs */}
+              <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1 no-scrollbar border border-stone-200 dark:border-white/10 rounded-2xl p-2 bg-stone-50/50 dark:bg-black/20">
+                {kitchenStoreLoc?.balances?.filter((b: any) =>
+                  !wasteSearch ||
+                  b.ingredient.name.toLowerCase().includes(wasteSearch.toLowerCase()) ||
+                  (b.ingredient.category && b.ingredient.category.toLowerCase().includes(wasteSearch.toLowerCase()))
+                ).map((b: any) => {
+                  const qtyVal = wasteQuantities[b.ingredient.id] || '';
+                  const hasQty = parseFloat(qtyVal) > 0;
+                  const unitSymbol = b.ingredient.baseUnit?.symbol || 'units';
+
+                  return (
+                    <div
+                      key={b.ingredient.id}
+                      className={`p-3 rounded-2xl border transition-all ${
+                        hasQty
+                          ? 'bg-rose-50/70 dark:bg-rose-500/10 border-rose-300 dark:border-rose-500/40 shadow-xs'
+                          : 'bg-white dark:bg-white/[0.02] border-stone-200 dark:border-white/10 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-bold text-stone-900 dark:text-white truncate" title={b.ingredient.name}>
+                              {b.ingredient.name}
+                            </span>
+                            <span className="text-[10px] bg-stone-100 dark:bg-white/10 text-stone-600 dark:text-zinc-400 px-2 py-0.5 rounded-md font-semibold whitespace-nowrap">
+                              {b.ingredient.category || 'General'}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-stone-500 dark:text-zinc-400 mt-0.5">
+                            Kitchen Stock:{' '}
+                            <span className="font-bold text-stone-800 dark:text-zinc-200">
+                              {Number(b.quantity).toLocaleString()} {unitSymbol}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <div className="relative flex items-center">
+                            <input
+                              type="number"
+                              step="any"
+                              min="0"
+                              max={b.quantity}
+                              placeholder="Qty wasted"
+                              value={qtyVal}
+                              onChange={(e) =>
+                                setWasteQuantities((prev) => ({
+                                  ...prev,
+                                  [b.ingredient.id]: e.target.value,
+                                }))
+                              }
+                              className={`w-28 sm:w-32 bg-white dark:bg-black/30 border rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold text-right focus:outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                                hasQty
+                                  ? 'border-rose-500 text-rose-800 dark:text-rose-300 ring-1 ring-rose-500/30'
+                                  : 'border-stone-300 dark:border-white/10 text-stone-900 dark:text-white placeholder-stone-400 focus:border-rose-600 focus:ring-1 focus:ring-rose-600'
+                              }`}
+                            />
+                            <span className="absolute right-2.5 text-[10px] font-semibold text-stone-400 dark:text-zinc-400 pointer-events-none select-none">
+                              {unitSymbol}
+                            </span>
+                          </div>
+                          {hasQty && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setWasteQuantities((prev) => {
+                                  const next = { ...prev };
+                                  delete next[b.ingredient.id];
+                                  return next;
+                                })
+                              }
+                              className="w-7 h-7 flex items-center justify-center rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 text-sm font-bold transition cursor-pointer shrink-0"
+                              title="Clear quantity"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
-              {wasteReason === 'Other' && (
+              {/* Shared Reason Setting for the batch */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-stone-200 dark:border-white/10">
                 <div>
                   <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                    Specify Reason
+                    Reason for Wastage
                   </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Broken storage jar, power outage thawing..."
-                    value={customWasteReason}
-                    onChange={(e) => setCustomWasteReason(e.target.value)}
-                    required
-                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
-                  />
+                  <select
+                    value={wasteReason}
+                    onChange={(e) => setWasteReason(e.target.value)}
+                    className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2 text-xs font-semibold text-stone-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                  >
+                    <option value="Overcooked / Burnt dish" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Overcooked / Burnt dish</option>
+                    <option value="Accidental Spillage" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Accidental Spillage</option>
+                    <option value="Expired / Past fresh date" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Expired / Past fresh date</option>
+                    <option value="Quality check failure" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Quality check failure</option>
+                    <option value="Customer Return" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Customer Return</option>
+                    <option value="Other" className="bg-white dark:bg-[#1C1815] text-stone-900 dark:text-white">Other (Specify below)</option>
+                  </select>
                 </div>
-              )}
 
-              <button
-                type="submit"
-                className="w-full py-3 bg-[#C11221] hover:bg-[#A30F1C] text-white font-extrabold text-xs rounded-2xl shadow-xs transition cursor-pointer"
-              >
-                Commit Wastage to Ledger
-              </button>
+                {wasteReason === 'Other' ? (
+                  <div>
+                    <label className="block text-xs font-bold text-stone-600 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                      Specify Reason
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Broken storage jar, power outage thawing..."
+                      value={customWasteReason}
+                      onChange={(e) => setCustomWasteReason(e.target.value)}
+                      required
+                      className="w-full bg-stone-50 dark:bg-white/[0.05] border border-stone-300 dark:border-white/10 rounded-2xl px-4 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-end">
+                    <span className="text-[11px] text-stone-400 dark:text-zinc-500 pb-2">
+                      Selected items will be deducted from kitchen inventory with audit logs.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                {Object.entries(wasteQuantities).filter(([_, q]) => parseFloat(q) > 0).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setWasteQuantities({})}
+                    className="text-xs font-bold text-stone-500 hover:text-stone-800 dark:text-zinc-400 dark:hover:text-white cursor-pointer"
+                  >
+                    Clear All
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={
+                    wasteSubmitting ||
+                    Object.entries(wasteQuantities).filter(([_, q]) => parseFloat(q) > 0).length === 0
+                  }
+                  className="ml-auto px-6 py-2.5 bg-[#C11221] hover:bg-[#A30F1C] text-white font-extrabold text-xs rounded-2xl shadow-xs transition cursor-pointer disabled:opacity-40"
+                >
+                  {wasteSubmitting
+                    ? 'Recording...'
+                    : `Commit Wastage to Ledger (${
+                        Object.entries(wasteQuantities).filter(([_, q]) => parseFloat(q) > 0).length
+                      } items)`}
+                </button>
+              </div>
             </form>
           </div>
         )}
