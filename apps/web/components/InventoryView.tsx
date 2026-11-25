@@ -1889,63 +1889,72 @@ export function InventoryView() {
                   return (
                     <div
                       key={b.ingredient.id}
-                      className={`p-3 rounded-2xl border transition flex items-center justify-between gap-3 ${
+                      className={`p-3 rounded-2xl border transition-all ${
                         hasQty
-                          ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/50 shadow-xs'
-                          : 'bg-stone-50 dark:bg-white/[0.03] border-stone-200 dark:border-white/10 hover:bg-stone-100 dark:hover:bg-white/[0.05]'
+                          ? 'bg-emerald-50/70 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/40 shadow-xs'
+                          : 'bg-stone-50 dark:bg-white/[0.03] border-stone-200 dark:border-white/10 hover:bg-stone-100/70 dark:hover:bg-white/[0.05]'
                       }`}
                     >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-stone-900 dark:text-white truncate">{b.ingredient.name}</span>
-                          <span className="text-[10px] bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-zinc-400 px-1.5 py-0.2 rounded-full font-medium">
-                            {b.ingredient.category}
-                          </span>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-bold text-stone-900 dark:text-white truncate" title={b.ingredient.name}>
+                              {b.ingredient.name}
+                            </span>
+                            <span className="text-[10px] bg-stone-200/80 dark:bg-white/10 text-stone-600 dark:text-zinc-400 px-2 py-0.5 rounded-md font-semibold whitespace-nowrap">
+                              {b.ingredient.category}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-stone-500 dark:text-zinc-400 mt-0.5">
+                            Available in Main:{' '}
+                            <span className="font-bold text-stone-800 dark:text-zinc-200">
+                              {b.quantity} {unitSymbol}
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-[11px] text-stone-500 dark:text-zinc-400 mt-0.5">
-                          Available in Main: <span className="text-amber-700 dark:text-amber-400 font-bold">{b.quantity} {unitSymbol}</span>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="relative">
-                          <input
-                            type="number"
-                            step="any"
-                            min="0"
-                            max={b.quantity}
-                            placeholder="Qty to send"
-                            value={qtyVal}
-                            onChange={(e) =>
-                              setBatchQuantities((prev) => ({
-                                ...prev,
-                                [b.ingredient.id]: e.target.value,
-                              }))
-                            }
-                            className={`w-32 bg-white dark:bg-black/40 border rounded-xl px-3 py-1.5 text-xs font-bold text-stone-900 dark:text-white text-right focus:outline-none transition ${
-                              hasQty ? 'border-amber-500 text-amber-800 dark:text-amber-300' : 'border-stone-300 dark:border-white/10 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600'
-                            }`}
-                          />
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-stone-400 dark:text-zinc-500 pointer-events-none">
-                            {unitSymbol}
-                          </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <div className="relative flex items-center">
+                            <input
+                              type="number"
+                              step="any"
+                              min="0"
+                              max={b.quantity}
+                              placeholder="Qty to send"
+                              value={qtyVal}
+                              onChange={(e) =>
+                                setBatchQuantities((prev) => ({
+                                  ...prev,
+                                  [b.ingredient.id]: e.target.value,
+                                }))
+                              }
+                              className={`w-28 sm:w-32 bg-white dark:bg-black/30 border rounded-xl pl-3 pr-8 py-1.5 text-xs font-bold text-right focus:outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                                hasQty
+                                  ? 'border-emerald-500 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-500/30'
+                                  : 'border-stone-300 dark:border-white/10 text-stone-900 dark:text-white placeholder-stone-400 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600'
+                              }`}
+                            />
+                            <span className="absolute right-2.5 text-[10px] font-semibold text-stone-400 dark:text-zinc-400 pointer-events-none select-none">
+                              {unitSymbol}
+                            </span>
+                          </div>
+                          {hasQty && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setBatchQuantities((prev) => {
+                                  const next = { ...prev };
+                                  delete next[b.ingredient.id];
+                                  return next;
+                                })
+                              }
+                              className="w-7 h-7 flex items-center justify-center rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 text-sm font-bold transition cursor-pointer shrink-0"
+                              title="Clear quantity"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
-                        {hasQty && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setBatchQuantities((prev) => {
-                                const next = { ...prev };
-                                delete next[b.ingredient.id];
-                                return next;
-                              })
-                            }
-                            className="p-1 text-stone-400 dark:text-zinc-500 hover:text-rose-500 dark:hover:text-rose-400 text-xs font-black cursor-pointer"
-                            title="Clear"
-                          >
-                            ×
-                          </button>
-                        )}
                       </div>
                     </div>
                   );
