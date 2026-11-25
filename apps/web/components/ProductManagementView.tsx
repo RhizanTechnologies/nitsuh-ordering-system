@@ -28,6 +28,7 @@ import {
   Square,
   LayoutList,
   LayoutGrid,
+  Loader2,
 } from 'lucide-react';
 
 export function ProductManagementView() {
@@ -75,8 +76,22 @@ export function ProductManagementView() {
     description: string;
     confirmText: string;
     isDanger?: boolean;
-    onConfirm: () => void;
+    onConfirm: () => Promise<void> | void;
   } | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const handleConfirmAction = async () => {
+    if (!confirmModal || confirmLoading) return;
+    setConfirmLoading(true);
+    try {
+      await confirmModal.onConfirm();
+    } catch (e: any) {
+      console.error('Confirmation action error:', e);
+    } finally {
+      setConfirmLoading(false);
+      setConfirmModal(null);
+    }
+  };
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -309,7 +324,6 @@ export function ProductManagementView() {
       confirmText: 'Delete Add-on',
       isDanger: true,
       onConfirm: async () => {
-        setConfirmModal(null);
         try {
           await fetchApi(`/menu/addons/${addon.id}`, { method: 'DELETE' });
           showToast(`Add-on "${addon.name}" removed.`, 'success');
@@ -442,7 +456,6 @@ export function ProductManagementView() {
       confirmText: 'Remove Product',
       isDanger: true,
       onConfirm: async () => {
-        setConfirmModal(null);
         try {
           await fetchApi(`/menu/items/${item.id}`, { method: 'DELETE' });
           showToast(`Product "${item.name}" removed.`, 'success');
@@ -520,21 +533,24 @@ export function ProductManagementView() {
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
+                disabled={confirmLoading}
                 onClick={() => setConfirmModal(null)}
-                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={confirmModal.onConfirm}
-                className={`px-4 py-2.5 rounded-xl text-white font-black text-xs transition shadow-xs cursor-pointer active:scale-95 ${
+                disabled={confirmLoading}
+                onClick={handleConfirmAction}
+                className={`px-4 py-2.5 rounded-xl text-white font-black text-xs transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-60 inline-flex items-center gap-1.5 ${
                   confirmModal.isDanger
                     ? 'bg-rose-600 hover:bg-rose-700'
                     : 'bg-emerald-600 hover:bg-emerald-700'
                 }`}
               >
-                {confirmModal.confirmText}
+                {confirmLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{confirmLoading ? 'Deleting...' : confirmModal.confirmText}</span>
               </button>
             </div>
           </div>
