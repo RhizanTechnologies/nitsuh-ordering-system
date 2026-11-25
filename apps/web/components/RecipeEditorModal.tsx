@@ -179,22 +179,22 @@ export function RecipeEditorModal({
     );
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
       <div className="bg-white text-stone-900 rounded-3xl max-w-2xl sm:max-w-3xl w-full p-4 sm:p-6 shadow-2xl border border-stone-200/90 space-y-4 max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header with Dish Switcher */}
-        <div className="flex items-center justify-between pb-3 border-b border-stone-200 flex-shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-start sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 flex-shrink-0">
+          <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0">
               <ChefHat className="w-5 h-5" />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-black text-stone-900">Recipe Studio:</h3>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 min-w-0">
+                <h3 className="text-sm sm:text-base font-black text-stone-900 whitespace-nowrap">Recipe Studio</h3>
                 {allMenuItems.length > 1 ? (
                   <select
                     value={activeItem.id}
                     onChange={(e) => handleSwitchDish(e.target.value)}
-                    className="bg-stone-50 border border-stone-300 rounded-xl px-2.5 py-1 text-xs font-black text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
+                    className="w-full sm:w-auto sm:max-w-[320px] min-w-0 bg-stone-50 border border-stone-300 rounded-xl px-3 py-1.5 text-xs font-black text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer truncate"
                   >
                     {allMenuItems.map((item) => (
                       <option key={item.id} value={item.id} className="bg-white text-stone-900">
@@ -203,14 +203,15 @@ export function RecipeEditorModal({
                     ))}
                   </select>
                 ) : (
-                  <span className="text-base font-black text-emerald-700 truncate">{activeItem.name}</span>
+                  <span className="text-sm sm:text-base font-black text-emerald-700 truncate">{activeItem.name}</span>
                 )}
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-stone-100 hover:bg-stone-200 rounded-xl transition text-stone-500 hover:text-stone-900 cursor-pointer flex-shrink-0 ml-2"
+            className="w-9 h-9 rounded-xl bg-stone-100 hover:bg-stone-200 flex items-center justify-center transition text-stone-500 hover:text-stone-900 cursor-pointer flex-shrink-0"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
@@ -227,26 +228,26 @@ export function RecipeEditorModal({
 
         {/* Live Cost & Margin Simulator Bar - Only Owner sees Selling Price and Profit Margin */}
         {isOwner ? (
-          <div className="grid grid-cols-3 gap-3 bg-stone-50 border border-stone-200 p-3.5 rounded-2xl text-xs flex-shrink-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-stone-50 border border-stone-200 p-3.5 sm:p-4 rounded-2xl text-xs flex-shrink-0">
             <div>
-              <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Portion Food Cost</div>
+              <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Portion Cost</div>
               <div className="text-sm font-black text-rose-600 mt-0.5">{portionCost.toFixed(4)} ETB</div>
             </div>
             <div>
               <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Selling Price</div>
               <div className="text-sm font-black text-stone-900 mt-0.5">{sellingPrice.toFixed(2)} ETB</div>
             </div>
-            <div>
-              <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Gross Margin %</div>
+            <div className="col-span-2 sm:col-span-1 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-200/80">
+              <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Gross Margin</div>
               <div className={`text-sm font-black mt-0.5 ${marginPercent >= 60 ? 'text-emerald-700' : 'text-stone-700'}`}>
                 {marginPercent.toFixed(1)}% <span className="text-[10px] text-stone-500 font-normal">({grossProfit.toFixed(2)} ETB)</span>
               </div>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 bg-stone-50 border border-stone-200 p-3.5 rounded-2xl text-xs flex-shrink-0">
+          <div className="grid grid-cols-2 gap-3 bg-stone-50 border border-stone-200 p-3.5 sm:p-4 rounded-2xl text-xs flex-shrink-0">
             <div>
-              <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Calculated Ingredient Cost</div>
+              <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Ingredient Cost</div>
               <div className="text-sm font-black text-stone-900 mt-0.5">{portionCost.toFixed(4)} ETB</div>
             </div>
             <div>
@@ -257,10 +258,10 @@ export function RecipeEditorModal({
         )}
 
         {/* Batch Yield Control & Ingredient Adder Controls (Fully Responsive) */}
-        <div className="space-y-2 flex-shrink-0">
+        <div className="space-y-2.5 flex-shrink-0">
           <div className="flex flex-wrap items-center justify-between gap-2.5">
             {/* Yield Portions Stepper */}
-            <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-2xl px-3 py-1.5">
+            <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-2xl px-3 py-2">
               <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider whitespace-nowrap">Yield:</span>
               <div className="flex items-center gap-1">
                 <button
@@ -294,11 +295,11 @@ export function RecipeEditorModal({
               <button
                 type="button"
                 onClick={onOpenCreateStockItem}
-                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 active:scale-95 ml-auto"
+                className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 active:scale-95"
                 title="Create a new stock item in inventory"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>+ New Ingredient</span>
+                <span>New Ingredient</span>
               </button>
             )}
           </div>
@@ -349,7 +350,7 @@ export function RecipeEditorModal({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap w-full sm:w-auto">
                     {/* Quick increment helpers for grams */}
                     {isGramOrMl && (
                       <div className="hidden sm:flex items-center gap-1">
