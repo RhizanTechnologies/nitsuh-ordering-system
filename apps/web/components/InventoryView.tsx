@@ -679,21 +679,18 @@ export function InventoryView() {
             {/* PENDING KITCHEN CONFIRMATION BANNER (For Head Chef) */}
             {isKitchenChef && pendingKitchenReceipts.length > 0 && (
               <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-3xl shadow-xs animate-in fade-in">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-amber-200 dark:border-white/10">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-black animate-bounce shadow-md shadow-amber-500/30">
-                      <PackageCheck className="w-4 h-4" />
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-emerald-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0">
+                      <PackageCheck className="w-4 h-4 text-emerald-700" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-stone-900 dark:text-white flex items-center gap-2">
+                      <h3 className="text-sm font-black text-stone-900 dark:text-white flex items-center gap-2 flex-wrap">
                         <span>Incoming Deliveries from Main Storekeeper</span>
-                        <span className="bg-[#C11221] text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+                        <span className="bg-rose-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-black whitespace-nowrap inline-flex items-center shrink-0">
                           {pendingKitchenReceipts.length} Pending Confirmation
                         </span>
                       </h3>
-                      <p className="text-[11px] text-stone-600 dark:text-zinc-400">
-                        Main store stock has already been deducted. Cook head chef confirmation adds stock to the Kitchen.
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -785,28 +782,27 @@ export function InventoryView() {
                 <div className={`bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs flex flex-col ${
                   mobileBalanceTab === 'ALL' || mobileBalanceTab === 'MAIN' ? 'flex' : 'hidden lg:flex'
                 }`}>
-                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10 flex-shrink-0 gap-3">
                     <div>
                       <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2 font-heading">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                         Main Store (Bulk Warehouse)
                       </h3>
-                      <div className="text-xs text-stone-500 dark:text-zinc-400">Add/remove stock or dispatch directly to kitchen</div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       {isMainStorekeeper && (
                         <button
                           onClick={() => setSendDirectModalOpen(true)}
-                          className="text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+                          className="h-9 px-3 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-500/30 rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0"
                           title="Send items directly to kitchen floor"
                         >
-                          <Send className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                          <Send className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                           <span className="hidden sm:inline">Send to Kitchen</span>
                         </button>
                       )}
                       <button
                         onClick={() => setPurchaseModalOpen(true)}
-                        className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+                        className="h-9 px-3.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
                       >
                         <Truck className="w-3.5 h-3.5" />
                         <span>PO Delivery</span>
@@ -904,10 +900,9 @@ export function InventoryView() {
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
                   <div>
                     <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2 font-heading">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#C11221] shadow-sm shadow-red-500/50" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                       Kitchen Store (Production Floor)
                     </h3>
-                    <div className="text-xs text-stone-500 dark:text-zinc-400">Head Chef controlled: auto-deducted on food preparation</div>
                   </div>
                 </div>
 
@@ -1019,12 +1014,9 @@ export function InventoryView() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
                   <div>
                     <h3 className="text-sm font-black text-stone-900 dark:text-white flex items-center gap-2 font-heading">
-                      <Boxes className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <Boxes className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       <span>Stock Items Catalog (Raw Materials & Supplies)</span>
                     </h3>
-                    <p className="text-xs text-stone-600 dark:text-zinc-400">
-                      Create, view, update unit costs and remove inventory stock items across Main Warehouse and Kitchen
-                    </p>
                   </div>
                   {isOwnerOrManager && (
                     <button
@@ -1246,9 +1238,6 @@ export function InventoryView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 gap-3">
               <div>
                 <h3 className="text-sm font-bold text-stone-900 dark:text-white font-heading">Stock Transfers Between Stores</h3>
-                <p className="text-xs text-stone-600 dark:text-zinc-400">
-                  Main Storekeeper sends stock ➔ In-Transit buffer ➔ Cook Head Chef confirms receipt into Kitchen Store
-                </p>
               </div>
               <div className="flex items-center gap-2">
                 {isMainStorekeeper && (
@@ -1354,12 +1343,9 @@ export function InventoryView() {
               <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-base font-black text-stone-900 dark:text-white flex items-center gap-2 font-heading">
-                    <ChefHat className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <ChefHat className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     <span>Culinary Recipe Studio & Costing Engine</span>
                   </h3>
-                  <p className="text-xs text-stone-600 dark:text-zinc-400 mt-0.5">
-                    Define exact raw ingredient portions (grams/ml/pcs) to automate Kitchen Store inventory deductions and calculate real portion food costs.
-                  </p>
                 </div>
 
                 <div className="flex items-center gap-2.5 flex-wrap">
@@ -1508,9 +1494,6 @@ export function InventoryView() {
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-stone-600 dark:text-zinc-400 mt-0.5">
-                            Gram-Level Production Costing & Margin Analysis
-                          </p>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -1663,9 +1646,6 @@ export function InventoryView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-200 dark:border-white/10 gap-3">
               <div>
                 <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Suppliers & Goods Receipt</h3>
-                <p className="text-xs text-stone-500 dark:text-zinc-400">
-                  Bulk supplier purchases restock the Main Store and recalculate cost per gram automatically.
-                </p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <button
@@ -1710,10 +1690,7 @@ export function InventoryView() {
         {/* TAB 5: KITCHEN WASTAGE LOGGER */}
         {activeTab === 'wastage' && (
           <div className="max-w-xl mx-auto bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs">
-            <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading mb-1">Record Kitchen Wastage & Spoilage</h3>
-            <p className="text-xs text-stone-600 dark:text-zinc-400 mb-6">
-              Track burnt dishes, spilled ingredients, or damaged stock. Deducts from Kitchen Store and records financial loss.
-            </p>
+            <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading mb-4">Record Kitchen Wastage & Spoilage</h3>
 
             {wasteSuccess && (
               <div className="mb-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 p-3 rounded-2xl text-xs font-bold text-emerald-800 dark:text-emerald-400">
@@ -1825,9 +1802,6 @@ export function InventoryView() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
                 <div>
                   <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Immutable Inventory Transaction Ledger</h3>
-                  <p className="text-xs text-stone-600 dark:text-zinc-400">
-                    Double-entry audit log of all receipts, direct transfers, kitchen consumption, adjustments & wastage.
-                  </p>
                 </div>
                 <span className="text-xs font-bold text-amber-800 dark:text-amber-400">{filteredLedger.length} of {ledger.length} entries</span>
               </div>

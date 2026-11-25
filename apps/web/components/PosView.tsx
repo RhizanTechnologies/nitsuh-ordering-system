@@ -1562,19 +1562,16 @@ export function PosView() {
             <div className="mb-4 bg-emerald-50/70 border border-emerald-300 rounded-2xl p-3.5 sm:p-4 shadow-xs animate-in fade-in">
               <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-emerald-200/80">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs flex-shrink-0">
+                  <div className="w-9 h-9 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shadow-2xs flex-shrink-0">
                     <BellRing className="w-4 h-4 font-bold" />
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-2 flex-wrap">
                       <span>Incoming Waiter Notes</span>
-                      <span className="bg-[#C11221] text-white text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-black">
+                      <span className="bg-rose-600 text-white text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full font-black whitespace-nowrap inline-flex items-center shrink-0">
                         {filteredSlips.length} Pending Firing
                       </span>
                     </h3>
-                    <p className="text-[11px] text-stone-500">
-                      Floor notes taken by waiters — review, edit or send straight to kitchen KDS
-                    </p>
                   </div>
                 </div>
               </div>

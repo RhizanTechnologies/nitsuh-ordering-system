@@ -189,11 +189,6 @@ export function TablePlanModal({
               <LayoutGrid className="w-5 h-5 text-emerald-600" />
               <span>Dining Tables &amp; Floor Plan</span>
             </h3>
-            <p className="text-xs text-stone-500">
-              {isOwnerOrManager
-                ? 'Configure dining tables, seat capacities, and room availability'
-                : 'Select an available table for this dining guest'}
-            </p>
           </div>
           <Button
             variant="secondary"
