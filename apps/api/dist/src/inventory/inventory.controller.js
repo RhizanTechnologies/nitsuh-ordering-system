@@ -61,10 +61,10 @@ let InventoryController = class InventoryController {
     async recordWastage(body) {
         return this.inventoryService.recordWastage(body.userId, body.ingredientId, body.quantity, body.reason);
     }
-    async getLedger(limit, page) {
+    async getLedger(limit, page, type, search) {
         const lim = limit !== undefined ? parseInt(limit, 10) : undefined;
         const pg = page ? parseInt(page, 10) : 1;
-        return this.inventoryService.getLedger(lim, pg);
+        return this.inventoryService.getLedger(lim, pg, type, search);
     }
     async getSuppliers() {
         return this.inventoryService.getSuppliers();
@@ -181,8 +181,10 @@ __decorate([
     (0, common_1.Get)('ledger'),
     __param(0, (0, common_1.Query)('limit')),
     __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('type')),
+    __param(3, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], InventoryController.prototype, "getLedger", null);
 __decorate([

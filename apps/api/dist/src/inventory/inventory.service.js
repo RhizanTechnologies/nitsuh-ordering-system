@@ -494,9 +494,33 @@ let InventoryService = class InventoryService {
             orderBy: { createdAt: 'desc' },
         });
     }
-    async getLedger(limit, page = 1) {
-        const total = await this.prisma.inventoryTransaction.count();
+    async getLedger(limit, page = 1, type, search) {
+        const where = {};
+        if (type && type !== 'ALL') {
+            if (type === 'TRANSFER') {
+                where.transactionType = {
+                    in: ['TRANSFER_DISPATCH', 'TRANSFER_RECEIVE', 'TRANSFER_REJECT'],
+                };
+            }
+            else if (type === 'MANUAL_ADJUSTMENT' || type === 'ADJUSTMENT') {
+                where.transactionType = 'ADJUSTMENT';
+            }
+            else {
+                where.transactionType = type;
+            }
+        }
+        if (search && search.trim()) {
+            const q = search.trim();
+            where.OR = [
+                { ingredient: { name: { contains: q, mode: 'insensitive' } } },
+                { referenceId: { contains: q, mode: 'insensitive' } },
+                { reason: { contains: q, mode: 'insensitive' } },
+                { user: { name: { contains: q, mode: 'insensitive' } } },
+            ];
+        }
+        const total = await this.prisma.inventoryTransaction.count({ where });
         const queryOptions = {
+            where,
             include: {
                 ingredient: { include: { baseUnit: true } },
                 sourceLocation: true,
@@ -515,7 +539,7 @@ let InventoryService = class InventoryService {
             total,
             page,
             limit: limit || total,
-            totalPages: limit && limit > 0 ? Math.ceil(total / limit) : 1,
+            totalPages: limit && limit > 0 ? Math.max(1, Math.ceil(total / limit)) : 1,
         };
     }
     async getSuppliers() {

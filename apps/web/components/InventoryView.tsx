@@ -143,9 +143,21 @@ export function InventoryView() {
   const [wasteSubmitting, setWasteSubmitting] = useState(false);
   const [wasteSuccess, setWasteSuccess] = useState(false);
 
-  const loadLedger = (page = ledgerPage, limit = ledgerLimit) => {
+  const loadLedger = (
+    page = ledgerPage,
+    limit = ledgerLimit,
+    type = ledgerTypeFilter,
+    search = ledgerSearch,
+  ) => {
     setLoadingLedger(true);
-    fetchApi(`/inventory/ledger?page=${page}&limit=${limit}`)
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (type && type !== 'ALL') params.append('type', type);
+    if (search && search.trim()) params.append('search', search.trim());
+
+    fetchApi(`/inventory/ledger?${params.toString()}`)
       .then((res) => {
         if (Array.isArray(res)) {
           setLedgerData({
@@ -168,7 +180,7 @@ export function InventoryView() {
     fetchApi(`/inventory/balances${roleParam}`).then(setLocations);
     fetchApi(`/inventory/transfers${roleParam}`).then(setTransfers);
     fetchApi(`/inventory/alerts${roleParam}`).then(setAlerts);
-    loadLedger(ledgerPage, ledgerLimit);
+    loadLedger(ledgerPage, ledgerLimit, ledgerTypeFilter, ledgerSearch);
     fetchApi('/inventory/suppliers').then(setSuppliers);
     fetchApi('/inventory/ingredients').then((ings) => setRawIngredients(ings || []));
     fetchApi('/inventory/units').then((u) => setUnits(u || []));
@@ -187,8 +199,8 @@ export function InventoryView() {
   }, [currentUser?.role]);
 
   useEffect(() => {
-    loadLedger(ledgerPage, ledgerLimit);
-  }, [ledgerPage, ledgerLimit]);
+    loadLedger(ledgerPage, ledgerLimit, ledgerTypeFilter, ledgerSearch);
+  }, [ledgerPage, ledgerLimit, ledgerTypeFilter, ledgerSearch]);
 
   // Handle Quick Stock Adjust (Add or Remove stock directly)
   const handleOpenAdjust = (ingredient: any, locationType: 'MAIN_STORE' | 'KITCHEN_STORE', mode: 'ADD' | 'REMOVE') => {
@@ -1777,24 +1789,6 @@ export function InventoryView() {
         {/* TAB 6: IMMUTABLE AUDIT LEDGER (CARD FORMAT) */}
         {activeTab === 'ledger' && (() => {
           const list = ledgerData?.data || [];
-          const filteredLedger = list.filter((row: any) => {
-            if (ledgerTypeFilter !== 'ALL') {
-              if (ledgerTypeFilter === 'TRANSFER') {
-                if (!row.transactionType.includes('TRANSFER')) return false;
-              } else if (row.transactionType !== ledgerTypeFilter) {
-                return false;
-              }
-            }
-            if (ledgerSearch.trim()) {
-              const q = ledgerSearch.toLowerCase();
-              const matchName = row.ingredient?.name?.toLowerCase().includes(q);
-              const matchRef = row.referenceId?.toLowerCase().includes(q);
-              const matchReason = row.reason?.toLowerCase().includes(q);
-              if (!matchName && !matchRef && !matchReason) return false;
-            }
-            return true;
-          });
-
           const startIdx = ledgerData.total > 0 ? (ledgerData.page - 1) * ledgerData.limit + 1 : 0;
           const endIdx = Math.min(ledgerData.page * ledgerData.limit, ledgerData.total);
 
@@ -1825,7 +1819,10 @@ export function InventoryView() {
                   ].map((f) => (
                     <button
                       key={f.id}
-                      onClick={() => setLedgerTypeFilter(f.id)}
+                      onClick={() => {
+                        setLedgerTypeFilter(f.id);
+                        setLedgerPage(1);
+                      }}
                       className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition cursor-pointer text-xs ${
                         ledgerTypeFilter === f.id
                           ? 'bg-emerald-600 text-white font-black shadow-xs'
@@ -1843,7 +1840,10 @@ export function InventoryView() {
                     type="text"
                     placeholder="Search ingredient, #order..."
                     value={ledgerSearch}
-                    onChange={(e) => setLedgerSearch(e.target.value)}
+                    onChange={(e) => {
+                      setLedgerSearch(e.target.value);
+                      setLedgerPage(1);
+                    }}
                     className="w-full bg-stone-50 border border-stone-300 rounded-xl pl-8 pr-3 py-1.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                   />
                 </div>
@@ -1851,12 +1851,12 @@ export function InventoryView() {
 
               {/* Transaction Cards Grid (Card Format) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredLedger.length === 0 ? (
+                {list.length === 0 ? (
                   <div className="col-span-full py-12 text-center text-xs text-stone-500 bg-stone-50 rounded-2xl border border-stone-200">
                     No ledger transactions found matching filters.
                   </div>
                 ) : (
-                  filteredLedger.map((row: any) => (
+                  list.map((row: any) => (
                     <div
                       key={row.id}
                       className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 hover:border-amber-500/30 rounded-2xl flex flex-col justify-between gap-2.5 transition shadow-xs"

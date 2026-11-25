@@ -600,12 +600,37 @@ export class InventoryService {
     });
   }
 
-  // 8. Get Immutable Transaction Ledger (with pagination and total count)
-  async getLedger(limit?: number, page = 1) {
-    const total = await this.prisma.inventoryTransaction.count();
-    
+  // 8. Get Immutable Transaction Ledger (with pagination, type filtering, search, and total count)
+  async getLedger(limit?: number, page = 1, type?: string, search?: string) {
+    const where: any = {};
+
+    if (type && type !== 'ALL') {
+      if (type === 'TRANSFER') {
+        where.transactionType = {
+          in: ['TRANSFER_DISPATCH', 'TRANSFER_RECEIVE', 'TRANSFER_REJECT'],
+        };
+      } else if (type === 'MANUAL_ADJUSTMENT' || type === 'ADJUSTMENT') {
+        where.transactionType = 'ADJUSTMENT';
+      } else {
+        where.transactionType = type;
+      }
+    }
+
+    if (search && search.trim()) {
+      const q = search.trim();
+      where.OR = [
+        { ingredient: { name: { contains: q, mode: 'insensitive' } } },
+        { referenceId: { contains: q, mode: 'insensitive' } },
+        { reason: { contains: q, mode: 'insensitive' } },
+        { user: { name: { contains: q, mode: 'insensitive' } } },
+      ];
+    }
+
+    const total = await this.prisma.inventoryTransaction.count({ where });
+
     // If limit is 0 or undefined, return all
     const queryOptions: any = {
+      where,
       include: {
         ingredient: { include: { baseUnit: true } },
         sourceLocation: true,
@@ -627,7 +652,7 @@ export class InventoryService {
       total,
       page,
       limit: limit || total,
-      totalPages: limit && limit > 0 ? Math.ceil(total / limit) : 1,
+      totalPages: limit && limit > 0 ? Math.max(1, Math.ceil(total / limit)) : 1,
     };
   }
 
