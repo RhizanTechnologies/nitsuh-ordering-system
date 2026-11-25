@@ -1729,12 +1729,24 @@ export function InventoryView() {
                       </div>
 
                       <div className="text-[10px] text-stone-500 dark:text-zinc-500 truncate mt-1">
-                        Reason: {row.reason || row.referenceId || 'N/A'}
+                        Reason:{' '}
+                        <span className="font-medium text-stone-700 dark:text-zinc-300">
+                          {(() => {
+                            let text = row.reason || row.referenceId || 'N/A';
+                            // Clean up redundant technical codes if supplier/item info is present
+                            if (text.includes('Goods receipt from supplier:')) {
+                              text = text.replace(/Goods receipt from supplier:\s*PO-\d{4}-\d+/i, 'Goods Receipt (Purchase Order)');
+                            }
+                            return text;
+                          })()}
+                        </span>
                       </div>
                     </div>
 
                     <div className="pt-2 border-t border-stone-200 dark:border-white/5 flex items-center justify-between text-[11px]">
-                      <span className="text-stone-500 dark:text-zinc-400">By {row.user?.name || 'Staff'}</span>
+                      <span className="text-stone-500 dark:text-zinc-400">
+                        By <strong className="font-bold text-stone-800 dark:text-zinc-200">{row.user?.name || 'Staff'}</strong>
+                      </span>
                       <span className="font-black text-stone-900 dark:text-white">
                         {Number(row.totalCost).toFixed(2)} ETB
                       </span>

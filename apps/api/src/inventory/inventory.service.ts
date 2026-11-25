@@ -725,6 +725,7 @@ export class InventoryService {
         }
 
         // Write immutable ledger entry
+        const supplierLabel = po.supplier?.name ? `Supplier: ${po.supplier.name}` : `PO ${po.poNumber}`;
         await tx.inventoryTransaction.create({
           data: {
             transactionType: InventoryTransactionType.PURCHASE_RECEIPT,
@@ -734,7 +735,7 @@ export class InventoryService {
             unitCost: unitCostPerGram,
             totalCost: item.totalCost,
             referenceId: po.poNumber,
-            reason: `Goods receipt from supplier: ${po.poNumber}`,
+            reason: `Goods receipt from ${po.supplier?.name || 'supplier'} (${po.poNumber})`,
             userId: buyerId,
           },
         });
