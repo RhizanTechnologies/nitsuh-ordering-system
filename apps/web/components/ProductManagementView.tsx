@@ -42,6 +42,12 @@ export function ProductManagementView() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [singleIndex, setSingleIndex] = useState(0);
 
+  // Pagination for Products & Add-ons
+  const [productPage, setProductPage] = useState(1);
+  const [productLimit, setProductLimit] = useState(12);
+  const [addonPage, setAddonPage] = useState(1);
+  const [addonLimit, setAddonLimit] = useState(12);
+
   // Category Management Modal
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -379,6 +385,26 @@ export function ProductManagementView() {
     });
   }, [addons, addonSearch]);
 
+  useEffect(() => {
+    setProductPage(1);
+  }, [search, selectedCatId]);
+
+  useEffect(() => {
+    setAddonPage(1);
+  }, [addonSearch]);
+
+  const productTotalPages = Math.max(1, Math.ceil(filteredItems.length / productLimit));
+  const paginatedItems = useMemo(() => {
+    const start = (productPage - 1) * productLimit;
+    return filteredItems.slice(start, start + productLimit);
+  }, [filteredItems, productPage, productLimit]);
+
+  const addonTotalPages = Math.max(1, Math.ceil(filteredAddons.length / addonLimit));
+  const paginatedAddons = useMemo(() => {
+    const start = (addonPage - 1) * addonLimit;
+    return filteredAddons.slice(start, start + addonLimit);
+  }, [filteredAddons, addonPage, addonLimit]);
+
   const openAddModal = () => {
     setIsEditing(false);
     setEditingId(null);
@@ -583,7 +609,7 @@ export function ProductManagementView() {
                   title="Create or manage product categories"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>+ Category</span>
+                  <span>Category</span>
                 </button>
                 <button
                   onClick={openAddModal}
@@ -782,10 +808,16 @@ export function ProductManagementView() {
               </button>
             </div>
 
-            <div className="text-xs font-bold text-zinc-400">
-              Showing <strong className="text-white font-black">{filteredItems.length}</strong> products
+            <div className="text-xs font-bold text-stone-500">
+              Showing{' '}
+              <strong className="text-stone-900 font-black">
+                {filteredItems.length === 0
+                  ? 0
+                  : `${(productPage - 1) * productLimit + 1}–${Math.min(productPage * productLimit, filteredItems.length)}`}
+              </strong>{' '}
+              of <strong className="text-stone-900 font-black">{filteredItems.length}</strong> products
               {selectedCatId && (
-                <span> in <strong className="text-emerald-600 font-black">{categories.find((c) => c.id === selectedCatId)?.name}</strong></span>
+                <span> in <strong className="text-emerald-700 font-black">{categories.find((c) => c.id === selectedCatId)?.name}</strong></span>
               )}
             </div>
           </div>
@@ -793,12 +825,12 @@ export function ProductManagementView() {
           {/* VIEW MODE 1: 1 PER ROW (CLEAN LIST VIEW) */}
           {viewMode === 'list' && (
             <div className="space-y-2.5">
-              {filteredItems.length === 0 ? (
+              {paginatedItems.length === 0 ? (
                 <div className="py-16 text-center text-xs text-stone-500 bg-white border border-stone-200/90 rounded-3xl">
                   No products found matching your search.
                 </div>
               ) : (
-                filteredItems.map((item) => {
+                paginatedItems.map((item) => {
                   const price = Number(item.price || 0);
 
                   return (
@@ -860,12 +892,12 @@ export function ProductManagementView() {
           {/* VIEW MODE 3: GRID VIEW (CLEAN RESPONSIVE GRID) */}
           {viewMode === 'grid' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {filteredItems.length === 0 ? (
+              {paginatedItems.length === 0 ? (
                 <div className="col-span-full py-16 text-center text-xs text-stone-500 bg-white border border-stone-200/90 rounded-3xl">
                   No products found matching your search.
                 </div>
               ) : (
-                filteredItems.map((item) => {
+                paginatedItems.map((item) => {
                   const price = Number(item.price || 0);
 
                   return (
@@ -916,6 +948,67 @@ export function ProductManagementView() {
               )}
             </div>
           )}
+
+          {/* Products Pagination Bar */}
+          {filteredItems.length > 0 && (
+            <div className="bg-white border border-stone-200/90 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              {/* Left: Per Page Selector */}
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-stone-500">Per page:</span>
+                <div className="flex items-center gap-1">
+                  {[12, 24, 48, 100].map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => {
+                        setProductLimit(size);
+                        setProductPage(1);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer text-xs ${
+                        productLimit === size
+                          ? 'bg-emerald-600 text-white font-black shadow-xs'
+                          : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Center: Range Display */}
+              <div className="font-bold text-stone-600">
+                Showing{' '}
+                <strong className="text-stone-900 font-black">
+                  {(productPage - 1) * productLimit + 1}–{Math.min(productPage * productLimit, filteredItems.length)}
+                </strong>{' '}
+                of <strong className="text-stone-900 font-black">{filteredItems.length}</strong> products
+              </div>
+
+              {/* Right: Prev / Next Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setProductPage((p) => Math.max(1, p - 1))}
+                  disabled={productPage <= 1}
+                  className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
+                >
+                  <span>← Previous</span>
+                </button>
+
+                <span className="font-bold text-stone-800 px-1">
+                  Page <strong className="text-emerald-700 font-black">{productPage}</strong> of{' '}
+                  <strong className="font-black">{productTotalPages}</strong>
+                </span>
+
+                <button
+                  onClick={() => setProductPage((p) => Math.min(productTotalPages, p + 1))}
+                  disabled={productPage >= productTotalPages}
+                  className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
+                >
+                  <span>Next →</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -935,7 +1028,7 @@ export function ProductManagementView() {
                 </button>
               </div>
             ) : (
-              filteredAddons.map((addon) => {
+              paginatedAddons.map((addon) => {
                 const scopeLabel = addon.menuItem
                   ? addon.menuItem.name
                   : addon.category
@@ -994,6 +1087,64 @@ export function ProductManagementView() {
               })
             )}
           </div>
+
+          {/* Add-ons Pagination Controls */}
+          {filteredAddons.length > 0 && (
+            <div className="bg-white border border-stone-200/90 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-stone-500">Per page:</span>
+                <div className="flex items-center gap-1">
+                  {[12, 24, 48].map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => {
+                        setAddonLimit(size);
+                        setAddonPage(1);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer text-xs ${
+                        addonLimit === size
+                          ? 'bg-emerald-600 text-white font-black shadow-xs'
+                          : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="font-bold text-stone-600">
+                Showing{' '}
+                <strong className="text-stone-900 font-black">
+                  {(addonPage - 1) * addonLimit + 1}–{Math.min(addonPage * addonLimit, filteredAddons.length)}
+                </strong>{' '}
+                of <strong className="text-stone-900 font-black">{filteredAddons.length}</strong> add-ons
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setAddonPage((p) => Math.max(1, p - 1))}
+                  disabled={addonPage <= 1}
+                  className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
+                >
+                  <span>← Previous</span>
+                </button>
+
+                <span className="font-bold text-stone-800 px-1">
+                  Page <strong className="text-emerald-700 font-black">{addonPage}</strong> of{' '}
+                  <strong className="font-black">{addonTotalPages}</strong>
+                </span>
+
+                <button
+                  onClick={() => setAddonPage((p) => Math.min(addonTotalPages, p + 1))}
+                  disabled={addonPage >= addonTotalPages}
+                  className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
+                >
+                  <span>Next →</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
