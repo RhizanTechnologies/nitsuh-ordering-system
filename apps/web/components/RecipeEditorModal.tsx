@@ -330,10 +330,7 @@ export function RecipeEditorModal({
           {recipeLines.length === 0 ? (
             <div className="py-12 text-center text-xs text-stone-500 bg-stone-50 border border-stone-200 rounded-3xl p-6">
               <ChefHat className="w-8 h-8 text-emerald-600/40 mx-auto mb-2" />
-              <div className="font-bold text-stone-900 text-sm mb-1">No ingredients in this recipe yet</div>
-              <p className="max-w-sm mx-auto text-stone-500">
-                Select ingredients from the dropdown above to define how many grams/ml are used per portion of {activeItem.name}.
-              </p>
+              <div className="font-bold text-stone-900 text-sm">No ingredients in this recipe yet</div>
             </div>
           ) : (
             recipeLines.map((line) => {

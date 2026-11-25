@@ -148,9 +148,6 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
             </div>
             <div>
               <h3 className="text-base font-black text-stone-900">Profile Security</h3>
-              <p className="text-[11px] text-stone-500">
-                Change credentials for {currentUser.name}
-              </p>
             </div>
           </div>
           <button

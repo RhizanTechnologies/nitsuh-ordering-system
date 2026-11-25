@@ -1434,11 +1434,8 @@ export function ProductManagementView() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-stone-900">
-                        {uploadingImage ? 'Optimizing & Processing Photo...' : 'Click to Upload Product Photo'}
+                        {uploadingImage ? 'Optimizing & Processing Photo...' : 'Upload Product Photo'}
                       </div>
-                      <p className="text-[11px] text-stone-500 mt-0.5">
-                        Choose photo file from your device (PNG, JPG, WebP) or drag here
-                      </p>
                     </div>
                   </div>
                 )}

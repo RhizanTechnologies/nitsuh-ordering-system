@@ -323,10 +323,7 @@ export function StaffAvatarUploader({
 
               <div className="space-y-0.5">
                 <p className="text-xs font-bold text-stone-800">
-                  {processing ? 'Optimizing photo...' : 'Drag & drop staff photo here, or'}
-                </p>
-                <p className="text-[10px] text-stone-500">
-                  PNG, JPG, WebP • Auto-crops to center square for badge & receipts
+                  {processing ? 'Optimizing photo...' : 'Upload staff photo'}
                 </p>
               </div>
 
@@ -368,9 +365,6 @@ export function StaffAvatarUploader({
       {/* TAB CONTENT: Stock Presets */}
       {activeTab === 'presets' && (
         <div className="space-y-2">
-          <p className="text-[11px] text-stone-500">
-            Choose from standard cafe role avatars:
-          </p>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
             {AVATAR_PRESETS.map((url, idx) => {
               const isSelected = value === url;
@@ -409,9 +403,6 @@ export function StaffAvatarUploader({
       {/* TAB CONTENT: Direct URL */}
       {activeTab === 'url' && (
         <form onSubmit={handleApplyUrl} className="space-y-2">
-          <p className="text-[11px] text-stone-500">
-            Paste a link to any existing online photo (Unsplash, company intranet, etc.):
-          </p>
           <div className="flex items-center gap-2">
             <input
               type="url"

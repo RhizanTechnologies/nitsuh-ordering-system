@@ -889,14 +889,6 @@ export function StaffManagementView() {
                     )}
                   </div>
 
-                  {/* Informative banner if account is disabled */}
-                  {!staff.isActive && !staff.pinCode?.startsWith('ARC-') && (
-                    <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-800 text-[11px] font-semibold flex items-center gap-1.5">
-                      <UserX className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                      <span>Disabled — Cannot use website. Profile & PIN preserved.</span>
-                    </div>
-                  )}
-
                   {/* Terminal PIN Box */}
                   <div className="mt-3.5 p-3 bg-stone-50 rounded-2xl border border-stone-200/80 flex items-center justify-between">
                     <div>
@@ -1161,9 +1153,6 @@ export function StaffManagementView() {
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-stone-900">Reset Staff PIN</h3>
-                  <p className="text-[11px] text-stone-500">
-                    For {selectedStaff.name} ({selectedStaff.employeeCode})
-                  </p>
                 </div>
               </div>
               <button

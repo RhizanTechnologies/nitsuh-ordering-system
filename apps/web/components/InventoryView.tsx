@@ -1460,9 +1460,6 @@ export function InventoryView() {
                             </div>
                             <div>
                               <h4 className="text-sm font-bold text-stone-900 dark:text-white">No recipe configured yet for {selectedRecipeItem.name}</h4>
-                              <p className="text-xs text-stone-600 dark:text-zinc-400 max-w-sm mx-auto mt-1">
-                                Add raw ingredient requirements (e.g. pasta, meat, sauce, oil) so kitchen store auto-deducts upon preparation and real food costs are tracked.
-                              </p>
                             </div>
                             {isOwnerOrManager && (
                               <button

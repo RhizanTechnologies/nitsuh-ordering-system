@@ -401,7 +401,6 @@ export function AnalyticsView() {
               <div className="lg:col-span-2 bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold text-stone-900">Top Best-Selling Dishes</h3>
-                  <span className="text-xs text-stone-500 font-semibold">Ranked by volume</span>
                 </div>
 
                 <div className="divide-y divide-stone-100">
