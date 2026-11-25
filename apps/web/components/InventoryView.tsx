@@ -40,7 +40,7 @@ import {
 
 export function InventoryView() {
   const { currentUser } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'balances' | 'catalog' | 'transfers' | 'recipes' | 'purchases' | 'wastage' | 'ledger'>('balances');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'transfers' | 'recipes' | 'purchases' | 'wastage' | 'ledger'>('catalog');
   const [locations, setLocations] = useState<any[]>([]);
   const [transfers, setTransfers] = useState<any[]>([]);
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -96,8 +96,8 @@ export function InventoryView() {
   const [sendSearch, setSendSearch] = useState('');
   const [sendSubmitting, setSendSubmitting] = useState(false);
 
-  // Mobile Store Balances view switcher (BUG-014)
-  const [mobileBalanceTab, setMobileBalanceTab] = useState<'ALL' | 'MAIN' | 'KITCHEN'>('ALL');
+  // Catalog store filter switcher (ALL | MAIN | KITCHEN)
+  const [catalogStoreFilter, setCatalogStoreFilter] = useState<'ALL' | 'MAIN' | 'KITCHEN'>('ALL');
 
   // Supplier Registration Modal State (BUG-016)
   const [newSupplierModalOpen, setNewSupplierModalOpen] = useState(false);
@@ -469,17 +469,6 @@ export function InventoryView() {
         {/* Tab Controls */}
         <div className="flex items-center gap-1.5 bg-stone-100 border border-stone-200 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
           <button
-            onClick={() => setActiveTab('balances')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-              activeTab === 'balances'
-                ? 'bg-emerald-600 text-white font-black shadow-xs'
-                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
-            }`}
-          >
-            Balances
-          </button>
-
-          <button
             onClick={() => setActiveTab('catalog')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'catalog'
@@ -489,7 +478,11 @@ export function InventoryView() {
           >
             <Boxes className="w-3.5 h-3.5" />
             <span>Catalog</span>
-            <span className="bg-stone-200 text-stone-700 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+              activeTab === 'catalog'
+                ? 'bg-white/20 text-white'
+                : 'bg-stone-200 text-stone-700'
+            }`}>
               {rawIngredients.length}
             </span>
           </button>
@@ -569,420 +562,9 @@ export function InventoryView() {
 
       {/* Main Tab Contents */}
       <div className="flex-1 p-4 sm:p-6 overflow-y-auto no-scrollbar">
-        {/* TAB 1: STORE BALANCES */}
-        {activeTab === 'balances' && (
-          <div className="space-y-6">
-            {/* Low-stock Warning System */}
-            {(kitchenLowStockItems.length > 0 || mainLowStockItems.length > 0 || alerts.length > 0) && (
-              <div className="bg-amber-50/90 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 p-4 rounded-3xl space-y-3 shadow-sm shadow-amber-950/5 dark:shadow-amber-950/20">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
-                      <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-stone-900 dark:text-white">
-                        {isHeadChefOnly
-                          ? 'Kitchen Low-Stock Alert'
-                          : isMainStorekeeper && !isOwnerOrManager
-                          ? 'Main Warehouse Low-Stock Alert'
-                          : 'Store Low-Stock Alert System'}
-                      </h4>
-                      <div className="text-xs text-stone-700 dark:text-amber-200 font-medium">
-                        {isHeadChefOnly ? (
-                          <span>
-                            <strong className="text-amber-800 dark:text-amber-400 font-black">{kitchenLowStockItems.length}</strong> ingredient(s) are running below the kitchen alert cutoff!
-                          </span>
-                        ) : isMainStorekeeper && !isOwnerOrManager ? (
-                          <span>
-                            <strong className="text-amber-800 dark:text-amber-400 font-black">{mainLowStockItems.length}</strong> bulk item(s) are running below warehouse alert cutoff!
-                          </span>
-                        ) : (
-                          <span>
-                            Kitchen Floor: <strong className="text-amber-800 dark:text-amber-400 font-black">{kitchenLowStockItems.length} low</strong> • Main Warehouse: <strong className="text-amber-800 dark:text-amber-400 font-black">{mainLowStockItems.length} low</strong>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {isOwnerOrManager && (
-                      <button
-                        onClick={handleOpenCreateStockItem}
-                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5"
-                      >
-                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                        <span>New Stock Item</span>
-                      </button>
-                    )}
-                    {isOwnerOrManager && (
-                      <button
-                        onClick={handleOpenThresholdModal}
-                        className="px-3.5 py-1.5 bg-white dark:bg-amber-500/20 hover:bg-stone-100 dark:hover:bg-amber-500/30 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs"
-                      >
-                        <Sliders className="w-3.5 h-3.5" />
-                        <span>Set Alert Cutoffs</span>
-                      </button>
-                    )}
-                    {!isHeadChefOnly && (
-                      <button
-                        onClick={() => setPurchaseModalOpen(true)}
-                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition cursor-pointer"
-                      >
-                        Receive Bulk PO
-                      </button>
-                    )}
-                    {!isHeadChefOnly && (
-                      <button
-                        onClick={() => setSendDirectModalOpen(true)}
-                        className="px-3.5 py-1.5 bg-white dark:bg-white/10 hover:bg-stone-100 dark:hover:bg-white/15 text-stone-800 dark:text-white font-bold rounded-xl text-xs transition border border-stone-300 dark:border-white/10 cursor-pointer flex items-center gap-1.5 shadow-xs"
-                      >
-                        <Send className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                        <span>Deliver to Kitchen</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Details chip list of low items */}
-                <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-amber-200 dark:border-white/10">
-                  {isHeadChefOnly
-                    ? kitchenLowStockItems.map((b: any) => (
-                        <span
-                          key={b.ingredient.id}
-                          className="bg-white dark:bg-black/30 border border-stone-200 dark:border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-stone-700 dark:text-zinc-300 flex items-center gap-1.5 shadow-xs"
-                        >
-                          <span className="font-bold text-stone-900 dark:text-white">{b.ingredient.name}:</span>
-                          <span className="text-amber-800 dark:text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
-                          <span className="text-stone-500 dark:text-zinc-500">(Cutoff: {b.ingredient.reorderThresholdKitchen} {b.ingredient.baseUnit?.symbol})</span>
-                        </span>
-                      ))
-                    : (isMainStorekeeper && !isOwnerOrManager ? mainLowStockItems : [...kitchenLowStockItems.map((k: any) => ({ ...k, storeLabel: 'Kitchen' })), ...mainLowStockItems.map((m: any) => ({ ...m, storeLabel: 'Main' }))]).map((b: any, idx: number) => (
-                        <span
-                          key={`${b.ingredient.id}-${idx}`}
-                          className="bg-white dark:bg-black/30 border border-stone-200 dark:border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-stone-700 dark:text-zinc-300 flex items-center gap-1.5 shadow-xs"
-                        >
-                          {b.storeLabel && (
-                            <span className={`px-1 py-0.2 rounded text-[9px] font-black ${b.storeLabel === 'Kitchen' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-800 dark:text-orange-400' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400'}`}>
-                              {b.storeLabel}
-                            </span>
-                          )}
-                          <span className="font-bold text-stone-900 dark:text-white">{b.ingredient.name}:</span>
-                          <span className="text-amber-800 dark:text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
-                        </span>
-                      ))}
-                </div>
-              </div>
-            )}
-
-            {/* PENDING KITCHEN CONFIRMATION BANNER (For Head Chef) */}
-            {isKitchenChef && pendingKitchenReceipts.length > 0 && (
-              <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-3xl shadow-xs animate-in fade-in">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-emerald-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0">
-                      <PackageCheck className="w-4 h-4 text-emerald-700" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-black text-stone-900 dark:text-white flex items-center gap-2 flex-wrap">
-                        <span>Incoming Deliveries from Main Storekeeper</span>
-                        <span className="bg-rose-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-black whitespace-nowrap inline-flex items-center shrink-0">
-                          {pendingKitchenReceipts.length} Pending Confirmation
-                        </span>
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {pendingKitchenReceipts.map((t) => (
-                    <div
-                      key={t.id}
-                      className="p-3.5 bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-2xl flex flex-col justify-between gap-3 shadow-xs"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs font-black text-stone-900 dark:text-white">{t.transferNumber}</span>
-                          <span className="text-[10px] font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 px-2 py-0.5 rounded-full animate-pulse">
-                            In-Transit
-                          </span>
-                        </div>
-                        <div className="text-xs text-stone-900 dark:text-zinc-300 font-semibold mb-1">
-                          {t.items.map((i: any) => `${i.ingredient?.name}: ${i.dispatchedQty || i.requestedQty} ${i.unit?.symbol || i.ingredient?.baseUnit?.symbol}`).join(', ')}
-                        </div>
-                        <div className="text-[10px] text-stone-500 dark:text-zinc-400">
-                          Dispatched by {t.approvedBy?.name || 'Main Storekeeper'} • Notes: {t.notes || 'Direct dispatch'}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-1">
-                        <button
-                          onClick={() => handleConfirmKitchenReceipt(t.id)}
-                          className="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
-                        >
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                          <span>Accept & Add to Kitchen</span>
-                        </button>
-                        <button
-                          onClick={() => handleRejectKitchenReceipt(t.id)}
-                          className="py-2 px-3 bg-rose-50 dark:bg-rose-500/20 hover:bg-rose-100 dark:hover:bg-rose-500/30 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-xs rounded-xl transition active:scale-95 cursor-pointer flex items-center gap-1"
-                          title="Reject delivery and return to Main Store"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                          <span>Reject</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Mobile Store Balances View Switcher (BUG-014) */}
-            {!isHeadChefOnly && (
-              <div className="flex lg:hidden items-center gap-1.5 p-1 bg-stone-100 rounded-2xl border border-stone-200">
-                <button
-                  onClick={() => setMobileBalanceTab('ALL')}
-                  className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
-                    mobileBalanceTab === 'ALL'
-                      ? 'bg-emerald-600 text-white font-black shadow-xs'
-                      : 'text-stone-600'
-                  }`}
-                >
-                  All Stores
-                </button>
-                <button
-                  onClick={() => setMobileBalanceTab('MAIN')}
-                  className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
-                    mobileBalanceTab === 'MAIN'
-                      ? 'bg-emerald-600 text-white font-black shadow-xs'
-                      : 'text-stone-600'
-                  }`}
-                >
-                  Main Store
-                </button>
-                <button
-                  onClick={() => setMobileBalanceTab('KITCHEN')}
-                  className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition ${
-                    mobileBalanceTab === 'KITCHEN'
-                      ? 'bg-emerald-600 text-white font-black shadow-xs'
-                      : 'text-stone-600'
-                  }`}
-                >
-                  Kitchen Store
-                </button>
-              </div>
-            )}
-
-            {/* Store Balances Grid */}
-            <div className={`grid gap-6 ${isHeadChefOnly ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
-              {/* Store 1: Main Store (Bulk Warehouse) - NEVER shown to Head Chef / Kitchen Staff */}
-              {!isHeadChefOnly && (
-                <div className={`bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs flex flex-col ${
-                  mobileBalanceTab === 'ALL' || mobileBalanceTab === 'MAIN' ? 'flex' : 'hidden lg:flex'
-                }`}>
-                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10 flex-shrink-0 gap-3">
-                    <div>
-                      <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2 font-heading">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                        Main Store (Bulk Warehouse)
-                      </h3>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {isMainStorekeeper && (
-                        <button
-                          onClick={() => setSendDirectModalOpen(true)}
-                          className="h-9 px-3 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-500/30 rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0"
-                          title="Send items directly to kitchen floor"
-                        >
-                          <Send className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
-                          <span className="hidden sm:inline">Send to Kitchen</span>
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setPurchaseModalOpen(true)}
-                        className="h-9 px-3.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
-                      >
-                        <Truck className="w-3.5 h-3.5" />
-                        <span>PO Delivery</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Main Store Cards List */}
-                  <div className="space-y-2.5 max-h-[550px] overflow-y-auto pr-1 no-scrollbar">
-                    {mainStoreLoc?.balances?.map((b: any) => {
-                      const isLow = Number(b.quantity) <= Number(b.ingredient.reorderThresholdMain ?? 1000);
-                      return (
-                        <div
-                          key={b.id}
-                          className={`p-3 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
-                            isLow
-                              ? 'bg-amber-500/10 border-amber-500/30'
-                              : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5 hover:border-stone-300 dark:hover:border-white/10'
-                          }`}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5">
-                              <span className="truncate">{b.ingredient.name}</span>
-                              {isLow && (
-                                <span className="text-[9px] bg-rose-600 text-white font-black px-1.5 py-0.5 rounded-md flex-shrink-0 animate-pulse">
-                                  LOW STOCK
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium">
-                              Valuation: {Number(b.ingredient.currentCostPerBaseUnit).toFixed(4)} ETB / {b.ingredient.baseUnit.symbol}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            <div className="text-right">
-                              <div className={`text-sm font-extrabold ${isLow ? 'text-amber-700 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
-                                {Number(b.quantity).toLocaleString()} {b.ingredient.baseUnit.symbol}
-                              </div>
-                              <div className="text-[10px] font-bold text-amber-700 dark:text-amber-400">
-                                {(Number(b.quantity) * Number(b.ingredient.currentCostPerBaseUnit)).toFixed(2)} ETB
-                              </div>
-                            </div>
-
-                            {/* Storekeeper Controls: Add Stock, Remove Stock, Send to Kitchen */}
-                            {isMainStorekeeper && (
-                              <div className="flex items-center gap-1">
-                                {isOwnerOrManager && (
-                                  <button
-                                    onClick={() => handleOpenEditStockItem(b.ingredient)}
-                                    className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/20 text-stone-700 dark:text-zinc-300 rounded-xl transition cursor-pointer"
-                                    title="Edit stock item configuration"
-                                  >
-                                    <Edit3 className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => handleOpenAdjust(b.ingredient, 'MAIN_STORE', 'ADD')}
-                                  className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer"
-                                  title="Add amount to Main Store stock"
-                                >
-                                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                                </button>
-                                <button
-                                  onClick={() => handleOpenAdjust(b.ingredient, 'MAIN_STORE', 'REMOVE')}
-                                  className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer"
-                                  title="Remove amount from Main Store stock"
-                                >
-                                  <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setBatchQuantities((prev) => ({ ...prev, [b.ingredient.id]: prev[b.ingredient.id] || '' }));
-                                    setSendDirectModalOpen(true);
-                                  }}
-                                  className="p-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-400 border border-amber-500/30 rounded-xl transition cursor-pointer"
-                                  title="Send this ingredient to Kitchen Store"
-                                >
-                                  <Send className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Store 2: Kitchen Store (Production Floor) */}
-              <div className={`bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs flex flex-col ${
-                mobileBalanceTab === 'ALL' || mobileBalanceTab === 'KITCHEN' ? 'flex' : 'hidden lg:flex'
-              }`}>
-                <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-white/10 flex-shrink-0">
-                  <div>
-                    <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2 font-heading">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                      Kitchen Store (Production Floor)
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Kitchen Store Cards List */}
-                <div className="space-y-2.5 max-h-[550px] overflow-y-auto pr-1 no-scrollbar">
-                  {kitchenStoreLoc?.balances?.map((b: any) => {
-                    const isLow = Number(b.quantity) <= Number(b.ingredient.reorderThresholdKitchen);
-                    return (
-                      <div
-                        key={b.id}
-                        className={`p-3 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
-                          isLow
-                            ? 'bg-amber-500/10 border-amber-500/30'
-                            : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5 hover:border-stone-300 dark:hover:border-white/10'
-                        }`}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5">
-                            <span className="truncate">{b.ingredient.name}</span>
-                            {isLow && (
-                              <span className="text-[9px] bg-rose-600 text-white font-black px-1.5 py-0.5 rounded-md flex-shrink-0 animate-pulse">
-                                LOW STOCK
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium">
-                            Threshold: {b.ingredient.reorderThresholdKitchen} {b.ingredient.baseUnit.symbol}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            <div className={`text-sm font-extrabold ${isLow ? 'text-amber-700 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
-                              {Number(b.quantity).toLocaleString()} {b.ingredient.baseUnit.symbol}
-                            </div>
-                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 font-medium">
-                              Ready for cooking
-                            </div>
-                          </div>
-
-                          {/* Cook Head Chef Controls: Add Stock, Deduct Stock directly in Kitchen */}
-                          {isKitchenChef && (
-                            <div className="flex items-center gap-1">
-                              {isOwnerOrManager && (
-                                <button
-                                  onClick={() => handleOpenEditStockItem(b.ingredient)}
-                                  className="p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/20 text-stone-700 dark:text-zinc-300 rounded-xl transition cursor-pointer"
-                                  title="Edit stock item configuration"
-                                >
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                              <button
-                                onClick={() => handleOpenAdjust(b.ingredient, 'KITCHEN_STORE', 'ADD')}
-                                className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer"
-                                title="Add/replenish kitchen stock"
-                              >
-                                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                              </button>
-                              <button
-                                onClick={() => handleOpenAdjust(b.ingredient, 'KITCHEN_STORE', 'REMOVE')}
-                                className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer"
-                                title="Deduct kitchen stock (prep spillage/count correction)"
-                              >
-                                <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: STOCK ITEMS CATALOG (CRUD) */}
+        {/* TAB 1: STOCK ITEMS CATALOG (UNIFIED BALANCES & CRUD) */}
         {activeTab === 'catalog' && (() => {
+          const effectiveStoreFilter = isHeadChefOnly ? 'KITCHEN' : catalogStoreFilter;
           const categories = ['ALL', ...Array.from(new Set(rawIngredients.map((i) => i.category || 'General')))];
           const filtered = rawIngredients.filter((item) => {
             const matchesSearch =
@@ -994,39 +576,211 @@ export function InventoryView() {
             return matchesSearch && matchesCategory;
           });
 
-          // Compute KPI totals
+          // Compute store-aware KPI totals
           const totalValuation = rawIngredients.reduce((sum, item) => {
             const cost = Number(item.currentCostPerBaseUnit || 0);
-            const qty = (item.balances || []).reduce((qSum: number, b: any) => qSum + Number(b.quantity || 0), 0);
+            const mainQty = Number(item.balances?.find((b: any) => b.location?.type === 'MAIN_STORE')?.quantity || 0);
+            const kitQty = Number(item.balances?.find((b: any) => b.location?.type === 'KITCHEN_STORE')?.quantity || 0);
+            const qty = effectiveStoreFilter === 'MAIN' ? mainQty : effectiveStoreFilter === 'KITCHEN' ? kitQty : mainQty + kitQty;
             return sum + (cost * qty);
           }, 0);
 
           const lowStockCount = rawIngredients.filter((item) => {
-            const mainBal = item.balances?.find((b: any) => b.location?.type === 'MAIN_STORE')?.quantity || 0;
-            const kitBal = item.balances?.find((b: any) => b.location?.type === 'KITCHEN_STORE')?.quantity || 0;
-            return Number(mainBal) <= Number(item.reorderThresholdMain) || Number(kitBal) <= Number(item.reorderThresholdKitchen);
+            const mainBal = Number(item.balances?.find((b: any) => b.location?.type === 'MAIN_STORE')?.quantity || 0);
+            const kitBal = Number(item.balances?.find((b: any) => b.location?.type === 'KITCHEN_STORE')?.quantity || 0);
+            const isMainLow = mainBal <= Number(item.reorderThresholdMain);
+            const isKitLow = kitBal <= Number(item.reorderThresholdKitchen);
+            if (effectiveStoreFilter === 'MAIN') return isMainLow;
+            if (effectiveStoreFilter === 'KITCHEN') return isKitLow;
+            return isMainLow || isKitLow;
           }).length;
 
           return (
             <div className="space-y-6">
+              {/* PENDING KITCHEN CONFIRMATION BANNER (For Head Chef) */}
+              {isKitchenChef && pendingKitchenReceipts.length > 0 && (
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-3xl shadow-xs animate-in fade-in">
+                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-emerald-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0">
+                        <PackageCheck className="w-4 h-4 text-emerald-700" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black text-stone-900 dark:text-white flex items-center gap-2 flex-wrap">
+                          <span>Incoming Deliveries from Main Storekeeper</span>
+                          <span className="bg-rose-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-black whitespace-nowrap inline-flex items-center shrink-0">
+                            {pendingKitchenReceipts.length} Pending Confirmation
+                          </span>
+                        </h3>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {pendingKitchenReceipts.map((t) => (
+                      <div
+                        key={t.id}
+                        className="p-3.5 bg-white dark:bg-white/[0.04] border border-stone-200 dark:border-white/10 rounded-2xl flex flex-col justify-between gap-3 shadow-xs"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-black text-stone-900 dark:text-white">{t.transferNumber}</span>
+                            <span className="text-[10px] font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 px-2 py-0.5 rounded-full animate-pulse">
+                              In-Transit
+                            </span>
+                          </div>
+                          <div className="text-xs text-stone-900 dark:text-zinc-300 font-semibold mb-1">
+                            {t.items.map((i: any) => `${i.ingredient?.name}: ${i.dispatchedQty || i.requestedQty} ${i.unit?.symbol || i.ingredient?.baseUnit?.symbol}`).join(', ')}
+                          </div>
+                          <div className="text-[10px] text-stone-500 dark:text-zinc-400">
+                            Dispatched by {t.approvedBy?.name || 'Main Storekeeper'} • Notes: {t.notes || 'Direct dispatch'}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            onClick={() => handleConfirmKitchenReceipt(t.id)}
+                            className="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            <span>Accept & Add to Kitchen</span>
+                          </button>
+                          <button
+                            onClick={() => handleRejectKitchenReceipt(t.id)}
+                            className="py-2 px-3 bg-rose-50 dark:bg-rose-500/20 hover:bg-rose-100 dark:hover:bg-rose-500/30 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 font-bold text-xs rounded-xl transition active:scale-95 cursor-pointer flex items-center gap-1"
+                            title="Reject delivery and return to Main Store"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Reject</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Low-stock Warning Banner */}
+              {(kitchenLowStockItems.length > 0 || (!isHeadChefOnly && mainLowStockItems.length > 0) || alerts.length > 0) && (
+                <div className="bg-amber-50/90 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 p-4 rounded-3xl space-y-3 shadow-xs">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <AlertTriangle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-stone-900 dark:text-white">
+                          {isHeadChefOnly
+                            ? 'Kitchen Low-Stock Alert'
+                            : isMainStorekeeper && !isOwnerOrManager
+                            ? 'Main Warehouse Low-Stock Alert'
+                            : 'Low-Stock Alerts'}
+                        </h4>
+                        <div className="text-xs text-stone-700 dark:text-amber-200 font-medium">
+                          {isHeadChefOnly ? (
+                            <span>
+                              <strong className="text-amber-800 dark:text-amber-400 font-black">{kitchenLowStockItems.length}</strong> below kitchen cutoff
+                            </span>
+                          ) : isMainStorekeeper && !isOwnerOrManager ? (
+                            <span>
+                              <strong className="text-amber-800 dark:text-amber-400 font-black">{mainLowStockItems.length}</strong> below warehouse cutoff
+                            </span>
+                          ) : (
+                            <span>
+                              Kitchen: <strong className="text-amber-800 dark:text-amber-400 font-black">{kitchenLowStockItems.length} low</strong> • Main: <strong className="text-amber-800 dark:text-amber-400 font-black">{mainLowStockItems.length} low</strong>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {isOwnerOrManager && (
+                      <button
+                        onClick={handleOpenThresholdModal}
+                        className="h-9 px-3.5 bg-white dark:bg-amber-500/20 hover:bg-stone-100 dark:hover:bg-amber-500/30 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs shrink-0"
+                      >
+                        <Sliders className="w-3.5 h-3.5" />
+                        <span>Set Alert Cutoffs</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Details chip list of low items */}
+                  <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-amber-200/70 dark:border-white/10">
+                    {isHeadChefOnly
+                      ? kitchenLowStockItems.map((b: any) => (
+                          <span
+                            key={b.ingredient.id}
+                            className="bg-white dark:bg-black/30 border border-stone-200 dark:border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-stone-700 dark:text-zinc-300 flex items-center gap-1.5 shadow-xs"
+                          >
+                            <span className="font-bold text-stone-900 dark:text-white">{b.ingredient.name}:</span>
+                            <span className="text-amber-800 dark:text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
+                            <span className="text-stone-500 dark:text-zinc-500">(Cutoff: {b.ingredient.reorderThresholdKitchen} {b.ingredient.baseUnit?.symbol})</span>
+                          </span>
+                        ))
+                      : (isMainStorekeeper && !isOwnerOrManager
+                          ? mainLowStockItems
+                          : [
+                              ...kitchenLowStockItems.map((k: any) => ({ ...k, storeLabel: 'Kitchen' })),
+                              ...mainLowStockItems.map((m: any) => ({ ...m, storeLabel: 'Main' })),
+                            ]
+                        ).map((b: any, idx: number) => (
+                          <span
+                            key={`${b.ingredient.id}-${idx}`}
+                            className="bg-white dark:bg-black/30 border border-stone-200 dark:border-amber-500/30 px-2.5 py-1 rounded-xl text-[10px] text-stone-700 dark:text-zinc-300 flex items-center gap-1.5 shadow-xs"
+                          >
+                            {b.storeLabel && (
+                              <span className={`px-1.5 py-0.2 rounded text-[9px] font-black ${b.storeLabel === 'Kitchen' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-800 dark:text-orange-400' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400'}`}>
+                                {b.storeLabel}
+                              </span>
+                            )}
+                            <span className="font-bold text-stone-900 dark:text-white">{b.ingredient.name}:</span>
+                            <span className="text-amber-800 dark:text-amber-400 font-black">{b.quantity} {b.ingredient.baseUnit?.symbol}</span>
+                          </span>
+                        ))}
+                  </div>
+                </div>
+              )}
+
               {/* Header & Controls */}
               <div className="bg-white dark:bg-white/[0.03] backdrop-blur-md border border-stone-200 dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
                   <div>
                     <h3 className="text-sm font-black text-stone-900 dark:text-white flex items-center gap-2 font-heading">
                       <Boxes className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                      <span>Stock Items Catalog (Raw Materials & Supplies)</span>
+                      <span>{isHeadChefOnly ? 'Kitchen Stock Catalog' : 'Stock Items Catalog'}</span>
                     </h3>
                   </div>
-                  {isOwnerOrManager && (
-                    <button
-                      onClick={handleOpenCreateStockItem}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-                    >
-                      <Plus className="w-4 h-4 stroke-[3]" />
-                      <span>New Stock Item</span>
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {isMainStorekeeper && (
+                      <button
+                        onClick={() => setSendDirectModalOpen(true)}
+                        className="h-9 px-3 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-500/30 rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                        title="Send items directly to kitchen floor"
+                      >
+                        <Send className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+                        <span>Send to Kitchen</span>
+                      </button>
+                    )}
+                    {!isHeadChefOnly && (
+                      <button
+                        onClick={() => setPurchaseModalOpen(true)}
+                        className="h-9 px-3.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                      >
+                        <Truck className="w-3.5 h-3.5" />
+                        <span>PO Delivery</span>
+                      </button>
+                    )}
+                    {isOwnerOrManager && (
+                      <button
+                        onClick={handleOpenCreateStockItem}
+                        className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3]" />
+                        <span>New Stock Item</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* KPI Overview Strip */}
@@ -1034,29 +788,70 @@ export function InventoryView() {
                   <div className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 rounded-2xl">
                     <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Total Stock Items</div>
                     <div className="text-xl font-black text-stone-900 dark:text-white mt-1">{rawIngredients.length}</div>
-                    <div className="text-[10px] text-stone-500 dark:text-zinc-500 mt-0.5">Active ingredients</div>
                   </div>
                   <div className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 rounded-2xl">
-                    <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Catalog Categories</div>
+                    <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Categories</div>
                     <div className="text-xl font-black text-amber-800 dark:text-amber-400 mt-1">{categories.length - 1}</div>
-                    <div className="text-[10px] text-stone-500 dark:text-zinc-500 mt-0.5">Product classifications</div>
                   </div>
                   <div className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 rounded-2xl">
-                    <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Total Asset Worth</div>
-                    <div className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs">ETB</span></div>
-                    <div className="text-[10px] text-stone-500 dark:text-zinc-500 mt-0.5">Dual store valuation</div>
+                    <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">
+                      {effectiveStoreFilter === 'MAIN'
+                        ? 'Main Store Worth'
+                        : effectiveStoreFilter === 'KITCHEN'
+                        ? 'Kitchen Store Worth'
+                        : 'Total Asset Worth'}
+                    </div>
+                    <div className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
+                      {totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+                      <span className="text-xs">ETB</span>
+                    </div>
                   </div>
                   <div className="p-3.5 bg-stone-50 dark:bg-white/[0.02] border border-stone-200/80 dark:border-white/5 rounded-2xl">
                     <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider">Low-Stock Warnings</div>
                     <div className={`text-xl font-black mt-1 ${lowStockCount > 0 ? 'text-rose-700 dark:text-rose-400' : 'text-stone-700 dark:text-zinc-400'}`}>
                       {lowStockCount}
                     </div>
-                    <div className="text-[10px] text-stone-500 dark:text-zinc-500 mt-0.5">Below alert cutoffs</div>
                   </div>
                 </div>
 
+                {/* Store Filter (All / Main / Kitchen) */}
+                {!isHeadChefOnly && (
+                  <div className="flex items-center gap-1.5 p-1 bg-stone-100 rounded-2xl border border-stone-200 w-full sm:w-fit">
+                    <button
+                      onClick={() => setCatalogStoreFilter('ALL')}
+                      className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        catalogStoreFilter === 'ALL'
+                          ? 'bg-emerald-600 text-white font-black shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      All Stores
+                    </button>
+                    <button
+                      onClick={() => setCatalogStoreFilter('MAIN')}
+                      className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        catalogStoreFilter === 'MAIN'
+                          ? 'bg-emerald-600 text-white font-black shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      Main Store
+                    </button>
+                    <button
+                      onClick={() => setCatalogStoreFilter('KITCHEN')}
+                      className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        catalogStoreFilter === 'KITCHEN'
+                          ? 'bg-emerald-600 text-white font-black shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      Kitchen Store
+                    </button>
+                  </div>
+                )}
+
                 {/* Search & Category Filter Toolbar */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <div className="relative flex-1">
                     <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-400" />
                     <input
@@ -1090,17 +885,14 @@ export function InventoryView() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filtered.length === 0 ? (
                   <div className="col-span-full py-12 px-6 text-center bg-white dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 rounded-3xl">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-500 mx-auto flex items-center justify-center mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-3">
                       <Boxes className="w-6 h-6" />
                     </div>
                     <h4 className="text-sm font-bold text-stone-900 dark:text-white mb-1">No stock items match your criteria</h4>
-                    <p className="text-xs text-stone-500 dark:text-zinc-400 max-w-sm mx-auto mb-4">
-                      Try adjusting your search terms or create a new stock item.
-                    </p>
                     {isOwnerOrManager && (
                       <button
                         onClick={handleOpenCreateStockItem}
-                        className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl text-xs transition"
+                        className="mt-3 px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl text-xs transition cursor-pointer"
                       >
                         + Create Stock Item
                       </button>
@@ -1111,19 +903,26 @@ export function InventoryView() {
                     const unitSym = item.baseUnit?.symbol || 'units';
                     const unitCost = Number(item.currentCostPerBaseUnit || 0);
 
-                    // Find balances from item.balances or locations
-                    const mainBalance = item.balances?.find((b: any) => b.location?.type === 'MAIN_STORE')?.quantity ?? 0;
-                    const kitchenBalance = item.balances?.find((b: any) => b.location?.type === 'KITCHEN_STORE')?.quantity ?? 0;
-                    const totalQty = Number(mainBalance) + Number(kitchenBalance);
-                    const totalWorth = totalQty * unitCost;
+                    const mainBalance = Number(item.balances?.find((b: any) => b.location?.type === 'MAIN_STORE')?.quantity ?? 0);
+                    const kitchenBalance = Number(item.balances?.find((b: any) => b.location?.type === 'KITCHEN_STORE')?.quantity ?? 0);
+                    const displayedQty =
+                      effectiveStoreFilter === 'MAIN'
+                        ? mainBalance
+                        : effectiveStoreFilter === 'KITCHEN'
+                        ? kitchenBalance
+                        : mainBalance + kitchenBalance;
+                    const displayedWorth = displayedQty * unitCost;
 
-                    const isMainLow = Number(mainBalance) <= Number(item.reorderThresholdMain);
-                    const isKitchenLow = Number(kitchenBalance) <= Number(item.reorderThresholdKitchen);
+                    const isMainLow = mainBalance <= Number(item.reorderThresholdMain);
+                    const isKitchenLow = kitchenBalance <= Number(item.reorderThresholdKitchen);
+
+                    const showMainPanel = !isHeadChefOnly && (effectiveStoreFilter === 'ALL' || effectiveStoreFilter === 'MAIN');
+                    const showKitchenPanel = effectiveStoreFilter === 'ALL' || effectiveStoreFilter === 'KITCHEN';
 
                     return (
                       <div
                         key={item.id}
-                        className="bg-white dark:bg-white/[0.03] backdrop-blur-md border border-stone-200 dark:border-white/10 hover:border-amber-500/40 rounded-3xl p-5 shadow-xs flex flex-col justify-between gap-4 transition"
+                        className="bg-white dark:bg-white/[0.03] backdrop-blur-md border border-stone-200 dark:border-white/10 hover:border-emerald-300 rounded-3xl p-5 shadow-xs flex flex-col justify-between gap-4 transition"
                       >
                         <div>
                           {/* Card Top: Title, SKU, Category Badge */}
@@ -1166,7 +965,7 @@ export function InventoryView() {
                           {/* Unit Cost Valuation Badge */}
                           <div className="flex items-center justify-between p-2.5 bg-stone-50 dark:bg-black/30 rounded-2xl border border-stone-200 dark:border-white/5 my-3">
                             <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-zinc-400">
-                              <Scale className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                              <Scale className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                               <span>Base Unit: <strong className="text-stone-900 dark:text-white">{item.baseUnit?.name || unitSym} ({unitSym})</strong></span>
                             </div>
                             <div className="text-right">
@@ -1177,51 +976,100 @@ export function InventoryView() {
                             </div>
                           </div>
 
-                          {/* Dual Store Balance Split */}
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className={`p-2.5 rounded-2xl border ${isMainLow ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30' : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5'}`}>
-                              <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold flex items-center justify-between">
-                                <span>Main Store</span>
-                                {isMainLow && <span className="text-amber-800 dark:text-amber-400 font-black">Low</span>}
-                              </div>
-                              <div className="text-sm font-black text-stone-900 dark:text-white mt-0.5">
-                                {Number(mainBalance).toLocaleString()} <span className="text-[10px] text-stone-500 dark:text-zinc-400">{unitSym}</span>
-                              </div>
-                              <div className="text-[9px] text-stone-500 dark:text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdMain}</div>
-                            </div>
+                          {/* Store Balance Split with Direct Addition / Removal */}
+                          <div className={`grid gap-2.5 text-xs ${showMainPanel && showKitchenPanel ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                            {showMainPanel && (
+                              <div className={`p-3 rounded-2xl border flex flex-col justify-between gap-2 ${isMainLow ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30' : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5'}`}>
+                                <div>
+                                  <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold flex items-center justify-between">
+                                    <span>Main Store</span>
+                                    {isMainLow && <span className="text-amber-800 dark:text-amber-400 font-black">Low</span>}
+                                  </div>
+                                  <div className="text-sm font-black text-stone-900 dark:text-white mt-0.5">
+                                    {mainBalance.toLocaleString()} <span className="text-[10px] text-stone-500 dark:text-zinc-400">{unitSym}</span>
+                                  </div>
+                                  <div className="text-[9px] text-stone-500 dark:text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdMain}</div>
+                                </div>
 
-                            <div className={`p-2.5 rounded-2xl border ${isKitchenLow ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-300 dark:border-rose-500/30' : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5'}`}>
-                              <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold flex items-center justify-between">
-                                <span>Kitchen Store</span>
-                                {isKitchenLow && <span className="text-rose-700 dark:text-rose-400 font-black">Low</span>}
+                                {isMainStorekeeper && (
+                                  <div className="flex items-center gap-1.5 pt-1.5 border-t border-stone-200/70 dark:border-white/5">
+                                    <button
+                                      onClick={() => handleOpenAdjust(item, 'MAIN_STORE', 'ADD')}
+                                      className="flex-1 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer flex items-center justify-center"
+                                      title="Add stock to Main Store"
+                                    >
+                                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleOpenAdjust(item, 'MAIN_STORE', 'REMOVE')}
+                                      className="flex-1 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer flex items-center justify-center"
+                                      title="Remove stock from Main Store"
+                                    >
+                                      <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setBatchQuantities((prev) => ({ ...prev, [item.id]: prev[item.id] || '' }));
+                                        setSendDirectModalOpen(true);
+                                      }}
+                                      className="flex-1 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-400 border border-amber-500/30 rounded-xl transition cursor-pointer flex items-center justify-center"
+                                      title="Send this ingredient to Kitchen Store"
+                                    >
+                                      <Send className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                              <div className="text-sm font-black text-stone-900 dark:text-white mt-0.5">
-                                {Number(kitchenBalance).toLocaleString()} <span className="text-[10px] text-stone-500 dark:text-zinc-400">{unitSym}</span>
+                            )}
+
+                            {showKitchenPanel && (
+                              <div className={`p-3 rounded-2xl border flex flex-col justify-between gap-2 ${isKitchenLow ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-300 dark:border-rose-500/30' : 'bg-stone-50 dark:bg-white/[0.02] border-stone-200 dark:border-white/5'}`}>
+                                <div>
+                                  <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold flex items-center justify-between">
+                                    <span>Kitchen Store</span>
+                                    {isKitchenLow && <span className="text-rose-700 dark:text-rose-400 font-black">Low</span>}
+                                  </div>
+                                  <div className="text-sm font-black text-stone-900 dark:text-white mt-0.5">
+                                    {kitchenBalance.toLocaleString()} <span className="text-[10px] text-stone-500 dark:text-zinc-400">{unitSym}</span>
+                                  </div>
+                                  <div className="text-[9px] text-stone-500 dark:text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdKitchen}</div>
+                                </div>
+
+                                {isKitchenChef && (
+                                  <div className="flex items-center gap-1.5 pt-1.5 border-t border-stone-200/70 dark:border-white/5">
+                                    <button
+                                      onClick={() => handleOpenAdjust(item, 'KITCHEN_STORE', 'ADD')}
+                                      className="flex-1 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded-xl transition cursor-pointer flex items-center justify-center"
+                                      title="Add stock to Kitchen Store"
+                                    >
+                                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleOpenAdjust(item, 'KITCHEN_STORE', 'REMOVE')}
+                                      className="flex-1 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-400 border border-rose-500/30 rounded-xl transition cursor-pointer flex items-center justify-center"
+                                      title="Remove stock from Kitchen Store"
+                                    >
+                                      <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                              <div className="text-[9px] text-stone-500 dark:text-zinc-500 mt-0.5">Alert cutoff: &le;{item.reorderThresholdKitchen}</div>
-                            </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* Card Bottom: Total Assets & Quick Adjust */}
+                        {/* Card Bottom: Total Valued Assets */}
                         <div className="pt-3 border-t border-stone-200 dark:border-white/10 flex items-center justify-between">
-                          <div>
-                            <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold">Total Valued Assets</div>
-                            <div className="text-xs font-black text-emerald-700 dark:text-emerald-400">
-                              {totalWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB
-                            </div>
+                          <div className="text-[10px] text-stone-500 dark:text-zinc-400 uppercase font-bold">
+                            {effectiveStoreFilter === 'MAIN'
+                              ? 'Main Store Value'
+                              : effectiveStoreFilter === 'KITCHEN'
+                              ? 'Kitchen Store Value'
+                              : 'Total Valued Assets'}
                           </div>
-
-                          {/* Quick Adjust Button */}
-                          {isMainStorekeeper && (
-                            <button
-                              onClick={() => handleOpenAdjust(item, 'MAIN_STORE', 'ADD')}
-                              className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/15 text-stone-800 dark:text-white font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 border border-stone-300 dark:border-white/10"
-                            >
-                              <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                              <span>Adjust Stock</span>
-                            </button>
-                          )}
+                          <div className="text-xs font-black text-emerald-700 dark:text-emerald-400">
+                            {displayedWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB
+                          </div>
                         </div>
                       </div>
                     );
