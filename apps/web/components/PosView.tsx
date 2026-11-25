@@ -41,7 +41,16 @@ import {
   Calendar
 } from 'lucide-react';
 
+import { useTranslation } from '@/lib/i18n';
+
+const formatOrderNumber = (num?: string | number | null) => {
+  if (!num) return '';
+  const cleaned = String(num).replace(/^#+/, '').trim();
+  return `#${cleaned}`;
+};
+
 export function PosView() {
+  const { t } = useTranslation();
   const {
     currentUser,
     orderType,
@@ -894,7 +903,7 @@ export function PosView() {
           <div>
             <div className="font-black text-amber-900 flex items-center gap-1.5">
               <FileEdit className="w-3.5 h-3.5 text-amber-600" />
-              <span>Editing Slip {editingSlipTarget.orderNumber?.startsWith('#') ? editingSlipTarget.orderNumber : `#${editingSlipTarget.orderNumber}`}</span>
+              <span>Editing Slip {formatOrderNumber(editingSlipTarget.orderNumber)}</span>
             </div>
             <div className="text-[10px] text-stone-500">
               {editingSlipTarget.orderType === "TAKEAWAY" ? "Takeaway Order" : `Table ${editingSlipTarget.table?.tableNumber || "Assigned"}`}
@@ -920,7 +929,7 @@ export function PosView() {
           <div>
             <div className="font-black text-emerald-800 flex items-center gap-1.5">
               <RotateCcw className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Appending to {appendOrderTarget.orderNumber?.startsWith('#') ? appendOrderTarget.orderNumber : `#${appendOrderTarget.orderNumber}`}</span>
+              <span>Appending to {formatOrderNumber(appendOrderTarget.orderNumber)}</span>
             </div>
             <div className="text-[10px] text-stone-500">
               {appendOrderTarget.orderType === "TAKEAWAY" ? "Takeaway Order" : `Table ${appendOrderTarget.table?.tableNumber}`}
@@ -1216,8 +1225,8 @@ export function PosView() {
                 <FileEdit className="w-3.5 h-3.5 text-amber-600" />
                 <span>
                   {editingSlipTarget
-                    ? `Editing ${editingSlipTarget.orderNumber?.startsWith('#') ? editingSlipTarget.orderNumber : `#${editingSlipTarget.orderNumber}`}`
-                    : `Appending to ${appendOrderTarget.orderNumber?.startsWith('#') ? appendOrderTarget.orderNumber : `#${appendOrderTarget.orderNumber}`}`}
+                    ? `Editing ${formatOrderNumber(editingSlipTarget.orderNumber)}`
+                    : `Appending to ${formatOrderNumber(appendOrderTarget.orderNumber)}`}
                 </span>
                 <button
                   onClick={() => {
@@ -1621,7 +1630,7 @@ export function PosView() {
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                               <span className="text-base font-black text-stone-900 tracking-tight flex-shrink-0">
-                                {slip.orderNumber?.startsWith('#') ? slip.orderNumber : `#${slip.orderNumber}`}
+                                {formatOrderNumber(slip.orderNumber)}
                               </span>
                               <span className="text-xs font-bold text-stone-700 truncate">
                                 {isSlipTakeaway
@@ -1800,7 +1809,7 @@ export function PosView() {
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                               <span className="text-base font-black text-stone-900 tracking-tight flex-shrink-0">
-                                {order.orderNumber?.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`}
+                                {formatOrderNumber(order.orderNumber)}
                               </span>
                               <span className="text-xs font-bold text-stone-700 truncate">
                                 {isOrderTakeaway
@@ -1989,10 +1998,7 @@ export function PosView() {
                 <div className="bg-amber-500/20 text-amber-900 border border-amber-500/30 px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
                   <FileEdit className="w-3.5 h-3.5 text-amber-600" />
                   <span>
-                    Editing Waiter Note{' '}
-                    {editingSlipTarget.orderNumber?.startsWith('#')
-                      ? editingSlipTarget.orderNumber
-                      : `#${editingSlipTarget.orderNumber}`}
+                    Editing Waiter Note {formatOrderNumber(editingSlipTarget.orderNumber)}
                   </span>
                   <button
                     onClick={() => {
@@ -2009,10 +2015,7 @@ export function PosView() {
                 <div className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>
-                    Appending to{' '}
-                    {appendOrderTarget.orderNumber?.startsWith('#')
-                      ? appendOrderTarget.orderNumber
-                      : `#${appendOrderTarget.orderNumber}`}
+                    Appending to {formatOrderNumber(appendOrderTarget.orderNumber)}
                   </span>
                   <button
                     onClick={() => setAppendOrderTarget(null)}

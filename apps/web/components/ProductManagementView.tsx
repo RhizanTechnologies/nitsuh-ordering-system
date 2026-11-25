@@ -30,8 +30,10 @@ import {
   LayoutGrid,
   Loader2,
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export function ProductManagementView() {
+  const { t, lang } = useTranslation();
   const [items, setItems] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -589,7 +591,7 @@ export function ProductManagementView() {
           <div>
             <h2 className="text-base font-black text-stone-900 flex items-center gap-2">
               <Utensils className="w-5 h-5 text-emerald-600" />
-              <span>Menu Studio & Recipes</span>
+              <span>{t('menu_studio')}</span>
             </h2>
           </div>
 
@@ -609,14 +611,14 @@ export function ProductManagementView() {
                   title="Create or manage product categories"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Category</span>
+                  <span>{t('menu_add_category')}</span>
                 </button>
                 <button
                   onClick={openAddModal}
                   className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
                 >
                   <Plus className="w-4 h-4 stroke-[3]" />
-                  <span>Add Product</span>
+                  <span>{t('menu_add_product')}</span>
                 </button>
               </div>
             ) : (
@@ -625,7 +627,7 @@ export function ProductManagementView() {
                 className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
-                <span>Add Modifier</span>
+                <span>+ {t('menu_addons')}</span>
               </button>
             )}
           </div>
@@ -642,7 +644,7 @@ export function ProductManagementView() {
             }`}
           >
             <Utensils className="w-3.5 h-3.5" />
-            <span>Products</span>
+            <span>{t('menu_products')}</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
               activeTab === 'products' ? 'bg-black/20 text-white font-extrabold' : 'bg-stone-200 text-stone-700'
             }`}>
@@ -659,7 +661,7 @@ export function ProductManagementView() {
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Add-ons</span>
+            <span>{t('menu_addons')}</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
               activeTab === 'addons' ? 'bg-black/20 text-stone-950 font-extrabold' : 'bg-stone-200 text-stone-700'
             }`}>
@@ -747,7 +749,7 @@ export function ProductManagementView() {
                 title="Add new category"
               >
                 <Plus className="w-3 h-3 stroke-[3]" />
-                <span>+ Category</span>
+                <span>Category</span>
               </button>
             </div>
           </div>
@@ -954,7 +956,7 @@ export function ProductManagementView() {
             <div className="bg-white border border-stone-200/90 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
               {/* Left: Per Page Selector */}
               <div className="flex items-center gap-2">
-                <span className="font-bold text-stone-500">Per page:</span>
+                <span className="font-bold text-stone-500">{t('menu_per_page')}</span>
                 <div className="flex items-center gap-1">
                   {[12, 24, 48, 100].map((size) => (
                     <button
@@ -977,11 +979,11 @@ export function ProductManagementView() {
 
               {/* Center: Range Display */}
               <div className="font-bold text-stone-600">
-                Showing{' '}
+                {t('menu_showing')}{' '}
                 <strong className="text-stone-900 font-black">
                   {(productPage - 1) * productLimit + 1}–{Math.min(productPage * productLimit, filteredItems.length)}
                 </strong>{' '}
-                of <strong className="text-stone-900 font-black">{filteredItems.length}</strong> products
+                {t('menu_of')} <strong className="text-stone-900 font-black">{filteredItems.length}</strong> {t('menu_products').toLowerCase()}
               </div>
 
               {/* Right: Prev / Next Buttons */}
@@ -991,11 +993,11 @@ export function ProductManagementView() {
                   disabled={productPage <= 1}
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
                 >
-                  <span>← Previous</span>
+                  <span>{t('menu_previous')}</span>
                 </button>
 
                 <span className="font-bold text-stone-800 px-1">
-                  Page <strong className="text-emerald-700 font-black">{productPage}</strong> of{' '}
+                  {t('menu_page')} <strong className="text-emerald-700 font-black">{productPage}</strong> {t('menu_of')}{' '}
                   <strong className="font-black">{productTotalPages}</strong>
                 </span>
 
@@ -1004,7 +1006,7 @@ export function ProductManagementView() {
                   disabled={productPage >= productTotalPages}
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
                 >
-                  <span>Next →</span>
+                  <span>{t('menu_next')}</span>
                 </button>
               </div>
             </div>
@@ -1092,7 +1094,7 @@ export function ProductManagementView() {
           {filteredAddons.length > 0 && (
             <div className="bg-white border border-stone-200/90 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-stone-500">Per page:</span>
+                <span className="font-bold text-stone-500">{t('menu_per_page')}</span>
                 <div className="flex items-center gap-1">
                   {[12, 24, 48].map((size) => (
                     <button
@@ -1114,11 +1116,11 @@ export function ProductManagementView() {
               </div>
 
               <div className="font-bold text-stone-600">
-                Showing{' '}
+                {t('menu_showing')}{' '}
                 <strong className="text-stone-900 font-black">
                   {(addonPage - 1) * addonLimit + 1}–{Math.min(addonPage * addonLimit, filteredAddons.length)}
                 </strong>{' '}
-                of <strong className="text-stone-900 font-black">{filteredAddons.length}</strong> add-ons
+                {t('menu_of')} <strong className="text-stone-900 font-black">{filteredAddons.length}</strong> {t('menu_addons').toLowerCase()}
               </div>
 
               <div className="flex items-center gap-2">
@@ -1127,11 +1129,11 @@ export function ProductManagementView() {
                   disabled={addonPage <= 1}
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
                 >
-                  <span>← Previous</span>
+                  <span>{t('menu_previous')}</span>
                 </button>
 
                 <span className="font-bold text-stone-800 px-1">
-                  Page <strong className="text-emerald-700 font-black">{addonPage}</strong> of{' '}
+                  {t('menu_page')} <strong className="text-emerald-700 font-black">{addonPage}</strong> {t('menu_of')}{' '}
                   <strong className="font-black">{addonTotalPages}</strong>
                 </span>
 
@@ -1140,7 +1142,7 @@ export function ProductManagementView() {
                   disabled={addonPage >= addonTotalPages}
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
                 >
-                  <span>Next →</span>
+                  <span>{t('menu_next')}</span>
                 </button>
               </div>
             </div>

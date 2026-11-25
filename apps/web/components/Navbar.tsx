@@ -22,10 +22,13 @@ import { fetchApi, getSocket } from '@/lib/api';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { ChangeCredentialsModal } from '@/components/ChangeCredentialsModal';
 import { canRoleAccessPage } from '@/lib/permissions';
+import { useTranslation } from '@/lib/i18n';
+import { Globe } from 'lucide-react';
 
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { lang, toggleLanguage, t } = useTranslation();
   const [, setPermissionsVer] = useState(0);
 
   useEffect(() => {
@@ -96,14 +99,14 @@ export function Navbar() {
   `;
 
   const allNavItems: Array<{ page: 'profit' | 'staff' | 'products' | 'inventory' | 'tables' | 'pos' | 'kds' | 'waiter'; path: string; label: string; icon: any }> = [
-    { page: 'profit', path: '/dashboard', label: 'Profit', icon: BarChart3 },
-    { page: 'staff', path: '/staff', label: 'Staff', icon: Users },
-    { page: 'inventory', path: '/inventory', label: 'Stock', icon: Boxes },
-    { page: 'products', path: '/products', label: 'Menu', icon: Utensils },
-    { page: 'tables', path: '/tables', label: 'Tables', icon: LayoutGrid },
-    { page: 'pos', path: '/pos', label: 'POS', icon: MonitorCheck },
-    { page: 'kds', path: '/kds', label: 'KDS', icon: ChefHat },
-    { page: 'waiter', path: '/waiter', label: 'Waiter', icon: Smartphone },
+    { page: 'profit', path: '/dashboard', label: t('nav_profit'), icon: BarChart3 },
+    { page: 'staff', path: '/staff', label: t('nav_staff'), icon: Users },
+    { page: 'inventory', path: '/inventory', label: t('nav_stock'), icon: Boxes },
+    { page: 'products', path: '/products', label: t('nav_menu'), icon: Utensils },
+    { page: 'tables', path: '/tables', label: t('nav_tables'), icon: LayoutGrid },
+    { page: 'pos', path: '/pos', label: t('nav_pos'), icon: MonitorCheck },
+    { page: 'kds', path: '/kds', label: t('nav_kds'), icon: ChefHat },
+    { page: 'waiter', path: '/waiter', label: t('nav_waiter'), icon: Smartphone },
   ];
 
   const allowedNavItems = allNavItems.filter((item) => canRoleAccessPage(role, item.page));
@@ -134,8 +137,19 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Right: Profile Pill */}
+          {/* Right: Language Switcher & Profile Pill */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Language Switcher Pill (Amharic / English) */}
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-full text-xs font-black text-stone-800 transition shadow-2xs cursor-pointer active:scale-95"
+              title={lang === 'en' ? 'ወደ አማርኛ ቀይር (Switch to Amharic)' : 'Switch to English'}
+            >
+              <Globe className="w-3.5 h-3.5 text-emerald-700" />
+              <span>{lang === 'en' ? '🇪🇹 አማ' : '🇬🇧 EN'}</span>
+            </button>
+
             {/* User Profile Pill matching reference */}
             <div className="relative">
               <button
@@ -205,7 +219,7 @@ export function Navbar() {
                         className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-50 rounded-xl transition cursor-pointer"
                       >
                         <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Change Password / PIN</span>
+                        <span>{t('nav_change_creds')}</span>
                       </button>
 
                       {/* Sign Out Button */}
@@ -214,7 +228,7 @@ export function Navbar() {
                         className="w-full flex items-center gap-2 px-3 py-2 text-xs font-black text-white bg-[#C11221] hover:bg-[#A30F1C] rounded-xl transition cursor-pointer shadow-xs"
                       >
                         <LogOut className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                        <span>Sign Out & Lock Terminal</span>
+                        <span>{t('nav_logout')}</span>
                       </button>
                     </div>
                   </div>

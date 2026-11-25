@@ -37,15 +37,17 @@ const ResponsiveContainer = RechartsResponsiveContainer as any;
 const Legend = RechartsLegend as any;
 import { ProductManagementView } from '@/components/ProductManagementView';
 import { useAppStore } from '@/lib/store';
+import { useTranslation } from '@/lib/i18n';
 
 const formatOrderNumber = (num?: string | number | null) => {
   if (!num) return '';
-  const s = String(num).trim();
-  return s.startsWith('#') ? s : `#${s}`;
+  const cleaned = String(num).replace(/^#+/, '').trim();
+  return `#${cleaned}`;
 };
 
 export function AnalyticsView() {
   const { currentUser } = useAppStore();
+  const { t } = useTranslation();
   const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -153,7 +155,7 @@ export function AnalyticsView() {
                 <BarChart3 className="w-5 h-5" />
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight leading-tight">
-                {activeOwnerTab === 'analytics' ? 'Operations & Profit' : 'Products & Recipes'}
+                {activeOwnerTab === 'analytics' ? t('profit_title') : t('profit_studio')}
               </h1>
             </div>
 
@@ -169,7 +171,7 @@ export function AnalyticsView() {
                   }`}
                 >
                   <BarChart3 className="w-3.5 h-3.5" />
-                  <span>Financial Analytics</span>
+                  <span>{t('profit_analytics')}</span>
                 </button>
                 <button
                   onClick={() => setActiveOwnerTab('products')}
@@ -180,35 +182,35 @@ export function AnalyticsView() {
                   }`}
                 >
                   <Utensils className="w-3.5 h-3.5" />
-                  <span>Products Studio</span>
+                  <span>{t('profit_studio')}</span>
                 </button>
               </div>
 
               {activeOwnerTab === 'analytics' && (
-                <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
                   <div className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-2xl flex-1 sm:flex-initial justify-between sm:justify-start">
-                    {(['day', 'week', 'month', 'year'] as const).map((t) => (
+                    {(['day', 'week', 'month', 'year'] as const).map((tKey) => (
                       <button
-                        key={t}
-                        onClick={() => setTimeframe(t)}
+                        key={tKey}
+                        onClick={() => setTimeframe(tKey)}
                         className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-bold transition uppercase cursor-pointer text-center ${
-                          timeframe === t
+                          timeframe === tKey
                             ? 'bg-emerald-600 text-white font-black shadow-xs'
                             : 'text-stone-600 hover:text-stone-900'
                         }`}
                       >
-                        {t}
+                        {tKey === 'day' ? t('profit_day') : tKey === 'week' ? t('profit_week') : tKey === 'month' ? t('profit_month') : t('profit_year')}
                       </button>
                     ))}
                   </div>
 
                   <button
                     onClick={handleExportCSV}
-                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-2xl text-[11px] sm:text-xs font-bold text-stone-700 shadow-xs transition cursor-pointer shrink-0"
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-2xl text-[11px] sm:text-xs font-bold text-stone-700 shadow-xs transition cursor-pointer"
                     title="Export financial report to CSV"
                   >
                     <Download className="w-3.5 h-3.5 text-stone-600" />
-                    <span className="whitespace-nowrap">Export CSV</span>
+                    <span className="whitespace-nowrap">{t('profit_export_csv')}</span>
                   </button>
                 </div>
               )}
@@ -227,7 +229,7 @@ export function AnalyticsView() {
               {/* Total Revenue */}
               <div className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
                 <div className="flex items-center justify-between text-xs text-stone-600 font-bold mb-2">
-                  <span>Total Revenue</span>
+                  <span>{t('profit_total_revenue')}</span>
                   <span className="text-emerald-800 font-bold text-[10px] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                     Live
                   </span>
@@ -240,7 +242,7 @@ export function AnalyticsView() {
               {/* Real-time Net Profit */}
               <div className="bg-emerald-50/70 border border-emerald-200 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
                 <div className="flex items-center justify-between text-xs font-bold mb-2 text-emerald-900">
-                  <span>Estimated Net Profit</span>
+                  <span>{t('profit_net_profit')}</span>
                   <Sparkles className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-emerald-800">
@@ -255,7 +257,7 @@ export function AnalyticsView() {
               {/* Production COGS */}
               <div className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
                 <div className="text-xs text-stone-600 font-bold mb-2">
-                  Production COGS
+                  {t('profit_cogs')}
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-stone-900">
                   {(kpis.cogs ?? 0).toFixed(2)} <span className="text-xs text-stone-500 font-bold">ETB</span>
@@ -265,7 +267,7 @@ export function AnalyticsView() {
               {/* Total Orders */}
               <div className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
                 <div className="flex items-center justify-between text-xs text-stone-600 font-bold mb-2">
-                  <span>Total Orders</span>
+                  <span>{t('profit_total_orders')}</span>
                   <ShoppingBag className="w-4 h-4 text-stone-400" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-stone-900">
@@ -276,7 +278,7 @@ export function AnalyticsView() {
               {/* Table Occupancy */}
               <div className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
                 <div className="flex items-center justify-between text-xs text-stone-600 font-bold mb-2">
-                  <span>Available Tables</span>
+                  <span>{t('profit_available_tables')}</span>
                   <Users className="w-4 h-4 text-stone-400" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-stone-900">

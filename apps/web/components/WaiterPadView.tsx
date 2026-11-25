@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { Button, Badge } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 const formatOrderNumber = (num?: string | number | null) => {
   if (!num) return '';
@@ -48,6 +49,7 @@ const formatOrderNumber = (num?: string | number | null) => {
 };
 
 export function WaiterPadView() {
+  const { t, lang } = useTranslation();
   const {
     currentUser,
     waiterCart,
@@ -629,36 +631,214 @@ export function WaiterPadView() {
 
 
 
-      {/* Active Edit/Append Banner */}
+      {/* Active Edit/Append Banner & Elevated Order Strip */}
       {editingDraftOrder && (
-        <div className="bg-amber-400 text-amber-950 px-4 py-2 flex items-center justify-between text-xs font-bold shadow-xs z-20 flex-shrink-0 border-b border-amber-500/30">
-          <div className="flex items-center gap-2">
-            <Edit3 className="w-4 h-4 text-amber-950" />
-            <span>Editing Draft Note {formatOrderNumber(editingDraftOrder.orderNumber)} for Table {editingDraftOrder.tableNumber} — Add, remove, or adjust quantities</span>
+        <div className="z-20 flex-shrink-0 border-b border-amber-500/30">
+          <div className="bg-amber-400 text-amber-950 px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/30 text-amber-950 flex items-center justify-center shrink-0">
+                <Edit3 className="w-4 h-4 text-amber-950" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-black text-xs sm:text-sm text-amber-950">
+                    Editing Draft {formatOrderNumber(editingDraftOrder.orderNumber)}
+                  </span>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-950/15 text-amber-950">
+                    Table {editingDraftOrder.tableNumber}
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-900 font-medium truncate mt-0.5">
+                  Add, remove, or adjust quantities for this guest note
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={handleCancelEditOrAppend}
+                className="px-3 py-1.5 bg-white/80 hover:bg-white text-amber-950 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+              >
+                Cancel Edit
+              </button>
+              <button
+                type="button"
+                disabled={sending || waiterCart.length === 0}
+                onClick={handleSendToCashier}
+                className="px-4 py-1.5 bg-amber-950 hover:bg-black text-amber-300 hover:text-amber-200 rounded-xl text-xs font-black shadow-xs transition cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Updating...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Update Order</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={handleCancelEditOrAppend}
-            className="px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-950 rounded-lg text-xs font-black shadow-xs cursor-pointer"
-          >
-            Cancel Edit
-          </button>
+
+          {/* Elevated Order Items Review Strip */}
+          {waiterCart.length > 0 && (
+            <div className="bg-amber-50/95 border-t border-amber-300/40 px-3 sm:px-4 py-2 flex items-center justify-between gap-3 overflow-x-auto text-xs">
+              <div className="flex items-center gap-2 min-w-0 shrink-0">
+                <span className="font-extrabold text-amber-950 text-[11px] uppercase tracking-wider">
+                  Items in Note ({totalWaiterItems}):
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                {waiterCart.map((cartItem) => (
+                  <div
+                    key={cartItem.menuItemId}
+                    className="flex items-center gap-1.5 bg-white border border-amber-300/60 rounded-xl px-2.5 py-1 shrink-0 shadow-2xs"
+                  >
+                    <span className="font-bold text-stone-900 text-[11px] truncate max-w-[110px]">
+                      {cartItem.name}
+                    </span>
+                    <span className="font-black text-emerald-700 text-[11px]">
+                      x{cartItem.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateWaiterQuantity(cartItem.menuItemId, -1)}
+                      className="w-4 h-4 rounded bg-stone-100 hover:bg-rose-100 text-stone-600 hover:text-rose-700 flex items-center justify-center font-black text-[10px]"
+                    >
+                      -
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateWaiterQuantity(cartItem.menuItemId, 1)}
+                      className="w-4 h-4 rounded bg-stone-100 hover:bg-emerald-100 text-stone-600 hover:text-emerald-700 flex items-center justify-center font-black text-[10px]"
+                    >
+                      +
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="font-black text-amber-950 text-xs">
+                  {totalWaiterSum.toFixed(2)} ETB
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileDrawer(true)}
+                  className="text-[11px] font-bold text-amber-900 hover:text-black underline cursor-pointer whitespace-nowrap"
+                >
+                  Review Slip →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {appendingOrder && (
-        <div className="bg-emerald-600 text-white px-4 py-2 flex items-center justify-between text-xs font-bold shadow-xs z-20 flex-shrink-0 border-b border-emerald-700/30">
-          <div className="flex items-center gap-2">
-            <Plus className="w-4 h-4 text-white" />
-            <span>Adding Items to Table {appendingOrder.tableNumber} (Order {formatOrderNumber(appendingOrder.orderNumber)}) — Active Kitchen Ticket</span>
+        <div className="z-20 flex-shrink-0 border-b border-emerald-700/30">
+          <div className="bg-emerald-600 text-white px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center shrink-0">
+                <Plus className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-black text-xs sm:text-sm text-white">
+                    Adding to {formatOrderNumber(appendingOrder.orderNumber)}
+                  </span>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-white/20 text-white">
+                    Table {appendingOrder.tableNumber}
+                  </span>
+                </div>
+                <p className="text-[11px] text-emerald-100 font-medium truncate mt-0.5">
+                  Select additional items to append to active kitchen ticket
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={handleCancelEditOrAppend}
+                className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={sending || waiterCart.length === 0}
+                onClick={handleSendToCashier}
+                className="px-4 py-1.5 bg-white hover:bg-emerald-50 text-emerald-800 rounded-xl text-xs font-black shadow-xs transition cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Send Items ({totalWaiterItems})</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={handleCancelEditOrAppend}
-            className="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-black shadow-xs cursor-pointer"
-          >
-            Cancel
-          </button>
+
+          {/* Elevated Order Items Review Strip */}
+          {waiterCart.length > 0 && (
+            <div className="bg-emerald-50/95 border-t border-emerald-200 px-3 sm:px-4 py-2 flex items-center justify-between gap-3 overflow-x-auto text-xs">
+              <div className="flex items-center gap-2 min-w-0 shrink-0">
+                <span className="font-extrabold text-emerald-950 text-[11px] uppercase tracking-wider">
+                  New Items ({totalWaiterItems}):
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                {waiterCart.map((cartItem) => (
+                  <div
+                    key={cartItem.menuItemId}
+                    className="flex items-center gap-1.5 bg-white border border-emerald-300 rounded-xl px-2.5 py-1 shrink-0 shadow-2xs"
+                  >
+                    <span className="font-bold text-stone-900 text-[11px] truncate max-w-[110px]">
+                      {cartItem.name}
+                    </span>
+                    <span className="font-black text-emerald-700 text-[11px]">
+                      x{cartItem.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateWaiterQuantity(cartItem.menuItemId, -1)}
+                      className="w-4 h-4 rounded bg-stone-100 hover:bg-rose-100 text-stone-600 hover:text-rose-700 flex items-center justify-center font-black text-[10px]"
+                    >
+                      -
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateWaiterQuantity(cartItem.menuItemId, 1)}
+                      className="w-4 h-4 rounded bg-stone-100 hover:bg-emerald-100 text-stone-600 hover:text-emerald-700 flex items-center justify-center font-black text-[10px]"
+                    >
+                      +
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="font-black text-emerald-950 text-xs">
+                  {totalWaiterSum.toFixed(2)} ETB
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileDrawer(true)}
+                  className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 underline cursor-pointer whitespace-nowrap"
+                >
+                  Review Slip →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
@@ -669,6 +849,16 @@ export function WaiterPadView() {
               const isActive = groupFilter === cat.id;
               const Icon = cat.icon;
 
+              const catCount =
+                cat.id === 'ALL'
+                  ? totalWaiterItems
+                  : waiterCart
+                      .filter((cItem) => {
+                        const m = allItems.find((it) => it.id === cItem.menuItemId);
+                        return m?.categoryId === cat.id || m?.category?.name === cat.label;
+                      })
+                      .reduce((sum, cItem) => sum + cItem.quantity, 0);
+
               return (
                 <button
                   key={cat.id}
@@ -676,20 +866,27 @@ export function WaiterPadView() {
                     setGroupFilter(cat.id as any);
                     setSelectedCategory('');
                   }}
-                  className={`w-full flex flex-col items-center justify-center py-2 sm:py-2.5 px-1 rounded-2xl transition text-center gap-1 group cursor-pointer ${
+                  className={`w-full flex flex-col items-center justify-center py-2 sm:py-2.5 px-1 rounded-2xl transition text-center gap-1 group cursor-pointer relative ${
                     isActive
                       ? 'bg-white shadow-xs border border-emerald-500/40 text-emerald-800 font-black'
                       : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'
                   }`}
                 >
-                  <div
-                    className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition ${
-                      isActive
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'bg-white text-stone-600 shadow-2xs border border-stone-200/70 group-hover:border-stone-300'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                  <div className="relative">
+                    <div
+                      className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition ${
+                        isActive
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'bg-white text-stone-600 shadow-2xs border border-stone-200/70 group-hover:border-stone-300'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                    </div>
+                    {catCount > 0 && (
+                      <span className="absolute -top-1 -right-1.5 bg-emerald-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-white shadow-xs">
+                        {catCount}
+                      </span>
+                    )}
                   </div>
                   <span className="text-[9px] sm:text-[10px] md:text-[11px] font-bold tracking-tight leading-tight truncate max-w-full px-0.5">
                     {cat.label}
@@ -803,8 +1000,8 @@ export function WaiterPadView() {
           {/* TAB 1: MENU PRODUCT GRID */}
           {activeTab === 'menu' && (
             <>
-              {/* Active Category Title & Count */}
-              <div className="flex items-center justify-between pb-2 mb-3 border-b border-stone-200">
+              {/* Active Category Title & Count + Order Count Indicator */}
+              <div className="flex items-center justify-between pb-2 mb-3 border-b border-stone-200 gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm sm:text-base font-extrabold text-stone-900">
                     {dynamicCategoryCards.find((c) => c.id === groupFilter)?.label || 'All Menu'}
@@ -813,6 +1010,25 @@ export function WaiterPadView() {
                     {filteredItems.length} items
                   </span>
                 </div>
+
+                {/* Active Order Count Indicator while waiter selects items */}
+                {totalWaiterItems > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowMobileDrawer(true)}
+                    className="flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 px-3 py-1.5 rounded-xl text-xs font-black shadow-xs transition cursor-pointer active:scale-95 animate-in zoom-in-95"
+                    title="View current order items in slip"
+                  >
+                    <div className="relative">
+                      <ShoppingBag className="w-3.5 h-3.5 text-emerald-700" />
+                      <span className="absolute -top-1 -right-1.5 bg-emerald-600 text-white text-[9px] w-3.5 h-3.5 rounded-full font-black flex items-center justify-center">
+                        {totalWaiterItems}
+                      </span>
+                    </div>
+                    <span>{totalWaiterItems} {totalWaiterItems === 1 ? 'item' : 'items'} in order</span>
+                    <span className="text-emerald-950 font-extrabold">• {totalWaiterSum.toFixed(2)} ETB</span>
+                  </button>
+                )}
               </div>
 
               {/* Loading State Spinner */}
@@ -1127,7 +1343,7 @@ export function WaiterPadView() {
                 }`}
               >
                 <Utensils className="w-3.5 h-3.5" />
-                <span>Dine In</span>
+                <span>{t('waiter_dine_in')}</span>
               </button>
               <button
                 onClick={() => setOrderType('TAKEAWAY')}
@@ -1138,7 +1354,7 @@ export function WaiterPadView() {
                 }`}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Take Away</span>
+                <span>{t('waiter_takeaway')}</span>
               </button>
             </div>
 
@@ -1164,7 +1380,7 @@ export function WaiterPadView() {
                     </div>
                     <div className="truncate">
                       <div className="text-xs font-black text-stone-900 truncate">
-                        {waiterTable ? `Table ${waiterTable}` : 'Select Dining Table'}
+                        {waiterTable ? `Table ${waiterTable}` : t('waiter_select_table')}
                       </div>
                       <div className="text-[10px] text-stone-500 font-semibold truncate">
                         {selectedTableObj
@@ -1174,7 +1390,7 @@ export function WaiterPadView() {
                     </div>
                   </div>
                   <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-stone-700 group-hover:border-emerald-500 group-hover:text-emerald-700 transition flex-shrink-0 shadow-2xs">
-                    Change
+                    {t('waiter_change_table')}
                   </span>
                 </button>
               </div>
@@ -1197,14 +1413,14 @@ export function WaiterPadView() {
           {/* Order Details Header */}
           <div className="px-4 py-2.5 bg-stone-50/70 border-b border-stone-200/90 flex items-center justify-between">
             <h3 className="text-xs font-black uppercase tracking-wider text-stone-900">
-              Order Details
+              {t('waiter_order_details')}
             </h3>
             {waiterCart.length > 0 && (
               <button
                 onClick={clearWaiterCart}
                 className="text-xs font-semibold text-rose-600 hover:underline cursor-pointer"
               >
-                Clear All Order
+                {t('waiter_clear_order')}
               </button>
             )}
           </div>
@@ -1267,9 +1483,9 @@ export function WaiterPadView() {
                 <div className="w-14 h-14 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 mb-2.5">
                   <ShoppingBag className="w-6 h-6 stroke-[1.5]" />
                 </div>
-                <p className="text-xs font-bold text-stone-700">No Order</p>
+                <p className="text-xs font-bold text-stone-700">{t('waiter_no_order')}</p>
                 <p className="text-[11px] text-stone-400 mt-0.5">
-                  Select items to add to order
+                  {t('waiter_select_items')}
                 </p>
               </div>
             ) : (
@@ -1346,7 +1562,7 @@ export function WaiterPadView() {
           <div className="px-4 py-2 border-t border-stone-200/90 bg-stone-50/50">
             <input
               type="text"
-              placeholder="Special instructions (e.g. Less spicy, extra sauce)..."
+              placeholder={t('waiter_special_notes')}
               value={waiterSpecialNotes}
               onChange={(e) => setWaiterSpecialNotes(e.target.value)}
               className="w-full bg-white border border-stone-300 rounded-xl px-3 py-1.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500"
@@ -1357,7 +1573,7 @@ export function WaiterPadView() {
           <div className="p-4 border-t border-stone-200/90 bg-white space-y-3">
             <div className="space-y-1.5 text-xs text-stone-500">
               <div className="flex justify-between items-center">
-                <span>Subtotal ({totalWaiterItems} items)</span>
+                <span>{t('waiter_subtotal')} ({totalWaiterItems} {totalWaiterItems === 1 ? t('waiter_item') : t('waiter_items')})</span>
                 <span className="font-bold text-stone-900">{totalWaiterBase.toFixed(2)} ETB</span>
               </div>
               {totalWaiterTip > 0 && (
@@ -1367,11 +1583,11 @@ export function WaiterPadView() {
                 </div>
               )}
               <div className="flex justify-between items-center text-stone-400 text-[11px]">
-                <span>VAT (15% Included)</span>
+                <span>{t('waiter_tax_inc')}</span>
                 <span>{totalWaiterTax.toFixed(2)} ETB</span>
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-stone-200 font-black text-sm text-stone-900">
-                <span>Total</span>
+                <span>{t('waiter_total')}</span>
                 <span className="text-base text-stone-900">{totalWaiterSum.toFixed(2)} ETB</span>
               </div>
             </div>
@@ -1386,12 +1602,12 @@ export function WaiterPadView() {
                 {sending
                   ? 'Processing...'
                   : editingDraftOrder
-                  ? `Update Order Note #${editingDraftOrder.orderNumber}`
+                  ? `${t('waiter_update_order')} (${formatOrderNumber(editingDraftOrder.orderNumber)})`
                   : appendingOrder
-                  ? `Send Additional Items (Table ${appendingOrder.tableNumber})`
+                  ? `Send Items (Table ${appendingOrder.tableNumber})`
                   : isCurrentTableOccupied
-                  ? `Append to Table ${waiterTable || ''} (Active Bill)`
-                  : 'Send Note to Cashier (Paperless)'}
+                  ? `Append to Table ${waiterTable || ''}`
+                  : t('waiter_send_to_cashier')}
               </span>
             </button>
           </div>
@@ -1413,7 +1629,7 @@ export function WaiterPadView() {
           }`}
         >
           <Utensils className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="text-[10px] font-bold">Menu</span>
+          <span className="text-[10px] font-bold">{t('waiter_menu_tab')}</span>
         </button>
 
         {/* Quick Table / Floor Plan Selector in Mobile Dock */}
@@ -1423,8 +1639,8 @@ export function WaiterPadView() {
           title="Change Table or View Floor Plan"
         >
           <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
-          <span className="text-[10px] font-black text-stone-900 truncate max-w-[65px] sm:max-w-none">
-            {orderType === 'DINE_IN' ? `Table ${waiterTable || '—'}` : 'Takeaway'}
+          <span className="text-[10px] font-black text-stone-900 truncate max-w-[85px] sm:max-w-none">
+            {orderType === 'DINE_IN' ? `Table ${waiterTable ? waiterTable.split('-')[0].trim() : '—'}` : t('waiter_takeaway')}
           </span>
         </button>
 
@@ -1440,7 +1656,7 @@ export function WaiterPadView() {
               </span>
             )}
           </div>
-          <span className="text-[10px] font-bold whitespace-nowrap">Review Slip</span>
+          <span className="text-[10px] font-bold whitespace-nowrap">{t('waiter_review_slip')}</span>
         </button>
 
         <button
@@ -1457,7 +1673,7 @@ export function WaiterPadView() {
               }`}
             />
           )}
-          <span className="text-[10px] font-bold whitespace-nowrap">Kitchen Status</span>
+          <span className="text-[10px] font-bold whitespace-nowrap">{t('waiter_kitchen_status')}</span>
         </button>
       </div>
 

@@ -14,9 +14,11 @@ import {
   Settings2,
   AlertCircle,
   LayoutGrid,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react';
 import { Button, Badge, Input } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface TablePlanModalProps {
   isOpen: boolean;
@@ -35,6 +37,7 @@ export function TablePlanModal({
   onSelectTable,
   onTablesUpdated,
 }: TablePlanModalProps) {
+  const { t } = useTranslation();
   const { currentUser } = useAppStore();
   const [tablesList, setTablesList] = useState<any[]>(initialTables || []);
   const [activeTab, setActiveTab] = useState<'floor' | 'manage'>('floor');
@@ -50,6 +53,7 @@ export function TablePlanModal({
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [tableToDelete, setTableToDelete] = useState<any | null>(null);
+  const [deletingTable, setDeletingTable] = useState(false);
 
   const isOwnerOrManager = currentUser?.role === 'OWNER' || currentUser?.role === 'MANAGER';
 
@@ -158,16 +162,18 @@ export function TablePlanModal({
   };
 
   const confirmDeleteTable = async () => {
-    if (!tableToDelete) return;
-    const t = tableToDelete;
-    setTableToDelete(null);
+    if (!tableToDelete || deletingTable) return;
+    setDeletingTable(true);
     try {
-      await fetchApi(`/menu/tables/${t.id}`, { method: 'DELETE' });
-      setSuccessMsg(`Table ${t.tableNumber} deleted.`);
+      await fetchApi(`/menu/tables/${tableToDelete.id}`, { method: 'DELETE' });
+      setSuccessMsg(`Table ${tableToDelete.tableNumber} deleted.`);
+      setTableToDelete(null);
       await refreshTables();
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err: any) {
       setError(err.message || 'Failed to delete table.');
+    } finally {
+      setDeletingTable(false);
     }
   };
 
@@ -187,8 +193,11 @@ export function TablePlanModal({
           <div>
             <h3 className="text-base sm:text-lg font-black text-stone-900 flex items-center gap-2">
               <LayoutGrid className="w-5 h-5 text-emerald-600" />
-              <span>Dining Tables &amp; Floor Plan</span>
+              <span>{t('tables_title')}</span>
             </h3>
+            <p className="text-xs text-stone-500 font-medium mt-0.5">
+              {t('tables_subtitle')}
+            </p>
           </div>
           <Button
             variant="secondary"
@@ -211,7 +220,7 @@ export function TablePlanModal({
                   handleCancelForm();
                 }}
               >
-                Floor Plan View
+                {t('tables_floor_view')}
               </Button>
               <Button
                 variant={activeTab === 'manage' ? 'primary' : 'ghost'}
@@ -219,7 +228,7 @@ export function TablePlanModal({
                 onClick={() => setActiveTab('manage')}
               >
                 <Settings2 className="w-3.5 h-3.5" />
-                <span>Manage Tables ({tablesList.length})</span>
+                <span>{t('tables_manage_tables')} ({tablesList.length})</span>
               </Button>
             </div>
 
@@ -230,7 +239,7 @@ export function TablePlanModal({
                 onClick={handleStartAdd}
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Table</span>
+                <span>{t('tables_add_table')}</span>
               </Button>
             )}
           </div>
@@ -366,7 +375,7 @@ export function TablePlanModal({
         </div>
 
         {/* Table Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto no-scrollbar pr-1 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[58vh] overflow-y-auto pr-1 pt-1">
           {filteredTables.map((t) => {
             const isOccupied = t.status === 'OCCUPIED';
             const hasActiveOrder = isOccupied && t.orders && t.orders.length > 0;
@@ -374,6 +383,9 @@ export function TablePlanModal({
             const isAvailable = t.status === 'AVAILABLE';
             // Only genuinely available tables can show as selected for a new order
             const isSelected = selectedTable === t.tableNumber && isAvailable;
+
+            const [code, ...zoneParts] = t.tableNumber.split(' - ');
+            const zoneName = zoneParts.join(' - ');
 
             return (
               <div
@@ -408,9 +420,16 @@ export function TablePlanModal({
                 {/* Header: Table Title & Status Badge cleanly spaced */}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0 flex-1">
-                    <span className="font-heading font-black text-sm text-stone-900 block leading-tight truncate">
-                      {t.tableNumber}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-heading font-black text-sm text-stone-900 leading-tight">
+                        {code || t.tableNumber}
+                      </span>
+                      {zoneName && (
+                        <span className="text-[11px] font-semibold text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded-md">
+                          {zoneName}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Status Badge */}
@@ -418,26 +437,26 @@ export function TablePlanModal({
                     variant={isOccupied ? 'amber' : isReserved ? 'purple' : 'success'}
                     className="flex-shrink-0"
                   >
-                    {isOccupied ? 'Seated' : isReserved ? 'Reserved' : 'Open'}
+                    {isOccupied ? t('tables_seated') : isReserved ? t('tables_reserved') : t('tables_open')}
                   </Badge>
                 </div>
 
                 {/* Capacity */}
                 <div className="flex items-center gap-1.5 text-xs text-stone-500 mb-2">
                   <Users className="w-3.5 h-3.5 text-stone-500" />
-                  <span>Capacity: {t.capacity} seats</span>
+                  <span>{t('tables_capacity')}: {t.capacity} {t('tables_seats')}</span>
                 </div>
 
                 {/* Active Order Summary if Seated */}
                 {isOccupied && (
-                  <div className="flex items-center justify-between gap-1 text-[11px] font-bold border-t border-amber-500/20 pt-1.5 mb-2 text-amber-700">
-                    <span className="truncate">
+                  <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] font-bold border-t border-amber-500/20 pt-1.5 mb-2 text-amber-800">
+                    <span className="truncate max-w-[65%]">
                       {hasActiveOrder
-                        ? `Active: ${t.orders[0].orderNumber} (${Number(t.orders[0].totalAmount).toFixed(2)} ETB)`
+                        ? `Active: ${t.orders[0].orderNumber?.startsWith('#') ? t.orders[0].orderNumber : `#${t.orders[0].orderNumber}`} (${Number(t.orders[0].totalAmount).toFixed(2)} ETB)`
                         : 'Occupied'}
                     </span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-200/80 text-amber-900 whitespace-nowrap">
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-lg bg-amber-200/90 text-amber-950 whitespace-nowrap shadow-2xs">
                         {hasActiveOrder && t.orders[0].status === 'DRAFT_NOTE' ? 'Edit Note' : 'Add Order'}
                       </span>
                       {isOwnerOrManager && (
@@ -526,17 +545,20 @@ export function TablePlanModal({
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
+                disabled={deletingTable}
                 onClick={() => setTableToDelete(null)}
-                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
+                disabled={deletingTable}
                 onClick={confirmDeleteTable}
-                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-60"
               >
-                Delete Table
+                {deletingTable && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{deletingTable ? 'Deleting...' : 'Delete Table'}</span>
               </button>
             </div>
           </div>

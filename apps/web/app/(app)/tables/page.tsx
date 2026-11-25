@@ -17,7 +17,8 @@ import {
   Check,
   RefreshCw,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react';
 import { calculatePrepTime } from '@/lib/timer-utils';
 
@@ -38,6 +39,7 @@ export default function TablesPage() {
 
   // Modern In-App Confirmation Modals (Replacing browser alert / confirm)
   const [deleteModal, setDeleteModal] = useState<{ id: string; name: string } | null>(null);
+  const [deletingTable, setDeletingTable] = useState(false);
   const [freeModal, setFreeModal] = useState<{ id: string; name: string } | null>(null);
 
   // In-App Toast
@@ -220,20 +222,20 @@ export default function TablesPage() {
   };
 
   const executeDelete = async () => {
-    if (!deleteModal) return;
+    if (!deleteModal || deletingTable) return;
     const { id, name } = deleteModal;
-    setDeleteModal(null);
-    setLoading(true);
+    setDeletingTable(true);
     try {
       await fetchApi(`/menu/tables/${id}`, {
         method: 'DELETE',
       });
       showToast(`Table "${name}" removed.`, 'success');
+      setDeleteModal(null);
       loadTables();
     } catch (err: any) {
       showToast(err.message || 'Failed to delete table. Check if table has active orders.', 'error');
     } finally {
-      setLoading(false);
+      setDeletingTable(false);
     }
   };
 
@@ -647,17 +649,20 @@ export default function TablesPage() {
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
+                disabled={deletingTable}
                 onClick={() => setDeleteModal(null)}
-                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
+                disabled={deletingTable}
                 onClick={executeDelete}
-                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-60"
               >
-                Delete Table
+                {deletingTable && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{deletingTable ? 'Deleting...' : 'Delete Table'}</span>
               </button>
             </div>
           </div>
