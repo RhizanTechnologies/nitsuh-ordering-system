@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, UnauthorizedException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { EventsGateway } from '../events/events.gateway';
 import { UserRole, Prisma } from '@prisma/client';
@@ -24,6 +24,8 @@ export interface UpdateUserDto {
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private prisma: PrismaService,
     private eventsGateway: EventsGateway,
@@ -823,23 +825,39 @@ export class UsersService {
 
   // Active Role Permissions & Station Matrix in PostgreSQL
   async getRolePermissions() {
-    const settings =
-      (await this.prisma.businessSettings.findUnique({ where: { id: 'default' } })) ||
-      (await this.prisma.businessSettings.findFirst());
-    return settings?.rolePermissions || null;
+    try {
+      const settings =
+        (await this.prisma.businessSettings.findUnique({ where: { id: 'default' } })) ||
+        (await this.prisma.businessSettings.findFirst());
+      return settings?.rolePermissions || null;
+    } catch (e: any) {
+      this.logger.warn?.('Failed to get role permissions from businessSettings:', e?.message);
+      return null;
+    }
   }
 
   async updateRolePermissions(permissions: any, actorUserId: string) {
-    const existing = await this.prisma.businessSettings.findUnique({ where: { id: 'default' } });
-    if (existing) {
-      await this.prisma.businessSettings.update({
-        where: { id: 'default' },
-        data: { rolePermissions: permissions },
-      });
-    } else {
-      await this.prisma.businessSettings.create({
-        data: { id: 'default', rolePermissions: permissions },
-      });
+    try {
+      const existing = await this.prisma.businessSettings.findUnique({ where: { id: 'default' } });
+      if (existing) {
+        await this.prisma.businessSettings.update({
+          where: { id: 'default' },
+          data: { rolePermissions: permissions },
+        });
+      } else {
+        await this.prisma.businessSettings.create({
+          data: { id: 'default', rolePermissions: permissions },
+        });
+      }
+    } catch (e: any) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `INSERT INTO "BusinessSettings" ("id", "rolePermissions", "updatedAt") VALUES ('default', $1::jsonb, NOW()) ON CONFLICT ("id") DO UPDATE SET "rolePermissions" = $1::jsonb, "updatedAt" = NOW()`,
+          JSON.stringify(permissions),
+        );
+      } catch (err: any) {
+        this.logger.warn?.('Unable to persist rolePermissions to DB:', err?.message);
+      }
     }
 
     // Broadcast in real-time to all connected devices and browsers

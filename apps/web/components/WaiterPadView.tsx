@@ -35,6 +35,8 @@ import {
   Edit3,
   Loader2,
   Layers,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { Button, Badge } from '@/components/ui';
@@ -101,13 +103,7 @@ export function WaiterPadView() {
   const [tableModalOpen, setTableModalOpen] = useState(false);
   const [readyToast, setReadyToast] = useState<any | null>(null);
   const [, setTick] = useState(0);
-
-  // Customizer Modal State
-  const [selectedDetailItem, setSelectedDetailItem] = useState<any | null>(null);
-  const [customSize, setCustomSize] = useState<'Regular' | 'Large' | 'X Large'>('Regular');
-  const [customQty, setCustomQty] = useState(1);
-  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
-  const [customItemNote, setCustomItemNote] = useState('');
+  const [menuLoadError, setMenuLoadError] = useState<string | null>(null);
 
   const loadTables = () => {
     fetchApi('/menu/tables')
@@ -130,18 +126,35 @@ export function WaiterPadView() {
       .catch(() => {});
   };
 
-  useEffect(() => {
+  const loadMenu = (retryCount = 0) => {
     setLoadingMenu(true);
+    setMenuLoadError(null);
     Promise.all([
       fetchApi('/menu/categories').then((cats) => {
         setCategories(cats || []);
-      }).catch(() => {}),
+      }),
       fetchApi('/menu/items').then((items) => {
         setAllItems(items || []);
-      }).catch(() => {})
-    ]).finally(() => {
-      setLoadingMenu(false);
-    });
+        // If items are empty and haven't retried yet, trigger one automatic retry for cold starts
+        if ((!items || items.length === 0) && retryCount === 0) {
+          setTimeout(() => loadMenu(retryCount + 1), 1500);
+        }
+      }),
+    ])
+      .catch((err: any) => {
+        console.error('Failed to load menu data:', err);
+        setMenuLoadError(err?.message || 'Unable to connect to menu server');
+        if (retryCount === 0) {
+          setTimeout(() => loadMenu(retryCount + 1), 1500);
+        }
+      })
+      .finally(() => {
+        setLoadingMenu(false);
+      });
+  };
+
+  useEffect(() => {
+    loadMenu();
 
     loadTables();
     loadActiveOrders();
@@ -311,56 +324,6 @@ export function WaiterPadView() {
   // All menu prices are VAT-inclusive (15% included in base price)
   const totalWaiterTax = totalWaiterBase > 0 ? (totalWaiterBase * 0.15) / 1.15 : 0;
   const totalWaiterSum = totalWaiterBase + totalWaiterTip;
-
-  const getCustomUnitPrice = (item: any) => {
-    if (!item) return 0;
-    const basePrice = Number(item.price || 0);
-    const sizeAddon = customSize === 'Large' ? 30 : customSize === 'X Large' ? 50 : 0;
-    const addons = (item.applicableAddons || []).filter((a: any) => selectedAddonIds.includes(a.id));
-    const addonsTotal = addons.reduce((sum: number, a: any) => sum + Number(a.price || 0), 0);
-    return basePrice + sizeAddon + addonsTotal;
-  };
-
-  const openItemCustomizer = (item: any) => {
-    setSelectedDetailItem(item);
-    setCustomSize('Regular');
-    setCustomQty(1);
-    setSelectedAddonIds([]);
-    setCustomItemNote('');
-  };
-
-  const toggleAddon = (addonId: string) => {
-    setSelectedAddonIds((prev) =>
-      prev.includes(addonId) ? prev.filter((id) => id !== addonId) : [...prev, addonId]
-    );
-  };
-
-  const handleAddCustomizedToCart = () => {
-    if (!selectedDetailItem) return;
-    const unitPrice = getCustomUnitPrice(selectedDetailItem);
-    const chosenAddons = (selectedDetailItem.applicableAddons || []).filter((a: any) =>
-      selectedAddonIds.includes(a.id)
-    );
-    const addonLabels = chosenAddons.map((a: any) => `+${a.name}`);
-    const specs = [
-      customSize !== 'Regular' ? `Size: ${customSize}` : '',
-      ...addonLabels,
-      customItemNote ? `Note: ${customItemNote}` : '',
-    ].filter(Boolean).join(', ');
-
-    addToWaiterCart({
-      id: selectedDetailItem.id,
-      name: specs ? `${selectedDetailItem.name} (${specs})` : selectedDetailItem.name,
-      price: unitPrice,
-      imageUrl: selectedDetailItem.imageUrl,
-      quantity: customQty,
-      specialInstructions: specs || undefined,
-      selectedAddonIds: selectedAddonIds,
-      selectedAddons: chosenAddons,
-    });
-
-    setSelectedDetailItem(null);
-  };
 
   const handleLoadDraftForEditing = (order: any, tableNumber?: string) => {
     const tblNum = tableNumber || order.table?.tableNumber || waiterTable;
@@ -851,8 +814,26 @@ export function WaiterPadView() {
                 </div>
               )}
 
+              {/* Error State Banner */}
+              {!loadingMenu && menuLoadError && (
+                <div className="bg-white border border-rose-200 rounded-2xl p-8 text-center my-4 shadow-xs">
+                  <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-3 text-rose-500">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-stone-900">Unable to load menu</h4>
+                  <p className="text-xs text-stone-500 mt-1 mb-4">{menuLoadError}</p>
+                  <button
+                    onClick={() => loadMenu()}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Retry Loading Menu</span>
+                  </button>
+                </div>
+              )}
+
               {/* Empty State */}
-              {!loadingMenu && filteredItems.length === 0 && (
+              {!loadingMenu && !menuLoadError && filteredItems.length === 0 && (
                 <div className="bg-white border border-stone-200 rounded-2xl p-8 sm:p-10 text-center my-4 shadow-xs">
                   <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-3 text-stone-400">
                     <Utensils className="w-6 h-6" />
@@ -861,16 +842,28 @@ export function WaiterPadView() {
                   <p className="text-xs text-stone-500 mt-1">
                     Try different search keywords or select another category.
                   </p>
-                  <button
-                    onClick={() => {
-                      setSearch('');
-                      setSelectedCategory('');
-                      setGroupFilter('ALL');
-                    }}
-                    className="mt-3.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition cursor-pointer"
-                  >
-                    Reset Filters
-                  </button>
+                  <div className="flex items-center justify-center gap-2 mt-4">
+                    <button
+                      onClick={() => {
+                        setSearch('');
+                        setSelectedCategory('');
+                        setGroupFilter('ALL');
+                        if (allItems.length === 0) loadMenu();
+                      }}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+                    >
+                      Reset Filters
+                    </button>
+                    {allItems.length === 0 && (
+                      <button
+                        onClick={() => loadMenu()}
+                        className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        <span>Reload Menu</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -898,7 +891,6 @@ export function WaiterPadView() {
                         });
                       }}
                       onUpdateQuantity={(it, delta) => updateWaiterQuantity(it.id, delta)}
-                      onCustomize={openItemCustomizer}
                     />
                   );
                 })}
@@ -1656,166 +1648,6 @@ export function WaiterPadView() {
                     : 'Confirm & Send to Cashier'}
                 </span>
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PRODUCT CUSTOMIZER MODAL */}
-      {selectedDetailItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-lg bg-white border border-stone-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-5 pb-4 border-b border-stone-200 flex items-start justify-between gap-3 flex-shrink-0">
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="w-14 h-14 rounded-xl bg-stone-100 overflow-hidden flex-shrink-0 flex items-center justify-center p-1.5 border border-stone-200/80">
-                  <MenuImage
-                    src={selectedDetailItem.imageUrl}
-                    alt={selectedDetailItem.name}
-                    categoryName={selectedDetailItem.category?.name}
-                    prepSection={selectedDetailItem.prepSection}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold text-stone-900 leading-tight">
-                    {selectedDetailItem.name}
-                  </h3>
-                  <p className="text-xs text-stone-500 mt-1 line-clamp-2">
-                    {selectedDetailItem.description || 'Delicious freshly prepared recipe with authentic culinary craft.'}
-                  </p>
-                  <div className="text-xs font-bold text-emerald-600 mt-1">
-                    {Number(selectedDetailItem.price).toFixed(2)} ETB
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedDetailItem(null)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-900 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-5 space-y-4 no-scrollbar">
-              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-                <span className="text-xs font-bold text-stone-700">Qty</span>
-                <div className="flex items-center gap-2 bg-stone-100 border border-stone-300 rounded-xl px-2 py-1">
-                  <button
-                    disabled={customQty <= 1}
-                    onClick={() => setCustomQty((q) => Math.max(1, q - 1))}
-                    className="w-6 h-6 rounded flex items-center justify-center text-stone-600 hover:text-stone-900 disabled:opacity-30 cursor-pointer"
-                  >
-                    <Minus className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="w-6 text-center text-xs font-bold text-stone-900">
-                    {customQty}
-                  </span>
-                  <button
-                    onClick={() => setCustomQty((q) => q + 1)}
-                    className="w-6 h-6 rounded flex items-center justify-center text-stone-600 hover:text-stone-900 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <div className="text-xs font-bold text-stone-700 mb-2">Size</div>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: 'Regular', label: 'Regular', add: 0 },
-                    { id: 'Large', label: 'Large', add: 30 },
-                    { id: 'X Large', label: 'X Large', add: 50 },
-                  ].map((sz) => {
-                    const isActive = customSize === sz.id;
-                    return (
-                      <button
-                        key={sz.id}
-                        type="button"
-                        onClick={() => setCustomSize(sz.id as any)}
-                        className={`py-2 px-3 rounded-xl text-xs transition border flex items-center justify-between cursor-pointer ${
-                          isActive
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-400 font-bold'
-                            : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
-                        }`}
-                      >
-                        <span>{sz.label}</span>
-                        <span className="text-[10px] font-semibold opacity-75">
-                          {sz.add > 0 ? `+${sz.add}` : '+0'}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {selectedDetailItem.applicableAddons && selectedDetailItem.applicableAddons.length > 0 && (
-                <div>
-                  <div className="text-xs font-bold text-stone-700 mb-2">Add-ons</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {selectedDetailItem.applicableAddons.map((addon: any) => {
-                      const isSelected = selectedAddonIds.includes(addon.id);
-                      return (
-                        <button
-                          key={addon.id}
-                          type="button"
-                          onClick={() => toggleAddon(addon.id)}
-                          className={`py-2 px-3 rounded-xl text-xs transition border flex items-center justify-between cursor-pointer ${
-                            isSelected
-                              ? 'bg-emerald-100 text-emerald-800 border-emerald-400 font-bold'
-                              : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
-                          }`}
-                        >
-                          <span className="truncate">{addon.name}</span>
-                          <span className="text-[10px] font-semibold opacity-75 ml-1">
-                            +{Number(addon.price).toFixed(0)}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                  Notes
-                </label>
-                <input
-                  type="text"
-                  placeholder="Add some notes..."
-                  value={customItemNote}
-                  onChange={(e) => setCustomItemNote(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-            </div>
-
-            <div className="p-4 bg-stone-50 border-t border-stone-200 flex items-center justify-between gap-3 flex-shrink-0">
-              <div className="text-xs">
-                <span className="text-stone-500">Total: </span>
-                <span className="text-base font-black text-stone-900">
-                  {(getCustomUnitPrice(selectedDetailItem) * customQty).toFixed(2)} ETB
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedDetailItem(null)}
-                  className="px-4 py-2 rounded-xl border border-stone-300 text-stone-700 text-xs font-bold hover:bg-stone-100 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAddCustomizedToCart}
-                  className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
-                >
-                  Add
-                </button>
-              </div>
             </div>
           </div>
         </div>

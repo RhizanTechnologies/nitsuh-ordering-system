@@ -41,6 +41,7 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var UsersService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
@@ -48,10 +49,11 @@ const prisma_service_1 = require("../prisma.service");
 const events_gateway_1 = require("../events/events.gateway");
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcryptjs"));
-let UsersService = class UsersService {
+let UsersService = UsersService_1 = class UsersService {
     constructor(prisma, eventsGateway) {
         this.prisma = prisma;
         this.eventsGateway = eventsGateway;
+        this.logger = new common_1.Logger(UsersService_1.name);
     }
     async getAllUsers(requesterRole) {
         const where = {};
@@ -709,22 +711,38 @@ let UsersService = class UsersService {
         };
     }
     async getRolePermissions() {
-        const settings = (await this.prisma.businessSettings.findUnique({ where: { id: 'default' } })) ||
-            (await this.prisma.businessSettings.findFirst());
-        return settings?.rolePermissions || null;
+        try {
+            const settings = (await this.prisma.businessSettings.findUnique({ where: { id: 'default' } })) ||
+                (await this.prisma.businessSettings.findFirst());
+            return settings?.rolePermissions || null;
+        }
+        catch (e) {
+            this.logger.warn?.('Failed to get role permissions from businessSettings:', e?.message);
+            return null;
+        }
     }
     async updateRolePermissions(permissions, actorUserId) {
-        const existing = await this.prisma.businessSettings.findUnique({ where: { id: 'default' } });
-        if (existing) {
-            await this.prisma.businessSettings.update({
-                where: { id: 'default' },
-                data: { rolePermissions: permissions },
-            });
+        try {
+            const existing = await this.prisma.businessSettings.findUnique({ where: { id: 'default' } });
+            if (existing) {
+                await this.prisma.businessSettings.update({
+                    where: { id: 'default' },
+                    data: { rolePermissions: permissions },
+                });
+            }
+            else {
+                await this.prisma.businessSettings.create({
+                    data: { id: 'default', rolePermissions: permissions },
+                });
+            }
         }
-        else {
-            await this.prisma.businessSettings.create({
-                data: { id: 'default', rolePermissions: permissions },
-            });
+        catch (e) {
+            try {
+                await this.prisma.$executeRawUnsafe(`INSERT INTO "BusinessSettings" ("id", "rolePermissions", "updatedAt") VALUES ('default', $1::jsonb, NOW()) ON CONFLICT ("id") DO UPDATE SET "rolePermissions" = $1::jsonb, "updatedAt" = NOW()`, JSON.stringify(permissions));
+            }
+            catch (err) {
+                this.logger.warn?.('Unable to persist rolePermissions to DB:', err?.message);
+            }
         }
         this.eventsGateway.broadcastPermissionsUpdated(permissions);
         await this.prisma.auditLog.create({
@@ -765,7 +783,7 @@ let UsersService = class UsersService {
     }
 };
 exports.UsersService = UsersService;
-exports.UsersService = UsersService = __decorate([
+exports.UsersService = UsersService = UsersService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         events_gateway_1.EventsGateway])

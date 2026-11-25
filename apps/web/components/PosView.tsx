@@ -105,50 +105,6 @@ export function PosView() {
   const [customTipValue, setCustomTipValue] = useState('15');
   const [rejectSlipConfirm, setRejectSlipConfirm] = useState<string | null>(null);
 
-  // Item Customizer / Add-ons Modal for Cashier POS
-  const [customizingItem, setCustomizingItem] = useState<any | null>(null);
-  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
-  const [customItemNote, setCustomItemNote] = useState('');
-  const [customQty, setCustomQty] = useState(1);
-
-  const openItemCustomizer = (item: any) => {
-    setCustomizingItem(item);
-    setSelectedAddonIds([]);
-    setCustomItemNote('');
-    setCustomQty(1);
-  };
-
-  const toggleAddon = (addonId: string) => {
-    setSelectedAddonIds((prev) =>
-      prev.includes(addonId) ? prev.filter((id) => id !== addonId) : [...prev, addonId],
-    );
-  };
-
-  const handleAddCustomizedToCart = () => {
-    if (!customizingItem) return;
-    const basePrice = Number(customizingItem.price || 0);
-    const chosenAddons = (customizingItem.applicableAddons || []).filter((a: any) =>
-      selectedAddonIds.includes(a.id),
-    );
-    const addonsTotal = chosenAddons.reduce((sum: number, a: any) => sum + Number(a.price || 0), 0);
-    const unitPrice = basePrice + addonsTotal;
-    const addonLabels = chosenAddons.map((a: any) => `+${a.name}`);
-    const specs = [...addonLabels, customItemNote].filter(Boolean).join(', ');
-
-    addToCart({
-      id: customizingItem.id,
-      name: customizingItem.name,
-      price: unitPrice,
-      quantity: customQty,
-      imageUrl: customizingItem.imageUrl,
-      isDirectSale: customizingItem.isDirectSale,
-      specialInstructions: specs || undefined,
-      selectedAddonIds,
-      selectedAddons: chosenAddons,
-    });
-    setCustomizingItem(null);
-  };
-
   const loadActiveOrders = () => {
     return fetchApi('/orders?statuses=CONFIRMED,IN_PREPARATION,READY,SERVED,COMPLETED&limit=250')
       .then(setActiveOrders)
@@ -232,16 +188,39 @@ export function PosView() {
     };
   }, []);
 
-  // Category navigation cards
-  const categoryCards = [
-    { id: 'BURGER', label: 'Burger', emoji: '🍔' },
-    { id: 'PIZZA', label: 'Pizza', emoji: '🍕' },
-    { id: 'CHICKEN', label: 'Chicken', emoji: '🍗' },
-    { id: 'FRIES', label: 'Fries', emoji: '🍟' },
-    { id: 'DRINKS', label: 'Drink', emoji: '🥤' },
-    { id: 'COFFEE', label: 'Coffee', emoji: '☕' },
-    { id: 'BAKERY', label: 'Bakery', emoji: '🍰' },
-  ];
+  // Dynamic Category navigation cards
+  const getCategoryEmoji = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes('burger')) return '🍔';
+    if (n.includes('pizza')) return '🍕';
+    if (n.includes('chicken') || n.includes('meat') || n.includes('beef')) return '🍗';
+    if (n.includes('fries') || n.includes('snack') || n.includes('side')) return '🍟';
+    if (n.includes('drink') || n.includes('beverage') || n.includes('water') || n.includes('juice')) return '🥤';
+    if (n.includes('coffee') || n.includes('tea') || n.includes('latte')) return '☕';
+    if (n.includes('dessert') || n.includes('cake') || n.includes('bakery')) return '🍰';
+    if (n.includes('addon') || n.includes('add-on') || n.includes('extra') || n.includes('modifier')) return '🧀';
+    if (n.includes('fasting') || n.includes('salad')) return '🥗';
+    return '🍽️';
+  };
+
+  const dynamicCategoryCards = useMemo(() => {
+    if (categories && categories.length > 0) {
+      return categories.map((c) => ({
+        id: c.id,
+        label: c.name,
+        emoji: getCategoryEmoji(c.name),
+      }));
+    }
+    return [
+      { id: 'BURGER', label: 'Burger', emoji: '🍔' },
+      { id: 'PIZZA', label: 'Pizza', emoji: '🍕' },
+      { id: 'CHICKEN', label: 'Chicken', emoji: '🍗' },
+      { id: 'FRIES', label: 'Fries', emoji: '🍟' },
+      { id: 'DRINKS', label: 'Drink', emoji: '🥤' },
+      { id: 'COFFEE', label: 'Coffee', emoji: '☕' },
+      { id: 'BAKERY', label: 'Bakery', emoji: '🍰' },
+    ];
+  }, [categories]);
 
   const isFastingItem = (item: any) => {
     const text = `${item.name} ${item.description || ''} ${item.category?.name || ''}`.toLowerCase();
@@ -268,14 +247,20 @@ export function PosView() {
 
       // Group / Category Filter
       if (groupFilter !== 'ALL') {
-        if (groupFilter === 'FASTING' && !isFastingItem(item)) return false;
-        if (groupFilter === 'BURGER' && !catName.includes('burger') && !itemName.includes('burger')) return false;
-        if (groupFilter === 'PIZZA' && !catName.includes('pizza') && !itemName.includes('pizza')) return false;
-        if (groupFilter === 'CHICKEN' && !catName.includes('chicken') && !itemName.includes('chicken') && !itemName.includes('wings')) return false;
-        if (groupFilter === 'FRIES' && !catName.includes('fries') && !itemName.includes('fries') && !itemName.includes('chips')) return false;
-        if (groupFilter === 'DRINKS' && !catName.includes('drink') && !catName.includes('juice') && !catName.includes('mojito') && !catName.includes('soft') && !catName.includes('water') && !itemName.includes('juice')) return false;
-        if (groupFilter === 'COFFEE' && !catName.includes('coffee') && !catName.includes('hot') && !catName.includes('tea') && !itemName.includes('coffee') && !itemName.includes('latte') && !itemName.includes('cappuccino') && !itemName.includes('macchiato')) return false;
-        if (groupFilter === 'BAKERY' && !catName.includes('dessert') && !catName.includes('cake') && !catName.includes('bakery') && !catName.includes('torta')) return false;
+        if (categories.some((c) => c.id === groupFilter)) {
+          if (item.categoryId !== groupFilter && item.category?.id !== groupFilter && catName !== groupFilter.toLowerCase()) {
+            return false;
+          }
+        } else {
+          if (groupFilter === 'FASTING' && !isFastingItem(item)) return false;
+          if (groupFilter === 'BURGER' && !catName.includes('burger') && !itemName.includes('burger')) return false;
+          if (groupFilter === 'PIZZA' && !catName.includes('pizza') && !itemName.includes('pizza')) return false;
+          if (groupFilter === 'CHICKEN' && !catName.includes('chicken') && !itemName.includes('chicken') && !itemName.includes('wings')) return false;
+          if (groupFilter === 'FRIES' && !catName.includes('fries') && !itemName.includes('fries') && !itemName.includes('chips')) return false;
+          if (groupFilter === 'DRINKS' && !catName.includes('drink') && !catName.includes('juice') && !catName.includes('mojito') && !catName.includes('soft') && !catName.includes('water') && !itemName.includes('juice')) return false;
+          if (groupFilter === 'COFFEE' && !catName.includes('coffee') && !catName.includes('hot') && !catName.includes('tea') && !itemName.includes('coffee') && !itemName.includes('latte') && !itemName.includes('cappuccino') && !itemName.includes('macchiato')) return false;
+          if (groupFilter === 'BAKERY' && !catName.includes('dessert') && !catName.includes('cake') && !catName.includes('bakery') && !catName.includes('torta')) return false;
+        }
       }
 
       // Specific Category Selection
@@ -295,7 +280,7 @@ export function PosView() {
 
       return true;
     });
-  }, [allItems, groupFilter, selectedCategory, searchQuery]);
+  }, [allItems, groupFilter, selectedCategory, searchQuery, categories]);
 
   // Helper to determine day bucket ('today' | 'yesterday' | 'day_before' | 'older')
   const getOrderDayKey = (dateStr: string | Date): 'today' | 'yesterday' | 'day_before' | 'older' => {
@@ -2135,7 +2120,7 @@ export function PosView() {
                 </span>
               </button>
 
-              {categoryCards.map((cat) => {
+              {dynamicCategoryCards.map((cat) => {
                 const isActive = groupFilter === cat.id;
                 const count = allItems.filter((i) => {
                   const name = `${i.name} ${i.category?.name || ''}`.toLowerCase();
@@ -2230,7 +2215,6 @@ export function PosView() {
                       })
                     }
                     onUpdateQuantity={(it, delta) => updateQuantity(it.id, delta)}
-                    onCustomize={openItemCustomizer}
                   />
                 );
               })}
@@ -2470,163 +2454,6 @@ export function PosView() {
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs shadow-xs transition cursor-pointer"
               >
                 Apply Tip
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ITEM CUSTOMIZER / ADD-ONS MODAL FOR CASHIER POS */}
-      {customizingItem && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 text-stone-900 dark:text-white">
-            {/* Header: Item Details */}
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-stone-200 dark:border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-white/10 shrink-0">
-                  <MenuImage
-                    src={customizingItem.imageUrl}
-                    alt={customizingItem.name}
-                    categoryName={customizingItem.category?.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                    {customizingItem.category?.name || 'Item'}
-                  </span>
-                  <h3 className="text-lg font-black leading-tight text-stone-900 dark:text-white">
-                    {customizingItem.name}
-                  </h3>
-                  <div className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-0.5">
-                    {Number(customizingItem.price || 0).toFixed(2)} ETB base
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCustomizingItem(null)}
-                className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-white rounded-lg hover:bg-stone-100 dark:hover:bg-white/5 transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Applicable Add-ons */}
-            {customizingItem.applicableAddons && customizingItem.applicableAddons.length > 0 ? (
-              <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-300">
-                  Choose Extras & Add-ons
-                </label>
-                <div className="grid grid-cols-2 gap-2.5 max-h-48 overflow-y-auto pr-1">
-                  {customizingItem.applicableAddons.map((addon: any) => {
-                    const isSelected = selectedAddonIds.includes(addon.id);
-                    return (
-                      <button
-                        key={addon.id}
-                        type="button"
-                        onClick={() => toggleAddon(addon.id)}
-                        className={`p-3 rounded-2xl text-left border transition flex items-center justify-between cursor-pointer ${
-                          isSelected
-                            ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-emerald-200 font-bold shadow-xs'
-                            : 'bg-stone-50 dark:bg-white/[0.03] border-stone-200 dark:border-white/10 text-stone-700 dark:text-stone-300 hover:bg-stone-100'
-                        }`}
-                      >
-                        <div className="truncate pr-1">
-                          <div className="text-xs font-bold truncate">{addon.name}</div>
-                          <div className="text-[10px] opacity-75 font-semibold">
-                            +{Number(addon.price || 0).toFixed(2)} ETB
-                          </div>
-                        </div>
-                        <div
-                          className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                            isSelected
-                              ? 'bg-emerald-600 border-emerald-600 text-white'
-                              : 'border-stone-300 dark:border-stone-600'
-                          }`}
-                        >
-                          {isSelected && <span className="text-[10px] font-black">✓</span>}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div className="p-3 bg-stone-50 dark:bg-white/[0.02] border border-stone-200 dark:border-white/10 rounded-2xl text-xs text-stone-500 text-center">
-                No specific add-ons configured for this item. You can add special instructions below.
-              </div>
-            )}
-
-            {/* Special Instructions Note */}
-            <div className="space-y-1">
-              <label className="block text-xs font-bold text-stone-700 dark:text-stone-300">
-                Special Instructions (Optional)
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Extra hot, no onions, sauce on side..."
-                value={customItemNote}
-                onChange={(e) => setCustomItemNote(e.target.value)}
-                className="w-full bg-stone-50 dark:bg-white/[0.03] border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-semibold text-stone-900 dark:text-white placeholder-stone-400 focus:outline-none focus:border-emerald-600"
-              />
-            </div>
-
-            {/* Quantity Stepper and Total Price */}
-            <div className="pt-3 border-t border-stone-200 dark:border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-stone-600 dark:text-stone-400">Qty:</span>
-                <div className="flex items-center gap-1 bg-stone-100 dark:bg-white/10 p-1 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setCustomQty((q) => Math.max(1, q - 1))}
-                    className="w-7 h-7 rounded-lg bg-white dark:bg-stone-800 flex items-center justify-center font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-200 cursor-pointer"
-                  >
-                    -
-                  </button>
-                  <span className="w-8 text-center text-xs font-black">{customQty}</span>
-                  <button
-                    type="button"
-                    onClick={() => setCustomQty((q) => q + 1)}
-                    className="w-7 h-7 rounded-lg bg-white dark:bg-stone-800 flex items-center justify-center font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-200 cursor-pointer"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Total Price for this selection */}
-              <div className="text-right">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Total</div>
-                <div className="text-base font-black text-stone-900 dark:text-white font-mono">
-                  {(() => {
-                    const basePrice = Number(customizingItem.price || 0);
-                    const chosen = (customizingItem.applicableAddons || []).filter((a: any) =>
-                      selectedAddonIds.includes(a.id),
-                    );
-                    const addonsSum = chosen.reduce((sum: number, a: any) => sum + Number(a.price || 0), 0);
-                    return ((basePrice + addonsSum) * customQty).toFixed(2);
-                  })()}{' '}
-                  ETB
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setCustomizingItem(null)}
-                className="px-4 py-2.5 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl text-xs transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleAddCustomizedToCart}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs shadow-xs transition active:scale-95 cursor-pointer"
-              >
-                Add to Cart
               </button>
             </div>
           </div>

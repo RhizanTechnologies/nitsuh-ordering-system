@@ -20,6 +20,7 @@ export interface UpdateUserDto {
 export declare class UsersService {
     private prisma;
     private eventsGateway;
+    private readonly logger;
     constructor(prisma: PrismaService, eventsGateway: EventsGateway);
     getAllUsers(requesterRole?: string): Promise<{
         id: string;

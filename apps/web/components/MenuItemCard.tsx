@@ -19,7 +19,6 @@ export interface MenuItemCardProps {
   quantity?: number;
   onAdd: (item: any) => void;
   onUpdateQuantity?: (item: any, delta: number) => void;
-  onCustomize?: (item: any) => void;
   className?: string;
 }
 
@@ -28,17 +27,12 @@ export function MenuItemCard({
   quantity = 0,
   onAdd,
   onUpdateQuantity,
-  onCustomize,
   className,
 }: MenuItemCardProps) {
   const isSelected = quantity > 0;
 
   const handleClick = () => {
-    if (item.applicableAddons && item.applicableAddons.length > 0 && onCustomize) {
-      onCustomize(item);
-    } else {
-      onAdd(item);
-    }
+    onAdd(item);
   };
 
   return (
@@ -82,11 +76,6 @@ export function MenuItemCard({
             <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block truncate">
               {item.category?.name || 'Dish'}
             </span>
-            {item.applicableAddons && item.applicableAddons.length > 0 && (
-              <span className="text-[9px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded-full whitespace-nowrap">
-                +{item.applicableAddons.length} Add-ons
-              </span>
-            )}
           </div>
           <h3
             className="font-heading font-black text-sm sm:text-base text-stone-900 leading-snug group-hover:text-emerald-700 transition line-clamp-1"
@@ -139,32 +128,17 @@ export function MenuItemCard({
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              {item.applicableAddons && item.applicableAddons.length > 0 && onCustomize ? (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCustomize(item);
-                  }}
-                  className="h-8 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 text-emerald-800 hover:text-white font-bold text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer active:scale-95"
-                  title="Customize with add-ons"
-                >
-                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Customize</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAdd(item);
-                  }}
-                  className="h-8 px-3 rounded-xl bg-stone-100 hover:bg-emerald-600 text-stone-700 hover:text-white font-bold text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer group-hover:bg-emerald-600 group-hover:text-white active:scale-95"
-                >
-                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Add</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAdd(item);
+                }}
+                className="h-8 px-3 rounded-xl bg-stone-100 hover:bg-emerald-600 text-stone-700 hover:text-white font-bold text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer group-hover:bg-emerald-600 group-hover:text-white active:scale-95"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Add</span>
+              </button>
             </div>
           )}
         </div>
