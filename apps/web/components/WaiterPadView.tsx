@@ -350,7 +350,7 @@ export function WaiterPadView() {
     });
     setAppendingOrder(null);
 
-    const cartItems: CartItem[] = (order.items || []).map((it: any) => ({
+    const draftItems: CartItem[] = (order.items || []).map((it: any) => ({
       menuItemId: it.menuItemId || it.id,
       name: it.menuItem?.name || it.name || 'Item',
       price: Number(it.unitPrice || it.price || it.menuItem?.price || 0),
@@ -361,8 +361,41 @@ export function WaiterPadView() {
       selectedAddonIds: it.selectedAddonIds || [],
       selectedAddons: it.selectedAddons || [],
     }));
-    setWaiterCart(cartItems);
-    setWaiterSpecialNotes(order.notes || order.specialInstructions || '');
+
+    // If the waiter already picked products before selecting this draft table,
+    // merge them so that none of the newly picked products disappear!
+    if (waiterCart.length > 0) {
+      const mergedCart = [...draftItems];
+      for (const curItem of waiterCart) {
+        const existingIdx = mergedCart.findIndex(
+          (m) =>
+            m.menuItemId === curItem.menuItemId &&
+            (m.specialInstructions || '') === (curItem.specialInstructions || '') &&
+            JSON.stringify(m.selectedAddonIds || []) === JSON.stringify(curItem.selectedAddonIds || [])
+        );
+        if (existingIdx >= 0) {
+          mergedCart[existingIdx] = {
+            ...mergedCart[existingIdx],
+            quantity: mergedCart[existingIdx].quantity + curItem.quantity,
+            tip: Math.max(mergedCart[existingIdx].tip || 0, curItem.tip || 0),
+          };
+        } else {
+          mergedCart.push(curItem);
+        }
+      }
+      setWaiterCart(mergedCart);
+    } else {
+      setWaiterCart(draftItems);
+    }
+
+    const draftNotes = order.notes || order.specialInstructions || '';
+    if (waiterSpecialNotes.trim() && draftNotes) {
+      if (!draftNotes.includes(waiterSpecialNotes.trim())) {
+        setWaiterSpecialNotes(`${draftNotes} | ${waiterSpecialNotes.trim()}`);
+      }
+    } else if (draftNotes) {
+      setWaiterSpecialNotes(draftNotes);
+    }
     setActiveTab('menu');
   };
 
@@ -376,7 +409,8 @@ export function WaiterPadView() {
       tableNumber: tblNum,
     });
     setEditingDraftOrder(null);
-    clearWaiterCart();
+    // CRITICAL: Do NOT clear waiterCart!
+    // Any products already selected by the waiter are retained so they can append them directly.
     setActiveTab('menu');
   };
 
@@ -411,6 +445,27 @@ export function WaiterPadView() {
           handleStartAppendToOrder(activeOrder, tableNumber);
           return;
         }
+      } else {
+        // Table is marked occupied in database: ensure active orders are refreshed
+        fetchApi('/orders?statuses=DRAFT_NOTE,CONFIRMED,IN_PREPARATION,READY,SERVED')
+          .then((res: any[]) => {
+            if (Array.isArray(res)) {
+              setActiveOrders(res);
+              const found = res.find(
+                (o: any) =>
+                  (o.tableId === tObj.id || o.table?.tableNumber === tableNumber) &&
+                  o.paymentStatus !== 'PAID'
+              );
+              if (found) {
+                if (found.status === 'DRAFT_NOTE') {
+                  handleLoadDraftForEditing(found, tableNumber);
+                } else {
+                  handleStartAppendToOrder(found, tableNumber);
+                }
+              }
+            }
+          })
+          .catch((err) => console.error('Failed to load table active order:', err));
       }
     }
 
