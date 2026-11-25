@@ -37,6 +37,22 @@ export class UsersController {
     return this.usersService.createUser(dto, req.user.id);
   }
 
+  // Get system-wide role permissions (available for all authenticated terminals to sync)
+  @Get('permissions')
+  async getRolePermissions() {
+    return this.usersService.getRolePermissions();
+  }
+
+  // Update system-wide role permissions (Owner only)
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('permissions')
+  async updateRolePermissions(@Req() req: any, @Body() body: { permissions: any }) {
+    if (req.user.role !== 'OWNER') {
+      throw new ForbiddenException('Only the Owner can customize role permissions and station access');
+    }
+    return this.usersService.updateRolePermissions(body.permissions, req.user.id);
+  }
+
   // Get specific user details
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')

@@ -50,6 +50,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server?.emit(SocketEvents.STOCK_LOW_ALERT, alert);
   }
 
+  // Broadcast updated role permissions & station access matrix
+  broadcastPermissionsUpdated(permissions: any) {
+    this.server?.emit('permissions:updated', permissions);
+  }
+
   // Broadcast stock transfer event
   broadcastTransferUpdated(transfer: any) {
     this.server?.emit(SocketEvents.STOCK_TRANSFER_UPDATED, transfer);

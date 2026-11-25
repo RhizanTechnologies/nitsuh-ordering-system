@@ -32,6 +32,15 @@ let UsersController = class UsersController {
         }
         return this.usersService.createUser(dto, req.user.id);
     }
+    async getRolePermissions() {
+        return this.usersService.getRolePermissions();
+    }
+    async updateRolePermissions(req, body) {
+        if (req.user.role !== 'OWNER') {
+            throw new common_1.ForbiddenException('Only the Owner can customize role permissions and station access');
+        }
+        return this.usersService.updateRolePermissions(body.permissions, req.user.id);
+    }
     async getUserById(req, id) {
         if (req.user.role !== 'OWNER' && req.user.role !== 'MANAGER' && req.user.id !== id) {
             throw new common_1.ForbiddenException('Unauthorized to view this user');
@@ -122,6 +131,21 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "createUser", null);
+__decorate([
+    (0, common_1.Get)('permissions'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getRolePermissions", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Patch)('permissions'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateRolePermissions", null);
 __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Get)(':id'),

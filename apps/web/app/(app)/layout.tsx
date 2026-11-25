@@ -7,6 +7,7 @@ import { isRouteAllowed, getDefaultRouteForRole } from '@/lib/route-guard';
 import { Navbar } from '@/components/Navbar';
 import { fetchApi, getSocket } from '@/lib/api';
 import { ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
+import { fetchServerRolePermissions, setLocalRolePermissions } from '@/lib/permissions';
 
 export default function ProtectedAppLayout({
   children,
@@ -17,6 +18,25 @@ export default function ProtectedAppLayout({
   const pathname = usePathname();
   const { currentUser, login } = useAppStore();
   const [hydrated, setHydrated] = useState(false);
+  const [, setPermsTick] = useState(0);
+
+  // Sync role permissions from database & subscribe to real-time live updates
+  useEffect(() => {
+    fetchServerRolePermissions().then(() => setPermsTick((t) => t + 1));
+    const socket = getSocket();
+    const handlePerms = (newPerms: any) => {
+      if (newPerms) {
+        setLocalRolePermissions(newPerms);
+      } else {
+        fetchServerRolePermissions();
+      }
+      setPermsTick((t) => t + 1);
+    };
+    socket.on('permissions:updated', handlePerms);
+    return () => {
+      socket.off('permissions:updated', handlePerms);
+    };
+  }, []);
 
   useEffect(() => {
     // 1. Session Restoration Check

@@ -47,6 +47,7 @@ import {
   AppCapability,
   RoleConfig,
   getRolePermissions,
+  fetchServerRolePermissions,
   saveRolePermissions,
   DEFAULT_ROLE_PERMISSIONS,
 } from '@/lib/permissions';
@@ -150,6 +151,12 @@ export function StaffManagementView() {
   const [rolePermissions, setRolePermissions] = useState<Record<AppRole, RoleConfig>>(() => getRolePermissions());
   const [isSavingPerms, setIsSavingPerms] = useState(false);
 
+  useEffect(() => {
+    fetchServerRolePermissions().then((perms) => {
+      if (perms) setRolePermissions(perms);
+    });
+  }, []);
+
   const toggleRolePage = (r: AppRole, page: AppPage) => {
     if (r === 'OWNER') return; // Owner always has all pages
     setRolePermissions((prev) => {
@@ -184,13 +191,11 @@ export function StaffManagementView() {
     });
   };
 
-  const handleSaveRolePermissions = () => {
+  const handleSaveRolePermissions = async () => {
     setIsSavingPerms(true);
-    saveRolePermissions(rolePermissions);
-    setTimeout(() => {
-      setIsSavingPerms(false);
-      triggerToast('Role permissions saved successfully! Changes are active.', 'success');
-    }, 200);
+    await saveRolePermissions(rolePermissions);
+    setIsSavingPerms(false);
+    triggerToast('Role permissions saved to server & active on all terminals!', 'success');
   };
 
   const handleResetRolePermissions = () => {
@@ -199,9 +204,9 @@ export function StaffManagementView() {
       description: 'Are you sure you want to revert all role permissions and page accesses to system defaults?',
       confirmText: 'Reset to Defaults',
       isDanger: true,
-      onConfirm: () => {
+      onConfirm: async () => {
         setRolePermissions(DEFAULT_ROLE_PERMISSIONS);
-        saveRolePermissions(DEFAULT_ROLE_PERMISSIONS);
+        await saveRolePermissions(DEFAULT_ROLE_PERMISSIONS);
         triggerToast('Role permissions reset to default configuration.', 'success');
       },
     });

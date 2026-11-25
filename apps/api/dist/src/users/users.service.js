@@ -708,6 +708,41 @@ let UsersService = class UsersService {
             user: updatedUser,
         };
     }
+    async getRolePermissions() {
+        const settings = (await this.prisma.businessSettings.findUnique({ where: { id: 'default' } })) ||
+            (await this.prisma.businessSettings.findFirst());
+        return settings?.rolePermissions || null;
+    }
+    async updateRolePermissions(permissions, actorUserId) {
+        const existing = await this.prisma.businessSettings.findUnique({ where: { id: 'default' } });
+        if (existing) {
+            await this.prisma.businessSettings.update({
+                where: { id: 'default' },
+                data: { rolePermissions: permissions },
+            });
+        }
+        else {
+            await this.prisma.businessSettings.create({
+                data: { id: 'default', rolePermissions: permissions },
+            });
+        }
+        this.eventsGateway.broadcastPermissionsUpdated(permissions);
+        await this.prisma.auditLog.create({
+            data: {
+                userId: actorUserId,
+                action: 'UPDATE_ROLE_PERMISSIONS',
+                entityName: 'BusinessSettings',
+                entityId: 'default',
+                newValue: permissions,
+                reason: 'Owner updated role permissions and page access matrix',
+            },
+        }).catch(() => { });
+        return {
+            success: true,
+            message: 'Role permissions updated successfully across all stations',
+            permissions,
+        };
+    }
     async generateNextEmployeeCode() {
         const users = await this.prisma.user.findMany({
             where: { employeeCode: { startsWith: 'EMP-' } },

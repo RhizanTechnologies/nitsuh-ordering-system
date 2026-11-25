@@ -8,6 +8,7 @@ export declare class EventsGateway implements OnGatewayConnection, OnGatewayDisc
     broadcastOrderConfirmed(order: any): void;
     broadcastOrderStatus(order: any): void;
     broadcastStockAlert(alert: any): void;
+    broadcastPermissionsUpdated(permissions: any): void;
     broadcastTransferUpdated(transfer: any): void;
     broadcastUserStatus(userId: string, isActive: boolean): void;
     broadcastInventoryUpdated(): void;

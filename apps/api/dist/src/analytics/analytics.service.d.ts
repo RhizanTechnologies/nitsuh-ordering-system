@@ -73,8 +73,8 @@ export declare class AnalyticsService {
         }[];
         settings: {
             id: string;
-            updatedAt: Date;
             email: string;
+            updatedAt: Date;
             cafeName: string;
             currencySymbol: string;
             taxRate: import("@prisma/client/runtime/library").Decimal;
@@ -82,6 +82,7 @@ export declare class AnalyticsService {
             address: string;
             phone: string;
             receiptFooterMessage: string;
+            rolePermissions: import("@prisma/client/runtime/library").JsonValue | null;
         };
     }>;
 }

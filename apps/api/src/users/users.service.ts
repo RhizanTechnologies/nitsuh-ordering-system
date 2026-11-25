@@ -821,6 +821,49 @@ export class UsersService {
     };
   }
 
+  // Active Role Permissions & Station Matrix in PostgreSQL
+  async getRolePermissions() {
+    const settings =
+      (await this.prisma.businessSettings.findUnique({ where: { id: 'default' } })) ||
+      (await this.prisma.businessSettings.findFirst());
+    return settings?.rolePermissions || null;
+  }
+
+  async updateRolePermissions(permissions: any, actorUserId: string) {
+    const existing = await this.prisma.businessSettings.findUnique({ where: { id: 'default' } });
+    if (existing) {
+      await this.prisma.businessSettings.update({
+        where: { id: 'default' },
+        data: { rolePermissions: permissions },
+      });
+    } else {
+      await this.prisma.businessSettings.create({
+        data: { id: 'default', rolePermissions: permissions },
+      });
+    }
+
+    // Broadcast in real-time to all connected devices and browsers
+    this.eventsGateway.broadcastPermissionsUpdated(permissions);
+
+    // Audit log
+    await this.prisma.auditLog.create({
+      data: {
+        userId: actorUserId,
+        action: 'UPDATE_ROLE_PERMISSIONS',
+        entityName: 'BusinessSettings',
+        entityId: 'default',
+        newValue: permissions,
+        reason: 'Owner updated role permissions and page access matrix',
+      },
+    }).catch(() => {});
+
+    return {
+      success: true,
+      message: 'Role permissions updated successfully across all stations',
+      permissions,
+    };
+  }
+
   // Auto-generate next employee code like EMP-009
   private async generateNextEmployeeCode(): Promise<string> {
     const users = await this.prisma.user.findMany({

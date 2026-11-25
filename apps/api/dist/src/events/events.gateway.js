@@ -37,6 +37,9 @@ let EventsGateway = class EventsGateway {
     broadcastStockAlert(alert) {
         this.server?.emit(shared_types_1.SocketEvents.STOCK_LOW_ALERT, alert);
     }
+    broadcastPermissionsUpdated(permissions) {
+        this.server?.emit('permissions:updated', permissions);
+    }
     broadcastTransferUpdated(transfer) {
         this.server?.emit(shared_types_1.SocketEvents.STOCK_TRANSFER_UPDATED, transfer);
     }

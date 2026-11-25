@@ -466,6 +466,7 @@ model BusinessSettings {
   phone                String   @default("0966833177")
   email                String   @default("nitsuhfoods@gmail.com")
   receiptFooterMessage String   @default("From Savour Bites to Sweet Delights – We Cater It All! Bookings & Inquiries: 0966833177")
+  rolePermissions      Json?
   updatedAt            DateTime @updatedAt
 }
 

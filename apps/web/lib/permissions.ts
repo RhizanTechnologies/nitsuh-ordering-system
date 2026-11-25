@@ -73,24 +73,57 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, RoleConfig> = {
   },
 };
 
+import { fetchApi } from '@/lib/api';
+
 const STORAGE_KEY = 'nitsuh_role_permissions';
 
+let inMemoryPermissions: Record<AppRole, RoleConfig> | null = null;
+
 export function getRolePermissions(): Record<AppRole, RoleConfig> {
+  if (inMemoryPermissions) return inMemoryPermissions;
   if (typeof window === 'undefined') return DEFAULT_ROLE_PERMISSIONS;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_ROLE_PERMISSIONS;
     const parsed = JSON.parse(raw);
-    return { ...DEFAULT_ROLE_PERMISSIONS, ...parsed };
+    inMemoryPermissions = { ...DEFAULT_ROLE_PERMISSIONS, ...parsed };
+    return inMemoryPermissions;
   } catch {
     return DEFAULT_ROLE_PERMISSIONS;
   }
 }
 
-export function saveRolePermissions(permissions: Record<AppRole, RoleConfig>) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(permissions));
-  window.dispatchEvent(new Event('nitsuh_permissions_updated'));
+export function setLocalRolePermissions(permissions: Record<AppRole, RoleConfig>) {
+  inMemoryPermissions = { ...DEFAULT_ROLE_PERMISSIONS, ...permissions };
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(inMemoryPermissions));
+    window.dispatchEvent(new Event('nitsuh_permissions_updated'));
+  }
+}
+
+export async function fetchServerRolePermissions(): Promise<Record<AppRole, RoleConfig>> {
+  try {
+    const data = await fetchApi('/users/permissions');
+    if (data && typeof data === 'object') {
+      setLocalRolePermissions(data);
+      return inMemoryPermissions || DEFAULT_ROLE_PERMISSIONS;
+    }
+  } catch (e) {
+    // Fallback to local
+  }
+  return getRolePermissions();
+}
+
+export async function saveRolePermissions(permissions: Record<AppRole, RoleConfig>) {
+  setLocalRolePermissions(permissions);
+  try {
+    await fetchApi('/users/permissions', {
+      method: 'PATCH',
+      body: JSON.stringify({ permissions }),
+    });
+  } catch (e) {
+    console.error('Failed to sync permissions to server:', e);
+  }
 }
 
 export function canRoleAccessPage(role: string | undefined, page: AppPage): boolean {
