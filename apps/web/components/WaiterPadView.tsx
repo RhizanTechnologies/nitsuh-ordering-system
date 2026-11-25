@@ -41,6 +41,12 @@ import {
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { Button, Badge } from '@/components/ui';
 
+const formatOrderNumber = (num?: string | number | null) => {
+  if (!num) return '';
+  const s = String(num).trim();
+  return s.startsWith('#') ? s : `#${s}`;
+};
+
 export function WaiterPadView() {
   const {
     currentUser,
@@ -163,6 +169,11 @@ export function WaiterPadView() {
       setTick((t) => t + 1);
     }, 1000);
 
+    const onFocus = () => {
+      if (allItems.length === 0) loadMenu();
+    };
+    window.addEventListener('focus', onFocus);
+
     const socket = getSocket();
 
     socket.on('tables:updated', (updated: any[]) => {
@@ -213,6 +224,7 @@ export function WaiterPadView() {
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
       socket.off('tables:updated');
       socket.off('waiter:new_order_note');
       socket.off('order:confirmed');
@@ -622,7 +634,7 @@ export function WaiterPadView() {
         <div className="bg-amber-400 text-amber-950 px-4 py-2 flex items-center justify-between text-xs font-bold shadow-xs z-20 flex-shrink-0 border-b border-amber-500/30">
           <div className="flex items-center gap-2">
             <Edit3 className="w-4 h-4 text-amber-950" />
-            <span>Editing Draft Note #{editingDraftOrder.orderNumber} for Table {editingDraftOrder.tableNumber} — Add, remove, or adjust quantities</span>
+            <span>Editing Draft Note {formatOrderNumber(editingDraftOrder.orderNumber)} for Table {editingDraftOrder.tableNumber} — Add, remove, or adjust quantities</span>
           </div>
           <button
             type="button"
@@ -638,7 +650,7 @@ export function WaiterPadView() {
         <div className="bg-emerald-600 text-white px-4 py-2 flex items-center justify-between text-xs font-bold shadow-xs z-20 flex-shrink-0 border-b border-emerald-700/30">
           <div className="flex items-center gap-2">
             <Plus className="w-4 h-4 text-white" />
-            <span>Adding Items to Table {appendingOrder.tableNumber} (Order #{appendingOrder.orderNumber}) — Active Kitchen Ticket</span>
+            <span>Adding Items to Table {appendingOrder.tableNumber} (Order {formatOrderNumber(appendingOrder.orderNumber)}) — Active Kitchen Ticket</span>
           </div>
           <button
             type="button"
@@ -1206,7 +1218,7 @@ export function WaiterPadView() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-amber-950 truncate">
-                    Editing Draft #{editingDraftOrder.orderNumber}
+                    Editing Draft {formatOrderNumber(editingDraftOrder.orderNumber)}
                   </div>
                   <div className="text-[10px] text-amber-800 font-semibold truncate">
                     Table {editingDraftOrder.tableNumber} • Add/remove items
@@ -1231,7 +1243,7 @@ export function WaiterPadView() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-black text-emerald-950 truncate">
-                    Adding to #{appendingOrder.orderNumber}
+                    Adding to {formatOrderNumber(appendingOrder.orderNumber)}
                   </div>
                   <div className="text-[10px] text-emerald-800 font-semibold truncate">
                     Table {appendingOrder.tableNumber} • Select items to add
@@ -1546,7 +1558,7 @@ export function WaiterPadView() {
                 <div className="flex items-center gap-2 min-w-0">
                   <Edit3 className="w-4 h-4 text-amber-700 flex-shrink-0" />
                   <div className="text-xs font-black text-amber-950 truncate">
-                    Editing Draft #{editingDraftOrder.orderNumber}
+                    Editing Draft {formatOrderNumber(editingDraftOrder.orderNumber)}
                   </div>
                 </div>
                 <button
@@ -1564,7 +1576,7 @@ export function WaiterPadView() {
                 <div className="flex items-center gap-2 min-w-0">
                   <Plus className="w-4 h-4 text-emerald-700 flex-shrink-0" />
                   <div className="text-xs font-black text-emerald-950 truncate">
-                    Adding to #{appendingOrder.orderNumber}
+                    Adding to {formatOrderNumber(appendingOrder.orderNumber)}
                   </div>
                 </div>
                 <button

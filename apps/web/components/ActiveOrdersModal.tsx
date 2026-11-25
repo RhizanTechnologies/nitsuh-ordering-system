@@ -159,7 +159,9 @@ export function ActiveOrdersModal({
                   {/* Left: Metadata & Attribution */}
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-black text-stone-900">#{order.orderNumber}</span>
+                      <span className="text-sm font-black text-stone-900">
+                        {order.orderNumber?.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`}
+                      </span>
 
                       {/* Destination Badge */}
                       {isTakeaway ? (

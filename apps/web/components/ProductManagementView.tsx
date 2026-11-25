@@ -308,6 +308,7 @@ export function ProductManagementView() {
       onConfirm: async () => {
         try {
           await fetchApi(`/menu/categories/${cat.id}`, { method: 'DELETE' });
+          setCategories((prev) => prev.filter((c) => c.id !== cat.id));
           showToast(`Category "${cat.name}" deleted.`, 'success');
           loadData();
         } catch (err: any) {

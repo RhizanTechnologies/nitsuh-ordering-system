@@ -38,6 +38,12 @@ const Legend = RechartsLegend as any;
 import { ProductManagementView } from '@/components/ProductManagementView';
 import { useAppStore } from '@/lib/store';
 
+const formatOrderNumber = (num?: string | number | null) => {
+  if (!num) return '';
+  const s = String(num).trim();
+  return s.startsWith('#') ? s : `#${s}`;
+};
+
 export function AnalyticsView() {
   const { currentUser } = useAppStore();
   const [data, setData] = useState<any | null>(null);
@@ -151,12 +157,12 @@ export function AnalyticsView() {
               </h1>
             </div>
 
-            {/* Tab Toggle: Analytics vs Products & Recipes */}
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-2xl">
+            {/* Tab Toggle: Analytics vs Products & Recipes & Filters */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+              <div className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-2xl w-full sm:w-auto">
                 <button
                   onClick={() => setActiveOwnerTab('analytics')}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                     activeOwnerTab === 'analytics'
                       ? 'bg-emerald-600 text-white font-black shadow-xs'
                       : 'text-stone-600 hover:text-stone-900'
@@ -167,7 +173,7 @@ export function AnalyticsView() {
                 </button>
                 <button
                   onClick={() => setActiveOwnerTab('products')}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                     activeOwnerTab === 'products'
                       ? 'bg-emerald-600 text-white font-black shadow-xs'
                       : 'text-stone-600 hover:text-stone-900'
@@ -179,13 +185,13 @@ export function AnalyticsView() {
               </div>
 
               {activeOwnerTab === 'analytics' && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-2xl">
+                <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+                  <div className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 rounded-2xl flex-1 sm:flex-initial justify-between sm:justify-start">
                     {(['day', 'week', 'month', 'year'] as const).map((t) => (
                       <button
                         key={t}
                         onClick={() => setTimeframe(t)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition uppercase cursor-pointer ${
+                        className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-bold transition uppercase cursor-pointer text-center ${
                           timeframe === t
                             ? 'bg-emerald-600 text-white font-black shadow-xs'
                             : 'text-stone-600 hover:text-stone-900'
@@ -198,10 +204,11 @@ export function AnalyticsView() {
 
                   <button
                     onClick={handleExportCSV}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 shadow-xs transition cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-2xl text-[11px] sm:text-xs font-bold text-stone-700 shadow-xs transition cursor-pointer shrink-0"
+                    title="Export financial report to CSV"
                   >
                     <Download className="w-3.5 h-3.5 text-stone-600" />
-                    <span>Export CSV</span>
+                    <span className="whitespace-nowrap">Export CSV</span>
                   </button>
                 </div>
               )}
@@ -372,7 +379,7 @@ export function AnalyticsView() {
                       <div key={i} className="p-2.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 truncate">
                           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                          <span className="text-rose-900 font-bold truncate">#{c.orderNumber}: {c.reason}</span>
+                          <span className="text-rose-900 font-bold truncate">{formatOrderNumber(c.orderNumber)}: {c.reason}</span>
                         </div>
                         <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full shrink-0">
                           Cancelled
@@ -408,7 +415,7 @@ export function AnalyticsView() {
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-black text-xs text-stone-900">#{tx.orderNumber}</span>
+                          <span className="font-black text-xs text-stone-900">{formatOrderNumber(tx.orderNumber)}</span>
                           <span className="text-[10px] font-bold bg-white text-stone-700 px-2 py-0.5 rounded-md uppercase border border-stone-200">
                             {tx.paymentMethod}
                           </span>
