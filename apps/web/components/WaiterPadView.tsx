@@ -56,7 +56,7 @@ export function WaiterPadView() {
     clearWaiterCart,
   } = useAppStore();
 
-  const [activeTab, setActiveTab] = useState<'menu' | 'tables'>('menu');
+  const [activeTab, setActiveTab] = useState<'menu' | 'tracker'>('menu');
   const [orderType, setOrderType] = useState<'DINE_IN' | 'TAKEAWAY'>('DINE_IN');
   const [takeawayCustomer, setTakeawayCustomer] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
@@ -756,7 +756,7 @@ export function WaiterPadView() {
 
                 {/* Live Kitchen Preparation Status Toggle Button */}
                 <button
-                  onClick={() => setActiveTab('tables')}
+                  onClick={() => setActiveTab('tracker')}
                   className="px-3 sm:px-3.5 py-2.5 rounded-2xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs font-bold font-sans flex-shrink-0 bg-white border-stone-200 text-stone-700 hover:bg-stone-50 hover:text-stone-900 shadow-2xs active:scale-95"
                   title="Open Live Kitchen Preparation Monitor"
                 >
@@ -907,7 +907,7 @@ export function WaiterPadView() {
           )}
 
           {/* TAB 2: LIVE KITCHEN PREPARATION MONITOR */}
-          {activeTab === 'tables' && (
+          {activeTab === 'tracker' && (
             <div className="space-y-4">
               <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-stone-200">
@@ -1440,9 +1440,9 @@ export function WaiterPadView() {
         </button>
 
         <button
-          onClick={() => setActiveTab('tables')}
+          onClick={() => setActiveTab('tracker')}
           className={`relative flex flex-col items-center gap-0.5 sm:gap-1 py-1 px-1.5 sm:px-3 rounded-xl transition cursor-pointer ${
-            activeTab === 'tables' ? 'text-emerald-600 font-black' : 'text-stone-500'
+            activeTab === 'tracker' ? 'text-emerald-600 font-black' : 'text-stone-500'
           }`}
         >
           <Clock className="w-4 h-4 sm:w-5 sm:h-5" />

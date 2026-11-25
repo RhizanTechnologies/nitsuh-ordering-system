@@ -43,12 +43,12 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, RoleConfig> = {
   },
   CASHIER: {
     label: 'Cashier Station',
-    pages: ['pos', 'tables'],
+    pages: ['pos'],
     capabilities: ['apply_discounts'],
   },
   WAITER: {
     label: 'Floor Waiter',
-    pages: ['waiter', 'tables'],
+    pages: ['waiter'],
     capabilities: [],
   },
   HEAD_CHEF: {
