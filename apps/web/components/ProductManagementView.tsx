@@ -396,16 +396,18 @@ export function ProductManagementView() {
   }, [addonSearch]);
 
   const productTotalPages = Math.max(1, Math.ceil(filteredItems.length / productLimit));
+  const safeProductPage = Math.min(Math.max(1, productPage), productTotalPages);
   const paginatedItems = useMemo(() => {
-    const start = (productPage - 1) * productLimit;
+    const start = (safeProductPage - 1) * productLimit;
     return filteredItems.slice(start, start + productLimit);
-  }, [filteredItems, productPage, productLimit]);
+  }, [filteredItems, safeProductPage, productLimit]);
 
   const addonTotalPages = Math.max(1, Math.ceil(filteredAddons.length / addonLimit));
+  const safeAddonPage = Math.min(Math.max(1, addonPage), addonTotalPages);
   const paginatedAddons = useMemo(() => {
-    const start = (addonPage - 1) * addonLimit;
+    const start = (safeAddonPage - 1) * addonLimit;
     return filteredAddons.slice(start, start + addonLimit);
-  }, [filteredAddons, addonPage, addonLimit]);
+  }, [filteredAddons, safeAddonPage, addonLimit]);
 
   const openAddModal = () => {
     setIsEditing(false);
@@ -981,7 +983,7 @@ export function ProductManagementView() {
               <div className="font-bold text-stone-600">
                 {t('menu_showing')}{' '}
                 <strong className="text-stone-900 font-black">
-                  {(productPage - 1) * productLimit + 1}–{Math.min(productPage * productLimit, filteredItems.length)}
+                  {(safeProductPage - 1) * productLimit + 1}–{Math.min(safeProductPage * productLimit, filteredItems.length)}
                 </strong>{' '}
                 {t('menu_of')} <strong className="text-stone-900 font-black">{filteredItems.length}</strong> {t('menu_products').toLowerCase()}
               </div>
@@ -990,20 +992,20 @@ export function ProductManagementView() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setProductPage((p) => Math.max(1, p - 1))}
-                  disabled={productPage <= 1}
+                  disabled={safeProductPage <= 1}
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
                 >
                   <span>{t('menu_previous')}</span>
                 </button>
 
                 <span className="font-bold text-stone-800 px-1">
-                  {t('menu_page')} <strong className="text-emerald-700 font-black">{productPage}</strong> {t('menu_of')}{' '}
+                  {t('menu_page')} <strong className="text-emerald-700 font-black">{safeProductPage}</strong> {t('menu_of')}{' '}
                   <strong className="font-black">{productTotalPages}</strong>
                 </span>
 
                 <button
                   onClick={() => setProductPage((p) => Math.min(productTotalPages, p + 1))}
-                  disabled={productPage >= productTotalPages}
+                  disabled={safeProductPage >= productTotalPages}
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
                 >
                   <span>{t('menu_next')}</span>
@@ -1118,7 +1120,7 @@ export function ProductManagementView() {
               <div className="font-bold text-stone-600">
                 {t('menu_showing')}{' '}
                 <strong className="text-stone-900 font-black">
-                  {(addonPage - 1) * addonLimit + 1}–{Math.min(addonPage * addonLimit, filteredAddons.length)}
+                  {(safeAddonPage - 1) * addonLimit + 1}–{Math.min(safeAddonPage * addonLimit, filteredAddons.length)}
                 </strong>{' '}
                 {t('menu_of')} <strong className="text-stone-900 font-black">{filteredAddons.length}</strong> {t('menu_addons').toLowerCase()}
               </div>
@@ -1126,20 +1128,20 @@ export function ProductManagementView() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setAddonPage((p) => Math.max(1, p - 1))}
-                  disabled={addonPage <= 1}
+                  disabled={safeAddonPage <= 1}
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
                 >
                   <span>{t('menu_previous')}</span>
                 </button>
 
                 <span className="font-bold text-stone-800 px-1">
-                  {t('menu_page')} <strong className="text-emerald-700 font-black">{addonPage}</strong> {t('menu_of')}{' '}
+                  {t('menu_page')} <strong className="text-emerald-700 font-black">{safeAddonPage}</strong> {t('menu_of')}{' '}
                   <strong className="font-black">{addonTotalPages}</strong>
                 </span>
 
                 <button
                   onClick={() => setAddonPage((p) => Math.min(addonTotalPages, p + 1))}
-                  disabled={addonPage >= addonTotalPages}
+                  disabled={safeAddonPage >= addonTotalPages}
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-stone-700 transition cursor-pointer flex items-center gap-1"
                 >
                   <span>{t('menu_next')}</span>

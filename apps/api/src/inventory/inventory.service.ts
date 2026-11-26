@@ -627,6 +627,8 @@ export class InventoryService {
     }
 
     const total = await this.prisma.inventoryTransaction.count({ where });
+    const computedTotalPages = limit && limit > 0 ? Math.max(1, Math.ceil(total / limit)) : 1;
+    const safePage = Math.min(Math.max(1, page), computedTotalPages);
 
     // If limit is 0 or undefined, return all
     const queryOptions: any = {
@@ -642,7 +644,7 @@ export class InventoryService {
 
     if (limit && limit > 0) {
       queryOptions.take = limit;
-      queryOptions.skip = (page - 1) * limit;
+      queryOptions.skip = (safePage - 1) * limit;
     }
 
     const data = await this.prisma.inventoryTransaction.findMany(queryOptions);
@@ -650,9 +652,9 @@ export class InventoryService {
     return {
       data,
       total,
-      page,
+      page: safePage,
       limit: limit || total,
-      totalPages: limit && limit > 0 ? Math.max(1, Math.ceil(total / limit)) : 1,
+      totalPages: computedTotalPages,
     };
   }
 

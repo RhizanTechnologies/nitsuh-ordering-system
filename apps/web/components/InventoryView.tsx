@@ -167,8 +167,12 @@ export function InventoryView() {
             limit: res.length,
             totalPages: 1,
           });
+          setLedgerPage(1);
         } else if (res && Array.isArray(res.data)) {
           setLedgerData(res);
+          if (res.page && res.page !== page) {
+            setLedgerPage(res.page);
+          }
         }
       })
       .catch((err) => console.error('Failed to load ledger:', err))
@@ -1796,8 +1800,8 @@ export function InventoryView() {
             <div className="bg-white dark:bg-[#161311] border border-stone-200 dark:border-white/10 rounded-3xl p-6 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-stone-200 dark:border-white/10">
                 <div>
-                  <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Immutable Inventory Transaction Ledger</h3>
-                  <p className="text-[11px] text-stone-500 font-medium">Permanent blockchain-like audit trail of every stock event</p>
+                  <h3 className="text-base font-bold text-stone-900 dark:text-white font-heading">Inventory Transaction Ledger</h3>
+                  <p className="text-[11px] text-stone-500 font-medium">Audit history of stock movements and adjustments</p>
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 px-3 py-1 rounded-full">

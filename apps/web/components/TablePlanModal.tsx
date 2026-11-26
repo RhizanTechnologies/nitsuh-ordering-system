@@ -449,13 +449,13 @@ export function TablePlanModal({
 
                 {/* Active Order Summary if Seated */}
                 {isOccupied && (
-                  <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] font-bold border-t border-amber-500/20 pt-1.5 mb-2 text-amber-800">
-                    <span className="truncate max-w-[65%]">
+                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-1 text-[11px] font-bold border-t border-amber-500/20 pt-1.5 mb-2 text-amber-800">
+                    <span className="truncate">
                       {hasActiveOrder
-                        ? `Active: ${t.orders[0].orderNumber?.startsWith('#') ? t.orders[0].orderNumber : `#${t.orders[0].orderNumber}`} (${Number(t.orders[0].totalAmount).toFixed(2)} ETB)`
+                        ? `Active: #${String(t.orders[0].orderNumber).replace(/^#+/, '')} • ${Number(t.orders[0].totalAmount).toFixed(2)} ETB`
                         : 'Occupied'}
                     </span>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1 shrink-0 self-end xs:self-auto">
                       <span className="text-[10px] font-black px-2 py-0.5 rounded-lg bg-amber-200/90 text-amber-950 whitespace-nowrap shadow-2xs">
                         {hasActiveOrder && t.orders[0].status === 'DRAFT_NOTE' ? 'Edit Note' : 'Add Order'}
                       </span>
