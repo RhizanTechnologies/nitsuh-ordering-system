@@ -1085,24 +1085,36 @@ export function WaiterPadView() {
                   </span>
                 </div>
 
-                {/* Active Order Count Indicator while waiter selects items */}
-                {totalWaiterItems > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowMobileDrawer(true)}
-                    className="flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 px-3 py-1.5 rounded-xl text-xs font-black shadow-xs transition cursor-pointer active:scale-95 animate-in zoom-in-95"
-                    title="View current order items in slip"
-                  >
-                    <div className="relative">
-                      <ShoppingBag className="w-3.5 h-3.5 text-emerald-700" />
+                {/* Order Count Indicator while waiter selects items (Always Present) */}
+                <button
+                  type="button"
+                  onClick={() => setShowMobileDrawer(true)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-black shadow-xs transition cursor-pointer active:scale-95 ${
+                    totalWaiterItems > 0
+                      ? 'bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 animate-in zoom-in-95'
+                      : 'bg-stone-50 hover:bg-stone-100 border border-stone-200 text-stone-500'
+                  }`}
+                  title={totalWaiterItems > 0 ? 'View current order items in slip' : 'No items selected yet'}
+                >
+                  <div className="relative">
+                    <ShoppingBag className={`w-3.5 h-3.5 ${totalWaiterItems > 0 ? 'text-emerald-700' : 'text-stone-400'}`} />
+                    {totalWaiterItems > 0 && (
                       <span className="absolute -top-1 -right-1.5 bg-emerald-600 text-white text-[9px] w-3.5 h-3.5 rounded-full font-black flex items-center justify-center">
                         {totalWaiterItems}
                       </span>
-                    </div>
-                    <span>{totalWaiterItems} {totalWaiterItems === 1 ? 'item' : 'items'} in order</span>
-                    <span className="text-emerald-950 font-extrabold">• {totalWaiterSum.toFixed(2)} ETB</span>
-                  </button>
-                )}
+                    )}
+                  </div>
+                  <span>
+                    {totalWaiterItems > 0
+                      ? `${totalWaiterItems} ${totalWaiterItems === 1 ? t('waiter_item', 'item') : t('waiter_items', 'items')} ${lang === 'am' ? 'በትዕዛዝ ውስጥ' : 'in order'}`
+                      : `${lang === 'am' ? '0 እቃዎች በትዕዛዝ ውስጥ' : '0 items in order'}`}
+                  </span>
+                  {totalWaiterItems > 0 && (
+                    <span className="text-emerald-950 font-extrabold">
+                      • {totalWaiterSum.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
+                    </span>
+                  )}
+                </button>
               </div>
 
               {/* Loading State Spinner */}
