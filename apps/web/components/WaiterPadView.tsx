@@ -315,6 +315,7 @@ export function WaiterPadView() {
           if (groupFilter === 'COFFEE' && !isCoffee(catName, item.name)) return false;
           if (groupFilter === 'DRINKS' && !isDrinks(catName)) return false;
           if (groupFilter === 'BAKERY' && !isBakery(catName)) return false;
+          if (groupFilter === 'ADDONS' && !(catName.toLowerCase().includes('addon') || catName.toLowerCase().includes('add-on') || item.name.toLowerCase().includes('extra') || item.name.toLowerCase().includes('topping'))) return false;
         }
       }
 
@@ -654,6 +655,7 @@ export function WaiterPadView() {
         { id: 'DRINKS', label: 'Drink', icon: CupSoda },
         { id: 'COFFEE', label: 'Coffee', icon: Coffee },
         { id: 'BAKERY', label: 'Dessert', icon: Cake },
+        { id: 'ADDONS', label: 'Add-ons', icon: Layers },
         { id: 'FASTING', label: 'Fasting', icon: Leaf },
       );
     }
