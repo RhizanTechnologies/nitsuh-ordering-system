@@ -890,7 +890,7 @@ export function WaiterPadView() {
       <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
         {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Seamlessly merged with unified background) */}
         {activeTab === 'menu' && (
-          <aside className="w-16 sm:w-20 md:w-24 bg-[#F8F9FA] border-r border-stone-200/70 py-2 sm:py-3 px-1 sm:px-1.5 space-y-1.5 overflow-y-auto no-scrollbar flex-shrink-0 z-10 flex flex-col pb-24 lg:pb-4">
+          <aside className="w-16 sm:w-20 md:w-24 bg-[#F8F9FA] border-r border-stone-200/70 py-2 sm:py-3 px-1 sm:px-1.5 space-y-1.5 overflow-y-auto no-scrollbar flex-shrink-0 z-10 flex flex-col pb-44 sm:pb-48 lg:pb-8">
             {dynamicCategoryCards.map((cat) => {
               const isActive = groupFilter === cat.id;
               const Icon = cat.icon;
@@ -944,7 +944,7 @@ export function WaiterPadView() {
         )}
 
         {/* COLUMN 2: CENTER PRODUCT FOOD CARDS GRID OR LIVE TRACKER */}
-        <main className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-24 lg:pb-6 no-scrollbar">
+        <main className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-48 sm:pb-56 lg:pb-20 no-scrollbar">
           {/* Top Control Bar:
               - On Menu tab: Search Bar + Live Status Toggle
               - On Tracker tab: Back to Food Menu Button + Active counter
@@ -1186,6 +1186,9 @@ export function WaiterPadView() {
                   );
                 })}
               </div>
+
+              {/* Generous bottom breathing spacer so footer bar never overlaps item cards */}
+              <div className="h-10 sm:h-14 lg:h-8" aria-hidden="true" />
             </>
           )}
 
