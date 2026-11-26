@@ -798,6 +798,26 @@ let OrdersService = class OrdersService {
                 },
             });
         });
+        if (data.confirm === false) {
+            const updatedOrder = await this.prisma.order.findUnique({
+                where: { id: orderId },
+                include: {
+                    items: {
+                        include: {
+                            menuItem: true,
+                        },
+                    },
+                    table: true,
+                    waiter: true,
+                    cashier: true,
+                },
+            });
+            if (updatedOrder) {
+                this.eventsGateway.broadcastWaiterNote(updatedOrder);
+                this.eventsGateway.broadcastOrderUpdated(updatedOrder);
+            }
+            return updatedOrder;
+        }
         return this.confirmOrder(orderId, resolvedCashierId);
     }
     async createPosOrder(data) {
@@ -834,6 +854,9 @@ let OrdersService = class OrdersService {
             discountPercent: data.discountPercent,
             items: data.items,
         });
+        if (data.confirm === false) {
+            return draft;
+        }
         return this.confirmOrder(draft.id, data.cashierId);
     }
     async updateOrderStatus(orderId, status, actorUserId) {

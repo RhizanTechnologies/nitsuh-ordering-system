@@ -104,6 +104,7 @@ export class OrdersController {
     @Body()
     body: {
       cashierId: string;
+      confirm?: boolean;
       tableId?: string;
       customerName?: string;
       waiterId?: string;
@@ -130,6 +131,7 @@ export class OrdersController {
     @Body()
     body: {
       cashierId: string;
+      confirm?: boolean;
       tableId?: string;
       customerName?: string;
       orderType?: OrderType;
@@ -159,6 +161,7 @@ export class OrdersController {
     @Body()
     body: {
       cashierId: string;
+      confirm?: boolean;
       tableId?: string;
       customerName?: string;
       orderType?: OrderType;

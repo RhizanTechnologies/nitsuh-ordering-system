@@ -731,11 +731,12 @@ export class OrdersService {
     return updated;
   }
 
-  // Update Draft Note items & details, and confirm/fire to kitchen
+  // Update Draft Note items & details, and confirm/fire to kitchen (or save draft only if confirm === false)
   async updateAndConfirmDraftNote(
     orderId: string,
     data: {
       cashierId: string;
+      confirm?: boolean;
       tableId?: string | null;
       customerName?: string;
       orderType?: OrderType;
@@ -937,12 +938,34 @@ export class OrdersService {
       });
     });
 
+    if (data.confirm === false) {
+      const updatedOrder = await this.prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: {
+            include: {
+              menuItem: true,
+            },
+          },
+          table: true,
+          waiter: true,
+          cashier: true,
+        },
+      });
+      if (updatedOrder) {
+        this.eventsGateway.broadcastWaiterNote(updatedOrder);
+        this.eventsGateway.broadcastOrderUpdated(updatedOrder);
+      }
+      return updatedOrder;
+    }
+
     return this.confirmOrder(orderId, resolvedCashierId);
   }
 
   // 3. Direct POS Order Entry by Cashier (Walk-in / Dine-in / Takeaway)
   async createPosOrder(data: {
     cashierId: string;
+    confirm?: boolean;
     tableId?: string;
     customerName?: string;
     waiterId?: string;
@@ -991,6 +1014,10 @@ export class OrdersService {
       discountPercent: data.discountPercent,
       items: data.items,
     });
+
+    if (data.confirm === false) {
+      return draft;
+    }
 
     return this.confirmOrder(draft.id, data.cashierId);
   }

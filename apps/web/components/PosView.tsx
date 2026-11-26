@@ -31,6 +31,7 @@ import {
   X,
   Clock,
   ChevronDown,
+  ChevronUp,
   Printer,
   PlusCircle,
   RefreshCw,
@@ -107,7 +108,11 @@ export function PosView() {
   const [appendOrderTarget, setAppendOrderTarget] = useState<any | null>(null);
   const [editingSlipTarget, setEditingSlipTarget] = useState<any | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
-  const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'day_before' | '3_days' | 'all'>('today');
+  const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'day_before' | '3_days' | 'all' | 'specific' | 'range'>('today');
+  const [customSpecificDate, setCustomSpecificDate] = useState<string>(''); // YYYY-MM-DD
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
+  const [isDateFilterExpanded, setIsDateFilterExpanded] = useState<boolean>(false);
 
   // In-App Modern Dialog States
   const [tipModal, setTipModal] = useState<{ itemId: string; name: string } | null>(null);
@@ -365,7 +370,20 @@ export function PosView() {
     };
   }, [activeOrders]);
 
-  // Orders filtered by the selected date bucket (today by default, yesterday, day before, 3-day range, or all days)
+  // Helper to get local YYYY-MM-DD
+  const getLocalDateStr = (d: string | Date) => {
+    try {
+      const dt = new Date(d);
+      const yyyy = dt.getFullYear();
+      const mm = String(dt.getMonth() + 1).padStart(2, '0');
+      const dd = String(dt.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    } catch {
+      return '';
+    }
+  };
+
+  // Orders filtered by the selected date bucket (today by default, yesterday, day before, 3-day range, all days, specific date, or date range)
   // CRITICAL: Any unsettled order (unpaid bill or active kitchen/floor order) MUST ALWAYS be visible on the POS screen!
   // Unsettled dining orders cannot be hidden simply because midnight rolled over.
   const dayFilteredOrders = useMemo(() => {
@@ -379,9 +397,19 @@ export function PosView() {
       if (dateFilter === 'day_before') return key === 'day_before';
       if (dateFilter === '3_days') return ['today', 'yesterday', 'day_before'].includes(key);
       if (dateFilter === 'all') return true;
+      if (dateFilter === 'specific') {
+        if (!customSpecificDate) return true;
+        return getLocalDateStr(o.createdAt) === customSpecificDate;
+      }
+      if (dateFilter === 'range') {
+        const dStr = getLocalDateStr(o.createdAt);
+        if (customStartDate && dStr < customStartDate) return false;
+        if (customEndDate && dStr > customEndDate) return false;
+        return true;
+      }
       return false;
     });
-  }, [activeOrders, dateFilter]);
+  }, [activeOrders, dateFilter, customSpecificDate, customStartDate, customEndDate]);
 
   // Waiter Slips scoped to selected day
   const daySlips = useMemo(() => {
@@ -392,9 +420,42 @@ export function PosView() {
       if (dateFilter === 'day_before') return key === 'day_before';
       if (dateFilter === '3_days') return ['today', 'yesterday', 'day_before'].includes(key);
       if (dateFilter === 'all') return true;
+      if (dateFilter === 'specific') {
+        if (!customSpecificDate) return true;
+        return getLocalDateStr(s.createdAt) === customSpecificDate;
+      }
+      if (dateFilter === 'range') {
+        const dStr = getLocalDateStr(s.createdAt);
+        if (customStartDate && dStr < customStartDate) return false;
+        if (customEndDate && dStr > customEndDate) return false;
+        return true;
+      }
       return false;
     });
-  }, [incomingSlips, dateFilter]);
+  }, [incomingSlips, dateFilter, customSpecificDate, customStartDate, customEndDate]);
+
+  // Formatted date filter label for the collapsible trigger button
+  const dateFilterLabel = useMemo(() => {
+    if (dateFilter === 'today') return 'Today';
+    if (dateFilter === 'yesterday') return 'Yesterday';
+    if (dateFilter === 'day_before') return dayBeforeDateLabel;
+    if (dateFilter === '3_days') return 'Past 3 Days';
+    if (dateFilter === 'all') return 'All Days';
+    if (dateFilter === 'specific') {
+      if (!customSpecificDate) return 'Specific Date';
+      try {
+        const [y, m, d] = customSpecificDate.split('-').map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch {
+        return customSpecificDate;
+      }
+    }
+    if (dateFilter === 'range') {
+      if (!customStartDate && !customEndDate) return 'Date Range';
+      return `${customStartDate || 'Any'} → ${customEndDate || 'Any'}`;
+    }
+    return 'Filter by Date';
+  }, [dateFilter, dayBeforeDateLabel, customSpecificDate, customStartDate, customEndDate]);
 
   // Statistics calculation for Cashier Command Center
   const pendingSlipsCount = daySlips.length;
@@ -530,8 +591,9 @@ export function PosView() {
     }
   };
 
-  // Place POS Order / Append Items and return to Orders View
-  const handlePlaceOrder = async () => {
+  // Place POS Order / Append Items / Update Draft Note
+  // fireToKitchen: true fires directly to kitchen display; false saves/updates as draft note in pending firing queue
+  const handlePlaceOrder = async (fireToKitchen: boolean = true) => {
     if (cart.length === 0) return;
     setLoading(true);
 
@@ -553,7 +615,7 @@ export function PosView() {
         });
 
         setLastCompletedOrder(res);
-        setSuccessOrder(`Appended to ${res.orderNumber}`);
+        setSuccessOrder(`Appended to ${formatOrderNumber(res.orderNumber)}`);
         clearCart();
         setAppendOrderTarget(null);
         setPosTab('orders');
@@ -562,7 +624,9 @@ export function PosView() {
         return;
       }
 
-      // If reviewing/editing an incoming waiter slip, update that exact slip in-place and fire it!
+      // If reviewing/editing an incoming waiter slip:
+      // If fireToKitchen === false, only updates the draft note without confirming/firing to kitchen!
+      // If fireToKitchen === true, updates and confirms/fires directly to kitchen.
       if (editingSlipTarget) {
         const isTakeaway = orderType === 'TAKEAWAY';
         const selectedTableObj = isTakeaway ? null : tables.find((t) => t.tableNumber === selectedTable);
@@ -571,6 +635,7 @@ export function PosView() {
           method: 'POST',
           body: JSON.stringify({
             cashierId: currentUser?.id,
+            confirm: fireToKitchen,
             tableId: selectedTableObj ? selectedTableObj.id : null,
             customerName: isTakeaway ? (customerName.trim() || 'Takeaway Customer') : (customerName || 'Guest'),
             orderType,
@@ -596,7 +661,12 @@ export function PosView() {
           totalAmount: total,
         });
 
-        setSuccessOrder(res.orderNumber);
+        const orderNum = formatOrderNumber(res.orderNumber);
+        if (fireToKitchen) {
+          setSuccessOrder(`Order ${orderNum} fired to Kitchen!`);
+        } else {
+          setSuccessOrder(`Draft note ${orderNum} saved (Pending Firing)`);
+        }
         clearCart();
         setEditingSlipTarget(null);
         setPosTab('orders');
@@ -620,6 +690,7 @@ export function PosView() {
         method: 'POST',
         body: JSON.stringify({
           cashierId: currentUser.id || 'c01-cashier',
+          confirm: fireToKitchen,
           tableId: selectedTableObj ? selectedTableObj.id : null,
           customerName: isTakeaway ? (customerName.trim() || 'Takeaway Customer') : (customerName || 'Guest'),
           orderType,
@@ -645,11 +716,17 @@ export function PosView() {
         totalAmount: total,
       });
 
-      setSuccessOrder(res.orderNumber);
+      const orderNum = formatOrderNumber(res.orderNumber);
+      if (fireToKitchen) {
+        setSuccessOrder(`Order ${orderNum} fired to Kitchen!`);
+      } else {
+        setSuccessOrder(`Draft note ${orderNum} saved (Pending Firing)`);
+      }
       clearCart();
       setPosTab('orders');
       setTimeout(() => setSuccessOrder(null), 4000);
       loadData();
+      loadActiveOrders();
     } catch (err: any) {
       showError(`Error placing order: ${err.message}`);
     } finally {
@@ -1155,43 +1232,130 @@ export function PosView() {
           </div>
         </div>
 
-        <div className="flex gap-2 pt-1">
-          <Button
-            variant="destructive"
-            size="lg"
-            disabled={cart.length === 0 || loading}
-            onClick={() => {
-              handlePlaceOrder();
-              if (isMobile) setMobileCartOpen(false);
-            }}
-            className="flex-1"
-          >
-            <span>
-              {loading
-                ? t('waiter_sending', "Firing...")
-                : editingSlipTarget
-                  ? t('waiter_update_order', "Update Order")
-                  : appendOrderTarget
-                    ? t('waiter_adding_items', "Append to Bill")
-                    : t('pos_confirm_payment', "Fire to Kitchen")}
-            </span>
-            <ArrowRight className="w-4 h-4 text-white" />
-          </Button>
+        {editingSlipTarget ? (
+          <div className="flex flex-col gap-2 pt-1">
+            <div className="flex gap-2">
+              <Button
+                variant="primary"
+                size="lg"
+                disabled={cart.length === 0 || loading}
+                onClick={() => {
+                  handlePlaceOrder(false); // Save Draft only, do NOT fire to kitchen
+                  if (isMobile) setMobileCartOpen(false);
+                }}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                title="Save modifications to draft note without sending to kitchen"
+              >
+                <Check className="w-4 h-4 text-white" />
+                <span>Save Draft Note</span>
+              </Button>
 
-          <Button
-            variant="primary"
-            size="lg"
-            disabled={cart.length === 0 && !lastCompletedOrder}
-            onClick={() => {
-              setPaymentModalOpen(true);
-              if (isMobile) setMobileCartOpen(false);
-            }}
-            title="Pay & Settle Tender"
-          >
-            <CreditCard className="w-4 h-4" />
-            <span>{t('pos_tender', 'Settle Bill')}</span>
-          </Button>
-        </div>
+              <Button
+                variant="destructive"
+                size="lg"
+                disabled={cart.length === 0 || loading}
+                onClick={() => {
+                  handlePlaceOrder(true); // Update & immediately fire to kitchen
+                  if (isMobile) setMobileCartOpen(false);
+                }}
+                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-black"
+                title="Save changes and immediately fire to kitchen display"
+              >
+                <Flame className="w-4 h-4 text-white" />
+                <span>Update & Fire</span>
+              </Button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                clearCart();
+                setEditingSlipTarget(null);
+                loadData();
+                if (isMobile) setMobileCartOpen(false);
+              }}
+              className="text-xs text-stone-500 hover:text-red-600 font-semibold py-1 text-center transition cursor-pointer"
+            >
+              Cancel Edit
+            </button>
+          </div>
+        ) : appendOrderTarget ? (
+          <div className="flex gap-2 pt-1">
+            <Button
+              variant="destructive"
+              size="lg"
+              disabled={cart.length === 0 || loading}
+              onClick={() => {
+                handlePlaceOrder(true);
+                if (isMobile) setMobileCartOpen(false);
+              }}
+              className="flex-1"
+            >
+              <span>{loading ? t('waiter_sending', "Firing...") : t('waiter_adding_items', "Append to Bill")}</span>
+              <ArrowRight className="w-4 h-4 text-white" />
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              disabled={cart.length === 0 && !lastCompletedOrder}
+              onClick={() => {
+                setPaymentModalOpen(true);
+                if (isMobile) setMobileCartOpen(false);
+              }}
+              title="Pay & Settle Tender"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>{t('pos_tender', 'Settle Bill')}</span>
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2 pt-1">
+            <div className="flex gap-2">
+              <Button
+                variant="destructive"
+                size="lg"
+                disabled={cart.length === 0 || loading}
+                onClick={() => {
+                  handlePlaceOrder(true);
+                  if (isMobile) setMobileCartOpen(false);
+                }}
+                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-black"
+                title="Send ticket directly to kitchen display"
+              >
+                <Flame className="w-4 h-4 text-white" />
+                <span>{loading ? t('waiter_sending', "Firing...") : t('pos_confirm_payment', "Fire to Kitchen")}</span>
+              </Button>
+
+              <Button
+                variant="primary"
+                size="lg"
+                disabled={cart.length === 0 && !lastCompletedOrder}
+                onClick={() => {
+                  setPaymentModalOpen(true);
+                  if (isMobile) setMobileCartOpen(false);
+                }}
+                title="Pay & Settle Tender"
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>{t('pos_tender', 'Settle Bill')}</span>
+              </Button>
+            </div>
+
+            <button
+              type="button"
+              disabled={cart.length === 0 || loading}
+              onClick={() => {
+                handlePlaceOrder(false); // Save Draft without firing
+                if (isMobile) setMobileCartOpen(false);
+              }}
+              className="text-xs text-stone-600 hover:text-emerald-700 font-bold py-1 flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+              title="Save order as draft note in pending firing queue without sending to kitchen"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Save as Draft Note (Awaiting Firing)</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1552,107 +1716,209 @@ export function PosView() {
               )}
             </div>
 
-            {/* Day Filter Segmented Controls (Today by default, Yesterday, 2 Days Ago, 3-Day View, All Days) */}
-            <div className="flex items-center bg-stone-100 p-0.5 sm:p-1 rounded-xl border border-stone-200/80 gap-1 overflow-x-auto no-scrollbar">
-              <button
-                type="button"
-                onClick={() => setDateFilter('today')}
-                className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  dateFilter === 'today'
-                    ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
-                }`}
-              >
-                <Calendar className="w-3 h-3" />
-                <span>Today</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  dateFilter === 'today' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
-                }`}>
-                  {dayCounts.today.total}
-                </span>
-                {dayCounts.today.unpaid > 0 && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title={`${dayCounts.today.unpaid} unpaid bills today`} />
-                )}
-              </button>
+            {/* Collapsible & Expandable Date Filter Controls */}
+            <div className="relative">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setIsDateFilterExpanded(!isDateFilterExpanded)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs border ${
+                    dateFilter === 'today'
+                      ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
+                      : 'bg-stone-900 text-white border-stone-800 hover:bg-stone-800'
+                  }`}
+                  title="Filter orders by date, specific date, or date range"
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>{dateFilterLabel}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                    dateFilter === 'today' ? 'bg-emerald-800 text-white' : 'bg-stone-700 text-white'
+                  }`}>
+                    {dayFilteredOrders.length + daySlips.length}
+                  </span>
+                  {dayCounts.today.unpaid > 0 && dateFilter === 'today' && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" title={`${dayCounts.today.unpaid} unpaid bills today`} />
+                  )}
+                  {isDateFilterExpanded ? (
+                    <ChevronUp className="w-3.5 h-3.5 text-stone-300" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5 text-stone-300" />
+                  )}
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setDateFilter('yesterday')}
-                className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  dateFilter === 'yesterday'
-                    ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
-                }`}
-              >
-                <span>Yesterday</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  dateFilter === 'yesterday' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
-                }`}>
-                  {dayCounts.yesterday.total}
-                </span>
-                {dayCounts.yesterday.unpaid > 0 && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title={`${dayCounts.yesterday.unpaid} unpaid bills from yesterday`} />
+                {dateFilter !== 'today' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDateFilter('today');
+                      setIsDateFilterExpanded(false);
+                    }}
+                    className="text-[11px] font-bold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 border border-stone-200/80 px-2 py-1 rounded-lg transition cursor-pointer"
+                    title="Reset to Today"
+                  >
+                    Reset to Today ✕
+                  </button>
                 )}
-              </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setDateFilter('day_before')}
-                className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  dateFilter === 'day_before'
-                    ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
-                }`}
-              >
-                <span>{dayBeforeDateLabel}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  dateFilter === 'day_before' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
-                }`}>
-                  {dayCounts.day_before.total}
-                </span>
-                {dayCounts.day_before.unpaid > 0 && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title={`${dayCounts.day_before.unpaid} unpaid bills`} />
-                )}
-              </button>
+              {/* Collapsible Dropdown / Panel */}
+              {isDateFilterExpanded && (
+                <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 z-50 bg-white border border-stone-200/90 rounded-2xl shadow-2xl p-3.5 sm:p-4 w-[calc(100vw-2rem)] max-w-sm sm:max-w-md animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-stone-100">
+                    <span className="text-xs font-black text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                      Filter Orders by Date
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsDateFilterExpanded(false)}
+                      className="text-stone-400 hover:text-stone-700 p-1 rounded-md transition cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
 
-              <button
-                type="button"
-                onClick={() => setDateFilter('3_days')}
-                className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer whitespace-nowrap ${
-                  dateFilter === '3_days'
-                    ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
-                }`}
-                title="View all orders across the 3-day window"
-              >
-                <span>Past 3 Days</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  dateFilter === '3_days' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
-                }`}>
-                  {dayCounts.threeDays}
-                </span>
-              </button>
+                  {/* Preset Pills */}
+                  <div className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-1.5">Presets</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-3.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDateFilter('today');
+                        setIsDateFilterExpanded(false);
+                      }}
+                      className={`px-2 py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer border ${
+                        dateFilter === 'today'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
+                      }`}
+                    >
+                      <span>Today</span>
+                      <span className="text-[10px] font-black opacity-80">{dayCounts.today.total}</span>
+                    </button>
 
-              <button
-                type="button"
-                onClick={() => setDateFilter('all')}
-                className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer whitespace-nowrap ${
-                  dateFilter === 'all'
-                    ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
-                }`}
-                title="View all orders across all recorded days"
-              >
-                <span>All Days</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                  dateFilter === 'all' ? 'bg-emerald-800 text-white' : 'bg-stone-200 text-stone-700'
-                }`}>
-                  {dayCounts.all.total}
-                </span>
-                {dayCounts.all.unpaid > 0 && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title={`${dayCounts.all.unpaid} total unpaid bills`} />
-                )}
-              </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDateFilter('yesterday');
+                        setIsDateFilterExpanded(false);
+                      }}
+                      className={`px-2 py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer border ${
+                        dateFilter === 'yesterday'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
+                      }`}
+                    >
+                      <span>Yesterday</span>
+                      <span className="text-[10px] font-black opacity-80">{dayCounts.yesterday.total}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDateFilter('3_days');
+                        setIsDateFilterExpanded(false);
+                      }}
+                      className={`px-2 py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer border ${
+                        dateFilter === '3_days'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
+                      }`}
+                    >
+                      <span>3 Days</span>
+                      <span className="text-[10px] font-black opacity-80">{dayCounts.threeDays}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDateFilter('all');
+                        setIsDateFilterExpanded(false);
+                      }}
+                      className={`px-2 py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer border ${
+                        dateFilter === 'all'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
+                      }`}
+                    >
+                      <span>All Days</span>
+                      <span className="text-[10px] font-black opacity-80">{dayCounts.all.total}</span>
+                    </button>
+                  </div>
+
+                  {/* Specific Single Date Picker */}
+                  <div className="pt-2.5 border-t border-stone-100 mb-3">
+                    <label className="text-[10px] font-black text-stone-400 uppercase tracking-wider block mb-1">
+                      Pick Specific Date
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={customSpecificDate}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomSpecificDate(val);
+                          if (val) {
+                            setDateFilter('specific');
+                          }
+                        }}
+                        className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-800 focus:outline-none focus:border-emerald-500"
+                      />
+                      <button
+                        type="button"
+                        disabled={!customSpecificDate}
+                        onClick={() => {
+                          setDateFilter('specific');
+                          setIsDateFilterExpanded(false);
+                        }}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Date Range Picker */}
+                  <div className="pt-2.5 border-t border-stone-100">
+                    <label className="text-[10px] font-black text-stone-400 uppercase tracking-wider block mb-1">
+                      Custom Date Range
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <div>
+                        <span className="text-[10px] text-stone-500 block mb-0.5">From</span>
+                        <input
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          className="w-full bg-stone-50 border border-stone-200 rounded-xl px-2 py-1.5 text-xs font-bold text-stone-800 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-stone-500 block mb-0.5">To</span>
+                        <input
+                          type="date"
+                          value={customEndDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          className="w-full bg-stone-50 border border-stone-200 rounded-xl px-2 py-1.5 text-xs font-bold text-stone-800 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        disabled={!customStartDate && !customEndDate}
+                        onClick={() => {
+                          setDateFilter('range');
+                          setIsDateFilterExpanded(false);
+                        }}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                      >
+                        Apply Range
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Quick Search Input */}
@@ -2064,7 +2330,7 @@ export function PosView() {
       {posTab === 'menu' && (
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row h-full overflow-hidden">
           {/* Main Left: Menu Browse & Item Selection */}
-          <div className="flex-1 min-h-0 flex flex-col p-3.5 sm:p-6 overflow-y-auto pb-28 lg:pb-6 relative z-10 no-scrollbar">
+          <div className="flex-1 min-h-0 flex flex-col p-3.5 sm:p-6 overflow-y-auto pb-52 sm:pb-56 lg:pb-8 relative z-10 no-scrollbar">
             {/* Top Back to Orders Banner */}
             <div className="mb-3 flex items-center justify-between">
               <button
@@ -2303,6 +2569,8 @@ export function PosView() {
                 );
               })}
             </div>
+            {/* Generous bottom spacer for mobile/tablet to ensure separation between items, floating bill card, and bottom footer bar */}
+            <div className="h-16 lg:h-6 w-full flex-shrink-0" aria-hidden="true" />
           </div>
 
           {/* DESKTOP RIGHT CART PANEL (>=lg) */}
@@ -2314,7 +2582,7 @@ export function PosView() {
 
       {/* MOBILE FLOATING BILL SUMMARY BAR (<lg) */}
       {cart.length > 0 && posTab === 'menu' && (
-        <div className="lg:hidden fixed bottom-16 left-3 right-3 z-30 animate-in slide-in-from-bottom duration-300">
+        <div className="lg:hidden fixed bottom-[4.75rem] sm:bottom-20 left-3 right-3 z-30 animate-in slide-in-from-bottom duration-300">
           <div
             onClick={() => setMobileCartOpen(true)}
             className="bg-white/95 backdrop-blur-xl border border-stone-200/90 p-2.5 sm:p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer hover:border-emerald-400 transition text-stone-900"
