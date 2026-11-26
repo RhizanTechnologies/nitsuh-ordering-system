@@ -698,14 +698,14 @@ export function WaiterPadView() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-black text-xs sm:text-sm text-amber-950">
-                    Editing Draft {formatOrderNumber(editingDraftOrder.orderNumber)}
+                    {t('waiter_editing_draft', 'Editing Draft')} {formatOrderNumber(editingDraftOrder.orderNumber)}
                   </span>
                   <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-950/15 text-amber-950">
                     Table {editingDraftOrder.tableNumber}
                   </span>
                 </div>
                 <p className="text-[11px] text-amber-900 font-medium truncate mt-0.5">
-                  Add, remove, or adjust quantities for this guest note
+                  {t('waiter_select_items', 'Add, remove, or adjust quantities for this guest note')}
                 </p>
               </div>
             </div>
@@ -716,7 +716,7 @@ export function WaiterPadView() {
                 onClick={handleCancelEditOrAppend}
                 className="px-3 py-1.5 bg-white/80 hover:bg-white text-amber-950 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
               >
-                Cancel Edit
+                {t('waiter_cancel_edit', 'Cancel Edit')}
               </button>
               <button
                 type="button"
@@ -727,12 +727,12 @@ export function WaiterPadView() {
                 {sending ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Updating...</span>
+                    <span>{t('waiter_updating', 'Updating...')}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Update Order</span>
+                    <span>{t('waiter_update_order', 'Update Order')}</span>
                   </>
                 )}
               </button>
@@ -744,7 +744,7 @@ export function WaiterPadView() {
             <div className="bg-amber-50/95 border-t border-amber-300/40 px-3 sm:px-4 py-2 flex items-center justify-between gap-3 overflow-x-auto text-xs">
               <div className="flex items-center gap-2 min-w-0 shrink-0">
                 <span className="font-extrabold text-amber-950 text-[11px] uppercase tracking-wider">
-                  Items in Note ({totalWaiterItems}):
+                  {t('waiter_items_selected', 'Items in Note')} ({totalWaiterItems}):
                 </span>
               </div>
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
@@ -1753,15 +1753,15 @@ export function WaiterPadView() {
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-black truncate">
-                  {totalWaiterItems} {totalWaiterItems === 1 ? 'Item' : 'Items'} Selected
+                  {totalWaiterItems} {t('waiter_items_selected', 'Items Selected')}
                 </div>
                 <div className="text-[10px] text-emerald-100 font-semibold truncate">
-                  {totalWaiterSum.toFixed(2)} ETB • Tap to Review Slip
+                  {totalWaiterSum.toFixed(2)} ETB • {t('waiter_review_slip', 'Tap to Review Slip')}
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0 bg-white text-emerald-900 font-black text-xs px-3 py-1.5 rounded-xl shadow-xs">
-              <span>Review Slip</span>
+              <span>{t('waiter_review_slip', 'Review Slip')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>

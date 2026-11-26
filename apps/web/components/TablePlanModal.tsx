@@ -353,7 +353,13 @@ export function TablePlanModal({
                 onClick={() => setStatusFilter(s)}
                 className="text-[11px]"
               >
-                {s === 'ALL' ? `All (${tablesList.length})` : s}
+                {s === 'ALL'
+                  ? `${t('common_all', 'All')} (${tablesList.length})`
+                  : s === 'AVAILABLE'
+                  ? t('tables_open', 'Open')
+                  : s === 'OCCUPIED'
+                  ? t('tables_seated', 'Seated')
+                  : t('tables_reserved', 'Reserved')}
               </Button>
             ))}
           </div>
@@ -361,15 +367,15 @@ export function TablePlanModal({
           <div className="hidden sm:flex items-center gap-3 text-[11px]">
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="text-stone-600">Open</span>
+              <span className="text-stone-600">{t('tables_open', 'Open')}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-              <span className="text-stone-600">Occupied</span>
+              <span className="text-stone-600">{t('tables_seated', 'Occupied')}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-              <span className="text-stone-600">Reserved</span>
+              <span className="text-stone-600">{t('tables_reserved', 'Reserved')}</span>
             </div>
           </div>
         </div>
@@ -457,7 +463,9 @@ export function TablePlanModal({
                     </span>
                     <div className="flex items-center gap-1 shrink-0 self-end xs:self-auto">
                       <span className="text-[10px] font-black px-2 py-0.5 rounded-lg bg-amber-200/90 text-amber-950 whitespace-nowrap shadow-2xs">
-                        {hasActiveOrder && t.orders[0].status === 'DRAFT_NOTE' ? 'Edit Note' : 'Add Order'}
+                        {hasActiveOrder && t.orders[0].status === 'DRAFT_NOTE'
+                          ? t('tables_edit_note', 'Edit Note')
+                          : t('tables_add_order', 'Add Order')}
                       </span>
                       {isOwnerOrManager && (
                         <button
@@ -479,7 +487,7 @@ export function TablePlanModal({
                           className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 hover:bg-emerald-600 hover:text-white text-amber-900 transition flex-shrink-0 cursor-pointer"
                           title="Clear table and set to Open"
                         >
-                          Free
+                          {t('tables_free', 'Free')}
                         </button>
                       )}
                     </div>

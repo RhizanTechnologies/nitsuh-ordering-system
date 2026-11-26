@@ -293,7 +293,7 @@ export function AnalyticsView() {
               <div className="lg:col-span-2 bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-sm font-bold text-stone-900">Revenue & Profit Breakdown</h3>
+                    <h3 className="text-sm font-bold text-stone-900">{t('profit_title', 'Revenue & Profit Breakdown')}</h3>
                     <p className="text-[11px] text-stone-500 font-semibold mt-0.5">Real-time revenue, gross/net profit & ingredient COGS</p>
                   </div>
                   <div className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
@@ -354,7 +354,7 @@ export function AnalyticsView() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold uppercase text-stone-600 flex items-center gap-1.5">
-                      ★ Service Quality
+                      ★ {t('profit_service_quality', 'Service Quality')}
                     </span>
                     <span className="text-xs text-stone-500 font-bold">
                       {qualityMetrics?.cancelledOrdersCount ?? 0} cancelled / {qualityMetrics?.completedOrdersCount ?? 0} served
@@ -401,9 +401,9 @@ export function AnalyticsView() {
             {/* Recent Transactions Table */}
             <div className="bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-stone-900">Recent Transactions</h3>
+                <h3 className="text-sm font-bold text-stone-900">{t('pos_active_orders', 'Recent Transactions')}</h3>
                 <span className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold">
-                  {recentTransactions?.length || 0} recent
+                  {recentTransactions?.length || 0} {t('common_all', 'recent')}
                 </span>
               </div>
 
@@ -462,7 +462,7 @@ export function AnalyticsView() {
               {/* Top Dishes */}
               <div className="lg:col-span-2 bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold text-stone-900">Top Best-Selling Dishes</h3>
+                  <h3 className="text-sm font-bold text-stone-900">{t('profit_top_dishes', 'Top Best-Selling Dishes')}</h3>
                 </div>
 
                 <div className="divide-y divide-stone-100">
@@ -497,12 +497,12 @@ export function AnalyticsView() {
               {/* Dual-Store Valuation */}
               <div className="bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-stone-900 mb-3">Store Stock Valuation</h3>
+                  <h3 className="text-sm font-bold text-stone-900 mb-3">{t('inv_total_value', 'Store Stock Valuation')}</h3>
 
                   <div className="space-y-3">
                     <div className="p-3.5 bg-stone-50 border border-stone-200/80 rounded-2xl flex items-center justify-between">
                       <div>
-                        <div className="text-xs font-bold text-stone-800">Main Store Balance</div>
+                        <div className="text-xs font-bold text-stone-800">{t('inv_main_store', 'Main Store Balance')}</div>
                       </div>
                       <div className="text-sm font-black text-stone-900 font-mono">
                         {stockValuation.mainStoreValuation.toLocaleString()} ETB
@@ -511,7 +511,7 @@ export function AnalyticsView() {
 
                     <div className="p-3.5 bg-stone-50 border border-stone-200/80 rounded-2xl flex items-center justify-between">
                       <div>
-                        <div className="text-xs font-bold text-stone-800">Kitchen Store Balance</div>
+                        <div className="text-xs font-bold text-stone-800">{t('inv_kitchen_store', 'Kitchen Store Balance')}</div>
                       </div>
                       <div className="text-sm font-black text-stone-900 font-mono">
                         {stockValuation.kitchenStoreValuation.toLocaleString()} ETB
@@ -521,7 +521,7 @@ export function AnalyticsView() {
                 </div>
 
                 <div className="pt-4 border-t border-stone-200 flex items-center justify-between">
-                  <span className="text-xs font-bold text-stone-600">Total Stock Value</span>
+                  <span className="text-xs font-bold text-stone-600">{t('inv_total_value', 'Total Stock Value')}</span>
                   <span className="text-base font-black text-emerald-700 font-mono">
                     {stockValuation.totalCombined.toLocaleString()} ETB
                   </span>

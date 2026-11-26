@@ -3,6 +3,7 @@
 import React from 'react';
 import { MenuImage } from '@/components/MenuImage';
 import { Plus, Minus } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export interface MenuItemCardProps {
   item: {
@@ -29,6 +30,7 @@ export function MenuItemCard({
   onUpdateQuantity,
   className,
 }: MenuItemCardProps) {
+  const { t, lang } = useTranslation();
   const isSelected = quantity > 0;
 
   const handleClick = () => {
@@ -74,7 +76,7 @@ export function MenuItemCard({
         <div>
           <div className="flex items-center justify-between gap-1 mb-0.5">
             <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block truncate">
-              {item.category?.name || 'Dish'}
+              {item.category?.name || t('menu_products', 'Dish')}
             </span>
           </div>
           <h3
@@ -90,7 +92,7 @@ export function MenuItemCard({
           <div>
             <div className="text-sm sm:text-base font-black text-stone-900 tracking-tight">
               {Number(item.price).toFixed(2)}{' '}
-              <span className="text-[10px] font-bold text-stone-500">ETB</span>
+              <span className="text-[10px] font-bold text-stone-500">{lang === 'am' ? 'ብር' : 'ETB'}</span>
             </div>
           </div>
 
@@ -137,7 +139,7 @@ export function MenuItemCard({
                 className="h-8 px-3 rounded-xl bg-stone-100 hover:bg-emerald-600 text-stone-700 hover:text-white font-bold text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer group-hover:bg-emerald-600 group-hover:text-white active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Add</span>
+                <span>{t('common_add', 'Add')}</span>
               </button>
             </div>
           )}

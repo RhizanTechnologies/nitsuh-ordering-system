@@ -7,6 +7,7 @@ import { ChefHat, Flame, CheckCircle, Clock, Utensils, AlertTriangle, X, Volume2
 import { playKitchenChime, playReadyChime } from '@/lib/audio';
 import { calculatePrepTime } from '@/lib/timer-utils';
 import { Button, Badge } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 // Clean helpers for formatting and high-contrast badges across themes
 const formatOrderNumber = (num: any) => {
@@ -35,6 +36,7 @@ const getPrepBadge = (prep: any) => {
 
 export function KitchenDisplayView() {
   const { currentUser } = useAppStore();
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<any[]>([]);
   const [mobileTab, setMobileTab] = useState<'NEW' | 'PREPARING' | 'READY'>('NEW');
   const [toastError, setToastError] = useState<string | null>(null);
@@ -235,7 +237,7 @@ export function KitchenDisplayView() {
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
           }`}
         >
-          <span>🟡 New</span>
+          <span>🟡 {t('kds_new_orders', 'New')}</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
             mobileTab === 'NEW' ? 'bg-black/20 text-white' : 'bg-stone-100 text-stone-600'
           }`}>
@@ -251,7 +253,7 @@ export function KitchenDisplayView() {
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
           }`}
         >
-          <span>🔥 Cooking</span>
+          <span>🔥 {t('kds_cooking', 'Cooking')}</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
             mobileTab === 'PREPARING' ? 'bg-black/20 text-white' : 'bg-stone-100 text-stone-600'
           }`}>
@@ -267,7 +269,7 @@ export function KitchenDisplayView() {
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
           }`}
         >
-          <span>✅ Ready</span>
+          <span>✅ {t('kds_ready', 'Ready')}</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
             mobileTab === 'READY' ? 'bg-black/20 text-white' : 'bg-stone-100 text-stone-600'
           }`}>
@@ -283,7 +285,7 @@ export function KitchenDisplayView() {
           <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200/80 flex-shrink-0">
             <span className="text-xs font-black uppercase tracking-wider text-amber-800 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>1. New Tickets ({newOrders.length})</span>
+              <span>1. {t('kds_new_orders', 'New Tickets')} ({newOrders.length})</span>
             </span>
           </div>
 
@@ -291,7 +293,7 @@ export function KitchenDisplayView() {
             {newOrders.length === 0 ? (
               <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400">
                 <Clock className="w-6 h-6 mb-1 text-stone-400 stroke-1" />
-                <span>No new tickets waiting</span>
+                <span>{t('kds_awaiting_orders', 'No new tickets waiting')}</span>
               </div>
             ) : (
               newOrders.map((order) => {
@@ -383,7 +385,7 @@ export function KitchenDisplayView() {
                       ) : (
                         <>
                           <Flame className="w-4 h-4" />
-                          <span>Accept & Start Prep</span>
+                          <span>{t('kds_start_cooking', 'Accept & Start Prep')}</span>
                         </>
                       )}
                     </button>
@@ -399,7 +401,7 @@ export function KitchenDisplayView() {
           <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200/80 flex-shrink-0">
             <span className="text-xs font-black uppercase tracking-wider text-orange-800 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-              <span>2. Cooking / Brewing ({preparingOrders.length})</span>
+              <span>2. {t('kds_cooking', 'Cooking / Brewing')} ({preparingOrders.length})</span>
             </span>
           </div>
 
@@ -407,7 +409,7 @@ export function KitchenDisplayView() {
             {preparingOrders.length === 0 ? (
               <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400">
                 <Flame className="w-6 h-6 mb-1 text-stone-400 stroke-1" />
-                <span>Kitchen is all clear</span>
+                <span>{t('kds_all_clear', 'Kitchen is all clear')}</span>
               </div>
             ) : (
               preparingOrders.map((order) => {
@@ -499,7 +501,7 @@ export function KitchenDisplayView() {
                       ) : (
                         <>
                           <CheckCircle className="w-4 h-4" />
-                          <span>Mark Order Ready!</span>
+                          <span>{t('kds_mark_ready', 'Mark Order Ready!')}</span>
                         </>
                       )}
                     </button>
@@ -515,7 +517,7 @@ export function KitchenDisplayView() {
           <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-200/80 flex-shrink-0">
             <span className="text-xs font-black uppercase tracking-wider text-emerald-800 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>3. Ready for Service ({readyOrders.length})</span>
+              <span>3. {t('kds_ready', 'Ready for Service')} ({readyOrders.length})</span>
             </span>
           </div>
 
@@ -523,7 +525,7 @@ export function KitchenDisplayView() {
             {readyOrders.length === 0 ? (
               <div className="h-32 flex flex-col items-center justify-center text-xs text-stone-400">
                 <CheckCircle className="w-6 h-6 mb-1 text-stone-400 stroke-1" />
-                <span>No orders waiting for pickup</span>
+                <span>{t('kds_awaiting_orders', 'No orders waiting for pickup')}</span>
               </div>
             ) : (
               readyOrders.map((order) => {
@@ -592,7 +594,7 @@ export function KitchenDisplayView() {
                       ) : (
                         <>
                           <Utensils className="w-4 h-4" />
-                          <span>Delivered & Served</span>
+                          <span>{t('kds_bump', 'Delivered & Served')}</span>
                         </>
                       )}
                     </button>

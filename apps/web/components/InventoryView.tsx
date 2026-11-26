@@ -37,9 +37,11 @@ import {
   Layers,
   Scale
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export function InventoryView() {
   const { currentUser } = useAppStore();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'catalog' | 'transfers' | 'recipes' | 'purchases' | 'wastage' | 'ledger'>('catalog');
   const [locations, setLocations] = useState<any[]>([]);
   const [transfers, setTransfers] = useState<any[]>([]);
@@ -528,7 +530,7 @@ export function InventoryView() {
           </div>
           <div>
             <h2 className="text-sm sm:text-base font-black text-stone-900 tracking-tight">
-              {isHeadChefOnly ? 'Kitchen Pantry Stock' : 'Inventory & Stock'}
+              {isHeadChefOnly ? t('inv_kitchen_store', 'Kitchen Pantry Stock') : t('inv_title', 'Inventory & Stock')}
             </h2>
           </div>
         </div>
@@ -544,7 +546,7 @@ export function InventoryView() {
             }`}
           >
             <Boxes className="w-3.5 h-3.5" />
-            <span>Catalog</span>
+            <span>{t('inv_catalog', 'Catalog')}</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
               activeTab === 'catalog'
                 ? 'bg-white/20 text-white'
@@ -563,7 +565,7 @@ export function InventoryView() {
             }`}
           >
             <ArrowRightLeft className="w-3.5 h-3.5" />
-            <span>Transfers</span>
+            <span>{t('inv_transfers', 'Transfers')}</span>
             {pendingKitchenReceipts.length > 0 && (
               <span className="bg-[#C11221] text-white text-[10px] px-1.5 py-0.2 rounded-full font-black animate-pulse">
                 {pendingKitchenReceipts.length}
@@ -581,7 +583,7 @@ export function InventoryView() {
               }`}
             >
               <ChefHat className="w-3.5 h-3.5" />
-              Recipes
+              <span>{t('inv_recipes', 'Recipes')}</span>
             </button>
           )}
 
@@ -595,7 +597,7 @@ export function InventoryView() {
               }`}
             >
               <Truck className="w-3.5 h-3.5" />
-              Suppliers
+              <span>{t('inv_suppliers', 'Suppliers')}</span>
             </button>
           )}
 
@@ -609,7 +611,7 @@ export function InventoryView() {
               }`}
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Wastage
+              <span>{t('inv_wastage', 'Wastage')}</span>
             </button>
           )}
 
@@ -622,7 +624,7 @@ export function InventoryView() {
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            Ledger
+            <span>{t('inv_ledger', 'Ledger')}</span>
           </button>
         </div>
       </div>

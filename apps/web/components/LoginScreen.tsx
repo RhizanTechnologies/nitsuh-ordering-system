@@ -6,11 +6,13 @@ import { useAppStore } from '@/lib/store';
 import { getDefaultRouteForRole } from '@/lib/route-guard';
 import { fetchApi } from '@/lib/api';
 import { NitsuhLogo } from '@/components/NitsuhLogo';
-import { Lock, KeyRound, ArrowRight, UserCircle, Check, HelpCircle, Sparkles, X, ShieldAlert, ChevronDown, Loader2 } from 'lucide-react';
+import { Lock, KeyRound, ArrowRight, UserCircle, Check, HelpCircle, Sparkles, X, ShieldAlert, ChevronDown, Loader2, Globe } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export function LoginScreen() {
   const router = useRouter();
   const { login, logout } = useAppStore();
+  const { lang, toggleLanguage, t } = useTranslation();
   const [checkingSession, setCheckingSession] = useState(true);
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -56,15 +58,15 @@ export function LoginScreen() {
 
   const formatRoleName = (role: string) => {
     switch (role) {
-      case 'WAITER': return 'Waiter';
-      case 'CASHIER': return 'Cashier';
-      case 'KITCHEN_STAFF': return 'Kitchen Cook';
-      case 'HEAD_CHEF': return 'Head Chef';
-      case 'MAIN_STOREKEEPER': return 'Main Storekeeper';
-      case 'KITCHEN_STOREKEEPER': return 'Kitchen Storekeeper';
-      case 'MANAGER': return 'Manager';
-      case 'OWNER': return 'Owner';
-      default: return role;
+      case 'WAITER': return t('role_waiter', 'Waiter');
+      case 'CASHIER': return t('role_cashier', 'Cashier');
+      case 'KITCHEN_STAFF': return t('role_kitchen_staff', 'Kitchen Cook');
+      case 'HEAD_CHEF': return t('role_head_chef', 'Head Chef');
+      case 'MAIN_STOREKEEPER': return t('role_main_storekeeper', 'Main Storekeeper');
+      case 'KITCHEN_STOREKEEPER': return t('role_kitchen_storekeeper', 'Kitchen Storekeeper');
+      case 'MANAGER': return t('role_manager', 'Manager');
+      case 'OWNER': return t('role_owner', 'Owner');
+      default: return t(`role_${role.toLowerCase()}`, role);
     }
   };
 
@@ -338,6 +340,17 @@ export function LoginScreen() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-stone-900 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
+      {/* Language Switcher Pill in Top Right */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-stone-100 border border-stone-200 rounded-full text-xs font-black text-stone-800 transition shadow-xs cursor-pointer active:scale-95"
+        title={lang === 'en' ? 'ወደ አማርኛ ቀይር (Switch to Amharic)' : 'Switch to English'}
+      >
+        <Globe className="w-3.5 h-3.5 text-emerald-700" />
+        <span>{lang === 'en' ? '🇪🇹 አማ' : '🇬🇧 EN'}</span>
+      </button>
+
       {/* Subtle ambient lighting accent */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -363,7 +376,7 @@ export function LoginScreen() {
               }`}
             >
               <KeyRound className={`w-3.5 h-3.5 ${activeTab === 'pin' ? 'text-emerald-600' : 'text-stone-400'}`} />
-              <span>Staff Profile & PIN</span>
+              <span>{t('login_staff_tab', 'Staff Profile & PIN')}</span>
             </button>
             <button
               type="button"
@@ -378,7 +391,7 @@ export function LoginScreen() {
               }`}
             >
               <Lock className={`w-3.5 h-3.5 ${activeTab === 'password' ? 'text-emerald-600' : 'text-stone-400'}`} />
-              <span>Manager / Owner</span>
+              <span>{t('login_manager_tab', 'Manager / Owner')}</span>
             </button>
           </div>
         </div>
@@ -389,7 +402,7 @@ export function LoginScreen() {
             {/* Step 1: Employee Name Dropdown */}
             <div className="w-full relative" ref={dropdownRef}>
               <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 text-center">
-                1. Select Your Staff Profile
+                {t('login_select_staff', '1. Select Your Staff Profile')}
               </label>
 
               {/* Modern Trigger Button */}

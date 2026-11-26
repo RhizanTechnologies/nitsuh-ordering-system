@@ -876,7 +876,7 @@ export function PosView() {
           <div className="min-w-0">
             <div className="text-[10px] font-bold text-stone-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1">
               <UserCheck className="w-3 h-3 text-amber-500 flex-shrink-0" />
-              <span>Cashier:</span>
+              <span>{t('role_cashier', 'Cashier')}:</span>
               <span className="text-amber-700 dark:text-amber-400 font-bold truncate">{currentUser?.name}</span>
             </div>
             <div className="text-xs sm:text-sm font-black text-stone-900 dark:text-white mt-0.5 truncate">
@@ -893,7 +893,7 @@ export function PosView() {
           }}
           className="text-xs font-semibold text-stone-400 hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400 transition cursor-pointer flex-shrink-0 ml-2"
         >
-          Clear
+          {t('waiter_clear_order', 'Clear')}
         </button>
       </div>
 
@@ -903,11 +903,11 @@ export function PosView() {
           <div>
             <div className="font-black text-amber-900 flex items-center gap-1.5">
               <FileEdit className="w-3.5 h-3.5 text-amber-600" />
-              <span>Editing Slip {formatOrderNumber(editingSlipTarget.orderNumber)}</span>
+              <span>{t('waiter_editing_draft', 'Editing Slip')} {formatOrderNumber(editingSlipTarget.orderNumber)}</span>
             </div>
             <div className="text-[10px] text-stone-500">
-              {editingSlipTarget.orderType === "TAKEAWAY" ? "Takeaway Order" : `Table ${editingSlipTarget.table?.tableNumber || "Assigned"}`}
-              {editingSlipTarget.waiter?.name ? ` • Waiter: ${editingSlipTarget.waiter.name}` : ''}
+              {editingSlipTarget.orderType === "TAKEAWAY" ? t('waiter_takeaway', "Takeaway Order") : `Table ${editingSlipTarget.table?.tableNumber || "Assigned"}`}
+              {editingSlipTarget.waiter?.name ? ` • ${t('role_waiter', 'Waiter')}: ${editingSlipTarget.waiter.name}` : ''}
             </div>
           </div>
           <button
@@ -918,7 +918,7 @@ export function PosView() {
             }}
             className="text-[10px] font-bold text-amber-900 hover:text-stone-900 bg-amber-200/80 hover:bg-amber-300 px-2 py-0.5 rounded-lg cursor-pointer transition"
           >
-            Cancel Edit
+            {t('waiter_cancel_edit', 'Cancel Edit')}
           </button>
         </div>
       )}
@@ -929,17 +929,17 @@ export function PosView() {
           <div>
             <div className="font-black text-emerald-800 flex items-center gap-1.5">
               <RotateCcw className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Appending to {formatOrderNumber(appendOrderTarget.orderNumber)}</span>
+              <span>{t('waiter_adding_items', 'Appending to')} {formatOrderNumber(appendOrderTarget.orderNumber)}</span>
             </div>
             <div className="text-[10px] text-stone-500">
-              {appendOrderTarget.orderType === "TAKEAWAY" ? "Takeaway Order" : `Table ${appendOrderTarget.table?.tableNumber}`}
+              {appendOrderTarget.orderType === "TAKEAWAY" ? t('waiter_takeaway', "Takeaway Order") : `Table ${appendOrderTarget.table?.tableNumber}`}
             </div>
           </div>
           <button
             onClick={() => setAppendOrderTarget(null)}
             className="text-[10px] font-bold text-emerald-800 hover:text-stone-900 bg-emerald-100 px-2 py-0.5 rounded-lg cursor-pointer"
           >
-            Cancel
+            {t('common_cancel', 'Cancel')}
           </button>
         </div>
       )}
@@ -956,7 +956,7 @@ export function PosView() {
             }`}
           >
             <Utensils className="w-3.5 h-3.5" />
-            <span>Dine In</span>
+            <span>{t('waiter_dine_in', 'Dine In')}</span>
           </button>
           <button
             onClick={() => setOrderType('TAKEAWAY')}
@@ -967,7 +967,7 @@ export function PosView() {
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Take Away</span>
+            <span>{t('waiter_takeaway', 'Take Away')}</span>
           </button>
         </div>
       </div>
@@ -1119,27 +1119,27 @@ export function PosView() {
 
         <div className="space-y-1 text-xs font-semibold text-stone-500 dark:text-zinc-400">
           <div className="flex justify-between">
-            <span>Base Subtotal</span>
+            <span>{t('waiter_subtotal', 'Base Subtotal')}</span>
             <span className="text-stone-900 dark:text-white font-bold">{subtotal.toFixed(2)} ETB</span>
           </div>
           {totalTip > 0 && (
             <div className="flex justify-between text-amber-700 dark:text-amber-400 font-bold">
-              <span>Staff Tip / Gratuity</span>
+              <span>{t('pos_tip', 'Staff Tip / Gratuity')}</span>
               <span>+{totalTip.toFixed(2)} ETB</span>
             </div>
           )}
           {discountPercent > 0 && (
             <div className="flex justify-between text-red-600 dark:text-rose-500 font-bold">
-              <span>Discount ({discountPercent}%)</span>
+              <span>{t('pos_discount', 'Discount')} ({discountPercent}%)</span>
               <span>-{discountAmount.toFixed(2)} ETB</span>
             </div>
           )}
           <div className="flex justify-between text-stone-400 text-[11px]">
             <span>VAT (15%)</span>
-            <span className="font-semibold text-stone-500">Included in prices</span>
+            <span className="font-semibold text-stone-500">{t('waiter_tax_inc', 'Included in prices')}</span>
           </div>
           <div className="flex justify-between pt-1.5 border-t border-stone-200 dark:border-white/10 text-sm font-bold text-stone-900 dark:text-white">
-            <span>Total Due</span>
+            <span>{t('waiter_total', 'Total Due')}</span>
             <span className="text-amber-700 dark:text-amber-400 text-base sm:text-lg font-black">{total.toFixed(2)} ETB</span>
           </div>
         </div>
@@ -1157,12 +1157,12 @@ export function PosView() {
           >
             <span>
               {loading
-                ? "Firing..."
+                ? t('waiter_sending', "Firing...")
                 : editingSlipTarget
-                  ? "Update Order"
+                  ? t('waiter_update_order', "Update Order")
                   : appendOrderTarget
-                    ? "Append to Bill"
-                    : "Fire to Kitchen"}
+                    ? t('waiter_adding_items', "Append to Bill")
+                    : t('pos_confirm_payment', "Fire to Kitchen")}
             </span>
             <ArrowRight className="w-4 h-4 text-white" />
           </Button>
@@ -1178,7 +1178,7 @@ export function PosView() {
             title="Pay & Settle Tender"
           >
             <CreditCard className="w-4 h-4" />
-            <span>Settle Bill</span>
+            <span>{t('pos_tender', 'Settle Bill')}</span>
           </Button>
         </div>
       </div>
@@ -1193,7 +1193,7 @@ export function PosView() {
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-stone-500">
             <UserCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <span className="truncate">Cashier Terminal</span>
+            <span className="truncate">{t('pos_terminal', 'Cashier Terminal')}</span>
           </div>
 
           {/* Primary View Switcher */}

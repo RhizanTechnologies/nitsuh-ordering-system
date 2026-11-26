@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { StaffAvatarUploader, AVATAR_PRESETS } from './StaffAvatarUploader';
 import { Button, Badge, Input, Card } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 import {
   AppRole,
   AppPage,
@@ -119,6 +120,7 @@ const AVAILABLE_CAPABILITIES: Array<{ id: AppCapability; label: string; descript
 
 export function StaffManagementView() {
   const { currentUser } = useAppStore();
+  const { t } = useTranslation();
   const isOwner = currentUser?.role === 'OWNER';
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -814,10 +816,10 @@ export function StaffManagementView() {
             </div>
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight leading-tight">
-                Staff Management
+                {t('staff_title', 'Staff Management')}
               </h1>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap shrink-0">
-                {isOwner ? 'Owner' : 'Manager'}
+                {isOwner ? t('role_owner', 'Owner') : t('role_manager', 'Manager')}
               </span>
             </div>
           </div>
@@ -828,7 +830,7 @@ export function StaffManagementView() {
               className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs shadow-xs transition cursor-pointer select-none"
             >
               <UserPlus className="w-4 h-4" />
-              <span className="whitespace-nowrap">Register Staff</span>
+              <span className="whitespace-nowrap">{t('staff_add_staff', 'Register Staff')}</span>
             </button>
             <button
               onClick={loadStaff}
@@ -843,22 +845,22 @@ export function StaffManagementView() {
         {/* Stats Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-4 pt-4 border-t border-stone-200/80">
           <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
-            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Total Staff</div>
+            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{t('common_all', 'Total')} {t('nav_staff', 'Staff')}</div>
             <div className="text-xl font-black text-stone-900 mt-0.5">{totalStaff}</div>
           </div>
 
           <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-3">
-            <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Active Staff</div>
+            <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">{t('common_active', 'Active')} {t('nav_staff', 'Staff')}</div>
             <div className="text-xl font-black text-emerald-800 mt-0.5">{activeStaff}</div>
           </div>
 
           <div className="bg-rose-50/60 border border-rose-200/80 rounded-2xl p-3">
-            <div className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Disabled Staff</div>
+            <div className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">{t('common_inactive', 'Disabled')} {t('nav_staff', 'Staff')}</div>
             <div className="text-xl font-black text-rose-800 mt-0.5">{disabledStaff}</div>
           </div>
 
           <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
-            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Kitchen & Store</div>
+            <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{t('nav_kds', 'Kitchen')} & {t('nav_stock', 'Store')}</div>
             <div className="text-xl font-black text-stone-900 mt-0.5">{kitchenStaff + storeStaff}</div>
           </div>
         </div>
@@ -876,7 +878,7 @@ export function StaffManagementView() {
               }`}
             >
               <Users className="w-4 h-4" />
-              <span>Staff Directory</span>
+              <span>{t('staff_tab_directory', 'Staff Directory')}</span>
             </button>
             <button
               type="button"
@@ -888,7 +890,7 @@ export function StaffManagementView() {
               }`}
             >
               <SlidersHorizontal className="w-4 h-4" />
-              <span>Role Permissions & Page Access Matrix</span>
+              <span>{t('staff_tab_permissions', 'Roles & Station Permissions')}</span>
             </button>
           </div>
         )}
@@ -1030,7 +1032,7 @@ export function StaffManagementView() {
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
             <input
               type="text"
-              placeholder="Search staff..."
+              placeholder={t('common_search', 'Search staff...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-white border border-stone-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-600 shadow-xs"
@@ -1040,9 +1042,9 @@ export function StaffManagementView() {
           {/* Status Filter: All / Active / Disabled */}
           <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-2xl border border-stone-200 shrink-0">
             {[
-              { id: 'ALL', label: `All (${totalStaff})` },
-              { id: 'ACTIVE', label: `Active (${activeStaff})` },
-              { id: 'DISABLED', label: `Disabled (${disabledStaff})` },
+              { id: 'ALL', label: `${t('common_all', 'All')} (${totalStaff})` },
+              { id: 'ACTIVE', label: `${t('common_active', 'Active')} (${activeStaff})` },
+              { id: 'DISABLED', label: `${t('common_inactive', 'Disabled')} (${disabledStaff})` },
             ].map((s) => (
               <button
                 key={s.id}
