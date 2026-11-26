@@ -21,6 +21,7 @@ import {
 import { fetchApi, getSocket } from '@/lib/api';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { ChangeCredentialsModal } from '@/components/ChangeCredentialsModal';
+import { NotificationCenter } from '@/components/NotificationCenter';
 import { canRoleAccessPage } from '@/lib/permissions';
 import { useTranslation } from '@/lib/i18n';
 import { Globe } from 'lucide-react';
@@ -113,7 +114,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="bg-white border-b border-stone-200/90 px-3.5 sm:px-6 py-2.5 sticky top-0 z-40 text-stone-900 shadow-2xs font-sans">
+      <header className="bg-white border-b border-stone-200/90 px-3.5 sm:px-6 py-2.5 sticky top-0 z-40 text-stone-900 shadow-2xs font-sans w-full flex-shrink-0">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Brand Identity */}
           <div className="flex items-center gap-3">
@@ -137,8 +138,11 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Right: Language Switcher & Profile Pill */}
+          {/* Right: Notification Center, Language Switcher & Profile Pill */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Realtime Notification Center */}
+            <NotificationCenter />
+
             {/* Language Switcher Pill (Amharic / English) */}
             <button
               type="button"

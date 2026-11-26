@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { isRouteAllowed, getDefaultRouteForRole } from '@/lib/route-guard';
 import { Navbar } from '@/components/Navbar';
+import { NotificationProvider } from '@/components/NotificationProvider';
 import { fetchApi, getSocket } from '@/lib/api';
 import { ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
 import { fetchServerRolePermissions, setLocalRolePermissions } from '@/lib/permissions';
@@ -149,11 +150,15 @@ export default function ProtectedAppLayout({
 
   // 4. Authorized View
   return (
-    <main className="h-screen max-h-screen flex flex-col bg-[#F8F9FA] text-stone-900 overflow-hidden transition-colors duration-200">
-      <Navbar />
-      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        {children}
-      </div>
-    </main>
+    <NotificationProvider>
+      <main className="h-screen h-[100dvh] max-h-screen max-h-[100dvh] w-full flex flex-col bg-[#F8F9FA] text-stone-900 overflow-hidden overscroll-none transition-colors duration-200">
+        <div className="sticky top-0 z-40 w-full flex-shrink-0">
+          <Navbar />
+        </div>
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+          {children}
+        </div>
+      </main>
+    </NotificationProvider>
   );
 }
