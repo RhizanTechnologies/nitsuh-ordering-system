@@ -689,59 +689,45 @@ export function WaiterPadView() {
 
       {/* Active Edit/Append Banner & Elevated Order Strip */}
       {editingDraftOrder && (
-        <div className="z-20 flex-shrink-0 border-b border-amber-500/30">
-          <div className="bg-amber-400 text-amber-950 px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/30 text-amber-950 flex items-center justify-center shrink-0">
-                <Edit3 className="w-4 h-4 text-amber-950" />
+        <div className="z-20 flex-shrink-0 border-b border-stone-200 bg-white shadow-2xs">
+          <div className="bg-stone-900 text-white px-3 sm:px-4 py-2 flex items-center justify-between gap-2 shadow-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <Edit3 className="w-3.5 h-3.5" />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-black text-xs sm:text-sm text-amber-950">
-                    {t('waiter_editing_draft', 'Editing Draft')} {formatOrderNumber(editingDraftOrder.orderNumber)}
-                  </span>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-950/15 text-amber-950">
-                    Table {editingDraftOrder.tableNumber}
-                  </span>
-                </div>
-                <p className="text-[11px] text-amber-900 font-medium truncate mt-0.5">
-                  {t('waiter_select_items', 'Add, remove, or adjust quantities for this guest note')}
-                </p>
+              <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                <span className="font-black text-xs text-white truncate">
+                  {t('waiter_editing_draft', 'Editing')} {formatOrderNumber(editingDraftOrder.orderNumber)}
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-stone-200">
+                  Table {editingDraftOrder.tableNumber}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
-              <button
-                type="button"
-                onClick={() => setShowMobileDrawer(true)}
-                className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 border border-amber-950/20 rounded-xl text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
-                title="View review slip"
-              >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>{t('waiter_review_slip', 'Review Slip')}</span>
-              </button>
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={handleCancelEditOrAppend}
-                className="px-3 py-1.5 bg-white/80 hover:bg-white text-amber-950 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+                className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white rounded-lg text-xs font-bold transition cursor-pointer"
               >
-                {t('waiter_cancel_edit', 'Cancel Edit')}
+                {t('waiter_cancel_edit', 'Cancel')}
               </button>
               <button
                 type="button"
                 disabled={sending || waiterCart.length === 0}
                 onClick={handleSendToCashier}
-                className="px-4 py-1.5 bg-amber-950 hover:bg-black text-amber-300 hover:text-amber-200 rounded-xl text-xs font-black shadow-xs transition cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-black shadow-xs transition cursor-pointer inline-flex items-center gap-1 disabled:opacity-50"
               >
                 {sending ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-3 h-3 animate-spin" />
                     <span>{t('waiter_updating', 'Updating...')}</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>{t('waiter_update_order', 'Update Order')}</span>
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>{t('waiter_update_order', 'Update')}</span>
                   </>
                 )}
               </button>
@@ -750,9 +736,9 @@ export function WaiterPadView() {
 
           {/* Elevated Order Items Review Strip */}
           {waiterCart.length > 0 && (
-            <div className="bg-amber-50/95 border-t border-amber-300/40 px-3 sm:px-4 py-2 flex items-center justify-between gap-3 overflow-x-auto text-xs">
+            <div className="bg-stone-50 border-t border-stone-200/90 px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 overflow-x-auto text-xs">
               <div className="flex items-center gap-2 min-w-0 shrink-0">
-                <span className="font-extrabold text-amber-950 text-[11px] uppercase tracking-wider">
+                <span className="font-extrabold text-stone-700 text-[10px] uppercase tracking-wider">
                   {t('waiter_items_selected', 'Items in Note')} ({totalWaiterItems}):
                 </span>
               </div>
@@ -760,7 +746,7 @@ export function WaiterPadView() {
                 {waiterCart.map((cartItem) => (
                   <div
                     key={cartItem.menuItemId}
-                    className="flex items-center gap-1.5 bg-white border border-amber-300/60 rounded-xl px-2.5 py-1 shrink-0 shadow-2xs"
+                    className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl px-2 py-0.5 shrink-0 shadow-2xs"
                   >
                     <span className="font-bold text-stone-900 text-[11px] truncate max-w-[110px]">
                       {cartItem.name}
@@ -786,15 +772,15 @@ export function WaiterPadView() {
                 ))}
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="font-black text-amber-950 text-xs">
-                  {totalWaiterSum.toFixed(2)} ETB
+                <span className="font-black text-stone-900 text-xs">
+                  {totalWaiterSum.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowMobileDrawer(true)}
-                  className="text-[11px] font-bold text-amber-900 hover:text-black underline cursor-pointer whitespace-nowrap"
+                  className="text-[10px] font-bold text-emerald-700 hover:text-emerald-800 underline cursor-pointer whitespace-nowrap"
                 >
-                  Review Slip →
+                  {t('waiter_review_slip', 'Review Slip')} →
                 </button>
               </div>
             </div>
@@ -803,59 +789,45 @@ export function WaiterPadView() {
       )}
 
       {appendingOrder && (
-        <div className="z-20 flex-shrink-0 border-b border-emerald-700/30">
-          <div className="bg-emerald-600 text-white px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center shrink-0">
-                <Plus className="w-4 h-4 text-white" />
+        <div className="z-20 flex-shrink-0 border-b border-stone-200 bg-white shadow-2xs">
+          <div className="bg-stone-900 text-white px-3 sm:px-4 py-2 flex items-center justify-between gap-2 shadow-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <Plus className="w-3.5 h-3.5" />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-black text-xs sm:text-sm text-white">
-                    Adding to {formatOrderNumber(appendingOrder.orderNumber)}
-                  </span>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-white/20 text-white">
-                    Table {appendingOrder.tableNumber}
-                  </span>
-                </div>
-                <p className="text-[11px] text-emerald-100 font-medium truncate mt-0.5">
-                  Select additional items to append to active kitchen ticket
-                </p>
+              <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                <span className="font-black text-xs text-white truncate">
+                  {lang === 'am' ? 'ወደ ትዕዛዝ በማከል ላይ' : 'Adding to'} {formatOrderNumber(appendingOrder.orderNumber)}
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-stone-200">
+                  Table {appendingOrder.tableNumber}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
-              <button
-                type="button"
-                onClick={() => setShowMobileDrawer(true)}
-                className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5"
-                title="View review slip"
-              >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>{t('waiter_review_slip', 'Review Slip')}</span>
-              </button>
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={handleCancelEditOrAppend}
-                className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+                className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white rounded-lg text-xs font-bold transition cursor-pointer"
               >
-                Cancel
+                {t('waiter_cancel_edit', 'Cancel')}
               </button>
               <button
                 type="button"
                 disabled={sending || waiterCart.length === 0}
                 onClick={handleSendToCashier}
-                className="px-4 py-1.5 bg-white hover:bg-emerald-50 text-emerald-800 rounded-xl text-xs font-black shadow-xs transition cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-black shadow-xs transition cursor-pointer inline-flex items-center gap-1 disabled:opacity-50"
               >
                 {sending ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Sending...</span>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>{t('waiter_sending', 'Sending...')}</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Send Items ({totalWaiterItems})</span>
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>{t('waiter_send_items', 'Send Items')} ({totalWaiterItems})</span>
                   </>
                 )}
               </button>
@@ -864,17 +836,17 @@ export function WaiterPadView() {
 
           {/* Elevated Order Items Review Strip */}
           {waiterCart.length > 0 && (
-            <div className="bg-emerald-50/95 border-t border-emerald-200 px-3 sm:px-4 py-2 flex items-center justify-between gap-3 overflow-x-auto text-xs">
+            <div className="bg-stone-50 border-t border-stone-200/90 px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 overflow-x-auto text-xs">
               <div className="flex items-center gap-2 min-w-0 shrink-0">
-                <span className="font-extrabold text-emerald-950 text-[11px] uppercase tracking-wider">
-                  New Items ({totalWaiterItems}):
+                <span className="font-extrabold text-stone-700 text-[10px] uppercase tracking-wider">
+                  {t('waiter_items_selected', 'New Items')} ({totalWaiterItems}):
                 </span>
               </div>
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
                 {waiterCart.map((cartItem) => (
                   <div
                     key={cartItem.menuItemId}
-                    className="flex items-center gap-1.5 bg-white border border-emerald-300 rounded-xl px-2.5 py-1 shrink-0 shadow-2xs"
+                    className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl px-2 py-0.5 shrink-0 shadow-2xs"
                   >
                     <span className="font-bold text-stone-900 text-[11px] truncate max-w-[110px]">
                       {cartItem.name}
@@ -900,15 +872,15 @@ export function WaiterPadView() {
                 ))}
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="font-black text-emerald-950 text-xs">
-                  {totalWaiterSum.toFixed(2)} ETB
+                <span className="font-black text-stone-900 text-xs">
+                  {totalWaiterSum.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowMobileDrawer(true)}
-                  className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 underline cursor-pointer whitespace-nowrap"
+                  className="text-[10px] font-bold text-emerald-700 hover:text-emerald-800 underline cursor-pointer whitespace-nowrap"
                 >
-                  Review Slip →
+                  {t('waiter_review_slip', 'Review Slip')} →
                 </button>
               </div>
             </div>
@@ -1537,17 +1509,17 @@ export function WaiterPadView() {
 
           {/* Mode Banner for Editing Draft or Appending to Table */}
           {editingDraftOrder && (
-            <div className="p-3 bg-amber-50 border-b border-amber-200 flex items-center justify-between gap-2">
+            <div className="p-2.5 bg-stone-100 border-b border-stone-200 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 rounded-lg bg-amber-200 text-amber-900 flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-stone-200 text-stone-800 flex items-center justify-center flex-shrink-0">
                   <Edit3 className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-black text-amber-950 truncate">
-                    Editing Draft {formatOrderNumber(editingDraftOrder.orderNumber)}
+                  <div className="text-xs font-black text-stone-900 truncate">
+                    {t('waiter_editing_draft', 'Editing Draft')} {formatOrderNumber(editingDraftOrder.orderNumber)}
                   </div>
-                  <div className="text-[10px] text-amber-800 font-semibold truncate">
-                    Table {editingDraftOrder.tableNumber} • Add/remove items
+                  <div className="text-[10px] text-stone-600 font-semibold truncate">
+                    Table {editingDraftOrder.tableNumber}
                   </div>
                 </div>
               </div>
@@ -1555,7 +1527,7 @@ export function WaiterPadView() {
                 <button
                   type="button"
                   onClick={handleCancelEditOrAppend}
-                  className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 transition flex-shrink-0 cursor-pointer shadow-2xs"
+                  className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 transition flex-shrink-0 cursor-pointer shadow-2xs"
                 >
                   {t('waiter_cancel_edit', 'Cancel')}
                 </button>
@@ -1563,7 +1535,7 @@ export function WaiterPadView() {
                   type="button"
                   disabled={sending || waiterCart.length === 0}
                   onClick={handleSendToCashier}
-                  className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-amber-950 hover:bg-black text-amber-300 hover:text-amber-200 transition flex-shrink-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1 shadow-2xs"
+                  className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition flex-shrink-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1 shadow-2xs"
                 >
                   {sending ? (
                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -1802,15 +1774,15 @@ export function WaiterPadView() {
         </button>
       </div>
 
-      {/* Floating Bottom Quick Bar when items are selected on Mobile/Tablet */}
+      {/* Floating Bottom Quick Bar when items are selected on Mobile/Tablet (Limited to menu area, excluding left sidebar) */}
       {totalWaiterItems > 0 && activeTab === 'menu' && !showMobileDrawer && (
-        <div className="fixed bottom-16 left-3 right-3 z-30 lg:hidden animate-in slide-in-from-bottom-2 duration-200">
+        <div className="fixed bottom-16 left-[4.5rem] sm:left-[5.5rem] md:left-[6.5rem] right-3 z-30 lg:hidden animate-in slide-in-from-bottom-2 duration-200">
           <div
             onClick={() => setShowMobileDrawer(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500 active:scale-[0.99] transition"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500 active:scale-[0.99] transition"
           >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center font-black text-xs text-white shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center font-black text-xs text-white shrink-0">
                 {totalWaiterItems}
               </div>
               <div className="min-w-0">
@@ -1818,13 +1790,13 @@ export function WaiterPadView() {
                   {totalWaiterItems} {t('waiter_items_selected', 'Items Selected')}
                 </div>
                 <div className="text-[10px] text-emerald-100 font-semibold truncate">
-                  {totalWaiterSum.toFixed(2)} ETB • {t('waiter_review_slip', 'Tap to Review Slip')}
+                  {totalWaiterSum.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'} • {t('waiter_review_slip', 'Tap to Review Slip')}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0 bg-white text-emerald-900 font-black text-xs px-3 py-1.5 rounded-xl shadow-xs">
-              <span>{t('waiter_review_slip', 'Review Slip')}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1 shrink-0 bg-white text-emerald-900 font-black text-xs px-2.5 py-1 rounded-xl shadow-xs">
+              <span className="truncate max-w-[80px] sm:max-w-none">{t('waiter_review_slip', 'Review Slip')}</span>
+              <ArrowRight className="w-3.5 h-3.5 shrink-0" />
             </div>
           </div>
         </div>
@@ -1923,18 +1895,18 @@ export function WaiterPadView() {
 
             {/* Mode Banner in Mobile Drawer */}
             {editingDraftOrder && (
-              <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-2 mb-2">
+              <div className="p-2.5 bg-stone-100 border border-stone-200 rounded-xl flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Edit3 className="w-4 h-4 text-amber-700 flex-shrink-0" />
-                  <div className="text-xs font-black text-amber-950 truncate">
-                    Editing Draft {formatOrderNumber(editingDraftOrder.orderNumber)}
+                  <Edit3 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <div className="text-xs font-black text-stone-900 truncate">
+                    {t('waiter_editing_draft', 'Editing Draft')} {formatOrderNumber(editingDraftOrder.orderNumber)}
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <button
                     type="button"
                     onClick={handleCancelEditOrAppend}
-                    className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 cursor-pointer shadow-2xs"
+                    className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-stone-300 text-stone-700 cursor-pointer shadow-2xs"
                   >
                     {t('waiter_cancel_edit', 'Cancel')}
                   </button>
@@ -1942,7 +1914,7 @@ export function WaiterPadView() {
                     type="button"
                     disabled={sending || waiterCart.length === 0}
                     onClick={handleSendToCashier}
-                    className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-amber-950 text-amber-300 hover:bg-black transition cursor-pointer disabled:opacity-50 inline-flex items-center gap-1 shadow-2xs"
+                    className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition cursor-pointer disabled:opacity-50 inline-flex items-center gap-1 shadow-2xs"
                   >
                     {sending ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
