@@ -73,7 +73,7 @@ export function PosView() {
   const [posTab, setPosTab] = useState<'orders' | 'menu'>('orders');
 
   // Orders View Filters & Search
-  const [orderFilter, setOrderFilter] = useState<'ALL' | 'SLIPS' | 'UNPAID' | 'PREPARING' | 'READY' | 'SERVED' | 'DINE_IN' | 'TAKEAWAY'>('ALL');
+  const [orderFilter, setOrderFilter] = useState<'ALL' | 'SLIPS' | 'PREPARING' | 'READY' | 'SERVED' | 'UNPAID' | 'PAID' | 'DINE_IN' | 'TAKEAWAY'>('ALL');
   const [orderSearch, setOrderSearch] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -383,15 +383,35 @@ export function PosView() {
     });
   }, [activeOrders, dateFilter]);
 
-  // Statistics calculation for Cashier Command Center (unpaid bills count ALL active unsettled bills)
+  // Waiter Slips scoped to selected day
+  const daySlips = useMemo(() => {
+    return incomingSlips.filter((s) => {
+      const key = getOrderDayKey(s.createdAt);
+      if (dateFilter === 'today') return key === 'today';
+      if (dateFilter === 'yesterday') return key === 'yesterday';
+      if (dateFilter === 'day_before') return key === 'day_before';
+      if (dateFilter === '3_days') return ['today', 'yesterday', 'day_before'].includes(key);
+      if (dateFilter === 'all') return true;
+      return false;
+    });
+  }, [incomingSlips, dateFilter]);
+
+  // Statistics calculation for Cashier Command Center
+  const pendingSlipsCount = daySlips.length;
+  const inPrepCount = useMemo(() => dayFilteredOrders.filter((o) => ['CONFIRMED', 'IN_PREPARATION'].includes(o.status)).length, [dayFilteredOrders]);
+  const readyCount = useMemo(() => dayFilteredOrders.filter((o) => o.status === 'READY').length, [dayFilteredOrders]);
+  const servedCount = useMemo(() => dayFilteredOrders.filter((o) => o.status === 'SERVED').length, [dayFilteredOrders]);
   const unpaidOrders = useMemo(
-    () => activeOrders.filter((o) => o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED' && o.status !== 'CANCELLED'),
-    [activeOrders]
+    () => dayFilteredOrders.filter((o) => o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED' && o.status !== 'CANCELLED'),
+    [dayFilteredOrders]
   );
   const unpaidTotalAmount = useMemo(() => unpaidOrders.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0), [unpaidOrders]);
-  const inPrepCount = useMemo(() => activeOrders.filter((o) => ['CONFIRMED', 'IN_PREPARATION'].includes(o.status)).length, [activeOrders]);
-  const readyCount = useMemo(() => activeOrders.filter((o) => o.status === 'READY').length, [activeOrders]);
-  const servedCount = useMemo(() => activeOrders.filter((o) => o.status === 'SERVED' && o.paymentStatus !== 'PAID').length, [activeOrders]);
+  const paidOrders = useMemo(
+    () => dayFilteredOrders.filter((o) => o.paymentStatus === 'PAID' || o.status === 'COMPLETED'),
+    [dayFilteredOrders]
+  );
+  const paidTotalAmount = useMemo(() => paidOrders.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0), [paidOrders]);
+  const allOrdersCount = daySlips.length + dayFilteredOrders.length;
 
   // Filtered & Sorted Orders for the Cashier main page
   // Requirement: UNPAID and SERVED orders MUST appear FIRST!
@@ -404,6 +424,10 @@ export function PosView() {
       // UNPAID filter: strictly only show unpaid bills (never completed/paid bills)
       if (orderFilter === 'UNPAID') {
         if (o.paymentStatus === 'PAID' || o.status === 'COMPLETED') return false;
+      }
+      // PAID filter: orders that are settled / paid
+      if (orderFilter === 'PAID') {
+        if (o.paymentStatus !== 'PAID' && o.status !== 'COMPLETED') return false;
       }
       if (orderFilter === 'PREPARING' && !['CONFIRMED', 'IN_PREPARATION'].includes(o.status)) return false;
       if (orderFilter === 'READY' && o.status !== 'READY') return false;
@@ -456,19 +480,6 @@ export function PosView() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [dayFilteredOrders, orderFilter, orderSearch]);
-
-  // Waiter Slips scoped to selected day
-  const daySlips = useMemo(() => {
-    return incomingSlips.filter((s) => {
-      const key = getOrderDayKey(s.createdAt);
-      if (dateFilter === 'today') return key === 'today';
-      if (dateFilter === 'yesterday') return key === 'yesterday';
-      if (dateFilter === 'day_before') return key === 'day_before';
-      if (dateFilter === '3_days') return ['today', 'yesterday', 'day_before'].includes(key);
-      if (dateFilter === 'all') return true;
-      return false;
-    });
-  }, [incomingSlips, dateFilter]);
 
   // Filtered Incoming Slips (filtered by day & search)
   const filteredSlips = useMemo(() => {
@@ -1196,15 +1207,17 @@ export function PosView() {
             <span className="truncate">{t('pos_terminal', 'Cashier Terminal')}</span>
           </div>
 
-          {/* Primary View Switcher */}
+          {/* Primary View Switcher: Desktop & Mobile Tabs for Orders & Billing, New Order, and Table Floor Plan */}
           <div className="flex items-center gap-2">
             <div className="flex items-center bg-stone-100 p-1 rounded-2xl border border-stone-200/80 shadow-2xs">
+              {/* Tab 1: Orders & Billing */}
               <button
+                type="button"
                 onClick={() => setPosTab('orders')}
                 className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
                   posTab === 'orders'
                     ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-stone-600 hover:text-stone-950'
+                    : 'text-stone-600 hover:text-stone-950 hover:bg-stone-200/60'
                 }`}
               >
                 <Receipt className="w-3.5 h-3.5" />
@@ -1215,6 +1228,43 @@ export function PosView() {
                   }`}>
                     {incomingSlips.length + unpaidOrders.length}
                   </span>
+                )}
+              </button>
+
+              {/* Tab 2: New Order (Desktop & Tablet Access) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setAppendOrderTarget(null);
+                  setPosTab('menu');
+                }}
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+                  posTab === 'menu'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-stone-600 hover:text-stone-950 hover:bg-stone-200/60'
+                }`}
+                title="Create New Order or browse food menu"
+              >
+                <Utensils className="w-3.5 h-3.5" />
+                <span>New Order</span>
+                {totalCartItems > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full font-black bg-emerald-600 text-white">
+                    {totalCartItems}
+                  </span>
+                )}
+              </button>
+
+              {/* Tab 3: Tables Floor Plan (Desktop & Tablet Access) */}
+              <button
+                type="button"
+                onClick={() => setTableModalOpen(true)}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-black text-stone-600 hover:text-stone-950 hover:bg-stone-200/60 transition cursor-pointer"
+                title="Open Dining Tables & Floor Plan"
+              >
+                <LayoutGrid className="w-3.5 h-3.5 text-stone-600" />
+                <span>{selectedTable ? `Table ${selectedTable}` : 'Tables'}</span>
+                {selectedTable && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
                 )}
               </button>
             </div>
@@ -1300,7 +1350,8 @@ export function PosView() {
       {posTab === 'orders' && (
         <div className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-24 lg:pb-6 relative z-10 no-scrollbar bg-[#F8F9FA]">
           {/* Compact Clickable Stat Cards (Function as interactive filters) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5 mb-3 flex-shrink-0">
+          {/* Sequential workflow order: All Orders -> Pending Firing -> In Kitchen -> Ready to Serve -> Served -> Unpaid Bills -> Paid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5 mb-3 flex-shrink-0">
             {/* 1. All Orders */}
             <div
               onClick={() => setOrderFilter('ALL')}
@@ -1321,11 +1372,14 @@ export function PosView() {
                 </div>
               </div>
               <div className="text-base sm:text-xl font-black text-stone-900">
-                {daySlips.length + dayFilteredOrders.length}
+                {allOrdersCount}
+              </div>
+              <div className="text-[10px] text-stone-500 font-bold truncate">
+                {servedCount} served • {paidOrders.length} paid
               </div>
             </div>
 
-            {/* 2. Pending Slips */}
+            {/* 2. Pending Firing */}
             <div
               onClick={() => setOrderFilter(orderFilter === 'SLIPS' ? 'ALL' : 'SLIPS')}
               className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
@@ -1339,22 +1393,94 @@ export function PosView() {
                   Pending Firing
                 </span>
                 <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
-                  daySlips.length > 0 ? 'bg-amber-500/20 text-amber-700' : 'bg-stone-100 text-stone-500'
+                  pendingSlipsCount > 0 ? 'bg-amber-500/20 text-amber-700' : 'bg-stone-100 text-stone-500'
                 }`}>
                   <Flame className="w-3 h-3" />
                 </div>
               </div>
               <div className="text-base sm:text-xl font-black text-stone-900 flex items-center gap-1.5">
-                <span>{daySlips.length}</span>
-                {daySlips.length > 0 && (
+                <span>{pendingSlipsCount}</span>
+                {pendingSlipsCount > 0 && (
                   <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#C11221] text-white font-bold">
-                    Action Required
+                    Action
                   </span>
                 )}
               </div>
             </div>
 
-            {/* 3. Unpaid Bills */}
+            {/* 3. In Kitchen Prep */}
+            <div
+              onClick={() => setOrderFilter(orderFilter === 'PREPARING' ? 'ALL' : 'PREPARING')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
+                orderFilter === 'PREPARING'
+                  ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-blue-500/40'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
+                  In Kitchen
+                </span>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  orderFilter === 'PREPARING' ? 'bg-blue-600 text-white' : 'bg-blue-500/15 text-blue-600'
+                }`}>
+                  <Clock className="w-3 h-3" />
+                </div>
+              </div>
+              <div className="text-base sm:text-xl font-black text-stone-900">
+                {inPrepCount}
+              </div>
+            </div>
+
+            {/* 4. Ready to Serve */}
+            <div
+              onClick={() => setOrderFilter(orderFilter === 'READY' ? 'ALL' : 'READY')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
+                orderFilter === 'READY'
+                  ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-emerald-500/40'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
+                  Ready to Serve
+                </span>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  orderFilter === 'READY' ? 'bg-emerald-600 text-white' : 'bg-emerald-500/15 text-emerald-600'
+                }`}>
+                  <CheckCircle className="w-3 h-3" />
+                </div>
+              </div>
+              <div className="text-base sm:text-xl font-black text-emerald-600">
+                {readyCount}
+              </div>
+            </div>
+
+            {/* 5. Served Orders */}
+            <div
+              onClick={() => setOrderFilter(orderFilter === 'SERVED' ? 'ALL' : 'SERVED')}
+              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
+                orderFilter === 'SERVED'
+                  ? 'bg-purple-50 border-purple-500 ring-2 ring-purple-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-purple-500/40'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
+                  Served
+                </span>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                  orderFilter === 'SERVED' ? 'bg-purple-600 text-white' : 'bg-purple-500/15 text-purple-700'
+                }`}>
+                  <Utensils className="w-3 h-3" />
+                </div>
+              </div>
+              <div className="text-base sm:text-xl font-black text-purple-700">
+                {servedCount}
+              </div>
+            </div>
+
+            {/* 6. Unpaid Bills */}
             <div
               onClick={() => setOrderFilter(orderFilter === 'UNPAID' ? 'ALL' : 'UNPAID')}
               className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
@@ -1381,75 +1507,30 @@ export function PosView() {
               </div>
             </div>
 
-            {/* 4. In Kitchen Prep */}
+            {/* 7. Paid Orders */}
             <div
-              onClick={() => setOrderFilter(orderFilter === 'PREPARING' ? 'ALL' : 'PREPARING')}
+              onClick={() => setOrderFilter(orderFilter === 'PAID' ? 'ALL' : 'PAID')}
               className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
-                orderFilter === 'PREPARING'
-                  ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-500/20'
-                  : 'bg-white border-stone-200/90 hover:border-blue-500/40'
+                orderFilter === 'PAID'
+                  ? 'bg-teal-50 border-teal-500 ring-2 ring-teal-500/20'
+                  : 'bg-white border-stone-200/90 hover:border-teal-500/40'
               }`}
             >
               <div className="flex items-center justify-between mb-0.5">
                 <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
-                  In Kitchen
+                  Paid
                 </span>
                 <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
-                  orderFilter === 'PREPARING' ? 'bg-blue-600 text-white' : 'bg-blue-500/15 text-blue-600'
+                  orderFilter === 'PAID' ? 'bg-teal-600 text-white' : 'bg-teal-500/15 text-teal-600'
                 }`}>
-                  <Clock className="w-3 h-3" />
+                  <CheckCircle2 className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-base sm:text-xl font-black text-stone-900">
-                {inPrepCount}
+              <div className="text-base sm:text-xl font-black text-teal-700">
+                {paidOrders.length}
               </div>
-            </div>
-
-            {/* 5. Ready to Serve */}
-            <div
-              onClick={() => setOrderFilter(orderFilter === 'READY' ? 'ALL' : 'READY')}
-              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
-                orderFilter === 'READY'
-                  ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/20'
-                  : 'bg-white border-stone-200/90 hover:border-emerald-500/40'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
-                  Ready to Serve
-                </span>
-                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
-                  orderFilter === 'READY' ? 'bg-emerald-600 text-white' : 'bg-emerald-500/15 text-emerald-600'
-                }`}>
-                  <CheckCircle className="w-3 h-3" />
-                </div>
-              </div>
-              <div className="text-base sm:text-xl font-black text-emerald-600">
-                {readyCount}
-              </div>
-            </div>
-
-            {/* 6. Served Orders */}
-            <div
-              onClick={() => setOrderFilter(orderFilter === 'SERVED' ? 'ALL' : 'SERVED')}
-              className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer shadow-2xs ${
-                orderFilter === 'SERVED'
-                  ? 'bg-purple-50 border-purple-500 ring-2 ring-purple-500/20'
-                  : 'bg-white border-stone-200/90 hover:border-purple-500/40'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">
-                  Served
-                </span>
-                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
-                  orderFilter === 'SERVED' ? 'bg-purple-600 text-white' : 'bg-purple-500/15 text-purple-700'
-                }`}>
-                  <Utensils className="w-3 h-3" />
-                </div>
-              </div>
-              <div className="text-base sm:text-xl font-black text-purple-700">
-                {servedCount}
+              <div className="text-[10px] text-stone-500 font-bold truncate">
+                {paidTotalAmount.toFixed(2)} ETB
               </div>
             </div>
           </div>
@@ -1466,7 +1547,7 @@ export function PosView() {
                   onClick={() => setOrderFilter('ALL')}
                   className="text-[10px] font-bold text-emerald-700 hover:underline bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 cursor-pointer"
                 >
-                  Clear Filter ({orderFilter === 'SERVED' ? 'Served' : orderFilter === 'UNPAID' ? 'Unpaid' : orderFilter === 'PREPARING' ? 'Kitchen' : orderFilter === 'READY' ? 'Ready' : orderFilter}) ✕
+                  Clear Filter ({orderFilter === 'SERVED' ? 'Served' : orderFilter === 'UNPAID' ? 'Unpaid' : orderFilter === 'PAID' ? 'Paid' : orderFilter === 'PREPARING' ? 'Kitchen' : orderFilter === 'READY' ? 'Ready' : orderFilter === 'SLIPS' ? 'Pending Firing' : orderFilter}) ✕
                 </button>
               )}
             </div>
