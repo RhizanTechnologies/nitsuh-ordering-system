@@ -1365,14 +1365,38 @@ export function PosView() {
       {/* ================= CASHIER TOP CONTROL BAR ================= */}
       <div className="bg-white border-b border-stone-200/90 px-3.5 sm:px-6 py-2.5 z-20 flex items-center justify-between gap-2 sm:gap-4 flex-shrink-0">
         {/* Left: Station Identity & Switcher */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-stone-500">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-stone-700">
             <UserCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             <span className="truncate">{t('pos_terminal', 'Cashier Terminal')}</span>
           </div>
 
-          {/* Primary View Switcher: Desktop & Mobile Tabs for Orders & Billing, New Order, and Table Floor Plan */}
-          <div className="flex items-center gap-2">
+          {/* Active editing/appending indicator (Visible across all screens) */}
+          {(editingSlipTarget || appendOrderTarget) && (
+            <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-900 px-2 sm:px-3 py-1 rounded-xl text-xs font-bold animate-in fade-in">
+              <FileEdit className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+              <span className="truncate">
+                {editingSlipTarget
+                  ? `Editing ${formatOrderNumber(editingSlipTarget.orderNumber)}`
+                  : `Appending to ${formatOrderNumber(appendOrderTarget.orderNumber)}`}
+              </span>
+              <button
+                onClick={() => {
+                  clearCart();
+                  setEditingSlipTarget(null);
+                  setAppendOrderTarget(null);
+                  setPosTab('orders');
+                  loadData();
+                }}
+                className="ml-1 text-[10px] text-red-600 hover:underline cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {/* Primary View Switcher: Desktop Tabs (Hidden on mobile where bottom navigation dock is used) */}
+          <div className="hidden lg:flex items-center gap-2">
             <div className="flex items-center bg-stone-100 p-1 rounded-2xl border border-stone-200/80 shadow-2xs">
               {/* Tab 1: Orders & Billing */}
               <button
@@ -1395,7 +1419,7 @@ export function PosView() {
                 )}
               </button>
 
-              {/* Tab 2: New Order (Desktop & Tablet Access) */}
+              {/* Tab 2: New Order (Desktop Access) */}
               <button
                 type="button"
                 onClick={() => {
@@ -1418,7 +1442,7 @@ export function PosView() {
                 )}
               </button>
 
-              {/* Tab 3: Tables Floor Plan (Desktop & Tablet Access) */}
+              {/* Tab 3: Tables Floor Plan (Desktop Access) */}
               <button
                 type="button"
                 onClick={() => setTableModalOpen(true)}
@@ -1432,30 +1456,6 @@ export function PosView() {
                 )}
               </button>
             </div>
-
-            {/* Active editing/appending indicator */}
-            {(editingSlipTarget || appendOrderTarget) && (
-              <div className="hidden sm:flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-900 px-3 py-1.5 rounded-xl text-xs font-bold animate-in fade-in">
-                <FileEdit className="w-3.5 h-3.5 text-amber-600" />
-                <span>
-                  {editingSlipTarget
-                    ? `Editing ${formatOrderNumber(editingSlipTarget.orderNumber)}`
-                    : `Appending to ${formatOrderNumber(appendOrderTarget.orderNumber)}`}
-                </span>
-                <button
-                  onClick={() => {
-                    clearCart();
-                    setEditingSlipTarget(null);
-                    setAppendOrderTarget(null);
-                    setPosTab('orders');
-                    loadData();
-                  }}
-                  className="ml-1 text-[10px] text-red-600 hover:underline cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
