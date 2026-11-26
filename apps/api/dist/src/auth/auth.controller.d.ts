@@ -13,7 +13,7 @@ export declare class AuthController {
             name: string;
             employeeCode: string;
             email: string;
-            role: import("@prisma/client").$Enums.UserRole;
+            role: string;
             avatarUrl: string;
         };
     }>;
@@ -27,17 +27,18 @@ export declare class AuthController {
             name: string;
             employeeCode: string;
             email: string;
-            role: "CASHIER" | "WAITER" | "KITCHEN_STAFF" | "MAIN_STOREKEEPER" | "KITCHEN_STOREKEEPER" | "HEAD_CHEF";
+            role: string;
             avatarUrl: string;
         };
     }>;
     getMe(req: any): Promise<any>;
     getStaff(): Promise<{
+        role: string;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         avatarUrl: string;
     }[]>;
 }

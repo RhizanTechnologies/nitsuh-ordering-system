@@ -4,8 +4,8 @@ export declare class MenuController {
     constructor(menuService: MenuService);
     getCategories(): Promise<({
         _count: {
-            addons: number;
             menuItems: number;
+            addons: number;
         };
     } & {
         id: string;
@@ -55,14 +55,14 @@ export declare class MenuController {
             badgeColor: string | null;
         };
     } & {
-        description: string | null;
         id: string;
         name: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string | null;
+        isDirectSale: boolean;
         categoryId: string;
         price: import("@prisma/client/runtime/library").Decimal;
-        isDirectSale: boolean;
         directIngredientId: string | null;
         prepSection: string;
         imageUrl: string | null;
@@ -87,14 +87,14 @@ export declare class MenuController {
             badgeColor: string | null;
         };
     } & {
-        description: string | null;
         id: string;
         name: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string | null;
+        isDirectSale: boolean;
         categoryId: string;
         price: import("@prisma/client/runtime/library").Decimal;
-        isDirectSale: boolean;
         directIngredientId: string | null;
         prepSection: string;
         imageUrl: string | null;
@@ -140,10 +140,10 @@ export declare class MenuController {
             };
         } & {
             id: string;
-            ingredientId: string;
             quantity: import("@prisma/client/runtime/library").Decimal;
-            unitId: string;
+            ingredientId: string;
             recipeId: string;
+            unitId: string;
         })[];
     } & {
         id: string;
@@ -236,14 +236,14 @@ export declare class MenuController {
             badgeColor: string | null;
         };
         menuItem: {
-            description: string | null;
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string | null;
+            isDirectSale: boolean;
             categoryId: string;
             price: import("@prisma/client/runtime/library").Decimal;
-            isDirectSale: boolean;
             directIngredientId: string | null;
             prepSection: string;
             imageUrl: string | null;
@@ -254,10 +254,10 @@ export declare class MenuController {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        categoryId: string | null;
         ingredientId: string | null;
-        unitId: string | null;
+        categoryId: string | null;
         menuItemId: string | null;
+        unitId: string | null;
     }[]>;
     createAddon(body: {
         name: string;
@@ -305,14 +305,14 @@ export declare class MenuController {
             badgeColor: string | null;
         };
         menuItem: {
-            description: string | null;
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string | null;
+            isDirectSale: boolean;
             categoryId: string;
             price: import("@prisma/client/runtime/library").Decimal;
-            isDirectSale: boolean;
             directIngredientId: string | null;
             prepSection: string;
             imageUrl: string | null;
@@ -324,12 +324,12 @@ export declare class MenuController {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        quantity: import("@prisma/client/runtime/library").Decimal;
+        ingredientId: string | null;
         categoryId: string | null;
         price: import("@prisma/client/runtime/library").Decimal;
-        ingredientId: string | null;
-        quantity: import("@prisma/client/runtime/library").Decimal;
-        unitId: string | null;
         menuItemId: string | null;
+        unitId: string | null;
     }>;
     updateAddon(id: string, body: {
         name?: string;
@@ -378,14 +378,14 @@ export declare class MenuController {
             badgeColor: string | null;
         };
         menuItem: {
-            description: string | null;
             id: string;
             name: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string | null;
+            isDirectSale: boolean;
             categoryId: string;
             price: import("@prisma/client/runtime/library").Decimal;
-            isDirectSale: boolean;
             directIngredientId: string | null;
             prepSection: string;
             imageUrl: string | null;
@@ -397,12 +397,12 @@ export declare class MenuController {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        quantity: import("@prisma/client/runtime/library").Decimal;
+        ingredientId: string | null;
         categoryId: string | null;
         price: import("@prisma/client/runtime/library").Decimal;
-        ingredientId: string | null;
-        quantity: import("@prisma/client/runtime/library").Decimal;
-        unitId: string | null;
         menuItemId: string | null;
+        unitId: string | null;
     }>;
     deleteAddon(id: string): Promise<{
         success: boolean;

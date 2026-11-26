@@ -37,6 +37,7 @@ import {
   Layers,
   AlertTriangle,
   RefreshCw,
+  ArrowRight,
 } from 'lucide-react';
 import { TablePlanModal } from '@/components/TablePlanModal';
 import { Button, Badge } from '@/components/ui';
@@ -44,8 +45,8 @@ import { useTranslation } from '@/lib/i18n';
 
 const formatOrderNumber = (num?: string | number | null) => {
   if (!num) return '';
-  const s = String(num).trim();
-  return s.startsWith('#') ? s : `#${s}`;
+  const s = String(num).trim().replace(/^#+/, '');
+  return `#${s}`;
 };
 
 export function WaiterPadView() {
@@ -1467,9 +1468,16 @@ export function WaiterPadView() {
 
           {/* Order Details Header */}
           <div className="px-4 py-2.5 bg-stone-50/70 border-b border-stone-200/90 flex items-center justify-between">
-            <h3 className="text-xs font-black uppercase tracking-wider text-stone-900">
-              {t('waiter_order_details')}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-black uppercase tracking-wider text-stone-900">
+                {t('waiter_order_details')}
+              </h3>
+              {totalWaiterItems > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                  {totalWaiterItems} {totalWaiterItems === 1 ? t('waiter_item') : t('waiter_items')}
+                </span>
+              )}
+            </div>
             {waiterCart.length > 0 && (
               <button
                 onClick={clearWaiterCart}
@@ -1731,6 +1739,34 @@ export function WaiterPadView() {
           <span className="text-[10px] font-bold whitespace-nowrap">{t('waiter_kitchen_status')}</span>
         </button>
       </div>
+
+      {/* Floating Bottom Quick Bar when items are selected on Mobile/Tablet */}
+      {totalWaiterItems > 0 && activeTab === 'menu' && !showMobileDrawer && (
+        <div className="fixed bottom-16 left-3 right-3 z-30 lg:hidden animate-in slide-in-from-bottom-2 duration-200">
+          <div
+            onClick={() => setShowMobileDrawer(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500 active:scale-[0.99] transition"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center font-black text-xs text-white shrink-0">
+                {totalWaiterItems}
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-black truncate">
+                  {totalWaiterItems} {totalWaiterItems === 1 ? 'Item' : 'Items'} Selected
+                </div>
+                <div className="text-[10px] text-emerald-100 font-semibold truncate">
+                  {totalWaiterSum.toFixed(2)} ETB • Tap to Review Slip
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0 bg-white text-emerald-900 font-black text-xs px-3 py-1.5 rounded-xl shadow-xs">
+              <span>Review Slip</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MOBILE / TABLET REVIEW SLIP DRAWER */}
       {showMobileDrawer && (

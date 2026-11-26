@@ -3,12 +3,13 @@ export declare class UsersController {
     private usersService;
     constructor(usersService: UsersService);
     getAllUsers(req: any): Promise<{
+        role: any;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
         pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         isActive: boolean;
         avatarUrl: string;
         createdAt: Date;
@@ -20,12 +21,13 @@ export declare class UsersController {
         };
     }[]>;
     createUser(req: any, dto: CreateUserDto): Promise<{
+        role: any;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
         pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         isActive: boolean;
         avatarUrl: string;
         createdAt: Date;
@@ -39,24 +41,26 @@ export declare class UsersController {
         permissions: any;
     }>;
     getUserById(req: any, id: string): Promise<{
+        role: any;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
         pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         isActive: boolean;
         avatarUrl: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
     updateUser(req: any, id: string, dto: UpdateUserDto): Promise<{
+        role: any;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
         pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         isActive: boolean;
         avatarUrl: string;
         updatedAt: Date;

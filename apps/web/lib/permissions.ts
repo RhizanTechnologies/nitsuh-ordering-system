@@ -6,7 +6,8 @@ export type AppRole =
   | 'HEAD_CHEF'
   | 'KITCHEN_STAFF'
   | 'MAIN_STOREKEEPER'
-  | 'KITCHEN_STOREKEEPER';
+  | 'KITCHEN_STOREKEEPER'
+  | string;
 
 export type AppPage =
   | 'profit'
@@ -28,46 +29,56 @@ export interface RoleConfig {
   label: string;
   pages: AppPage[];
   capabilities: AppCapability[];
+  description?: string;
+  isCustom?: boolean;
 }
 
-export const DEFAULT_ROLE_PERMISSIONS: Record<AppRole, RoleConfig> = {
+export const DEFAULT_ROLE_PERMISSIONS: Record<string, RoleConfig> = {
   OWNER: {
     label: 'Owner / General Director',
+    description: 'Universal administrative authority and settings access',
     pages: ['profit', 'staff', 'products', 'inventory', 'tables', 'pos', 'kds', 'waiter'],
     capabilities: ['cancel_orders', 'apply_discounts', 'adjust_stock', 'reset_pins'],
   },
   MANAGER: {
     label: 'Operations Manager',
+    description: 'Floor supervision, staff administration, and operational reporting',
     pages: ['profit', 'staff', 'products', 'inventory', 'tables', 'pos', 'kds', 'waiter'],
     capabilities: ['cancel_orders', 'apply_discounts', 'adjust_stock', 'reset_pins'],
   },
   CASHIER: {
     label: 'Cashier Station',
+    description: 'POS terminal checkout, payments, bills settlement, and receipts',
     pages: ['pos'],
     capabilities: ['apply_discounts'],
   },
   WAITER: {
     label: 'Floor Waiter',
+    description: 'Dining table guest ordering pad and floor servicing',
     pages: ['waiter'],
     capabilities: [],
   },
   HEAD_CHEF: {
     label: 'Head Chef',
+    description: 'Kitchen display oversight, recipe studio, and store requisitions',
     pages: ['kds', 'products', 'inventory'],
     capabilities: ['adjust_stock'],
   },
   KITCHEN_STAFF: {
     label: 'Kitchen Line Cook',
+    description: 'Real-time order line preparation and kitchen ticket dispatch',
     pages: ['kds'],
     capabilities: [],
   },
   MAIN_STOREKEEPER: {
     label: 'Main Storekeeper',
+    description: 'Bulk warehouse stock receipt, transfers, and inventory control',
     pages: ['inventory'],
     capabilities: ['adjust_stock'],
   },
   KITCHEN_STOREKEEPER: {
     label: 'Kitchen Storekeeper',
+    description: 'Kitchen sub-store consumption, daily requisitions, and wastage',
     pages: ['inventory', 'kds'],
     capabilities: ['adjust_stock'],
   },
@@ -77,9 +88,9 @@ import { fetchApi } from '@/lib/api';
 
 const STORAGE_KEY = 'nitsuh_role_permissions';
 
-let inMemoryPermissions: Record<AppRole, RoleConfig> | null = null;
+let inMemoryPermissions: Record<string, RoleConfig> | null = null;
 
-export function getRolePermissions(): Record<AppRole, RoleConfig> {
+export function getRolePermissions(): Record<string, RoleConfig> {
   if (inMemoryPermissions) return inMemoryPermissions;
   if (typeof window === 'undefined') return DEFAULT_ROLE_PERMISSIONS;
   try {
@@ -93,15 +104,18 @@ export function getRolePermissions(): Record<AppRole, RoleConfig> {
   }
 }
 
-export function setLocalRolePermissions(permissions: Record<AppRole, RoleConfig>) {
-  inMemoryPermissions = { ...DEFAULT_ROLE_PERMISSIONS, ...permissions };
+export function setLocalRolePermissions(permissions: Record<string, RoleConfig>) {
+  inMemoryPermissions = {
+    ...permissions,
+    OWNER: DEFAULT_ROLE_PERMISSIONS.OWNER,
+  };
   if (typeof window !== 'undefined') {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(inMemoryPermissions));
     window.dispatchEvent(new Event('nitsuh_permissions_updated'));
   }
 }
 
-export async function fetchServerRolePermissions(): Promise<Record<AppRole, RoleConfig>> {
+export async function fetchServerRolePermissions(): Promise<Record<string, RoleConfig>> {
   try {
     const data = await fetchApi('/users/permissions');
     if (data && typeof data === 'object') {
@@ -114,7 +128,7 @@ export async function fetchServerRolePermissions(): Promise<Record<AppRole, Role
   return getRolePermissions();
 }
 
-export async function saveRolePermissions(permissions: Record<AppRole, RoleConfig>) {
+export async function saveRolePermissions(permissions: Record<string, RoleConfig>) {
   setLocalRolePermissions(permissions);
   try {
     await fetchApi('/users/permissions', {
@@ -128,7 +142,7 @@ export async function saveRolePermissions(permissions: Record<AppRole, RoleConfi
 
 export function canRoleAccessPage(role: string | undefined, page: AppPage): boolean {
   if (!role) return false;
-  const normRole = role.toUpperCase() as AppRole;
+  const normRole = role.toUpperCase();
   if (normRole === 'OWNER') return true;
   const perms = getRolePermissions();
   const config = perms[normRole];
@@ -138,7 +152,7 @@ export function canRoleAccessPage(role: string | undefined, page: AppPage): bool
 
 export function canRolePerformAction(role: string | undefined, cap: AppCapability): boolean {
   if (!role) return false;
-  const normRole = role.toUpperCase() as AppRole;
+  const normRole = role.toUpperCase();
   if (normRole === 'OWNER') return true;
   const perms = getRolePermissions();
   const config = perms[normRole];

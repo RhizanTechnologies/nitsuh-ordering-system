@@ -106,6 +106,7 @@ model User {
   pinCode       String         // 4-6 digit quick PIN for touch terminals
   passwordHash  String
   role          UserRole       @default(CASHIER)
+  customRole    String?
   isActive      Boolean        @default(true)
   avatarUrl     String?
   createdAt     DateTime       @default(now())

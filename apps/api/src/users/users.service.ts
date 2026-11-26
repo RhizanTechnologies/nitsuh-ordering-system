@@ -7,7 +7,7 @@ import * as bcrypt from 'bcryptjs';
 export interface CreateUserDto {
   name: string;
   employeeCode?: string;
-  role: UserRole;
+  role: UserRole | string;
   pinCode: string;
   password?: string;
   avatarUrl?: string;
@@ -17,7 +17,7 @@ export interface CreateUserDto {
 export interface UpdateUserDto {
   name?: string;
   employeeCode?: string;
-  role?: UserRole;
+  role?: UserRole | string;
   avatarUrl?: string;
   isActive?: boolean;
 }
@@ -38,7 +38,7 @@ export class UsersService {
       where.role = { not: UserRole.OWNER };
     }
 
-    return this.prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       where,
       select: {
         id: true,
@@ -46,6 +46,7 @@ export class UsersService {
         employeeCode: true,
         email: true,
         role: true,
+        customRole: true,
         pinCode: true,
         isActive: true,
         avatarUrl: true,
@@ -61,6 +62,11 @@ export class UsersService {
       },
       orderBy: [{ role: 'asc' }, { name: 'asc' }],
     });
+
+    return users.map((u) => ({
+      ...u,
+      role: (u.customRole || u.role) as any,
+    }));
   }
 
   async getUserById(id: string, requesterRole?: string) {
@@ -72,6 +78,7 @@ export class UsersService {
         employeeCode: true,
         email: true,
         role: true,
+        customRole: true,
         pinCode: true,
         isActive: true,
         avatarUrl: true,
@@ -88,7 +95,10 @@ export class UsersService {
       throw new ForbiddenException('Managers cannot view Owner account details');
     }
 
-    return user;
+    return {
+      ...user,
+      role: (user.customRole || user.role) as any,
+    };
   }
 
   // Register new staff member (no email or phone required)
@@ -137,6 +147,10 @@ export class UsersService {
     const rawPass = dto.password?.trim() || 'nitsuh123';
     const passwordHash = await bcrypt.hash(rawPass, 10);
 
+    const isCustomRole = !Object.values(UserRole).includes(dto.role as UserRole);
+    const dbRole = isCustomRole ? UserRole.CASHIER : (dto.role as UserRole);
+    const customRoleValue = isCustomRole ? String(dto.role).toUpperCase().trim() : null;
+
     const user = await this.prisma.user.create({
       data: {
         name: trimmedName,
@@ -144,7 +158,8 @@ export class UsersService {
         email: internalEmail,
         pinCode: trimmedPin,
         passwordHash,
-        role: dto.role || UserRole.CASHIER,
+        role: dbRole,
+        customRole: customRoleValue,
         isActive: dto.isActive !== undefined ? dto.isActive : true,
         avatarUrl: dto.avatarUrl || null,
       },
@@ -154,12 +169,15 @@ export class UsersService {
         employeeCode: true,
         email: true,
         role: true,
+        customRole: true,
         pinCode: true,
         isActive: true,
         avatarUrl: true,
         createdAt: true,
       },
     });
+
+    const effectiveRole = user.customRole || user.role;
 
     // Audit log if creator provided
     if (creatorId) {
@@ -170,14 +188,17 @@ export class UsersService {
             action: 'CREATE_USER',
             entityName: 'User',
             entityId: user.id,
-            newValue: { name: user.name, role: user.role, code: user.employeeCode },
-            reason: `Registered new employee ${user.name} (${user.role})`,
+            newValue: { name: user.name, role: effectiveRole, code: user.employeeCode },
+            reason: `Registered new employee ${user.name} (${effectiveRole})`,
           },
         })
         .catch(() => {});
     }
 
-    return user;
+    return {
+      ...user,
+      role: effectiveRole as any,
+    };
   }
 
   async updateUser(id: string, dto: UpdateUserDto, updaterId?: string, updaterRole?: string) {
@@ -197,7 +218,9 @@ export class UsersService {
       if (dto.role === UserRole.OWNER && existing.role !== UserRole.OWNER) {
         throw new BadRequestException('Staff roles cannot be changed to Owner');
       }
-      updateData.role = dto.role;
+      const isCustomRole = !Object.values(UserRole).includes(dto.role as UserRole);
+      updateData.role = isCustomRole ? UserRole.CASHIER : (dto.role as UserRole);
+      updateData.customRole = isCustomRole ? String(dto.role).toUpperCase().trim() : null;
     }
 
     if (dto.avatarUrl !== undefined) {
@@ -230,6 +253,7 @@ export class UsersService {
         employeeCode: true,
         email: true,
         role: true,
+        customRole: true,
         pinCode: true,
         isActive: true,
         avatarUrl: true,
@@ -237,7 +261,10 @@ export class UsersService {
       },
     });
 
-    return updated;
+    return {
+      ...updated,
+      role: (updated.customRole || updated.role) as any,
+    };
   }
 
   // Reset PIN for any staff member

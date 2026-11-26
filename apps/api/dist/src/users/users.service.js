@@ -60,7 +60,7 @@ let UsersService = UsersService_1 = class UsersService {
         if (requesterRole === 'MANAGER') {
             where.role = { not: client_1.UserRole.OWNER };
         }
-        return this.prisma.user.findMany({
+        const users = await this.prisma.user.findMany({
             where,
             select: {
                 id: true,
@@ -68,6 +68,7 @@ let UsersService = UsersService_1 = class UsersService {
                 employeeCode: true,
                 email: true,
                 role: true,
+                customRole: true,
                 pinCode: true,
                 isActive: true,
                 avatarUrl: true,
@@ -83,6 +84,10 @@ let UsersService = UsersService_1 = class UsersService {
             },
             orderBy: [{ role: 'asc' }, { name: 'asc' }],
         });
+        return users.map((u) => ({
+            ...u,
+            role: (u.customRole || u.role),
+        }));
     }
     async getUserById(id, requesterRole) {
         const user = await this.prisma.user.findUnique({
@@ -93,6 +98,7 @@ let UsersService = UsersService_1 = class UsersService {
                 employeeCode: true,
                 email: true,
                 role: true,
+                customRole: true,
                 pinCode: true,
                 isActive: true,
                 avatarUrl: true,
@@ -106,7 +112,10 @@ let UsersService = UsersService_1 = class UsersService {
         if (requesterRole === 'MANAGER' && user.role === client_1.UserRole.OWNER) {
             throw new common_1.ForbiddenException('Managers cannot view Owner account details');
         }
-        return user;
+        return {
+            ...user,
+            role: (user.customRole || user.role),
+        };
     }
     async createUser(dto, creatorId) {
         if (dto.role === client_1.UserRole.OWNER) {
@@ -141,6 +150,9 @@ let UsersService = UsersService_1 = class UsersService {
         const internalEmail = `${code.toLowerCase().replace(/[^a-z0-9]/g, '')}@nitsuh.local`;
         const rawPass = dto.password?.trim() || 'nitsuh123';
         const passwordHash = await bcrypt.hash(rawPass, 10);
+        const isCustomRole = !Object.values(client_1.UserRole).includes(dto.role);
+        const dbRole = isCustomRole ? client_1.UserRole.CASHIER : dto.role;
+        const customRoleValue = isCustomRole ? String(dto.role).toUpperCase().trim() : null;
         const user = await this.prisma.user.create({
             data: {
                 name: trimmedName,
@@ -148,7 +160,8 @@ let UsersService = UsersService_1 = class UsersService {
                 email: internalEmail,
                 pinCode: trimmedPin,
                 passwordHash,
-                role: dto.role || client_1.UserRole.CASHIER,
+                role: dbRole,
+                customRole: customRoleValue,
                 isActive: dto.isActive !== undefined ? dto.isActive : true,
                 avatarUrl: dto.avatarUrl || null,
             },
@@ -158,12 +171,14 @@ let UsersService = UsersService_1 = class UsersService {
                 employeeCode: true,
                 email: true,
                 role: true,
+                customRole: true,
                 pinCode: true,
                 isActive: true,
                 avatarUrl: true,
                 createdAt: true,
             },
         });
+        const effectiveRole = user.customRole || user.role;
         if (creatorId) {
             await this.prisma.auditLog
                 .create({
@@ -172,13 +187,16 @@ let UsersService = UsersService_1 = class UsersService {
                     action: 'CREATE_USER',
                     entityName: 'User',
                     entityId: user.id,
-                    newValue: { name: user.name, role: user.role, code: user.employeeCode },
-                    reason: `Registered new employee ${user.name} (${user.role})`,
+                    newValue: { name: user.name, role: effectiveRole, code: user.employeeCode },
+                    reason: `Registered new employee ${user.name} (${effectiveRole})`,
                 },
             })
                 .catch(() => { });
         }
-        return user;
+        return {
+            ...user,
+            role: effectiveRole,
+        };
     }
     async updateUser(id, dto, updaterId, updaterRole) {
         const existing = await this.getUserById(id, updaterRole);
@@ -196,7 +214,9 @@ let UsersService = UsersService_1 = class UsersService {
             if (dto.role === client_1.UserRole.OWNER && existing.role !== client_1.UserRole.OWNER) {
                 throw new common_1.BadRequestException('Staff roles cannot be changed to Owner');
             }
-            updateData.role = dto.role;
+            const isCustomRole = !Object.values(client_1.UserRole).includes(dto.role);
+            updateData.role = isCustomRole ? client_1.UserRole.CASHIER : dto.role;
+            updateData.customRole = isCustomRole ? String(dto.role).toUpperCase().trim() : null;
         }
         if (dto.avatarUrl !== undefined) {
             updateData.avatarUrl = dto.avatarUrl;
@@ -225,13 +245,17 @@ let UsersService = UsersService_1 = class UsersService {
                 employeeCode: true,
                 email: true,
                 role: true,
+                customRole: true,
                 pinCode: true,
                 isActive: true,
                 avatarUrl: true,
                 updatedAt: true,
             },
         });
-        return updated;
+        return {
+            ...updated,
+            role: (updated.customRole || updated.role),
+        };
     }
     async resetPin(id, newPin, modifierId, modifierRole) {
         const existing = await this.getUserById(id, modifierRole);

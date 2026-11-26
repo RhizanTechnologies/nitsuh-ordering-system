@@ -39,6 +39,7 @@ import {
   CheckSquare,
   Square,
   Loader2,
+  Plus,
 } from 'lucide-react';
 import { StaffAvatarUploader, AVATAR_PRESETS } from './StaffAvatarUploader';
 import { Button, Badge, Input, Card } from '@/components/ui';
@@ -87,16 +88,16 @@ interface ResetRequest {
   credentialType?: 'PIN' | 'PASSWORD';
 }
 
-const ALL_ROLES: Array<{ role: AppRole; label: string; description: string; icon: any }> = [
-  { role: 'OWNER', label: 'Owner / General Director', description: 'Complete system authority and full financial profit analytics', icon: ShieldCheck },
-  { role: 'MANAGER', label: 'Operations Manager', description: 'Floor supervision, staff administration, menu and stock oversight', icon: LayoutGrid },
-  { role: 'CASHIER', label: 'Cashier Station', description: 'POS checkout, table bills, settlement and payment processing', icon: MonitorCheck },
-  { role: 'WAITER', label: 'Floor Waiter', description: 'Table order taking, customer service, sending kitchen tickets', icon: Smartphone },
-  { role: 'HEAD_CHEF', label: 'Head Chef', description: 'Kitchen line monitoring, menu recipes, kitchen inventory oversight', icon: ChefHat },
-  { role: 'KITCHEN_STAFF', label: 'Kitchen Line Cook', description: 'KDS station preparation, marking orders prepared and ready', icon: ChefHat },
-  { role: 'MAIN_STOREKEEPER', label: 'Main Storekeeper', description: 'Raw material procurement, main warehouse stock, transfers', icon: Boxes },
-  { role: 'KITCHEN_STOREKEEPER', label: 'Kitchen Storekeeper', description: 'Kitchen store stock receiving, batch transfers, and wastage logs', icon: Boxes },
-];
+const BUILTIN_ROLE_ICONS: Record<string, any> = {
+  OWNER: ShieldCheck,
+  MANAGER: LayoutGrid,
+  CASHIER: MonitorCheck,
+  WAITER: Smartphone,
+  HEAD_CHEF: ChefHat,
+  KITCHEN_STAFF: ChefHat,
+  MAIN_STOREKEEPER: Boxes,
+  KITCHEN_STOREKEEPER: Boxes,
+};
 
 const AVAILABLE_PAGES: Array<{ id: AppPage; label: string; icon: any }> = [
   { id: 'profit', label: 'Profit & Analytics', icon: BarChart3 },
@@ -163,8 +164,17 @@ export function StaffManagementView() {
 
   // View Tab: Staff Directory vs Role Permissions Matrix
   const [viewTab, setViewTab] = useState<'staff' | 'permissions'>('staff');
-  const [rolePermissions, setRolePermissions] = useState<Record<AppRole, RoleConfig>>(() => getRolePermissions());
+  const [rolePermissions, setRolePermissions] = useState<Record<string, RoleConfig>>(() => getRolePermissions());
   const [isSavingPerms, setIsSavingPerms] = useState(false);
+
+  // Add Custom Role State
+  const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
+  const [newRoleName, setNewRoleName] = useState('');
+  const [newRoleDesc, setNewRoleDesc] = useState('');
+  const [newRolePages, setNewRolePages] = useState<AppPage[]>(['pos']);
+  const [newRoleCaps, setNewRoleCaps] = useState<AppCapability[]>([]);
+  const [isCreatingRole, setIsCreatingRole] = useState(false);
+  const [addRoleError, setAddRoleError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchServerRolePermissions().then((perms) => {
@@ -172,7 +182,23 @@ export function StaffManagementView() {
     });
   }, []);
 
-  const toggleRolePage = (r: AppRole, page: AppPage) => {
+  const allRoles = useMemo(() => {
+    return Object.entries(rolePermissions).map(([roleKey, cfg]) => ({
+      role: roleKey,
+      label: cfg.label || roleKey,
+      description: cfg.description || (roleKey === 'OWNER' ? 'Complete system authority and full financial profit analytics' : 'Custom restaurant role'),
+      icon: BUILTIN_ROLE_ICONS[roleKey] || UserCheck,
+      isCustom: cfg.isCustom ?? !Object.keys(DEFAULT_ROLE_PERMISSIONS).includes(roleKey),
+      pages: cfg.pages || [],
+      capabilities: cfg.capabilities || [],
+    }));
+  }, [rolePermissions]);
+
+  const availableRoleOptions = useMemo(() => {
+    return allRoles.filter((r) => r.role !== 'OWNER');
+  }, [allRoles]);
+
+  const toggleRolePage = (r: string, page: AppPage) => {
     if (r === 'OWNER') return; // Owner always has all pages
     setRolePermissions((prev) => {
       const currentPages = prev[r]?.pages || [];
@@ -189,7 +215,7 @@ export function StaffManagementView() {
     });
   };
 
-  const toggleRoleCapability = (r: AppRole, cap: AppCapability) => {
+  const toggleRoleCapability = (r: string, cap: AppCapability) => {
     if (r === 'OWNER') return; // Owner always has all capabilities
     setRolePermissions((prev) => {
       const currentCaps = prev[r]?.capabilities || [];
@@ -211,6 +237,98 @@ export function StaffManagementView() {
     await saveRolePermissions(rolePermissions);
     setIsSavingPerms(false);
     triggerToast('Role permissions saved to server & active on all terminals!', 'success');
+  };
+
+  const handleDeleteRole = (roleKey: string, roleLabel: string) => {
+    if (roleKey === 'OWNER') {
+      triggerToast('Owner role is permanent and cannot be removed.', 'error');
+      return;
+    }
+
+    const assignedStaff = staffList.filter(
+      (s) => s.role.toUpperCase() === roleKey.toUpperCase()
+    );
+
+    if (assignedStaff.length > 0) {
+      triggerToast(
+        `Cannot delete role "${roleLabel}" because ${assignedStaff.length} staff member(s) (${assignedStaff.map((s) => s.name).join(', ')}) are assigned to it. Please reassign them first.`,
+        'error'
+      );
+      return;
+    }
+
+    setConfirmModal({
+      title: 'Delete Role',
+      description: `Are you sure you want to delete role "${roleLabel}"? This role will be removed from permissions and station accesses.`,
+      confirmText: 'Delete Role',
+      isDanger: true,
+      onConfirm: async () => {
+        const next = { ...rolePermissions };
+        delete next[roleKey];
+        setRolePermissions(next);
+        await saveRolePermissions(next);
+        triggerToast(`Role "${roleLabel}" deleted successfully.`, 'success');
+      },
+    });
+  };
+
+  const handleAddRoleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newRoleName.trim();
+    if (!trimmed) {
+      setAddRoleError('Role name is required');
+      return;
+    }
+
+    const key = trimmed
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
+
+    if (!key) {
+      setAddRoleError('Please provide a valid alphanumeric role name');
+      return;
+    }
+
+    if (key === 'OWNER') {
+      setAddRoleError('Owner role is reserved by system');
+      return;
+    }
+
+    if (rolePermissions[key]) {
+      setAddRoleError(`Role "${trimmed}" (${key}) already exists`);
+      return;
+    }
+
+    setIsCreatingRole(true);
+    setAddRoleError(null);
+
+    try {
+      const next: Record<string, RoleConfig> = {
+        ...rolePermissions,
+        [key]: {
+          label: trimmed,
+          description: newRoleDesc.trim() || `${trimmed} station role`,
+          pages: newRolePages,
+          capabilities: newRoleCaps,
+          isCustom: true,
+        },
+      };
+
+      setRolePermissions(next);
+      await saveRolePermissions(next);
+      triggerToast(`Custom role "${trimmed}" created successfully!`, 'success');
+      setIsAddRoleOpen(false);
+      setNewRoleName('');
+      setNewRoleDesc('');
+      setNewRolePages(['pos']);
+      setNewRoleCaps([]);
+    } catch (err: any) {
+      setAddRoleError(err.message || 'Failed to create role');
+    } finally {
+      setIsCreatingRole(false);
+    }
   };
 
   const handleResetRolePermissions = () => {
@@ -592,7 +710,16 @@ export function StaffManagementView() {
   };
 
   const getRoleBadge = (role: string) => {
-    switch (role) {
+    const norm = role.toUpperCase();
+    const cfg = rolePermissions[norm];
+    if (cfg?.label) {
+      return {
+        label: cfg.label,
+        color: norm === 'OWNER' ? 'bg-stone-100 text-stone-800 border-stone-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        icon: BUILTIN_ROLE_ICONS[norm] || UserCheck,
+      };
+    }
+    switch (norm) {
       case 'OWNER':
         return { label: 'Owner', color: 'bg-stone-100 text-stone-800 border-stone-200', icon: ShieldCheck };
       case 'MANAGER':
@@ -935,12 +1062,9 @@ export function StaffManagementView() {
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {[
             { id: 'ALL', label: 'All Roles' },
-            ...(isOwner ? [{ id: 'OWNER', label: 'Owner' }] : []),
-            { id: 'CASHIER', label: 'Cashiers' },
-            { id: 'WAITER', label: 'Waiters' },
-            { id: 'KITCHEN_STAFF', label: 'Kitchen' },
-            { id: 'MAIN_STOREKEEPER', label: 'Store' },
-            { id: 'MANAGER', label: 'Managers' },
+            ...allRoles
+              .filter((r) => isOwner || r.role !== 'OWNER')
+              .map((r) => ({ id: r.role, label: r.label.split(' / ')[0] })),
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1175,7 +1299,22 @@ export function StaffManagementView() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setNewRoleName('');
+                  setNewRoleDesc('');
+                  setNewRolePages(['pos']);
+                  setNewRoleCaps([]);
+                  setAddRoleError(null);
+                  setIsAddRoleOpen(true);
+                }}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>+ Add Role</span>
+              </button>
               <button
                 type="button"
                 onClick={handleResetRolePermissions}
@@ -1187,7 +1326,7 @@ export function StaffManagementView() {
                 type="button"
                 onClick={handleSaveRolePermissions}
                 disabled={isSavingPerms}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-black text-white font-black text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Check className="w-4 h-4" />
                 <span>{isSavingPerms ? 'Saving Changes...' : 'Save Permissions'}</span>
@@ -1197,11 +1336,12 @@ export function StaffManagementView() {
 
           {/* Matrix Cards for Roles */}
           <div className="space-y-4">
-            {ALL_ROLES.map(({ role, label, description, icon: RoleIcon }) => {
+            {allRoles.map(({ role, label, description, icon: RoleIcon, isCustom }) => {
               const isOwnerRole = role === 'OWNER';
-              const cfg = rolePermissions[role] || DEFAULT_ROLE_PERMISSIONS[role];
+              const cfg = rolePermissions[role] || (DEFAULT_ROLE_PERMISSIONS as any)[role] || { pages: [], capabilities: [] };
               const activePages = cfg.pages || [];
               const activeCaps = cfg.capabilities || [];
+              const assignedCount = staffList.filter((s) => s.role.toUpperCase() === role.toUpperCase()).length;
 
               return (
                 <div
@@ -1223,22 +1363,42 @@ export function StaffManagementView() {
                         <RoleIcon className="w-5 h-5" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="text-sm font-black text-stone-900">{label}</h3>
                           <span className="font-mono text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 border border-stone-200">
                             {role}
                           </span>
+                          {isCustom && (
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              Custom Role
+                            </span>
+                          )}
                         </div>
                         <p className="text-[11px] text-stone-500 mt-0.5">{description}</p>
                       </div>
                     </div>
 
-                    {isOwnerRole && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 whitespace-nowrap self-start sm:self-auto">
-                        <Check className="w-3 h-3 stroke-[3]" />
-                        Full System Authority (Permanent)
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <span className="text-[10px] font-bold text-stone-500 bg-stone-100 border border-stone-200 px-2.5 py-1 rounded-lg">
+                        {assignedCount} {assignedCount === 1 ? 'staff' : 'staff'}
                       </span>
-                    )}
+                      {isOwnerRole ? (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 whitespace-nowrap">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          Full Authority
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteRole(role, label)}
+                          className="px-2.5 py-1 rounded-xl text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 text-xs font-bold transition cursor-pointer flex items-center gap-1 active:scale-95"
+                          title={`Delete role ${label}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Remove</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Accessible Pages Checkbox Strip */}
@@ -1411,13 +1571,11 @@ export function StaffManagementView() {
                     onChange={(e) => setFormRole(e.target.value)}
                     className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
-                    <option value="WAITER">Waiter / Order Pad</option>
-                    <option value="CASHIER">Cashier / POS</option>
-                    <option value="KITCHEN_STAFF">Kitchen Cook</option>
-                    <option value="HEAD_CHEF">Head Chef</option>
-                    <option value="MAIN_STOREKEEPER">Main Storekeeper</option>
-                    <option value="KITCHEN_STOREKEEPER">Kitchen Storekeeper</option>
-                    <option value="MANAGER">General Manager</option>
+                    {availableRoleOptions.map((r) => (
+                      <option key={r.role} value={r.role}>
+                        {r.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -1634,13 +1792,11 @@ export function StaffManagementView() {
                     onChange={(e) => setEditRole(e.target.value)}
                     className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
-                    <option value="WAITER">Service Waiter</option>
-                    <option value="CASHIER">Cashier / POS</option>
-                    <option value="KITCHEN_STAFF">Kitchen Cook</option>
-                    <option value="HEAD_CHEF">Head Chef</option>
-                    <option value="MAIN_STOREKEEPER">Main Storekeeper</option>
-                    <option value="KITCHEN_STOREKEEPER">Kitchen Storekeeper</option>
-                    <option value="MANAGER">General Manager</option>
+                    {availableRoleOptions.map((r) => (
+                      <option key={r.role} value={r.role}>
+                        {r.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1729,6 +1885,159 @@ export function StaffManagementView() {
           </div>
         </div>
       )}
+      {/* ================= MODAL: ADD CUSTOM ROLE ================= */}
+      {isAddRoleOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white border border-stone-200/90 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative my-8 text-stone-900 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+              <div className="flex items-center gap-2">
+                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <SlidersHorizontal className="w-4 h-4" />
+                </span>
+                <h3 className="text-sm font-black text-stone-900">Add Custom Staff Role</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddRoleOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {addRoleError && (
+              <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-2xl flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{addRoleError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAddRoleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">
+                  Role Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Bartender, Shift Supervisor, Barista..."
+                  value={newRoleName}
+                  onChange={(e) => setNewRoleName(e.target.value)}
+                  required
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Takes bar counter orders and mixes drinks"
+                  value={newRoleDesc}
+                  onChange={(e) => setNewRoleDesc(e.target.value)}
+                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              {/* Station Pages Checkbox Strip */}
+              <div>
+                <div className="text-xs font-bold text-stone-700 mb-2">
+                  Accessible Station Pages <span className="text-rose-500">*</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {AVAILABLE_PAGES.map((page) => {
+                    const PageIcon = page.icon;
+                    const isChecked = newRolePages.includes(page.id);
+                    return (
+                      <button
+                        key={page.id}
+                        type="button"
+                        onClick={() => {
+                          setNewRolePages((prev) =>
+                            prev.includes(page.id)
+                              ? prev.filter((p) => p !== page.id)
+                              : [...prev, page.id]
+                          );
+                        }}
+                        className={`p-2 rounded-xl border text-left flex items-center gap-2 transition cursor-pointer text-xs font-bold ${
+                          isChecked
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-2xs'
+                            : 'bg-stone-50 border-stone-200 text-stone-400 hover:border-stone-300'
+                        }`}
+                      >
+                        <PageIcon className={`w-3.5 h-3.5 ${isChecked ? 'text-emerald-700' : 'text-stone-400'}`} />
+                        <span className="truncate text-[11px]">{page.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Capabilities Checkbox Strip */}
+              <div>
+                <div className="text-xs font-bold text-stone-700 mb-2">
+                  Operational Capabilities
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {AVAILABLE_CAPABILITIES.map((cap) => {
+                    const isChecked = newRoleCaps.includes(cap.id);
+                    return (
+                      <button
+                        key={cap.id}
+                        type="button"
+                        onClick={() => {
+                          setNewRoleCaps((prev) =>
+                            prev.includes(cap.id)
+                              ? prev.filter((c) => c !== cap.id)
+                              : [...prev, cap.id]
+                          );
+                        }}
+                        className={`p-2.5 rounded-xl border text-left flex items-start gap-2 transition cursor-pointer text-xs ${
+                          isChecked
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-2xs'
+                            : 'bg-stone-50 border-stone-200 text-stone-400 hover:border-stone-300'
+                        }`}
+                      >
+                        <div className="mt-0.5 shrink-0">
+                          {isChecked ? (
+                            <CheckSquare className="w-3.5 h-3.5 text-emerald-700" />
+                          ) : (
+                            <Square className="w-3.5 h-3.5 text-stone-300" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-[11px]">{cap.label}</div>
+                          <div className="text-[10px] text-stone-400 leading-tight">{cap.description}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-stone-200 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddRoleOpen(false)}
+                  className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingRole}
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
+                >
+                  {isCreatingRole && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isCreatingRole ? 'Creating Role...' : 'Create Role'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Modal */}
       {confirmModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">

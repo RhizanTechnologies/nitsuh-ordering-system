@@ -4,7 +4,7 @@ import { UserRole, Prisma } from '@prisma/client';
 export interface CreateUserDto {
     name: string;
     employeeCode?: string;
-    role: UserRole;
+    role: UserRole | string;
     pinCode: string;
     password?: string;
     avatarUrl?: string;
@@ -13,7 +13,7 @@ export interface CreateUserDto {
 export interface UpdateUserDto {
     name?: string;
     employeeCode?: string;
-    role?: UserRole;
+    role?: UserRole | string;
     avatarUrl?: string;
     isActive?: boolean;
 }
@@ -23,12 +23,13 @@ export declare class UsersService {
     private readonly logger;
     constructor(prisma: PrismaService, eventsGateway: EventsGateway);
     getAllUsers(requesterRole?: string): Promise<{
+        role: any;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
         pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         isActive: boolean;
         avatarUrl: string;
         createdAt: Date;
@@ -40,35 +41,38 @@ export declare class UsersService {
         };
     }[]>;
     getUserById(id: string, requesterRole?: string): Promise<{
+        role: any;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
         pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         isActive: boolean;
         avatarUrl: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
     createUser(dto: CreateUserDto, creatorId?: string): Promise<{
+        role: any;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
         pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         isActive: boolean;
         avatarUrl: string;
         createdAt: Date;
     }>;
     updateUser(id: string, dto: UpdateUserDto, updaterId?: string, updaterRole?: string): Promise<{
+        role: any;
         id: string;
         name: string;
         employeeCode: string;
         email: string;
         pinCode: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        customRole: string;
         isActive: boolean;
         avatarUrl: string;
         updatedAt: Date;

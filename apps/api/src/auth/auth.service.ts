@@ -39,10 +39,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    const effectiveRole = user.customRole || user.role;
     const payload = {
       sub: user.id,
       email: user.email,
-      role: user.role,
+      role: effectiveRole,
       name: user.name,
       employeeCode: user.employeeCode,
     };
@@ -53,7 +54,7 @@ export class AuthService {
         name: user.name,
         employeeCode: user.employeeCode,
         email: user.email,
-        role: user.role,
+        role: effectiveRole,
         avatarUrl: user.avatarUrl,
       },
     };
@@ -96,10 +97,11 @@ export class AuthService {
       );
     }
 
+    const effectiveRole = user.customRole || user.role;
     const payload = {
       sub: user.id,
       email: user.email,
-      role: user.role,
+      role: effectiveRole,
       name: user.name,
       employeeCode: user.employeeCode,
     };
@@ -110,14 +112,14 @@ export class AuthService {
         name: user.name,
         employeeCode: user.employeeCode,
         email: user.email,
-        role: user.role,
+        role: effectiveRole,
         avatarUrl: user.avatarUrl,
       },
     };
   }
 
   async getStaffList() {
-    return this.prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       where: {
         isActive: true,
         role: { notIn: ['OWNER', 'MANAGER'] },
@@ -128,9 +130,15 @@ export class AuthService {
         employeeCode: true,
         email: true,
         role: true,
+        customRole: true,
         avatarUrl: true,
       },
       orderBy: { name: 'asc' },
     });
+
+    return users.map((u) => ({
+      ...u,
+      role: u.customRole || u.role,
+    }));
   }
 }

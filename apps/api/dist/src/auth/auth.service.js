@@ -76,10 +76,11 @@ let AuthService = class AuthService {
         if (!matches) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
+        const effectiveRole = user.customRole || user.role;
         const payload = {
             sub: user.id,
             email: user.email,
-            role: user.role,
+            role: effectiveRole,
             name: user.name,
             employeeCode: user.employeeCode,
         };
@@ -90,7 +91,7 @@ let AuthService = class AuthService {
                 name: user.name,
                 employeeCode: user.employeeCode,
                 email: user.email,
-                role: user.role,
+                role: effectiveRole,
                 avatarUrl: user.avatarUrl,
             },
         };
@@ -121,10 +122,11 @@ let AuthService = class AuthService {
         if (user.role === 'OWNER' || user.role === 'MANAGER') {
             throw new common_1.UnauthorizedException('Managers and Owners must sign in using code/email and password.');
         }
+        const effectiveRole = user.customRole || user.role;
         const payload = {
             sub: user.id,
             email: user.email,
-            role: user.role,
+            role: effectiveRole,
             name: user.name,
             employeeCode: user.employeeCode,
         };
@@ -135,13 +137,13 @@ let AuthService = class AuthService {
                 name: user.name,
                 employeeCode: user.employeeCode,
                 email: user.email,
-                role: user.role,
+                role: effectiveRole,
                 avatarUrl: user.avatarUrl,
             },
         };
     }
     async getStaffList() {
-        return this.prisma.user.findMany({
+        const users = await this.prisma.user.findMany({
             where: {
                 isActive: true,
                 role: { notIn: ['OWNER', 'MANAGER'] },
@@ -152,10 +154,15 @@ let AuthService = class AuthService {
                 employeeCode: true,
                 email: true,
                 role: true,
+                customRole: true,
                 avatarUrl: true,
             },
             orderBy: { name: 'asc' },
         });
+        return users.map((u) => ({
+            ...u,
+            role: u.customRole || u.role,
+        }));
     }
 };
 exports.AuthService = AuthService;
