@@ -14,6 +14,7 @@ import {
   Printer
 } from 'lucide-react';
 import { Button, Badge, Input } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface ActiveOrdersModalProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export function ActiveOrdersModal({
   onPrintReceipt,
   onAppendItems,
 }: ActiveOrdersModalProps) {
+  const { t, lang } = useTranslation();
   const [filter, setFilter] = useState<'ALL' | 'DINE_IN' | 'TAKEAWAY' | 'UNPAID' | 'READY'>('ALL');
   const [search, setSearch] = useState('');
 
@@ -70,7 +72,7 @@ export function ActiveOrdersModal({
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-stone-900">
-                Active Orders & Live Bills
+                {t('active_orders_title', 'Active Orders & Live Bills')}
               </h3>
             </div>
           </div>
@@ -78,7 +80,7 @@ export function ActiveOrdersModal({
             variant="secondary"
             size="icon-sm"
             onClick={onClose}
-            title="Close"
+            title={t('common_close', 'Close')}
           >
             <X className="w-4 h-4" />
           </Button>
@@ -93,7 +95,7 @@ export function ActiveOrdersModal({
               size="sm"
               onClick={() => setFilter('ALL')}
             >
-              All Active ({orders.length})
+              {t('active_orders_all', 'All Active')} ({orders.length})
             </Button>
             <Button
               variant={filter === 'DINE_IN' ? 'primary' : 'secondary'}
@@ -101,7 +103,7 @@ export function ActiveOrdersModal({
               onClick={() => setFilter('DINE_IN')}
             >
               <Utensils className="w-3 h-3" />
-              Dine-In ({orders.filter((o) => o.orderType === 'DINE_IN').length})
+              {t('active_orders_dine_in', 'Dine-In')} ({orders.filter((o) => o.orderType === 'DINE_IN').length})
             </Button>
             <Button
               variant={filter === 'TAKEAWAY' ? 'primary' : 'secondary'}
@@ -109,21 +111,21 @@ export function ActiveOrdersModal({
               onClick={() => setFilter('TAKEAWAY')}
             >
               <ShoppingBag className="w-3 h-3" />
-              Takeaway ({orders.filter((o) => o.orderType === 'TAKEAWAY').length})
+              {t('active_orders_takeaway', 'Takeaway')} ({orders.filter((o) => o.orderType === 'TAKEAWAY').length})
             </Button>
             <Button
               variant={filter === 'UNPAID' ? 'destructive' : 'secondary'}
               size="sm"
               onClick={() => setFilter('UNPAID')}
             >
-              Unpaid ({orders.filter((o) => o.paymentStatus !== 'PAID').length})
+              {t('active_orders_unpaid', 'Unpaid')} ({orders.filter((o) => o.paymentStatus !== 'PAID').length})
             </Button>
             <Button
               variant={filter === 'READY' ? 'success' : 'secondary'}
               size="sm"
               onClick={() => setFilter('READY')}
             >
-              Ready ({orders.filter((o) => o.status === 'READY').length})
+              {t('active_orders_ready', 'Ready')} ({orders.filter((o) => o.status === 'READY').length})
             </Button>
           </div>
 
@@ -132,7 +134,7 @@ export function ActiveOrdersModal({
             <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
               type="text"
-              placeholder="Search table, cashier, guest..."
+              placeholder={t('active_orders_search', 'Search table, cashier, guest...')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -144,7 +146,7 @@ export function ActiveOrdersModal({
         <div className="flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar">
           {filteredOrders.length === 0 ? (
             <div className="py-16 text-center text-xs text-stone-400">
-              No orders found matching the filter criteria.
+              {t('active_orders_empty', 'No orders found matching the filter criteria.')}
             </div>
           ) : (
             filteredOrders.map((order) => {
@@ -230,9 +232,11 @@ export function ActiveOrdersModal({
                   {/* Right: Financial Amount & Actions */}
                   <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-stone-200">
                     <div className="text-left md:text-right">
-                      <div className="text-[10px] text-stone-500 font-bold uppercase">Total Bill (15% VAT)</div>
+                      <div className="text-[10px] text-stone-500 font-bold uppercase">
+                        {lang === 'am' ? 'ጠቅላላ ሂሳብ (15% ቫት)' : 'Total Bill (15% VAT)'}
+                      </div>
                       <div className="text-base font-black text-emerald-700">
-                        {Number(order.totalAmount).toFixed(2)} ETB
+                        {Number(order.totalAmount).toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
                       </div>
                     </div>
 
@@ -249,7 +253,7 @@ export function ActiveOrdersModal({
                           title="Add more items to this order"
                         >
                           <PlusCircle className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>+ Items</span>
+                          <span>{t('active_orders_add_items', '+ Items')}</span>
                         </Button>
                       )}
 
@@ -260,7 +264,7 @@ export function ActiveOrdersModal({
                         onClick={() => {
                           onPrintReceipt(order);
                         }}
-                        title="Print receipt or guest check"
+                        title={t('active_orders_print', 'Print Bill')}
                       >
                         <Printer className="w-3.5 h-3.5 text-stone-600" />
                       </Button>
@@ -276,7 +280,7 @@ export function ActiveOrdersModal({
                           }}
                         >
                           <CreditCard className="w-3.5 h-3.5" />
-                          <span>Settle Bill</span>
+                          <span>{t('active_orders_settle', 'Settle Bill')}</span>
                         </Button>
                       )}
                     </div>

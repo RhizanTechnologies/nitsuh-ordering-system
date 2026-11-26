@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, CreditCard, Banknote, Smartphone, Check, Sparkles } from 'lucide-react';
 import { playPaymentChime } from '@/lib/audio';
 import { Button, Input } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export function PaymentModal({
   onConfirmPayment,
   onShowReceipt,
 }: PaymentModalProps) {
+  const { t, lang } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'MOBILE_PAY' | 'BANK_TRANSFER'>('CASH');
   const [transactionRef, setTransactionRef] = useState<string>('');
   const [customTip, setCustomTip] = useState<string>('');
@@ -55,8 +57,8 @@ export function PaymentModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-stone-200">
           <div>
-            <h3 className="text-base font-black text-stone-900">Process Tender</h3>
-            <p className="text-xs text-stone-500">Order Subtotal: {orderTotal.toFixed(2)} ETB</p>
+            <h3 className="text-base font-black text-stone-900">{t('pay_process_tender', 'Process Tender')}</h3>
+            <p className="text-xs text-stone-500">{t('pay_order_subtotal', 'Order Subtotal:')} {orderTotal.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}</p>
           </div>
           <Button
             variant="secondary"
@@ -75,13 +77,13 @@ export function PaymentModal({
 
         {/* Big Total Banner */}
         <div className="bg-emerald-50/60 border border-emerald-200 p-4 rounded-2xl text-center">
-          <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">Amount To Pay</div>
+          <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">{t('pay_amount_to_pay', 'Amount To Pay')}</div>
           <div className="text-3xl font-black text-emerald-800 mt-0.5 tracking-tight">
-            {totalPayable.toFixed(2)} ETB
+            {totalPayable.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
           </div>
           {tipNumber > 0 && (
             <div className="text-[11px] text-emerald-700 font-bold mt-1">
-              Base: {orderTotal.toFixed(2)} ETB + Tip: {tipNumber.toFixed(2)} ETB
+              Base: {orderTotal.toFixed(2)} + Tip: {tipNumber.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
             </div>
           )}
         </div>
@@ -91,10 +93,10 @@ export function PaymentModal({
           <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1.5 flex items-center justify-between">
             <span className="flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              Server Tip / Gratuity (ETB)
+              {t('pay_tip_label', 'Server Tip / Gratuity (ETB)')}
             </span>
             {tipNumber > 0 && (
-              <span className="text-emerald-700 font-black">+{tipNumber.toFixed(2)} ETB</span>
+              <span className="text-emerald-700 font-black">+{tipNumber.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}</span>
             )}
           </label>
           <div className="relative">
@@ -104,7 +106,7 @@ export function PaymentModal({
               step="any"
               value={customTip}
               onChange={(e) => setCustomTip(e.target.value)}
-              placeholder="Enter tip amount..."
+              placeholder={t('pay_tip_placeholder', 'Enter tip amount...')}
               className="pr-16"
             />
             {customTip && (
@@ -114,7 +116,7 @@ export function PaymentModal({
                 onClick={() => setCustomTip('')}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 px-2"
               >
-                Clear
+                {t('pay_clear', 'Clear')}
               </Button>
             )}
           </div>
@@ -123,7 +125,7 @@ export function PaymentModal({
         {/* Ethiopian Payment Tender */}
         <div>
           <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1.5">
-            Payment Method
+            {t('pay_payment_method', 'Payment Method')}
           </label>
           <div className="grid grid-cols-3 gap-2">
             <button
@@ -136,7 +138,7 @@ export function PaymentModal({
               }`}
             >
               <Banknote className="w-5 h-5 text-emerald-600" />
-              <span className="text-xs font-black">Cash</span>
+              <span className="text-xs font-black">{t('pay_cash', 'Cash')}</span>
             </button>
 
             <button
@@ -149,7 +151,7 @@ export function PaymentModal({
               }`}
             >
               <Smartphone className="w-5 h-5 text-sky-600" />
-              <span className="text-xs font-black">Telebirr</span>
+              <span className="text-xs font-black">{t('pay_telebirr', 'Telebirr')}</span>
             </button>
 
             <button
@@ -162,7 +164,7 @@ export function PaymentModal({
               }`}
             >
               <CreditCard className="w-5 h-5 text-purple-600" />
-              <span className="text-xs font-black">CBE</span>
+              <span className="text-xs font-black">{t('pay_cbe', 'CBE')}</span>
             </button>
           </div>
         </div>
@@ -173,8 +175,8 @@ export function PaymentModal({
             <div className="flex items-center justify-between text-xs">
               <span className="text-stone-700 font-bold">
                 {paymentMethod === 'MOBILE_PAY'
-                  ? 'Telebirr Transaction ID (Optional)'
-                  : 'CBE Reference / Slip Number (Optional)'}
+                  ? t('pay_telebirr_ref', 'Telebirr Transaction ID (Optional)')
+                  : t('pay_cbe_ref', 'CBE Reference / Slip Number (Optional)')}
               </span>
             </div>
             <Input
@@ -190,10 +192,10 @@ export function PaymentModal({
         {paymentMethod === 'CASH' && (
           <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-stone-500 font-bold">Cash Received (Optional)</span>
+              <span className="text-stone-500 font-bold">{t('pay_cash_received', 'Cash Received (Optional)')}</span>
               {cashReceivedNumber >= totalPayable && (
                 <span className="text-emerald-700 font-black text-xs">
-                  Change: {change.toFixed(2)} ETB
+                  {t('pay_change', 'Change:')} {change.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
                 </span>
               )}
             </div>
@@ -203,7 +205,7 @@ export function PaymentModal({
               step="any"
               value={cashReceived}
               onChange={(e) => setCashReceived(e.target.value)}
-              placeholder={`e.g. ${Math.ceil(totalPayable)} ETB`}
+              placeholder={`e.g. ${Math.ceil(totalPayable)} ${lang === 'am' ? 'ብር' : 'ETB'}`}
             />
           </div>
         )}
@@ -215,7 +217,7 @@ export function PaymentModal({
             size="default"
             onClick={onClose}
           >
-            Cancel
+            {t('common_cancel', 'Cancel')}
           </Button>
           <Button
             variant="primary"
@@ -225,7 +227,7 @@ export function PaymentModal({
             className="flex-1"
           >
             <Check className="w-4 h-4 stroke-[3]" />
-            <span>{processing ? 'Processing...' : 'Settle Payment'}</span>
+            <span>{processing ? t('pay_processing', 'Processing...') : t('pay_settle', 'Settle Payment')}</span>
           </Button>
         </div>
       </div>

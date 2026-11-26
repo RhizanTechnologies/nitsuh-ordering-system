@@ -12,6 +12,7 @@ import {
   RefreshCw,
   AlertCircle,
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', // Female Exec
@@ -37,6 +38,7 @@ export function StaffAvatarUploader({
   staffName,
   label = 'Staff Profile Photo / Avatar',
 }: StaffAvatarUploaderProps) {
+  const { t, lang } = useTranslation();
   const [activeTab, setActiveTab] = useState<'upload' | 'presets' | 'url'>('upload');
   const [isDragging, setIsDragging] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -231,7 +233,7 @@ export function StaffAvatarUploader({
                   className="text-[11px] font-semibold text-rose-500 hover:text-rose-400 flex items-center gap-1 cursor-pointer"
                 >
                   <Trash2 className="w-3 h-3" />
-                  <span>Reset to stock</span>
+                  <span>{t('avatar_reset_stock', 'Reset to stock')}</span>
                 </button>
               </>
             )}
@@ -251,7 +253,7 @@ export function StaffAvatarUploader({
           }`}
         >
           <Upload className="w-3.5 h-3.5" />
-          <span>Upload / Camera</span>
+          <span>{t('avatar_upload_tab', 'Upload / Camera')}</span>
         </button>
 
         <button
@@ -264,7 +266,7 @@ export function StaffAvatarUploader({
           }`}
         >
           <ImageIcon className="w-3.5 h-3.5" />
-          <span>Stock Presets</span>
+          <span>{t('avatar_presets_tab', 'Stock Presets')}</span>
         </button>
 
         <button
@@ -277,7 +279,7 @@ export function StaffAvatarUploader({
           }`}
         >
           <Link2 className="w-3.5 h-3.5" />
-          <span>Image URL</span>
+          <span>{t('avatar_url_tab', 'Image URL')}</span>
         </button>
       </div>
 
@@ -323,7 +325,7 @@ export function StaffAvatarUploader({
 
               <div className="space-y-0.5">
                 <p className="text-xs font-bold text-stone-800">
-                  {processing ? 'Optimizing photo...' : 'Upload staff photo'}
+                  {processing ? t('avatar_optimizing', 'Optimizing photo...') : t('avatar_upload_label', 'Upload staff photo')}
                 </p>
               </div>
 
@@ -336,7 +338,7 @@ export function StaffAvatarUploader({
                   className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   <Upload className="w-3.5 h-3.5" />
-                  <span>Choose Photo</span>
+                  <span>{t('avatar_choose_photo', 'Choose Photo')}</span>
                 </button>
 
                 <button
@@ -347,7 +349,7 @@ export function StaffAvatarUploader({
                   title="Take photo using mobile or laptop camera"
                 >
                   <Camera className="w-3.5 h-3.5" />
-                  <span>Take Photo</span>
+                  <span>{t('avatar_take_photo', 'Take Photo')}</span>
                 </button>
               </div>
             </div>
@@ -416,7 +418,7 @@ export function StaffAvatarUploader({
               disabled={!urlInput.trim()}
               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition disabled:opacity-40 cursor-pointer"
             >
-              Apply
+              {t('avatar_apply', 'Apply')}
             </button>
           </div>
         </form>

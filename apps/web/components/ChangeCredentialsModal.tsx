@@ -5,6 +5,7 @@ import { useAppStore } from '@/lib/store';
 import { fetchApi } from '@/lib/api';
 import { KeyRound, Lock, X, Check, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { Button, Input, Card } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface ChangeCredentialsModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface ChangeCredentialsModalProps {
 
 export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsModalProps) {
   const { currentUser, login } = useAppStore();
+  const { t, lang } = useTranslation();
 
   const isManagement = currentUser?.role === 'OWNER' || currentUser?.role === 'MANAGER';
   const [activeTab, setActiveTab] = useState<'pin' | 'password'>(isManagement ? 'password' : 'pin');
@@ -147,12 +149,15 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
               <KeyRound className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-black text-stone-900">Profile Security</h3>
+              <h3 className="text-base font-black text-stone-900">
+                {lang === 'am' ? 'የመለያ ደህንነት እና የይለፍ ቃል' : 'Profile Security & Credentials'}
+              </h3>
             </div>
           </div>
           <button
             onClick={handleClose}
             className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 cursor-pointer"
+            title={t('common_close', 'Close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -174,7 +179,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
               }`}
             >
               <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Password</span>
+              <span>{lang === 'am' ? 'የይለፍ ቃል' : 'Password'}</span>
             </button>
             <button
               type="button"
@@ -189,7 +194,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
               }`}
             >
               <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Terminal PIN</span>
+              <span>{lang === 'am' ? 'ባለ 4-አሃዝ ፒን' : 'Terminal PIN'}</span>
             </button>
           </div>
         ) : (
@@ -221,7 +226,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                 {currentUser.role !== 'OWNER' && (
                   <div>
                     <label className="block text-xs font-bold text-stone-700 mb-1">
-                      Current 4-Digit PIN
+                      {lang === 'am' ? 'የአሁኑ ባለ 4-አሃዝ ፒን' : 'Current 4-Digit PIN'}
                     </label>
                     <Input
                       type="password"
@@ -237,7 +242,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    New 4-Digit PIN
+                    {lang === 'am' ? 'አዲስ ባለ 4-አሃዝ ፒን' : 'New 4-Digit PIN'}
                   </label>
                   <Input
                     type="password"
@@ -252,7 +257,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    Confirm New PIN
+                    {lang === 'am' ? 'አዲሱን ፒን ያረጋግጡ' : 'Confirm New PIN'}
                   </label>
                   <Input
                     type="password"
@@ -272,14 +277,14 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                     size="sm"
                     onClick={handleClose}
                   >
-                    Cancel
+                    {t('common_cancel', 'Cancel')}
                   </Button>
                   <button
                     type="submit"
                     disabled={submitting}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
                   >
-                    {submitting ? 'Updating...' : 'Update PIN'}
+                    {submitting ? (lang === 'am' ? 'በማደስ ላይ...' : 'Updating...') : (lang === 'am' ? 'ፒን ቀይር' : 'Update PIN')}
                   </button>
                 </div>
               </form>
@@ -290,11 +295,11 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
               <form onSubmit={handlePasswordSubmit} className="space-y-3.5 mt-3.5">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    Current Password
+                    {t('credentials_current_password', 'Current Password')}
                   </label>
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Current password"
+                    placeholder={lang === 'am' ? 'የአሁኑ የይለፍ ቃል' : 'Current password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
@@ -303,11 +308,11 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    New Password
+                    {t('credentials_new_password', 'New Password')}
                   </label>
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="At least 6 characters"
+                    placeholder={lang === 'am' ? 'ቢያንስ 6 ቁምፊዎች' : 'At least 6 characters'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
@@ -316,11 +321,11 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    Confirm New Password
+                    {t('credentials_confirm_new_password', 'Confirm New Password')}
                   </label>
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Repeat new password"
+                    placeholder={lang === 'am' ? 'አዲሱን የይለፍ ቃል እንደገና ያስገቡ' : 'Repeat new password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -334,7 +339,7 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                     className="text-[11px] font-bold text-stone-500 hover:text-stone-900 flex items-center gap-1 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-3.5 h-3.5 text-stone-500" /> : <Eye className="w-3.5 h-3.5 text-stone-500" />}
-                    <span>{showPassword ? 'Hide password' : 'Show password'}</span>
+                    <span>{showPassword ? t('credentials_hide_pw', 'Hide password') : t('credentials_show_pw', 'Show password')}</span>
                   </button>
                 </div>
 
@@ -345,14 +350,14 @@ export function ChangeCredentialsModal({ isOpen, onClose }: ChangeCredentialsMod
                     size="sm"
                     onClick={handleClose}
                   >
-                    Cancel
+                    {t('common_cancel', 'Cancel')}
                   </Button>
                   <button
                     type="submit"
                     disabled={submitting}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
                   >
-                    {submitting ? 'Updating...' : 'Update Password'}
+                    {submitting ? (lang === 'am' ? 'በማደስ ላይ...' : 'Updating...') : t('credentials_update_password', 'Update Password')}
                   </button>
                 </div>
               </form>

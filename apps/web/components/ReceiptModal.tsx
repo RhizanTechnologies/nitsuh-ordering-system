@@ -3,6 +3,7 @@
 import React from 'react';
 import { Printer, X } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface ReceiptModalProps {
 }
 
 export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
+  const { t, lang } = useTranslation();
   if (!isOpen || !order) return null;
 
   const handlePrint = () => {
@@ -29,14 +31,14 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
         {/* Modal Controls */}
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-200 print:hidden">
           <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">
-            Customer Receipt
+            {t('receipt_customer_receipt', 'Customer Receipt')}
           </span>
           <div className="flex items-center gap-2">
             <Button
               variant="primary"
               size="icon-sm"
               onClick={handlePrint}
-              title="Print Receipt"
+              title={t('receipt_print', 'Print Receipt')}
             >
               <Printer className="w-4 h-4 stroke-[2.5]" />
             </Button>
@@ -44,7 +46,7 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
               variant="secondary"
               size="icon-sm"
               onClick={onClose}
-              title="Close"
+              title={t('receipt_close', 'Close')}
             >
               <X className="w-4 h-4" />
             </Button>
@@ -70,46 +72,46 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
               &ldquo;From Savour Bites to Sweet Delights – We Cater It All!&rdquo;
             </div>
             <div className="text-[10px] font-bold border-t border-b border-dashed border-gray-400 py-1 mt-2">
-              ERCA OFFICIAL CASH RECEIPT / TAX INVOICE
+              {t('receipt_official_title', 'ERCA OFFICIAL CASH RECEIPT / TAX INVOICE')}
             </div>
           </div>
 
           {/* Metadata */}
           <div className="text-[11px] space-y-0.5 border-b border-dashed border-gray-400 pb-2">
             <div className="flex justify-between">
-              <span>Order #:</span>
+              <span>{t('receipt_order_no', 'Order #:')}</span>
               <span className="font-bold">{order.orderNumber}</span>
             </div>
             <div className="flex justify-between">
-              <span>Order Type:</span>
+              <span>{lang === 'am' ? 'የትዕዛዝ ዓይነት:' : 'Order Type:'}</span>
               <span className="font-bold">
                 {order.orderType === 'TAKEAWAY'
-                  ? '🛍️ TAKEAWAY (Package)'
-                  : `🍽️ DINE-IN (${order.table?.tableNumber || 'Table Assigned'})`}
+                  ? `🛍️ ${t('waiter_takeaway_label', 'TAKEAWAY')}`
+                  : `🍽️ ${t('waiter_table_label', 'DINE-IN')} (${order.table?.tableNumber || (lang === 'am' ? 'የተመደበ ጠረጴዛ' : 'Table Assigned')})`}
               </span>
             </div>
             <div className="flex justify-between">
-              <span>Customer:</span>
-              <span>{order.customerName || 'Guest'}</span>
+              <span>{lang === 'am' ? 'ደንበኛ:' : 'Customer:'}</span>
+              <span>{order.customerName || (lang === 'am' ? 'እንግዳ' : 'Guest')}</span>
             </div>
             <div className="flex justify-between">
-              <span>Date & Time:</span>
+              <span>{t('receipt_date', 'Date & Time:')}</span>
               <span>{new Date(order.createdAt || Date.now()).toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span>Cashier:</span>
-              <span className="font-bold text-gray-800">{order.cashier?.name || 'Cashier Station'}</span>
+              <span>{t('receipt_cashier', 'Cashier:')}</span>
+              <span className="font-bold text-gray-800">{order.cashier?.name || (lang === 'am' ? 'ካሸር' : 'Cashier Station')}</span>
             </div>
             {order.waiter?.name && (
               <div className="flex justify-between">
-                <span>Waiter / Server:</span>
+                <span>{lang === 'am' ? 'አስተናጋጅ:' : 'Waiter / Server:'}</span>
                 <span className="font-bold text-gray-800">{order.waiter.name}</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span>Payment Method:</span>
+              <span>{lang === 'am' ? 'የክፍያ ዘዴ:' : 'Payment Method:'}</span>
               <span className="font-bold uppercase text-emerald-800">
-                {order.paymentMethod || 'CASH'} (PAID)
+                {order.paymentMethod || 'CASH'} ({lang === 'am' ? 'ተከፍሏል' : 'PAID'})
               </span>
             </div>
           </div>
@@ -117,9 +119,9 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
           {/* Items Table */}
           <div className="space-y-1 border-b border-dashed border-gray-400 pb-2">
             <div className="flex justify-between font-bold text-[11px] pb-1 border-b border-gray-300">
-              <span className="w-1/2">Item Description</span>
-              <span className="w-1/6 text-center">Qty</span>
-              <span className="w-1/3 text-right">Price</span>
+              <span className="w-1/2">{t('receipt_item', 'Item Description')}</span>
+              <span className="w-1/6 text-center">{t('receipt_qty', 'Qty')}</span>
+              <span className="w-1/3 text-right">{t('receipt_amount', 'Price')}</span>
             </div>
             {order.items?.map((item: any, idx: number) => {
               const name = item.menuItem?.name || item.name || 'Item';
@@ -147,35 +149,35 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
           {/* Totals Calculation */}
           <div className="space-y-1 text-[11px] pt-1">
             <div className="flex justify-between">
-              <span>Base Subtotal:</span>
-              <span>{subtotal.toFixed(2)} ETB</span>
+              <span>{t('receipt_subtotal', 'Base Subtotal:')}</span>
+              <span>{subtotal.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between font-bold text-red-600">
-                <span>Promotional Discount:</span>
-                <span>-{discount.toFixed(2)} ETB</span>
+                <span>{t('receipt_discount', 'Promotional Discount:')}</span>
+                <span>-{discount.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}</span>
               </div>
             )}
             {tip > 0 && (
               <div className="flex justify-between font-bold">
-                <span>Staff Tip / Gratuity:</span>
-                <span>+{tip.toFixed(2)} ETB</span>
+                <span>{t('receipt_tip', 'Staff Tip / Gratuity:')}</span>
+                <span>+{tip.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span>VAT (15% Included):</span>
-              <span>{tax.toFixed(2)} ETB</span>
+              <span>{t('receipt_tax', 'VAT (15% Included):')}</span>
+              <span>{tax.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}</span>
             </div>
             <div className="flex justify-between font-black text-sm pt-1 border-t border-dashed border-gray-400">
-              <span>TOTAL DUE:</span>
-              <span>{total.toFixed(2)} ETB</span>
+              <span>{t('receipt_total', 'TOTAL DUE:')}</span>
+              <span>{total.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}</span>
             </div>
           </div>
 
           {/* Footer Note */}
           <div className="text-center pt-3 border-t border-dashed border-gray-400 text-[10px] text-gray-600 space-y-1">
-            <p className="font-bold">Thank you for dining with Nitsuh Foods!</p>
-            <p>Please retain this receipt for your records.</p>
+            <p className="font-bold">{t('receipt_thank_you', 'Thank you for dining with Nitsuh Foods!')}</p>
+            <p>{lang === 'am' ? 'እባክዎ ይህን ደረሰኝ ለይዞታዎ ያስቀምጡ።' : 'Please retain this receipt for your records.'}</p>
             <p className="text-[9px] text-gray-400 font-sans mt-2">
               System powered by Nitsuh POS &bull; www.nitsuh.et
             </p>
@@ -190,7 +192,7 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
             onClick={handlePrint}
           >
             <Printer className="w-4 h-4" />
-            <span>Print Receipt</span>
+            <span>{t('receipt_print', 'Print Receipt')}</span>
           </Button>
           <Button
             variant="secondary"

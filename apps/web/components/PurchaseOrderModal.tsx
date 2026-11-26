@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Truck, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { fetchApi } from '@/lib/api';
+import { useTranslation } from '@/lib/i18n';
 
 interface PurchaseOrderModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function PurchaseOrderModal({
   onPurchaseRecorded,
   currentUserId,
 }: PurchaseOrderModalProps) {
+  const { t, lang } = useTranslation();
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -131,7 +133,7 @@ export function PurchaseOrderModal({
             </div>
             <div>
               <h3 className="text-base font-black text-stone-900">
-                Record Supplier Delivery (Main Store)
+                {t('po_title', 'Record Supplier Delivery (Main Store)')}
               </h3>
             </div>
           </div>
@@ -153,7 +155,7 @@ export function PurchaseOrderModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1">
-                Supplier
+                {t('po_supplier', 'Supplier')}
               </label>
               <select
                 value={selectedSupplierId}
@@ -171,7 +173,7 @@ export function PurchaseOrderModal({
 
             <div>
               <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1">
-                Vendor Invoice #
+                {t('po_vendor_invoice', 'Vendor Invoice #')}
               </label>
               <input
                 type="text"
@@ -186,7 +188,7 @@ export function PurchaseOrderModal({
           {/* Add Ingredient Line */}
           <div>
             <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1">
-              Delivered Stock Items
+              {t('po_delivered_items', 'Delivered Stock Items')}
             </label>
             <select
               onChange={(e) => {
@@ -197,12 +199,12 @@ export function PurchaseOrderModal({
               }}
               className="w-full bg-white border border-stone-300 rounded-2xl px-3 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
-              <option value="" className="bg-white text-stone-500">+ Select ingredient from database...</option>
+              <option value="" className="bg-white text-stone-500">{t('po_select_ingredient', '+ Select ingredient from database...')}</option>
               {ingredients
                 .filter((i) => !items.some((it) => it.ingredientId === i.id))
                 .map((ing) => (
                   <option key={ing.id} value={ing.id} className="bg-white text-stone-900">
-                    {ing.name} (Current: {Number(ing.currentCostPerBaseUnit).toFixed(4)} ETB / {ing.baseUnit?.symbol})
+                    {ing.name} ({lang === 'am' ? 'የአሁኑ ዋጋ' : 'Current'}: {Number(ing.currentCostPerBaseUnit).toFixed(4)} {lang === 'am' ? 'ብር' : 'ETB'} / {ing.baseUnit?.symbol})
                   </option>
                 ))}
             </select>
@@ -212,7 +214,7 @@ export function PurchaseOrderModal({
           <div className="space-y-2.5 max-h-[260px] overflow-y-auto no-scrollbar">
             {items.length === 0 ? (
               <div className="py-8 text-center text-xs text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl">
-                No items added yet. Select an ingredient above to restock.
+                {t('po_no_items', 'No items added yet. Select an ingredient above to restock.')}
               </div>
             ) : (
               items.map((i) => {
@@ -225,13 +227,13 @@ export function PurchaseOrderModal({
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-xs sm:text-sm text-stone-900 truncate">{i.name}</div>
                       <div className="text-[10px] text-stone-500 mt-0.5">
-                        New Cost: <span className="text-emerald-700 font-bold">{unitCost.toFixed(4)} ETB / {i.symbol}</span>
+                        {t('po_new_cost', 'New Cost:')} <span className="text-emerald-700 font-bold">{unitCost.toFixed(4)} {lang === 'am' ? 'ብር' : 'ETB'} / {i.symbol}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <div className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl px-2 py-1">
-                        <span className="text-[10px] font-bold text-stone-500">Qty:</span>
+                        <span className="text-[10px] font-bold text-stone-500">{t('po_qty', 'Qty:')}</span>
                         <input
                           type="number"
                           step="any"
@@ -245,7 +247,7 @@ export function PurchaseOrderModal({
                       </div>
 
                       <div className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl px-2 py-1">
-                        <span className="text-[10px] font-bold text-stone-500">Total:</span>
+                        <span className="text-[10px] font-bold text-stone-500">{t('po_total', 'Total:')}</span>
                         <input
                           type="number"
                           step="any"
@@ -255,14 +257,14 @@ export function PurchaseOrderModal({
                           }
                           className="w-20 bg-transparent text-xs font-bold text-emerald-700 focus:outline-none text-right"
                         />
-                        <span className="text-[10px] text-stone-500 font-semibold">ETB</span>
+                        <span className="text-[10px] text-stone-500 font-semibold">{lang === 'am' ? 'ብር' : 'ETB'}</span>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => handleRemove(i.ingredientId)}
                         className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
-                        title="Remove item"
+                        title={lang === 'am' ? 'ዕቃ አስወግድ' : 'Remove item'}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -274,13 +276,13 @@ export function PurchaseOrderModal({
           </div>
 
           <div className="flex justify-between items-center bg-stone-100 border border-stone-200 p-3 rounded-2xl text-xs font-bold">
-            <span className="text-stone-600">Total Purchase Value:</span>
-            <span className="text-base text-emerald-800 font-extrabold">{grandTotal.toFixed(2)} ETB</span>
+            <span className="text-stone-600">{t('po_total_val', 'Total Purchase Value:')}</span>
+            <span className="text-base text-emerald-800 font-extrabold">{grandTotal.toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}</span>
           </div>
 
           {/* Payment Terms & Credit Tracking */}
           <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3 space-y-2">
-            <div className="text-[11px] font-bold text-stone-600 uppercase">Payment Terms & Credit Status</div>
+            <div className="text-[11px] font-bold text-stone-600 uppercase">{t('po_payment_terms', 'Payment Terms & Credit Status')}</div>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
@@ -291,7 +293,7 @@ export function PurchaseOrderModal({
                     : 'bg-white border-stone-200 text-stone-600'
                 }`}
               >
-                Paid in Full
+                {t('po_paid_in_full', 'Paid in Full')}
               </button>
               <button
                 type="button"
@@ -302,7 +304,7 @@ export function PurchaseOrderModal({
                     : 'bg-white border-stone-200 text-stone-600'
                 }`}
               >
-                On Credit (AP)
+                {t('po_on_credit', 'On Credit (AP)')}
               </button>
               <button
                 type="button"
@@ -313,14 +315,14 @@ export function PurchaseOrderModal({
                     : 'bg-white border-stone-200 text-stone-600'
                 }`}
               >
-                Partial Deposit
+                {t('po_partial', 'Partial Deposit')}
               </button>
             </div>
 
             {paymentTerms === 'PARTIAL' && (
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase mb-0.5">Amount Paid (ETB)</label>
+                  <label className="block text-[10px] font-bold text-stone-500 uppercase mb-0.5">{t('po_amount_paid', 'Amount Paid (ETB)')}</label>
                   <input
                     type="number"
                     step="any"
@@ -331,7 +333,7 @@ export function PurchaseOrderModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase mb-0.5">Due Date / Terms</label>
+                  <label className="block text-[10px] font-bold text-stone-500 uppercase mb-0.5">{t('po_due_date', 'Due Date / Terms')}</label>
                   <input
                     type="text"
                     value={creditDueDate}
@@ -345,7 +347,7 @@ export function PurchaseOrderModal({
 
             {paymentTerms === 'CREDIT' && (
               <div className="pt-1">
-                <label className="block text-[10px] font-bold text-stone-500 uppercase mb-0.5">Payment Due Date</label>
+                <label className="block text-[10px] font-bold text-stone-500 uppercase mb-0.5">{t('po_due_date', 'Payment Due Date')}</label>
                 <input
                   type="text"
                   value={creditDueDate}
@@ -363,7 +365,7 @@ export function PurchaseOrderModal({
               onClick={onClose}
               className="px-4 py-2 rounded-2xl text-xs font-bold text-stone-600 hover:text-stone-900 transition cursor-pointer"
             >
-              Cancel
+              {t('common_cancel', 'Cancel')}
             </button>
             <button
               type="submit"
@@ -371,7 +373,7 @@ export function PurchaseOrderModal({
               className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>{submitting ? 'Committing...' : 'Commit Purchase'}</span>
+              <span>{submitting ? t('po_committing', 'Committing...') : t('po_commit', 'Commit Purchase')}</span>
             </button>
           </div>
         </form>

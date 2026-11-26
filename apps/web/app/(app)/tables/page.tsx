@@ -21,9 +21,11 @@ import {
   Loader2
 } from 'lucide-react';
 import { calculatePrepTime } from '@/lib/timer-utils';
+import { useTranslation } from '@/lib/i18n';
 
 export default function TablesPage() {
   const { currentUser } = useAppStore();
+  const { t, lang } = useTranslation();
   const [tablesList, setTablesList] = useState<any[]>([]);
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,8 +88,8 @@ export default function TablesPage() {
 
   const getNextSequentialTableNumber = () => {
     const nums = tablesList
-      .map((t) => {
-        const match = t.tableNumber.match(/\d+/);
+      .map((tbl) => {
+        const match = tbl.tableNumber.match(/\d+/);
         return match ? parseInt(match[0], 10) : 0;
       })
       .filter((n) => n > 0);
@@ -209,7 +211,7 @@ export default function TablesPage() {
 
   // Open modern in-app confirmation modal for deleting table
   const handleDelete = (tableId: string, name: string) => {
-    const table = tablesList.find((t) => t.id === tableId);
+    const table = tablesList.find((tbl) => tbl.id === tableId);
     const hasActiveOrders = activeOrders.some((o) => o.tableId === tableId);
     if (table?.status === 'OCCUPIED' || hasActiveOrders) {
       showToast(
@@ -239,9 +241,9 @@ export default function TablesPage() {
     }
   };
 
-  const filteredTables = tablesList.filter((t) => {
+  const filteredTables = tablesList.filter((tbl) => {
     if (statusFilter === 'ALL') return true;
-    return t.status === statusFilter;
+    return tbl.status === statusFilter;
   });
 
   return (
@@ -255,7 +257,7 @@ export default function TablesPage() {
                 <LayoutGrid className="w-5 h-5" />
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight leading-tight">
-                Dining Tables
+                {t('tables_page_title', 'Dining Tables')}
               </h1>
             </div>
 
@@ -276,14 +278,14 @@ export default function TablesPage() {
                     title="1-Click Auto-Number & Create Next Table"
                   >
                     <Plus className="w-4 h-4 stroke-[2.5]" />
-                    <span>+ Auto Next</span>
+                    <span>{t('tables_auto_next', '+ Auto Next')}</span>
                   </button>
                   <button
                     onClick={handleStartAdd}
                     className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                   >
                     <Plus className="w-4 h-4 stroke-[3]" />
-                    <span>Add New Table</span>
+                    <span>{t('tables_add_new', 'Add New Table')}</span>
                   </button>
                 </>
               )}
@@ -407,30 +409,30 @@ export default function TablesPage() {
                   : 'bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200'
               }`}
             >
-              {filter === 'ALL' && `All Tables (${tablesList.length})`}
-              {filter === 'AVAILABLE' && `Available (${tablesList.filter((t) => t.status === 'AVAILABLE').length})`}
-              {filter === 'OCCUPIED' && `Occupied (${tablesList.filter((t) => t.status === 'OCCUPIED').length})`}
-              {filter === 'RESERVED' && `Reserved (${tablesList.filter((t) => t.status === 'RESERVED').length})`}
+              {filter === 'ALL' && `${t('tables_filter_all', 'All')} (${tablesList.length})`}
+              {filter === 'AVAILABLE' && `${t('tables_filter_available', 'Available')} (${tablesList.filter((tbl) => tbl.status === 'AVAILABLE').length})`}
+              {filter === 'OCCUPIED' && `${t('tables_filter_occupied', 'Occupied')} (${tablesList.filter((tbl) => tbl.status === 'OCCUPIED').length})`}
+              {filter === 'RESERVED' && `${t('tables_filter_reserved', 'Reserved')} (${tablesList.filter((tbl) => tbl.status === 'RESERVED').length})`}
             </button>
           ))}
         </div>
 
         {/* Floor Plan Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredTables.map((t) => {
-            const isEditing = editingTableId === t.id;
+          {filteredTables.map((tableItem) => {
+            const isEditing = editingTableId === tableItem.id;
 
             if (isEditing) {
               return (
                 <div
-                  key={t.id}
+                  key={tableItem.id}
                   className="p-4 rounded-3xl border-2 border-emerald-500 bg-white transition-all shadow-md relative flex flex-col justify-between animate-in fade-in"
                 >
                   <form onSubmit={handleSaveEdit} className="space-y-3">
                     <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                       <div className="flex items-center gap-1.5 text-xs font-black text-emerald-800">
                         <Edit3 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Edit Table Details</span>
+                        <span>{t('tables_edit_note', 'Edit Table Details')}</span>
                       </div>
                       <button
                         type="button"
@@ -444,7 +446,7 @@ export default function TablesPage() {
 
                     <div>
                       <label className="block text-[10px] font-black text-stone-600 uppercase mb-1">
-                        Table Name / Number *
+                        {t('tables_name_number', 'Table Name / Number')} *
                       </label>
                       <input
                         type="text"
@@ -459,33 +461,33 @@ export default function TablesPage() {
 
                     <div>
                       <label className="block text-[10px] font-black text-stone-600 uppercase mb-1">
-                        Guest Capacity
+                        {t('tables_capacity_label', 'Guest Capacity')}
                       </label>
                       <select
                         value={capacity}
                         onChange={(e) => setCapacity(e.target.value)}
                         className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 bg-stone-50 text-stone-900 cursor-pointer font-medium"
                       >
-                        <option value="2">2 Guests (Couples)</option>
-                        <option value="4">4 Guests (Standard)</option>
-                        <option value="6">6 Guests (Family)</option>
-                        <option value="8">8 Guests (Large Group)</option>
-                        <option value="12">12+ Guests (VIP Hall)</option>
+                        <option value="2">2 {lang === 'am' ? 'እንግዶች (ጥንዶች)' : 'Guests (Couples)'}</option>
+                        <option value="4">4 {lang === 'am' ? 'እንግዶች (መደበኛ)' : 'Guests (Standard)'}</option>
+                        <option value="6">6 {lang === 'am' ? 'እንግዶች (ቤተሰብ)' : 'Guests (Family)'}</option>
+                        <option value="8">8 {lang === 'am' ? 'እንግዶች (ትልቅ ቡድን)' : 'Guests (Large Group)'}</option>
+                        <option value="12">12+ {lang === 'am' ? 'እንግዶች (ቪአይፒ)' : 'Guests (VIP Hall)'}</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-[10px] font-black text-stone-600 uppercase mb-1">
-                        Table Status
+                        {t('tables_initial_status', 'Table Status')}
                       </label>
                       <select
                         value={status}
                         onChange={(e) => setStatus(e.target.value as any)}
                         className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-emerald-600 bg-stone-50 text-stone-900 cursor-pointer font-medium"
                       >
-                        <option value="AVAILABLE">Available (Open)</option>
-                        <option value="RESERVED">Reserved</option>
-                        {t.status === 'OCCUPIED' && <option value="OCCUPIED">Occupied</option>}
+                        <option value="AVAILABLE">{t('tables_filter_available', 'Available (Open)')}</option>
+                        <option value="RESERVED">{t('tables_filter_reserved', 'Reserved')}</option>
+                        {tableItem.status === 'OCCUPIED' && <option value="OCCUPIED">{t('tables_filter_occupied', 'Occupied')}</option>}
                       </select>
                     </div>
 
@@ -496,14 +498,14 @@ export default function TablesPage() {
                         className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
                         <Save className="w-3.5 h-3.5" />
-                        <span>{formLoading ? 'Saving...' : 'Save Changes'}</span>
+                        <span>{formLoading ? t('tables_saving', 'Saving...') : t('common_save', 'Save Changes')}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setEditingTableId(null)}
                         className="py-2 px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
                       >
-                        Cancel
+                        {t('tables_cancel', 'Cancel')}
                       </button>
                     </div>
                   </form>
@@ -511,12 +513,12 @@ export default function TablesPage() {
               );
             }
 
-            const isOccupied = t.status === 'OCCUPIED';
-            const isReserved = t.status === 'RESERVED';
+            const isOccupied = tableItem.status === 'OCCUPIED';
+            const isReserved = tableItem.status === 'RESERVED';
 
             return (
               <div
-                key={t.id}
+                key={tableItem.id}
                 className={`p-4 rounded-3xl border transition-all shadow-xs relative flex flex-col justify-between ${
                   isOccupied
                     ? 'bg-rose-50/70 border-rose-200 text-stone-900'
@@ -527,7 +529,7 @@ export default function TablesPage() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-black text-stone-900">{t.tableNumber}</span>
+                    <span className="text-sm font-black text-stone-900">{tableItem.tableNumber}</span>
                     <span
                       className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase border ${
                         isOccupied
@@ -537,17 +539,17 @@ export default function TablesPage() {
                           : 'bg-emerald-50 text-emerald-800 border-emerald-200'
                       }`}
                     >
-                      {t.status}
+                      {isOccupied ? t('tables_seated', 'Seated') : isReserved ? t('tables_reserved', 'Reserved') : t('tables_open', 'Open')}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-1.5 text-xs text-stone-500 mb-3">
                     <Users className="w-3.5 h-3.5 text-stone-400" />
-                    <span>{t.capacity} Guests Capacity</span>
+                    <span>{tableItem.capacity} {lang === 'am' ? 'እንግዶች የመያዝ አቅም' : 'Guests Capacity'}</span>
                   </div>
 
                   {isOccupied && (() => {
-                    const activeOrder = activeOrders.find((o) => o.tableId === t.id);
+                    const activeOrder = activeOrders.find((o) => o.tableId === tableItem.id);
                     const prep = activeOrder ? calculatePrepTime(activeOrder.createdAt) : null;
                     return (
                       <div className="bg-white rounded-2xl p-2.5 mb-3 border border-stone-200 text-xs space-y-1.5 shadow-2xs">
@@ -562,15 +564,17 @@ export default function TablesPage() {
                               )}
                             </div>
                             <div className="flex items-center justify-between text-[11px] text-stone-600">
-                              <span>Server: <strong className="text-emerald-700">{activeOrder.waiter?.name || 'Staff'}</strong></span>
+                              <span>
+                                {lang === 'am' ? 'አስተናጋጅ' : 'Server'}: <strong className="text-emerald-700">{activeOrder.waiter?.name || (lang === 'am' ? 'ሰራተኛ' : 'Staff')}</strong>
+                              </span>
                               <span className="font-extrabold text-stone-900 font-mono">
-                                {Number(activeOrder.totalAmount || 0).toFixed(2)} ETB
+                                {Number(activeOrder.totalAmount || 0).toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
                               </span>
                             </div>
                           </>
                         ) : (
                           <div className="text-[11px] font-bold text-amber-800 py-1">
-                            Table marked occupied (no active order found).
+                            {lang === 'am' ? 'ጠረጴዛው ተይዟል (ንቁ ትዕዛዝ የለም)' : 'Table marked occupied (no active order found).'}
                           </div>
                         )}
                         <div className="flex items-center gap-1.5 pt-1">
@@ -579,18 +583,18 @@ export default function TablesPage() {
                               href="/pos"
                               className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 transition shadow-xs"
                             >
-                              <span>Settle in POS</span>
+                              <span>{lang === 'am' ? 'በካሸር አጠናቅቅ' : 'Settle in POS'}</span>
                               <ArrowRight className="w-3 h-3" />
                             </Link>
                           )}
                           {isOwnerOrManager && (
                             <button
                               type="button"
-                              onClick={() => handleFreeTable(t.id, t.tableNumber)}
+                              onClick={() => handleFreeTable(tableItem.id, tableItem.tableNumber)}
                               className="py-1.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] rounded-xl transition cursor-pointer"
                               title="Force clear table and set to Available"
                             >
-                              Free Table
+                              {t('tables_free_button', 'Free Table')}
                             </button>
                           )}
                         </div>
@@ -602,21 +606,21 @@ export default function TablesPage() {
                 {isOwnerOrManager && (
                   <div className="flex items-center justify-end gap-1 pt-3 border-t border-stone-200">
                     <button
-                      onClick={() => handleStartEdit(t)}
+                      onClick={() => handleStartEdit(tableItem)}
                       className="p-1.5 text-stone-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition cursor-pointer"
                       title="Edit table"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(t.id, t.tableNumber)}
+                      onClick={() => handleDelete(tableItem.id, tableItem.tableNumber)}
                       className={`p-1.5 rounded-lg transition cursor-pointer ${
-                        t.status === 'OCCUPIED'
+                        tableItem.status === 'OCCUPIED'
                           ? 'text-stone-300 hover:text-rose-500 hover:bg-rose-50/50'
                           : 'text-stone-500 hover:text-rose-600 hover:bg-rose-50'
                       }`}
                       title={
-                        t.status === 'OCCUPIED'
+                        tableItem.status === 'OCCUPIED'
                           ? 'Occupied table cannot be deleted (release or settle first)'
                           : 'Delete table'
                       }
@@ -640,9 +644,9 @@ export default function TablesPage() {
             </div>
 
             <div>
-              <h3 className="text-base font-black text-stone-900">Delete Table</h3>
+              <h3 className="text-base font-black text-stone-900">{t('tables_delete_confirm_title', 'Delete Table')}</h3>
               <p className="text-xs text-stone-500 mt-1 leading-relaxed">
-                Are you sure you want to delete table <strong className="text-stone-800 font-bold">&quot;{deleteModal.name}&quot;</strong>? This action will remove it from the dining floor.
+                {lang === 'am' ? 'እርግጠኛ ነዎት ይህን ጠረጴዛ መሰረዝ ይፈልጋሉ' : 'Are you sure you want to delete table'} <strong className="text-stone-800 font-bold">&quot;{deleteModal.name}&quot;</strong>?
               </p>
             </div>
 
@@ -653,7 +657,7 @@ export default function TablesPage() {
                 onClick={() => setDeleteModal(null)}
                 className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer disabled:opacity-50"
               >
-                Cancel
+                {t('tables_cancel', 'Cancel')}
               </button>
               <button
                 type="button"
@@ -662,7 +666,7 @@ export default function TablesPage() {
                 className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-60"
               >
                 {deletingTable && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>{deletingTable ? 'Deleting...' : 'Delete Table'}</span>
+                <span>{deletingTable ? t('tables_saving', 'Deleting...') : t('common_delete', 'Delete Table')}</span>
               </button>
             </div>
           </div>
@@ -678,9 +682,9 @@ export default function TablesPage() {
             </div>
 
             <div>
-              <h3 className="text-base font-black text-stone-900">Release Table</h3>
+              <h3 className="text-base font-black text-stone-900">{lang === 'am' ? 'ጠረጴዛን ልቀቅ' : 'Release Table'}</h3>
               <p className="text-xs text-stone-500 mt-1 leading-relaxed">
-                Are you sure you want to release table <strong className="text-stone-800 font-bold">&quot;{freeModal.name}&quot;</strong> and mark it Available? Any open orders will be cleared from this table.
+                {lang === 'am' ? 'እርግጠኛ ነዎት ጠረጴዛውን መልቀቅ እና ነፃ ማድረግ ይፈልጋሉ' : 'Are you sure you want to release table'} <strong className="text-stone-800 font-bold">&quot;{freeModal.name}&quot;</strong>?
               </p>
             </div>
 
@@ -690,14 +694,14 @@ export default function TablesPage() {
                 onClick={() => setFreeModal(null)}
                 className="px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition cursor-pointer"
               >
-                Cancel
+                {t('tables_cancel', 'Cancel')}
               </button>
               <button
                 type="button"
                 onClick={executeFreeTable}
                 className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs transition shadow-xs cursor-pointer"
               >
-                Release Table
+                {lang === 'am' ? 'ጠረጴዛውን ልቀቅ' : 'Release Table'}
               </button>
             </div>
           </div>

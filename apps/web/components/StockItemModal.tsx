@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Boxes, Tag, DollarSign, Sliders, Layers, Hash, Check } from 'lucide-react';
 import { fetchApi } from '@/lib/api';
+import { useTranslation } from '@/lib/i18n';
 
 interface StockItemModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ const CATEGORIES = [
 ];
 
 export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockItemModalProps) {
+  const { t, lang } = useTranslation();
   const isEditing = Boolean(item);
 
   const [name, setName] = useState('');
@@ -148,7 +150,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
             </div>
             <div>
               <h3 className="text-base font-black text-stone-900">
-                {isEditing ? `Edit: ${item?.name}` : 'New Stock Item'}
+                {isEditing ? `${t('stock_edit_item', 'Edit Stock Item')}: ${item?.name}` : t('stock_new_item', 'New Stock Item')}
               </h3>
             </div>
           </div>
@@ -175,13 +177,13 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2 space-y-1">
               <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
-                <span>Stock Item Name</span>
+                <span>{t('stock_name_label', 'Stock Item Name')}</span>
                 <span className="text-emerald-600">*</span>
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Arabica Coffee Beans"
+                placeholder={lang === 'am' ? 'ምሳሌ፡ አረቢካ የቡና ፍሬ' : 'e.g. Arabica Coffee Beans'}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
@@ -190,11 +192,11 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
                 <Hash className="w-3 h-3 text-stone-500" />
-                <span>SKU Code</span>
+                <span>{t('stock_sku_label', 'SKU Code')}</span>
               </label>
               <input
                 type="text"
-                placeholder="Auto-generate"
+                placeholder={lang === 'am' ? 'በራስ-ሰር የሚመነጭ' : 'Auto-generate'}
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
                 className="w-full bg-white border border-stone-300 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 uppercase"
@@ -207,7 +209,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
                 <Tag className="w-3 h-3 text-emerald-600" />
-                <span>Category</span>
+                <span>{t('stock_category_label', 'Category')}</span>
               </label>
               <select
                 value={category}
@@ -219,12 +221,12 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                     {c}
                   </option>
                 ))}
-                <option value="CUSTOM">+ Custom Category...</option>
+                <option value="CUSTOM">{t('stock_custom_cat', '+ Custom Category...')}</option>
               </select>
               {category === 'CUSTOM' && (
                 <input
                   type="text"
-                  placeholder="Enter custom category name..."
+                  placeholder={lang === 'am' ? 'የተለየ የምድብ ስም ያስገቡ...' : 'Enter custom category name...'}
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value)}
                   className="w-full mt-2 bg-white border border-stone-300 rounded-2xl px-3.5 py-2 text-xs font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
@@ -235,7 +237,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
                 <Layers className="w-3 h-3 text-emerald-600" />
-                <span>Base Measurement Unit</span>
+                <span>{t('stock_base_unit', 'Base Measurement Unit')}</span>
                 <span className="text-emerald-600">*</span>
               </label>
               <select
@@ -257,7 +259,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
             <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <DollarSign className="w-3 h-3 text-emerald-600" />
-                <span>Cost per Base Unit (ETB)</span>
+                <span>{t('stock_cost_unit', 'Cost per Base Unit (ETB)')}</span>
                 <span className="text-emerald-600">*</span>
               </span>
               <span className="text-[10px] text-emerald-700 font-bold lowercase">
@@ -275,7 +277,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                 className="w-full bg-white border border-stone-300 rounded-2xl pl-4 pr-16 py-2.5 text-xs font-black text-stone-900 placeholder-stone-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-500">
-                ETB / {selectedUnit?.symbol || 'unit'}
+                {lang === 'am' ? 'ብር' : 'ETB'} / {selectedUnit?.symbol || 'unit'}
               </span>
             </div>
           </div>
@@ -284,12 +286,12 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
           <div className="p-3.5 bg-stone-50 border border-stone-200 rounded-2xl space-y-3">
             <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
               <Sliders className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Low-Stock Alert Cutoffs</span>
+              <span>{t('stock_alert_cutoffs', 'Low-Stock Alert Cutoffs')}</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-[10px] text-stone-600 uppercase font-bold">
-                  Main Warehouse Alert (&le;)
+                  {t('stock_main_alert', 'Main Warehouse Alert (≤)')}
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -305,7 +307,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
 
               <div className="space-y-1">
                 <label className="text-[10px] text-stone-600 uppercase font-bold">
-                  Kitchen Store Alert (&le;)
+                  {t('stock_kitchen_alert', 'Kitchen Store Alert (≤)')}
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -327,13 +329,13 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
               <div className="flex items-center justify-between">
                 <div className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
                   <Boxes className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Opening Stock Balances (Optional)</span>
+                  <span>{t('stock_opening_balances', 'Opening Stock Balances (Optional)')}</span>
                 </div>
-                <span className="text-[10px] text-emerald-700 font-semibold">Initial On-Hand Quantity</span>
+                <span className="text-[10px] text-emerald-700 font-semibold">{lang === 'am' ? 'የመጀመሪያ የተገኘ እቃ ብዛት' : 'Initial On-Hand Quantity'}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] text-stone-600 uppercase font-bold">Main Store Opening Qty</label>
+                  <label className="text-[10px] text-stone-600 uppercase font-bold">{t('stock_main_opening', 'Main Store Opening Qty')}</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -348,7 +350,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-stone-600 uppercase font-bold">Kitchen Store Opening Qty</label>
+                  <label className="text-[10px] text-stone-600 uppercase font-bold">{t('stock_kitchen_opening', 'Kitchen Store Opening Qty')}</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -373,7 +375,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
               disabled={submitting}
               className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition cursor-pointer"
             >
-              Cancel
+              {t('common_cancel', 'Cancel')}
             </button>
             <button
               type="submit"
@@ -381,7 +383,7 @@ export function StockItemModal({ isOpen, onClose, item, units, onSaved }: StockI
               className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <Check className="w-4 h-4 stroke-[3]" />
-              <span>{submitting ? 'Saving...' : isEditing ? 'Update Stock Item' : 'Create Stock Item'}</span>
+              <span>{submitting ? (lang === 'am' ? 'በማስቀመጥ ላይ...' : 'Saving...') : isEditing ? t('stock_update_button', 'Update Stock Item') : t('stock_create_button', 'Create Stock Item')}</span>
             </button>
           </div>
         </form>

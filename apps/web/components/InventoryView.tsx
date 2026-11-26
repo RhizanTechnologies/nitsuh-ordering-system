@@ -508,7 +508,7 @@ export function InventoryView() {
   const kitchenStoreLoc = locations.find((l) => l.type === 'KITCHEN_STORE');
 
   // Transfers dispatched by Main Storekeeper awaiting Kitchen Chef confirmation
-  const pendingKitchenReceipts = transfers.filter((t) => t.status === 'DISPATCHED');
+  const pendingKitchenReceipts = transfers.filter((tr) => tr.status === 'DISPATCHED');
 
   // Kitchen-specific low stock alerts (current kitchen balance <= reorderThresholdKitchen)
   const kitchenLowStockItems = kitchenStoreLoc?.balances?.filter(

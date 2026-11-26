@@ -1029,11 +1029,16 @@ export function WaiterPadView() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition cursor-pointer active:scale-95"
               >
                 <Utensils className="w-4 h-4" />
-                <span>Back to Food Menu</span>
+                <span>{t('waiter_back_to_menu', 'Back to Food Menu')}</span>
               </button>
               <div className="flex items-center gap-2 text-xs font-bold text-stone-600 bg-white border border-stone-200 px-3 py-2 rounded-2xl shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>{inFlightOrders.length} Active Ticket{inFlightOrders.length === 1 ? '' : 's'}</span>
+                <span>
+                  {inFlightOrders.length}{' '}
+                  {inFlightOrders.length === 1
+                    ? t('waiter_active_ticket', 'Active Ticket')
+                    : t('waiter_active_tickets', 'Active Tickets')}
+                </span>
               </div>
             </div>
           )}
@@ -1220,10 +1225,11 @@ export function WaiterPadView() {
                   <div>
                     <h3 className="text-sm sm:text-base font-black text-stone-900 flex items-center gap-2">
                       <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
-                      <span>Live Kitchen Preparation Tracker</span>
+                      <span>{t('waiter_live_tracker', 'Live Kitchen Preparation Tracker')}</span>
                     </h3>
                     <p className="text-xs text-stone-500 mt-0.5">
-                      Real-time status for tickets served by <span className="text-stone-900 font-bold">{currentUser?.name}</span>.
+                      {t('waiter_tracker_subtitle', 'Real-time status for tickets served by')}{' '}
+                      <span className="text-stone-900 font-bold">{currentUser?.name}</span>.
                     </p>
                   </div>
 
@@ -1231,15 +1237,15 @@ export function WaiterPadView() {
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 text-[11px] sm:text-xs font-bold pt-1 sm:pt-0">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 whitespace-nowrap shadow-2xs">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
-                      <span>Normal (&lt;15m)</span>
+                      <span>{t('tracker_normal', 'Normal (<15m)')}</span>
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 whitespace-nowrap shadow-2xs">
                       <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-                      <span>Warning (15–20m)</span>
+                      <span>{t('tracker_warning', 'Warning (15–20m)')}</span>
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200/90 whitespace-nowrap shadow-2xs">
                       <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping flex-shrink-0" />
-                      <span>Delayed (&gt;20m)</span>
+                      <span>{t('tracker_delayed', 'Delayed (>20m)')}</span>
                     </span>
                   </div>
                 </div>
@@ -1247,8 +1253,12 @@ export function WaiterPadView() {
                 {inFlightOrders.length === 0 ? (
                   <div className="py-12 text-center text-stone-500">
                     <Clock className="w-10 h-10 mx-auto mb-2 opacity-40 text-emerald-600" />
-                    <p className="text-sm font-bold text-stone-800">No active tables being prepared right now.</p>
-                    <p className="text-xs text-stone-500 mt-1">Take an order to start tracking prep time!</p>
+                    <p className="text-sm font-bold text-stone-800">
+                      {t('tracker_no_active', 'No active tables being prepared right now.')}
+                    </p>
+                    <p className="text-xs text-stone-500 mt-1">
+                      {t('tracker_take_order', 'Take an order to start tracking prep time!')}
+                    </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1259,13 +1269,13 @@ export function WaiterPadView() {
                       const isWarning = !isDraft && prep.delayStatus === 'WARNING';
                       const isReady = order.status === 'READY';
                       const statusLabel = isDraft
-                        ? '⏳ Awaiting Cashier Firing'
+                        ? t('status_awaiting_cashier', '⏳ Awaiting Cashier Firing')
                         : order.status === 'CONFIRMED'
-                        ? 'In Kitchen'
+                        ? t('status_in_kitchen', 'In Kitchen')
                         : order.status === 'IN_PREPARATION'
-                        ? 'Cooking'
+                        ? t('status_cooking', 'Cooking')
                         : order.status === 'READY'
-                        ? 'Ready to Serve'
+                        ? t('status_ready_to_serve', 'Ready to Serve')
                         : order.status;
                       const orderNote = order.notes || order.specialInstructions || order.items?.find((i: any) => i.specialInstructions)?.specialInstructions;
 
@@ -1292,8 +1302,8 @@ export function WaiterPadView() {
                                 </span>
                                 <span className="text-xs font-bold text-stone-700 truncate">
                                   {order.orderType === 'TAKEAWAY'
-                                    ? `🛍️ Takeaway (${order.customerName || 'Guest'})`
-                                    : `🍽️ Table ${order.table?.tableNumber || 'Guest'}`}
+                                    ? `🛍️ ${t('waiter_takeaway_label', 'Takeaway')} (${order.customerName || t('waiter_guest_label', 'Guest')})`
+                                    : `🍽️ ${t('waiter_table_label', 'Table')} ${order.table?.tableNumber || t('waiter_guest_label', 'Guest')}`}
                                 </span>
                               </div>
 
@@ -1312,7 +1322,11 @@ export function WaiterPadView() {
                                 }`}
                               >
                                 <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                                <span>{isDraft ? `Sent ${prep.formattedTime} ago` : `${prep.formattedTime} prep`}</span>
+                                <span>
+                                  {isDraft
+                                    ? (lang === 'am' ? `ከ${prep.formattedTime} በፊት ተልኳል` : `Sent ${prep.formattedTime} ago`)
+                                    : `${prep.formattedTime} ${t('tracker_prep', 'prep')}`}
+                                </span>
                               </div>
                             </div>
 
@@ -1348,7 +1362,8 @@ export function WaiterPadView() {
                                   )}
                                 </span>
                                 <span className="text-stone-500 font-mono text-[11px] whitespace-nowrap">
-                                  {Number(it.subtotal || (it.unitPrice || it.price || it.menuItem?.price || 0) * it.quantity).toFixed(2)} ETB
+                                  {Number(it.subtotal || (it.unitPrice || it.price || it.menuItem?.price || 0) * it.quantity).toFixed(2)}{' '}
+                                  {lang === 'am' ? 'ብር' : 'ETB'}
                                 </span>
                               </div>
                             ))}
@@ -1358,14 +1373,16 @@ export function WaiterPadView() {
                           {orderNote && (
                             <div className="mt-2.5 p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
                               <MessageSquare className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                              <span>Note: <strong>{orderNote}</strong></span>
+                              <span>
+                                {t('waiter_note_label', 'Note')}: <strong>{orderNote}</strong>
+                              </span>
                             </div>
                           )}
 
                           {/* Actions */}
                           <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between gap-2 flex-wrap">
                             <span className="text-xs font-bold text-stone-900">
-                              {Number(order.totalAmount || 0).toFixed(2)} ETB
+                              {Number(order.totalAmount || 0).toFixed(2)} {lang === 'am' ? 'ብር' : 'ETB'}
                             </span>
 
                             <div className="flex items-center gap-2">
@@ -1377,7 +1394,7 @@ export function WaiterPadView() {
                                   title="Edit note items before cashier fires to kitchen"
                                 >
                                   <Edit3 className="w-3.5 h-3.5 text-amber-700" />
-                                  <span>Edit Note</span>
+                                  <span>{t('waiter_edit_note', 'Edit Note')}</span>
                                 </button>
                               )}
 
@@ -1389,7 +1406,7 @@ export function WaiterPadView() {
                                   title="Add more items to this active kitchen ticket"
                                 >
                                   <Plus className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span>+ Add Items</span>
+                                  <span>{t('waiter_add_items', '+ Add Items')}</span>
                                 </button>
                               )}
 
@@ -1400,7 +1417,7 @@ export function WaiterPadView() {
                                   onClick={() => handleMarkServed(order.id)}
                                 >
                                   <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                  <span>Mark Served</span>
+                                  <span>{t('waiter_mark_served', 'Mark Served')}</span>
                                 </Button>
                               )}
                             </div>
