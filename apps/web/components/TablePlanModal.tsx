@@ -95,12 +95,12 @@ export function TablePlanModal({
     setSuccessMsg(null);
   };
 
-  const handleStartEdit = (t: any) => {
+  const handleStartEdit = (tbl: any) => {
     setShowAddForm(false);
-    setEditingTableId(t.id);
-    setTableNumber(t.tableNumber);
-    setCapacity(String(t.capacity));
-    setStatus(t.status === 'RESERVED' ? 'RESERVED' : 'AVAILABLE');
+    setEditingTableId(tbl.id);
+    setTableNumber(tbl.tableNumber);
+    setCapacity(String(tbl.capacity));
+    setStatus(tbl.status === 'RESERVED' ? 'RESERVED' : 'AVAILABLE');
     setError(null);
     setSuccessMsg(null);
   };
@@ -153,12 +153,12 @@ export function TablePlanModal({
     }
   };
 
-  const handleDeleteTable = (t: any) => {
-    if (t.orders && t.orders.length > 0) {
-      setError(`Cannot delete Table ${t.tableNumber} while it has an active dining bill.`);
+  const handleDeleteTable = (tbl: any) => {
+    if (tbl.orders && tbl.orders.length > 0) {
+      setError(`Cannot delete Table ${tbl.tableNumber} while it has an active dining bill.`);
       return;
     }
-    setTableToDelete(t);
+    setTableToDelete(tbl);
   };
 
   const confirmDeleteTable = async () => {
@@ -177,11 +177,11 @@ export function TablePlanModal({
     }
   };
 
-  const filteredTables = tablesList.filter((t) => {
-    const isOccupied = t.status === 'OCCUPIED';
-    if (statusFilter === 'AVAILABLE') return t.status === 'AVAILABLE';
+  const filteredTables = tablesList.filter((tbl) => {
+    const isOccupied = tbl.status === 'OCCUPIED';
+    if (statusFilter === 'AVAILABLE') return tbl.status === 'AVAILABLE';
     if (statusFilter === 'OCCUPIED') return isOccupied;
-    if (statusFilter === 'RESERVED') return t.status === 'RESERVED';
+    if (statusFilter === 'RESERVED') return tbl.status === 'RESERVED';
     return true;
   });
 
@@ -382,27 +382,27 @@ export function TablePlanModal({
 
         {/* Table Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[58vh] overflow-y-auto pr-1 pt-1">
-          {filteredTables.map((t) => {
-            const isOccupied = t.status === 'OCCUPIED';
-            const hasActiveOrder = isOccupied && t.orders && t.orders.length > 0;
-            const isReserved = t.status === 'RESERVED';
-            const isAvailable = t.status === 'AVAILABLE';
+          {filteredTables.map((tableItem) => {
+            const isOccupied = tableItem.status === 'OCCUPIED';
+            const hasActiveOrder = isOccupied && tableItem.orders && tableItem.orders.length > 0;
+            const isReserved = tableItem.status === 'RESERVED';
+            const isAvailable = tableItem.status === 'AVAILABLE';
             // Only genuinely available tables can show as selected for a new order
-            const isSelected = selectedTable === t.tableNumber && isAvailable;
+            const isSelected = selectedTable === tableItem.tableNumber && isAvailable;
 
-            const [code, ...zoneParts] = t.tableNumber.split(' - ');
+            const [code, ...zoneParts] = tableItem.tableNumber.split(' - ');
             const zoneName = zoneParts.join(' - ');
 
             return (
               <div
-                key={t.id}
+                key={tableItem.id}
                 onClick={() => {
                   if (activeTab === 'floor' && onSelectTable) {
                     if (isReserved) {
-                      setError(`Table "${t.tableNumber}" is currently reserved. Please select an available Open table.`);
+                      setError(`Table "${tableItem.tableNumber}" is currently reserved. Please select an available Open table.`);
                       return;
                     }
-                    onSelectTable(t.tableNumber, t);
+                    onSelectTable(tableItem.tableNumber, tableItem);
                     onClose();
                   }
                 }}
@@ -428,7 +428,7 @@ export function TablePlanModal({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="font-heading font-black text-sm text-stone-900 leading-tight">
-                        {code || t.tableNumber}
+                        {code || tableItem.tableNumber}
                       </span>
                       {zoneName && (
                         <span className="text-[11px] font-semibold text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded-md">
@@ -450,7 +450,7 @@ export function TablePlanModal({
                 {/* Capacity */}
                 <div className="flex items-center gap-1.5 text-xs text-stone-500 mb-2">
                   <Users className="w-3.5 h-3.5 text-stone-500" />
-                  <span>{t('tables_capacity')}: {t.capacity} {t('tables_seats')}</span>
+                  <span>{t('tables_capacity')}: {tableItem.capacity} {t('tables_seats')}</span>
                 </div>
 
                 {/* Active Order Summary if Seated */}
@@ -458,12 +458,12 @@ export function TablePlanModal({
                   <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-1 text-[11px] font-bold border-t border-amber-500/20 pt-1.5 mb-2 text-amber-800">
                     <span className="truncate">
                       {hasActiveOrder
-                        ? `Active: #${String(t.orders[0].orderNumber).replace(/^#+/, '')} • ${Number(t.orders[0].totalAmount).toFixed(2)} ETB`
+                        ? `Active: #${String(tableItem.orders[0].orderNumber).replace(/^#+/, '')} • ${Number(tableItem.orders[0].totalAmount).toFixed(2)} ETB`
                         : 'Occupied'}
                     </span>
                     <div className="flex items-center gap-1 shrink-0 self-end xs:self-auto">
                       <span className="text-[10px] font-black px-2 py-0.5 rounded-lg bg-amber-200/90 text-amber-950 whitespace-nowrap shadow-2xs">
-                        {hasActiveOrder && t.orders[0].status === 'DRAFT_NOTE'
+                        {hasActiveOrder && tableItem.orders[0].status === 'DRAFT_NOTE'
                           ? t('tables_edit_note', 'Edit Note')
                           : t('tables_add_order', 'Add Order')}
                       </span>
@@ -473,11 +473,11 @@ export function TablePlanModal({
                           onClick={async (e) => {
                             e.stopPropagation();
                             try {
-                              await fetchApi(`/menu/tables/${t.id}`, {
+                              await fetchApi(`/menu/tables/${tableItem.id}`, {
                                 method: 'PATCH',
                                 body: JSON.stringify({ status: 'AVAILABLE' }),
                               });
-                              setSuccessMsg(`Table ${t.tableNumber} is now Open.`);
+                              setSuccessMsg(`Table ${tableItem.tableNumber} is now Open.`);
                               await refreshTables();
                               setTimeout(() => setSuccessMsg(null), 2500);
                             } catch (err: any) {
@@ -502,7 +502,7 @@ export function TablePlanModal({
                       size="icon-sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleStartEdit(t);
+                        handleStartEdit(tableItem);
                       }}
                       title="Edit Table"
                     >
@@ -514,7 +514,7 @@ export function TablePlanModal({
                       disabled={hasActiveOrder}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteTable(t);
+                        handleDeleteTable(tableItem);
                       }}
                       className="text-stone-500 hover:text-[#C11221]"
                       title={hasActiveOrder ? 'Cannot delete table with active order' : 'Delete Table'}

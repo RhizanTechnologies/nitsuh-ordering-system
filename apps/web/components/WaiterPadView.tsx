@@ -1504,13 +1504,28 @@ export function WaiterPadView() {
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleCancelEditOrAppend}
-                className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 transition flex-shrink-0 cursor-pointer"
-              >
-                Cancel
-              </button>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={handleCancelEditOrAppend}
+                  className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 transition flex-shrink-0 cursor-pointer shadow-2xs"
+                >
+                  {t('waiter_cancel_edit', 'Cancel')}
+                </button>
+                <button
+                  type="button"
+                  disabled={sending || waiterCart.length === 0}
+                  onClick={handleSendToCashier}
+                  className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-amber-950 hover:bg-black text-amber-300 hover:text-amber-200 transition flex-shrink-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1 shadow-2xs"
+                >
+                  {sending ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-3 h-3" />
+                  )}
+                  <span>{t('waiter_update_order', 'Update')}</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -1868,13 +1883,28 @@ export function WaiterPadView() {
                     Editing Draft {formatOrderNumber(editingDraftOrder.orderNumber)}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleCancelEditOrAppend}
-                  className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 cursor-pointer"
-                >
-                  Cancel
-                </button>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleCancelEditOrAppend}
+                    className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 cursor-pointer shadow-2xs"
+                  >
+                    {t('waiter_cancel_edit', 'Cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={sending || waiterCart.length === 0}
+                    onClick={handleSendToCashier}
+                    className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-amber-950 text-amber-300 hover:bg-black transition cursor-pointer disabled:opacity-50 inline-flex items-center gap-1 shadow-2xs"
+                  >
+                    {sending ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-3 h-3" />
+                    )}
+                    <span>{t('waiter_update_order', 'Update')}</span>
+                  </button>
+                </div>
               </div>
             )}
 
@@ -1959,7 +1989,7 @@ export function WaiterPadView() {
                   {sending
                     ? 'Processing...'
                     : editingDraftOrder
-                    ? `Update Order Note #${editingDraftOrder.orderNumber}`
+                    ? `${t('waiter_update_order', 'Update Order')} ${formatOrderNumber(editingDraftOrder.orderNumber)}`
                     : appendingOrder
                     ? `Send Additional Items (Table ${appendingOrder.tableNumber})`
                     : isCurrentTableOccupied
