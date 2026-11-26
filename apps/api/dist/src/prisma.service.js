@@ -26,6 +26,14 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
             catch (colErr) {
                 this.logger.warn(`Could not run notes column migration: ${colErr?.message}`);
             }
+            try {
+                await this.$executeRawUnsafe(`DROP INDEX IF EXISTS "Order_orderNumber_key";`);
+                await this.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "Order_orderNumber_idx" ON "Order"("orderNumber");`);
+                this.logger.log('Auto-migration: Ensured Order_orderNumber_key unique constraint is relaxed for daily resets.');
+            }
+            catch (idxErr) {
+                this.logger.warn(`Could not update orderNumber index: ${idxErr?.message}`);
+            }
         }
         catch (err) {
             this.logger.error('Database connection error on boot:', err?.message || err);

@@ -346,7 +346,7 @@ model DiningTable {
 
 model Order {
   id                 String         @id @default(uuid())
-  orderNumber        String         @unique
+  orderNumber        String
   orderType          OrderType      @default(DINE_IN)
   tableId            String?
   table              DiningTable?   @relation(fields: [tableId], references: [id])

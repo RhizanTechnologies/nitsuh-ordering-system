@@ -76,12 +76,32 @@ let OrdersService = class OrdersService {
                 });
             }
         }
-        const allOrders = await this.prisma.order.findMany({ select: { orderNumber: true } });
-        const maxNum = allOrders.reduce((max, o) => {
-            const parsed = parseInt(o.orderNumber.replace(/\D/g, ''), 10);
-            return !isNaN(parsed) && parsed > max ? parsed : max;
-        }, 27000);
-        const orderNumber = `#${maxNum + 1}`;
+        const EAT_OFFSET_MS = 3 * 60 * 60 * 1000;
+        const nowUtc = new Date();
+        const eatNow = new Date(nowUtc.getTime() + EAT_OFFSET_MS);
+        const startOfEatDay = new Date(Date.UTC(eatNow.getUTCFullYear(), eatNow.getUTCMonth(), eatNow.getUTCDate(), 0, 0, 0, 0) - EAT_OFFSET_MS);
+        const endOfEatDay = new Date(Date.UTC(eatNow.getUTCFullYear(), eatNow.getUTCMonth(), eatNow.getUTCDate(), 23, 59, 59, 999) - EAT_OFFSET_MS);
+        const todayOrders = await this.prisma.order.findMany({
+            where: {
+                createdAt: {
+                    gte: startOfEatDay,
+                    lte: endOfEatDay,
+                },
+            },
+            select: { orderNumber: true },
+        });
+        let maxDailySeq = -1;
+        for (const o of todayOrders) {
+            if (!o.orderNumber)
+                continue;
+            const cleaned = String(o.orderNumber).replace(/^[^\d]+/, '').trim();
+            const parsed = parseInt(cleaned, 10);
+            if (!isNaN(parsed) && parsed < 10000 && parsed > maxDailySeq) {
+                maxDailySeq = parsed;
+            }
+        }
+        const nextOrderSeq = maxDailySeq + 1;
+        const orderNumber = `#${nextOrderSeq}`;
         const itemIds = data.items.map((i) => i.menuItemId);
         const menuItems = await this.prisma.menuItem.findMany({
             where: { id: { in: itemIds } },

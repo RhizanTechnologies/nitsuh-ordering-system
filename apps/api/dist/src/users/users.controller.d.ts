@@ -5,13 +5,6 @@ export declare class UsersController {
     getAllUsers(req: any): Promise<{
         role: any;
         id: string;
-        name: string;
-        employeeCode: string;
-        email: string;
-        pinCode: string;
-        customRole: string;
-        isActive: boolean;
-        avatarUrl: string;
         createdAt: Date;
         updatedAt: Date;
         _count: {
@@ -19,10 +12,6 @@ export declare class UsersController {
             ordersWaitered: number;
             shifts: number;
         };
-    }[]>;
-    createUser(req: any, dto: CreateUserDto): Promise<{
-        role: any;
-        id: string;
         name: string;
         employeeCode: string;
         email: string;
@@ -30,7 +19,18 @@ export declare class UsersController {
         customRole: string;
         isActive: boolean;
         avatarUrl: string;
+    }[]>;
+    createUser(req: any, dto: CreateUserDto): Promise<{
+        role: any;
+        id: string;
         createdAt: Date;
+        name: string;
+        employeeCode: string;
+        email: string;
+        pinCode: string;
+        customRole: string;
+        isActive: boolean;
+        avatarUrl: string;
     }>;
     getRolePermissions(): Promise<string | number | true | import("@prisma/client/runtime/library").JsonObject | import("@prisma/client/runtime/library").JsonArray>;
     updateRolePermissions(req: any, body: {
@@ -43,6 +43,8 @@ export declare class UsersController {
     getUserById(req: any, id: string): Promise<{
         role: any;
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         employeeCode: string;
         email: string;
@@ -50,12 +52,11 @@ export declare class UsersController {
         customRole: string;
         isActive: boolean;
         avatarUrl: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     updateUser(req: any, id: string, dto: UpdateUserDto): Promise<{
         role: any;
         id: string;
+        updatedAt: Date;
         name: string;
         employeeCode: string;
         email: string;
@@ -63,17 +64,16 @@ export declare class UsersController {
         customRole: string;
         isActive: boolean;
         avatarUrl: string;
-        updatedAt: Date;
     }>;
     resetPin(req: any, id: string, body: {
         pinCode: string;
     }): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         employeeCode: string;
         pinCode: string;
         role: import("@prisma/client").$Enums.UserRole;
-        updatedAt: Date;
     }>;
     resetPassword(req: any, id: string, body: {
         password: string;

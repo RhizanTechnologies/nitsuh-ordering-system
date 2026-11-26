@@ -73,8 +73,8 @@ export declare class AnalyticsService {
         }[];
         settings: {
             id: string;
-            email: string;
             updatedAt: Date;
+            email: string;
             cafeName: string;
             currencySymbol: string;
             taxRate: import("@prisma/client/runtime/library").Decimal;
