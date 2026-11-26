@@ -40,7 +40,7 @@ export function MenuItemCard({
   return (
     <div
       onClick={handleClick}
-      className={`group relative bg-white rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden hover:shadow-md ${
+      className={`group relative bg-white rounded-xl sm:rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden hover:shadow-md ${
         isSelected
           ? 'border-emerald-500 ring-2 ring-emerald-500/25 shadow-sm'
           : 'border-stone-200/90 hover:border-emerald-500/50'
@@ -58,29 +58,29 @@ export function MenuItemCard({
 
         {/* Selected Count Badge Overlay */}
         {isSelected && (
-          <div className="absolute top-2 right-2 z-10 bg-emerald-600 text-white font-black text-xs px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+          <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 bg-emerald-600 text-white font-black text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1">
             <span>x{quantity}</span>
           </div>
         )}
 
         {/* Station Tag */}
         {item.prepSection && (
-          <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-xs text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+          <div className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 z-10 bg-black/60 backdrop-blur-xs text-white text-[8px] sm:text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider">
             {item.prepSection}
           </div>
         )}
       </div>
 
       {/* Card Content: Category Tag, Dish Title */}
-      <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
+      <div className="p-2 sm:p-3.5 flex-1 flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between gap-1 mb-0.5">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block truncate">
+            <span className="text-[9px] sm:text-[10px] font-bold text-stone-400 uppercase tracking-wider block truncate">
               {item.category?.name || t('menu_products', 'Dish')}
             </span>
           </div>
           <h3
-            className="font-heading font-black text-sm sm:text-base text-stone-900 leading-snug group-hover:text-emerald-700 transition line-clamp-1"
+            className="font-heading font-black text-xs sm:text-base text-stone-900 leading-snug group-hover:text-emerald-700 transition line-clamp-1"
             title={item.name}
           >
             {item.name}
@@ -88,11 +88,11 @@ export function MenuItemCard({
         </div>
 
         {/* Card Footer: Price & Add / Stepper */}
-        <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-stone-100">
+        <div className="flex items-center justify-between gap-1 sm:gap-2 mt-2 sm:mt-3 pt-2 sm:pt-2.5 border-t border-stone-100">
           <div>
-            <div className="text-sm sm:text-base font-black text-stone-900 tracking-tight">
+            <div className="text-xs sm:text-base font-black text-stone-900 tracking-tight whitespace-nowrap">
               {Number(item.price).toFixed(2)}{' '}
-              <span className="text-[10px] font-bold text-stone-500">{lang === 'am' ? 'ብር' : 'ETB'}</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-stone-500">{lang === 'am' ? 'ብር' : 'ETB'}</span>
             </div>
           </div>
 
@@ -100,7 +100,7 @@ export function MenuItemCard({
           {quantity > 0 ? (
             <div
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 bg-emerald-600 text-white p-1 rounded-xl shadow-xs"
+              className="flex items-center gap-0.5 sm:gap-1 bg-emerald-600 text-white p-0.5 sm:p-1 rounded-lg sm:rounded-xl shadow-xs"
             >
               <button
                 type="button"
@@ -108,12 +108,12 @@ export function MenuItemCard({
                   e.stopPropagation();
                   onUpdateQuantity?.(item, -1);
                 }}
-                className="w-6 h-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 flex items-center justify-center cursor-pointer transition active:scale-90"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-emerald-700 hover:bg-emerald-800 flex items-center justify-center cursor-pointer transition active:scale-90"
                 title="Decrease quantity"
               >
-                <Minus className="w-3.5 h-3.5 stroke-[3]" />
+                <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3]" />
               </button>
-              <span className="text-xs font-black px-1.5 min-w-[18px] text-center select-none font-mono">
+              <span className="text-[11px] sm:text-xs font-black px-1 sm:px-1.5 min-w-[14px] sm:min-w-[18px] text-center select-none font-mono">
                 {quantity}
               </span>
               <button
@@ -122,10 +122,10 @@ export function MenuItemCard({
                   e.stopPropagation();
                   onUpdateQuantity?.(item, 1);
                 }}
-                className="w-6 h-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 flex items-center justify-center cursor-pointer transition active:scale-90"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-emerald-700 hover:bg-emerald-800 flex items-center justify-center cursor-pointer transition active:scale-90"
                 title="Increase quantity"
               >
-                <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3]" />
               </button>
             </div>
           ) : (
@@ -136,9 +136,9 @@ export function MenuItemCard({
                   e.stopPropagation();
                   onAdd(item);
                 }}
-                className="h-8 px-3 rounded-xl bg-stone-100 hover:bg-emerald-600 text-stone-700 hover:text-white font-bold text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer group-hover:bg-emerald-600 group-hover:text-white active:scale-95"
+                className="h-7 sm:h-8 px-2 sm:px-3 rounded-lg sm:rounded-xl bg-stone-100 hover:bg-emerald-600 text-stone-700 hover:text-white font-bold text-[11px] sm:text-xs flex items-center gap-0.5 sm:gap-1 transition shadow-2xs cursor-pointer group-hover:bg-emerald-600 group-hover:text-white active:scale-95 whitespace-nowrap"
               >
-                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
                 <span>{t('common_add', 'Add')}</span>
               </button>
             </div>

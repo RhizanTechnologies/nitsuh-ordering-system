@@ -242,8 +242,8 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* DYNAMIC ROLE STATION MOBILE SUB-NAVBAR (Scrollable on small screens) */}
-        {allowedNavItems.length > 0 && (
+        {/* DYNAMIC ROLE STATION MOBILE SUB-NAVBAR (Only if multiple accessible stations exist) */}
+        {allowedNavItems.length > 1 && (
           <div className="md:hidden flex items-center gap-1 overflow-x-auto pt-2 pb-0.5 no-scrollbar border-t border-stone-200 mt-2">
             {allowedNavItems.map((item) => {
               const Icon = item.icon;

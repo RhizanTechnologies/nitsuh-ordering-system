@@ -890,9 +890,9 @@ export function WaiterPadView() {
         </div>
       )}
       <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
-        {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Seamlessly merged with unified background) */}
+        {/* COLUMN 1: LEFT VERTICAL CATEGORY SIDEBAR (Visible on md+ screens; mobile uses horizontal bar below) */}
         {activeTab === 'menu' && (
-          <aside className="w-16 sm:w-20 md:w-24 bg-[#F8F9FA] border-r border-stone-200/70 py-2 sm:py-3 px-1 sm:px-1.5 space-y-1.5 overflow-y-auto no-scrollbar flex-shrink-0 z-10 flex flex-col pb-44 sm:pb-48 lg:pb-8">
+          <aside className="hidden md:flex w-20 md:w-24 bg-[#F8F9FA] border-r border-stone-200/70 py-3 px-1.5 space-y-1.5 overflow-y-auto no-scrollbar flex-shrink-0 z-10 flex-col pb-44 sm:pb-48 lg:pb-8">
             {dynamicCategoryCards.map((cat) => {
               const isActive = groupFilter === cat.id;
               const Icon = cat.icon;
@@ -946,20 +946,20 @@ export function WaiterPadView() {
         )}
 
         {/* COLUMN 2: CENTER PRODUCT FOOD CARDS GRID OR LIVE TRACKER */}
-        <main className="flex-1 min-h-0 flex flex-col p-3 sm:p-5 overflow-y-auto pb-48 sm:pb-56 lg:pb-20 no-scrollbar">
+        <main className="flex-1 min-h-0 flex flex-col p-2.5 sm:p-4 md:p-5 overflow-y-auto pb-48 sm:pb-56 lg:pb-20 no-scrollbar">
           {/* Top Control Bar:
-              - On Menu tab: Search Bar + Live Status Toggle
+              - On Menu tab: Search Bar + Live Status Toggle + Mobile Category Bar
               - On Tracker tab: Back to Food Menu Button + Active counter
           */}
           {activeTab === 'menu' ? (
-            <div className="space-y-2.5 mb-3.5 flex-shrink-0">
+            <div className="space-y-2.5 mb-3 flex-shrink-0">
               {/* Row 1: Search Input + Live Status Toggle */}
-              <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div className="flex-1 relative flex items-center">
                   <Search className="w-4 h-4 text-stone-400 absolute left-3.5 pointer-events-none" />
                   <input
                     type="text"
-                    placeholder="Search food, drinks..."
+                    placeholder="Search menu..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full bg-white hover:border-stone-300 focus:border-emerald-500 border border-stone-200/90 rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition shadow-2xs font-sans"
@@ -994,6 +994,51 @@ export function WaiterPadView() {
                     </span>
                   )}
                 </button>
+              </div>
+
+              {/* Row 2: Mobile Horizontal Category Chip Bar (< md) */}
+              <div className="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 flex-shrink-0">
+                {dynamicCategoryCards.map((cat) => {
+                  const isActive = groupFilter === cat.id;
+                  const Icon = cat.icon;
+                  const catCount =
+                    cat.id === 'ALL'
+                      ? totalWaiterItems
+                      : waiterCart
+                          .filter((cItem) => {
+                            const m = allItems.find((it) => it.id === cItem.menuItemId);
+                            return m?.categoryId === cat.id || m?.category?.name === cat.label;
+                          })
+                          .reduce((sum, cItem) => sum + cItem.quantity, 0);
+
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        setGroupFilter(cat.id as any);
+                        setSelectedCategory('');
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer border whitespace-nowrap shadow-2xs ${
+                        isActive
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs font-black'
+                          : 'bg-white text-stone-700 border-stone-200/90 hover:bg-stone-50'
+                      }`}
+                    >
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-stone-500'}`} />
+                      <span>{cat.label}</span>
+                      {catCount > 0 && (
+                        <span
+                          className={`text-[9px] px-1.5 py-0.2 rounded-full font-black ${
+                            isActive ? 'bg-emerald-800 text-white' : 'bg-emerald-100 text-emerald-800'
+                          }`}
+                        >
+                          {catCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : (
@@ -1161,11 +1206,11 @@ export function WaiterPadView() {
               )}
 
               {/* RESPONSIVE FOOD GRID (Shadcn-Style Food Cards):
-                  - Smaller phone (< 640px): 1 card per row (grid-cols-1)
-                  - Tablet / iPad: 3 cards per row (sm:grid-cols-2 md:grid-cols-3)
-                  - Desktop: 3 to 4 cards per row (lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5)
+                  - Mobile phone: 2 cards per row (grid-cols-2)
+                  - Tablet / iPad: 2 to 3 cards per row (sm:grid-cols-2 md:grid-cols-3)
+                  - Desktop: 3 to 5 cards per row (lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5)
               */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2.5 sm:gap-4">
                 {filteredItems.map((item) => {
                   const inCart = waiterCart.find((c) => c.menuItemId === item.id);
                   const qty = inCart ? inCart.quantity : 0;
@@ -1190,7 +1235,7 @@ export function WaiterPadView() {
               </div>
 
               {/* Generous bottom breathing spacer so footer bar never overlaps item cards */}
-              <div className="h-10 sm:h-14 lg:h-8" aria-hidden="true" />
+              <div className="h-20 sm:h-24 md:h-12 w-full flex-shrink-0" aria-hidden="true" />
             </>
           )}
 
@@ -1718,10 +1763,10 @@ export function WaiterPadView() {
 
       {/* MOBILE / TABLET FLOATING DOCK (Visible on < lg screens) */}
       <div
-        className={`lg:hidden fixed bottom-3 right-3 sm:right-6 z-40 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-1.5 sm:p-2 px-2 sm:px-6 shadow-xl flex items-center justify-around transition-all duration-200 ${
+        className={`lg:hidden fixed bottom-3 z-40 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-1.5 sm:p-2 px-2 sm:px-6 shadow-xl flex items-center justify-around transition-all duration-200 ${
           activeTab === 'menu'
-            ? 'left-[4.75rem] sm:left-[6.5rem] md:left-[7.5rem]'
-            : 'left-3 sm:left-6'
+            ? 'left-3 right-3 sm:left-6 sm:right-6 md:left-[6.5rem] md:right-6'
+            : 'left-3 right-3 sm:left-6 sm:right-6'
         }`}
       >
         <button
@@ -1779,9 +1824,9 @@ export function WaiterPadView() {
         </button>
       </div>
 
-      {/* Floating Bottom Quick Bar when items are selected on Mobile/Tablet (Limited to menu area, excluding left sidebar) */}
+      {/* Floating Bottom Quick Bar when items are selected on Mobile/Tablet */}
       {totalWaiterItems > 0 && activeTab === 'menu' && !showMobileDrawer && (
-        <div className="fixed bottom-16 left-[4.5rem] sm:left-[5.5rem] md:left-[6.5rem] right-3 z-30 lg:hidden animate-in slide-in-from-bottom-2 duration-200">
+        <div className="fixed bottom-16 sm:bottom-20 z-30 lg:hidden animate-in slide-in-from-bottom-2 duration-200 left-3 right-3 sm:left-6 sm:right-6 md:left-[6.5rem] md:right-6">
           <div
             onClick={() => setShowMobileDrawer(true)}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500 active:scale-[0.99] transition"

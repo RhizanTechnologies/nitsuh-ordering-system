@@ -85,7 +85,7 @@ export function NitsuhLogo({
             {brandTag}
           </span>
         </div>
-        <span className="text-[10px] sm:text-[11px] text-stone-500 font-medium leading-none mt-1">
+        <span className="text-[10px] sm:text-[11px] text-stone-500 font-medium leading-none mt-1 truncate max-w-[120px] sm:max-w-none">
           {brandSlogan}
         </span>
       </div>
