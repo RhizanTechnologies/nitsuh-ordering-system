@@ -164,6 +164,13 @@ export const translations: Record<Language, Record<string, string>> = {
     receipt_total: 'TOTAL:',
     receipt_thank_you: 'Thank you for dining with Nitsuh Foods!',
 
+    // Brand Identity / House Name
+    brand_name: 'NITSUH',
+    brand_tag: 'FOODS',
+    brand_slogan: 'Real Taste & Savoury Bites',
+    brand_full_title: 'NITSUH FOODS & CAFE',
+    brand_powered_by: 'System powered by Nitsuh POS',
+
     // Payment Modal
     pay_process_tender: 'Process Tender',
     pay_order_subtotal: 'Order Subtotal:',
@@ -582,7 +589,14 @@ export const translations: Record<Language, Record<string, string>> = {
     receipt_discount: 'ቅናሽ:',
     receipt_tip: 'ጉርሻ:',
     receipt_total: 'አጠቃላይ ድምር:',
-    receipt_thank_you: 'ስለመረጡን እናመሰግናለን!',
+    receipt_thank_you: 'ከንጹህ ምግቦች ጋር ስለተመገቡ እናመሰግናለን!',
+
+    // Brand Identity / House Name
+    brand_name: 'ንጹህ',
+    brand_tag: 'ምግቦች',
+    brand_slogan: 'እውነተኛ ጣዕም እና ልዩ መስተንግዶ',
+    brand_full_title: 'ንጹህ ምግቦች እና ካፌ',
+    brand_powered_by: 'በንጹህ ፖስ የቀረበ ሲስተም',
 
     // Payment Modal
     pay_process_tender: 'ክፍያ መቀበያ',

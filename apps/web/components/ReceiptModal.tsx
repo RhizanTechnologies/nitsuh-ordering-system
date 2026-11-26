@@ -63,13 +63,13 @@ export function ReceiptModal({ isOpen, onClose, order }: ReceiptModalProps) {
               </div>
             </div>
             <div className="font-black text-sm uppercase tracking-wider text-black">
-              NITSUH FOODS & CAFE
+              {t('brand_full_title', 'NITSUH FOODS & CAFE')}
             </div>
             <div className="text-[10px] text-gray-700">
-              Addis Ababa, Ethiopia • Inquiries: 0966833177
+              {lang === 'am' ? 'አዲስ አበባ፣ ኢትዮጵያ • ስልክ፡ 0966833177' : 'Addis Ababa, Ethiopia • Inquiries: 0966833177'}
             </div>
             <div className="text-[10px] text-gray-600 font-semibold italic">
-              &ldquo;From Savour Bites to Sweet Delights – We Cater It All!&rdquo;
+              {lang === 'am' ? '«ከጣፋጭ ምግቦች እስከ ልዩ መጠጦች - ሁሉንም እናዘጋጃለን!»' : '“From Savour Bites to Sweet Delights – We Cater It All!”'}
             </div>
             <div className="text-[10px] font-bold border-t border-b border-dashed border-gray-400 py-1 mt-2">
               {t('receipt_official_title', 'ERCA OFFICIAL CASH RECEIPT / TAX INVOICE')}
